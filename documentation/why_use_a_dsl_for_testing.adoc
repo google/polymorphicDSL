@@ -1,0 +1,103 @@
+= Powerful Testing: The Polymorphic DSL Pattern
+
+== Modern "unsolved" problems:
+
+=== It is just too big to understand!
+
+A large distributed system has a change in features. One part gets updated and the others don't.
+When released it is determined that many other interactions required other parts to update, requiring a lengthy rollback and development cycle.
+
+=== There's no time to find out why it failed!
+
+A small team actively develops a new feature. In the process about 50,000 pre-existing unit tests fail.
+It's possible that new changes over the years rendered these tests obsolete, but they may also be alerting the team to
+the fact that important legacy features have been broken.
+
+The release is blocked if the tests aren't repaired, but issues caused by releasing may not be discovered until
+it is too late to do anything about them.
+
+=== My team is too small!
+
+A business has a bias against software testing and views it as a liability that distracts from
+creating new features. After several releases go extremely poorly from a complete absence of testing
+it reluctantly hires a small number of Software Testers to support the
+much larger Development team.
+
+The culture of the company is such that the developers arrogantly refuse to even write unit
+tests, participate in the QA process and occasionally express contempt towards the testers.
+
+The QA team needs to decides they can't cover the full testing pyramid and compromise by focusing exclusively on end-to-end testing.
+They remain painfully aware that tests are badly needed on lower tiers of the application.
+
+=== I didn't even know it did that!
+
+The original developers have long since left. A new developer tries to find out how adding a new
+feature might impact the application, but there was no business requirement documents, issues or other
+artifacts explaining what the application even does. Even if there was, the developer decided they wouldn't even
+have known where to have looked!
+
+After being forced to spend a massive amount of time reading the source code, the developer creates and
+releases a new feature only to learn that it broke a microservice. It turns out that the developer didn't even have access to the
+source code of that service, so the team accepts that deploys must be done through perilous trial and error.
+
+=== Where could I even find somebody?
+
+A manager sighs after the top candidate rejects a job offer. Months have been spent trying to fill the position.
+The last hire quit in less than a year. The technical skill set is scarce and the barrier to entry is just too high.
+
+=== I can only do one thing at a time!
+
+A test engineer panics while the team discusses estimates. A new feature will require little effort to create.
+However several engineers will need to spend a huge amounts of time verifying it on the web, mobile platforms and even several API endpoints!
+And even after all of that , multiple automation frameworks will need to be updated.
+
+=== We need another one!
+
+It is common for a business to need to support the same application on another platform. Determining (let alone) maintaining parity between the different clients often never actually happens because no one can make a clear comparison.
+
+=== Do it again!
+
+A legacy codebase sometimes needs to be either rewritten in or ported to another entirely different technology stack. A business rarely has the information it needs to make sure all functionality (including the corner cases) actually make the transition at all.
+
+
+== Solving the unsolved
+
+== The Polymorphic DSL Testing Pattern
+
+=== Wow, are you psychic?
+
+Solves the issue of having to maintain large test suites because a grammar is used to describe the tests.
+If requirements ever change such that old requirements stop making sense, all of these will immediatley be rooted out.
+Product managers can rapidly get information needed to appropriately craft requirements _before_ a single feature is even developed, let alone released.
+
+=== I didn't know you spoke another language!
+
+Language libraries, algorithms and tools are increasingly being forced to be developed for many
+platforms. Many of these tend to drift and become out of sync. Fixes often do not make it to all the implementations leaving
+the community frustrated.
+
+Grammars can be written to be language agnostic. All test frameworks can remain in parity with a single unit of effort.
+In the event a new platform needs to be supported often the API is already developed.
+
+This _sharply_ reduces the maintenance
+effort of any test automation.
+
+=== A hero of the common folk
+
+After maturing, grammars can allow non-technical people to productively add automation without knowing any programming.
+This drastically lowers the barrier to entry, allowing more unskilled labor to contribute to the development of the product.
+
+While some highly skilled labor is required to build and maintain the DSL, it does not take much skill to use it.
+
+=== Eureka!
+
+The DSL becomes a source of truth that clearly describes what the application does. It can become
+a form of living documentation (this is different from conventional _Business Driven Development_ tools).
+
+=== You almost forgot!
+
+The DSL captures all requirements. If you need to port the application you _already_ have the requirements in a centralized place and can intelligently migrate anything needed.
+
+=== My friends and I all get along
+
+When you need to support a new client (web, desktop, etc) you can easily tell if they have feature parity. If not it is simple to quantify what is missing.
