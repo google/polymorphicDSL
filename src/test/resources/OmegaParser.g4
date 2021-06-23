@@ -1,4 +1,4 @@
-parser grammar AllGrammarsParser;
+parser grammar OmegaParser;
 
 options {tokenVocab=AllGrammarsLexer; }
 
