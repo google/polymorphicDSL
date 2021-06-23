@@ -39,5 +39,6 @@ public class AnsiTerminalColorHelper {
     public static final String BG_BRIGHT_CYAN   = "\u001B[106m";
     public static final String BG_BRIGHT_WHITE  = "\u001B[107m";
 
+    public static final String BOLD = "\033[1m";
     public static final String FORMAT_STRIKETHROUGH = "\u001b[9m";
 }

@@ -3,6 +3,7 @@ package com.pdsl.specifications;
 import com.google.common.base.Preconditions;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.*;
 
@@ -10,7 +11,7 @@ public final class DefaultTestSpecification implements TestSpecification {
 
     private final String id;
     private final Optional<List<ParseTree>> phrases;
-    private final Optional<OutputStream> metaData;
+    private final Optional<ByteArrayOutputStream> metaData;
     private final Optional<List<? extends TestSpecification>> childItems;
 
     private DefaultTestSpecification(Builder builder) {
@@ -23,10 +24,11 @@ public final class DefaultTestSpecification implements TestSpecification {
     public static class Builder {
         private final String id;
         private Optional<List<ParseTree>> phrases = Optional.empty();
-        private Optional<OutputStream> metaData = Optional.empty();
+        private Optional<ByteArrayOutputStream> metaData = Optional.empty();
         private Optional<List<? extends TestSpecification>> childItems = Optional.empty();
 
         public Builder(String id) {
+            Preconditions.checkArgument(id != null && !id.isEmpty(), "Test Specification ID cannot be mepty or null!");
             this.id = id;
         }
 
@@ -48,7 +50,7 @@ public final class DefaultTestSpecification implements TestSpecification {
             return this;
         }
 
-        public Builder withMetaData(OutputStream metaData) {
+        public Builder withMetaData(ByteArrayOutputStream metaData) {
             this.metaData = Optional.of(metaData);
             return this;
         }
@@ -65,7 +67,7 @@ public final class DefaultTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<OutputStream> getMetaData() {
+    public Optional<ByteArrayOutputStream> getMetaData() {
         return metaData;
     }
 

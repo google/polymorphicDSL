@@ -1,18 +1,17 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.executors.GherkinPolymorphicDslTestExecutor;
-import com.pdsl.grammars.*;
+import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
-import com.pdsl.grammars.AllGrammarsParserBaseListener;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.reports.PolymorphicDslTestRunResults;
+import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import org.junit.Test;
 
 import java.io.File;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -27,9 +26,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
             new LineDelimitedTestSpecificationFactory(AllGrammarsParser.class,
                     AllGrammarsLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
     private static final TestSpecificationFactory provider =
-            new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-    private static final GherkinPolymorphicDslTestExecutor.Builder executorBuilder = new GherkinPolymorphicDslTestExecutor.Builder()
-            .withGrammarListener(new AllGrammarsParserBaseListener());
+            new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
 
     private static final GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor
             <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>
@@ -39,19 +36,15 @@ public class GherkinPolymorphicDslTestExecutorTest {
     public void minimalFeature_runsAllTests() {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/complex_background.feature").getFile()).getAbsolutePath();
         // Arrange
-        List<String> dslFiles = new LinkedList<>();
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        gherkinTestExecutor.runTests(dslFiles, new AllGrammarsParserBaseListener(), stepCounterListener);
+        PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
-        assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(10);
-        assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism inside a background");
-        assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism");
-
+        assertThat(results.totalPhrases()).isEqualTo(8);
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
         assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism inside a background");
         assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism");
 
@@ -68,13 +61,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
     public void noTagFilters_runsAllTests() {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
-        List<String> dslFiles = new LinkedList<>();
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        gherkinTestExecutor.runTests(dslFiles, new AllGrammarsParserBaseListener(), stepCounterListener);
+        PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(6);
@@ -86,17 +79,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withTagExpression("@feature_tag3")
-                .withSubgrammarListener(stepCounterListener)
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@feature_tag3");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(6);
@@ -107,17 +96,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("not @feature_tag3")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "not @feature_tag3");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(0);
@@ -128,17 +113,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("@scenario_tag1 and @scenario_tag2")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@scenario_tag1 and @scenario_tag2");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
@@ -149,18 +130,14 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
 
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withTagExpression("@ex_tag1")
-                .withSubgrammarListener(stepCounterListener)
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@ex_tag1");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
@@ -171,17 +148,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withTagExpression("@so_tag1")
-                .withSubgrammarListener(stepCounterListener)
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@so_tag1");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(2);
@@ -192,18 +165,14 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("@joined_tag3")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag3");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
@@ -214,17 +183,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("@joined_tag4")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag4");
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
@@ -235,17 +200,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/datatables.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(5);
@@ -256,18 +217,15 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/docstrings.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
 
         StepCounterListener stepCounterListener = new StepCounterListener();
 
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(8);
@@ -278,17 +236,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_emoji.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
@@ -299,17 +253,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_no.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(3);
@@ -320,16 +270,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_fr.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(39);
@@ -340,17 +287,13 @@ public class GherkinPolymorphicDslTestExecutorTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/language.feature").getFile()).getAbsolutePath();
         // Arrange
         TestSpecificationFactory provider =
-                new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        List<String> dslFiles = new LinkedList<>();
+                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(stepCounterListener)
-                .withTagExpression("")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);

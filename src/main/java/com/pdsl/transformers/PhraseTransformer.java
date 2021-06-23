@@ -11,7 +11,7 @@ import java.util.List;
 public interface PhraseTransformer {
 
     /**
-     * Reads a file and determines which parts of
+     * Reads a file and determines which parts of it
      * @param path
      * @return
      */

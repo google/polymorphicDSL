@@ -1,21 +1,23 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.executors.GherkinPolymorphicDslTestExecutor;
-import com.pdsl.executors.ParentForEachChildPhraseFullExecutor;
+import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
-import com.pdsl.grammars.*;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.reports.PolymorphicDslTestRunResults;
+import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.grammars.MinimalImpl;
+import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
+import com.pdsl.testcases.TestCaseFactory;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -29,31 +31,25 @@ public class GherkinIntegrationTest {
             new LineDelimitedTestSpecificationFactory<PolymorphicDslMinimalParser, AllGrammarsLexer>(PolymorphicDslMinimalParser.class,
                     AllGrammarsLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
     private static final TestSpecificationFactory provider =
-            new GherkinTestSpecificationFactory(pickleJarFactory, stepBodyGrammarHelperFactory, stepBodySubgrammarHelperFactory);
-
+            new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyGrammarHelperFactory, stepBodySubgrammarHelperFactory);
+    private static final GherkinTestExecutor minimalExecutor = new GherkinTestExecutor(MinimalParser.class, MinimalLexer.class, MinimalParser.class, MinimalLexer.class);
+    private static final GherkinTestExecutor executor = new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
     // Only reads the text "Given the minimalism"
-    private static final GherkinPolymorphicDslTestExecutor.Builder executorBuilder = new GherkinPolymorphicDslTestExecutor.Builder()
-            .withVerifierExecutor( new ParentForEachChildPhraseFullExecutor())
-            .withSubgrammarListener(new MinimalImpl())
-            .withGrammarListener(new MinimalParserBaseListener());
-
+    private static final TestCaseFactory testCaseFactory = new ParentForEachChildTestCaseFactory();
+    private static final ParseTreeListener allGrammarsListener = new AllGrammarsParserBaseListener();
 
     @Test
     public void complexBackgroundWithRuleFilteredOut_runsSuccessfully() {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/complex_background.feature").getFile()).getAbsolutePath();
         // Arrange
-        List<String> dslFiles = new LinkedList<>();
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         MinimalImpl minimalListener = new MinimalImpl();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(minimalListener)
-                .withTagExpression("")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        executor.runTests(testCaseFactory.processTestSpecification(specifications), new AllGrammarsParserBaseListener());
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
     }
@@ -62,21 +58,17 @@ public class GherkinIntegrationTest {
     public void minimalContextExecutor_executesSuccessfully() {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/minimal.feature").getFile()).getAbsolutePath();
         // Arrange
-        List<String> dslFiles = new LinkedList<>();
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         MinimalImpl minimalListener = new MinimalImpl();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(minimalListener)
-                .withTagExpression("")
-                .build();
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        PolymorphicDslTestRunResults results = minimalExecutor.runTests(testCaseFactory.processTestSpecification(specifications), allGrammarsListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
-        assertThat(minimalListener.getStepCount()).isEqualTo(1);
+        assertThat(results.passingPhraseTotal()).isEqualTo(1);
     }
 
     @Test
@@ -84,21 +76,17 @@ public class GherkinIntegrationTest {
         final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/background.feature").getFile()).getAbsolutePath();
         // Arrange
 
-        List<String> dslFiles = new LinkedList<>();
+        Set<String> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         MinimalImpl minimalListener = new MinimalImpl();
-        GherkinPolymorphicDslTestExecutor executor = executorBuilder
-                .withSubgrammarListener(minimalListener)
-                .withTagExpression("")
-                .build();
 
         // Act
         TestSpecification specifications = provider.getTestSpecifications(dslFiles);
-        executor.runTests(specifications);
+        PolymorphicDslTestRunResults results = executor.runTests(testCaseFactory.processTestSpecification(specifications), allGrammarsListener);
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
-        assertThat(minimalListener.getStepCount()).isEqualTo(4);
+        assertThat(results.passingPhraseTotal()).isEqualTo(4);
     }
 }

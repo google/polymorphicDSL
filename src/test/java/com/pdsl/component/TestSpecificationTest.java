@@ -2,15 +2,15 @@ package com.pdsl.component;
 
 import com.pdsl.grammars.BetaLexer;
 import com.pdsl.grammars.PolymorphicDslBetaParser;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import static org.junit.Assert.fail;
 
@@ -22,7 +22,7 @@ public class TestSpecificationTest {
         // Arrange
         TestSpecificationFactory provider =
                 new LineDelimitedTestSpecificationFactory<PolymorphicDslBetaParser, BetaLexer>(PolymorphicDslBetaParser.class, BetaLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
-        List<String> dslFiles = new LinkedList<>();
+        Set<String> dslFiles = new HashSet<>();
         // Act
         try {
             TestSpecification specifications = provider.getTestSpecifications(dslFiles);

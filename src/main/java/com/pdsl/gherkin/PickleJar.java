@@ -50,6 +50,8 @@ class PickleJar {
         private String languageCode;
 
         public Builder(String location, String featureTitle, String languageCode) {
+            Preconditions.checkNotNull(location, "Gherkin location cannot be null or empty!");
+            Preconditions.checkArgument(!location.isEmpty(), "Gherkin location cannot be null or empty!");
             this.location = location;
             this.featureTitle = featureTitle;
             this.languageCode = languageCode;

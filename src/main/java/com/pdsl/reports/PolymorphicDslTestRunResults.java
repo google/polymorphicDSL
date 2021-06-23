@@ -10,9 +10,9 @@ import java.util.stream.Collectors;
 public class PolymorphicDslTestRunResults implements TestRunResults, ReportListener {
 
     private List<TestMetadata> results = new LinkedList<>();
-    private Set<Integer> resultIds = new HashSet<>();
+    private Set<Long> resultIds = new HashSet<>();
     // map for fast lookup
-    private Map<Integer, List<TestMetadata>> duplicateIdToTestResult = new HashMap<>();
+    private Map<Long, List<TestMetadata>> duplicateIdToTestResult = new HashMap<>();
     // The map cannot hold more than one duplicate
     private List<TestMetadata> duplicateTestResults = new LinkedList<>();
     private final List<OutputStream> dslReports;
@@ -31,7 +31,7 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
     @Override
     public void addTestResult(TestMetadata testMetadata) {
         Preconditions.checkNotNull(testMetadata, "Test metadata cannot be null!");
-        int id = testMetadata.getPhraseBodyId();
+        long id = testMetadata.getPhraseBodyId();
         if (resultIds.contains(id)) {
             if (duplicateIdToTestResult.containsKey(id)) {
                 duplicateIdToTestResult.get(id).add(testMetadata);

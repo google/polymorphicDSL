@@ -3,9 +3,10 @@ package com.pdsl.specifications;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public interface TestSpecificationFactory {
-    public TestSpecification getTestSpecifications(List<String> dslTestFilePaths);
+    public TestSpecification getTestSpecifications(Set<String> dslTestFilePaths);
 
     /**
      * Creates a test specification if possible from the provided input.

@@ -40,6 +40,7 @@ public class GherkinFeature {
         private Optional<List<String>> tags = Optional.empty();
 
         public Builder(String location) {
+            Preconditions.checkArgument(location == null || location.isEmpty(), "Location cannot be null or empty!");
             // preconditions on argument delayed until building
             this.location = location;
         }
