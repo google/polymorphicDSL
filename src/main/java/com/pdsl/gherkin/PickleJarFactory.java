@@ -34,7 +34,7 @@ public class PickleJarFactory {
      * @param dslTestFilePaths List of paths to feature files
      * @return A List of PickleJars, where each pickle jar represents a processed feature
      */
-    public List<PickleJar> getPickleJars(List<String> dslTestFilePaths) {
+    public List<PickleJar> getPickleJars(Set<String> dslTestFilePaths) {
         List<GherkinFeature> features = new LinkedList<>();
         // Parse each gherkin file
         try {

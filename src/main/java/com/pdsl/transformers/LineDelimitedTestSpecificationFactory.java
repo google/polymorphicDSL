@@ -1,12 +1,9 @@
-package com.pdsl.specifications;
+package com.pdsl.transformers;
 
 import com.pdsl.exceptions.SentenceNotFoundException;
 import com.pdsl.logging.AnsiTerminalColorHelper;
-import com.pdsl.transformers.LineDelimitedPhraseTransformer;
-import com.pdsl.transformers.PhraseTransformer;
+import com.pdsl.specifications.*;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.ATNConfigSet;
-import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +59,7 @@ public class LineDelimitedTestSpecificationFactory<P extends Parser, L extends L
 
             L pdslLexer = lexerConstructor.newInstance(CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray())));
             pdslLexer.removeErrorListeners();
-            CustomErrorListener errorListener = new CustomErrorListener();
+            PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
             List<? extends  Token> allTokens = pdslLexer.getAllTokens();
             if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.size() == 0 || errorListener.isErrorFound()) ) {
@@ -118,23 +115,14 @@ public class LineDelimitedTestSpecificationFactory<P extends Parser, L extends L
         }
     }
 
-    public static class PolymorphicDslTransformationException extends RuntimeException {
-        public PolymorphicDslTransformationException(String s, Exception e) {
-            super(s, e);
-        }
-        public PolymorphicDslTransformationException(String s) {
-            super(s);
-        }
-    }
-
     @Override
-    public TestSpecification getTestSpecifications(List<String> dslTestFilePaths) {
+    public TestSpecification getTestSpecifications(Set<String> dslTestFilePaths) {
         Objects.requireNonNull(dslTestFilePaths, "File paths cannot be null!");
         Objects.requireNonNull(phraseTransformer, "Phrase transformer cannot be null!");
         // Make sure all paths are valid
         List<TestSpecification> testSpecifications = dslTestFilePaths.stream()
                 .map(Paths::get) // Get all the files that the paths point to
-            .map(file -> getTestSpecification(file.toString(), phraseTransformer.testSpecificationPhrases(file))) // Turn them into optionals that may contain a test specification
+                .map(file -> getTestSpecification(file.getFileName().toString(), phraseTransformer.testSpecificationPhrases(file))) // Turn them into optionals that may contain a test specification
                     .filter(Optional::isPresent) // Get the non-empty optionals
                     .map(Optional::get) // unwrap the test specification
                     .collect(Collectors.toUnmodifiableList());
@@ -172,32 +160,4 @@ public class LineDelimitedTestSpecificationFactory<P extends Parser, L extends L
         return Optional.of(specification.withTestPhrases(parserTrees).build());
     }
 
-    private static class CustomErrorListener implements ANTLRErrorListener {
-        private boolean errorFound = false;
-
-        public boolean isErrorFound() {
-            return  errorFound;
-        }
-
-        @Override
-        public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-            errorFound = true;
-
-        }
-
-        @Override
-        public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
-            errorFound = true;
-        }
-
-        @Override
-        public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
-            errorFound = true;
-        }
-
-        @Override
-        public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
-            errorFound = true;
-        }
-    }
 }

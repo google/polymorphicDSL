@@ -2,6 +2,7 @@ package com.pdsl.specifications;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +26,7 @@ public interface TestSpecification {
      *
      * @return Optional containing an InputStream of shared test information or an empty optional if there is none
      */
-    Optional<OutputStream> getMetaData();
+    Optional<ByteArrayOutputStream> getMetaData();
 
     /**
      * Returns a collection of more detailed child TestItems.

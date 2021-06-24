@@ -1,21 +1,22 @@
-package com.pdsl.gherkin;
+package com.pdsl.gherkin.specifications;
 
 import com.pdsl.specifications.TestSpecification;
 import org.antlr.v4.runtime.tree.ParseTree;
-import java.io.OutputStream;
+
+import java.io.ByteArrayOutputStream;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class GherkinTestSpecification implements TestSpecification {
+public class GherkinTestCaseSpecification implements TestSpecification {
 
-    private final Set<String> tags;
-    private final TestSpecification testSpecification;
+    private TestSpecification testSpecification;
+    private Set<String> tags;
 
-    public GherkinTestSpecification(TestSpecification testSpecification, Set<String> tags) {
-        this.tags = tags;
+    public GherkinTestCaseSpecification(Set<String> tags, TestSpecification testSpecification) {
         this.testSpecification = testSpecification;
+        this.tags = tags;
     }
 
     public Set<String> getTags() {
@@ -23,7 +24,7 @@ public class GherkinTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<OutputStream> getMetaData() {
+    public Optional<ByteArrayOutputStream> getMetaData() {
         return testSpecification.getMetaData();
     }
 

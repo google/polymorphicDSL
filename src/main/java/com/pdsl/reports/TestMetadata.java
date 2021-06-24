@@ -14,19 +14,19 @@ public class TestMetadata {
     private int phrasesSkippedDueToFailure = 0;
     private int passingPhraseTotal = 0;
 
-    private final int phraseBodyId;
+    private final long phraseBodyId;
 
     private Optional<String> failingPhrase = Optional.empty();
     private Optional<Throwable> failureReason = Optional.empty();
 
-    public TestMetadata(String testSuiteId, int passingPhraseTotal, int phraseBodyId) {
+    public TestMetadata(String testSuiteId, int passingPhraseTotal, long phraseBodyId) {
         this.isPassed = true;
         this.testSuiteId = testSuiteId;
         this.passingPhraseTotal = passingPhraseTotal;
         this.phraseBodyId = phraseBodyId;
     }
 
-    public TestMetadata(String testSuiteId, int passingPhraseTotal, int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason, int phraseBodyId) {
+    public TestMetadata(String testSuiteId, int passingPhraseTotal, int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason, long phraseBodyId) {
         this.isPassed = false;
         this.testSuiteId = testSuiteId;
         this.passingPhraseTotal = passingPhraseTotal;
@@ -36,7 +36,7 @@ public class TestMetadata {
         this.phraseBodyId = phraseBodyId;
     }
 
-    public int getPhraseBodyId() {
+    public long getPhraseBodyId() {
         return phraseBodyId;
     }
 

@@ -1,0 +1,24 @@
+= Powerful Testing: The Polymorphic DSL Pattern
+
+== Common Misconceptions
+
+Remember that PDSL is a *design pattern*, not any of the below:
+
+=== BDD
+
+The PDSL design pattern is not itself Business Driven Development, but it can be used with it.
+A Business Driven Development framework requires that the business defines how the application works
+in business language. There is no such constraint inherent to the PDSL design pattern: it can use _any_ grammar,
+BDD or otherwise. Whether you want to use BDD is up to you.
+
+Regardless this PDSL framework natively supports gherkin to provide a powerful option to users who may already be familiar
+with the language. That does not mean that you must use gherkin or any other BDD language when writing your own tests.
+
+=== Contract Testing
+
+The PDSL design pattern is not contract testing. Contract testing requires that shared APIs follow specified constraints.
+Contract also _excludes_ functional testing.
+
+The PDSL pattern includes functional testing and any other form of testing you might care about. The DSL you use to create
+your tests does _not_ require that the API (or any other) boundaries follow a specific protocol. It simply describes your
+software at a high enough level that a test specification can be applied to multiple domains.
