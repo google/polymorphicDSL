@@ -22,10 +22,13 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
 
 public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
 
@@ -133,13 +136,13 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
         Path parserPath = grammarParentDirectory.resolve(grammarName + "Parser.g4");
         List<String> ruleNames = getRuleNamesFromInterpreterFile(grammarParentDirectory, grammarName);
         // Write a new antlr parser that will match any rule names
-        createAntlrSourceToMatchRules(ruleNames, grammarParentDirectory, grammarName, lexer);
+        createAntlrSourceToMatchRules(ruleNames, grammarParentDirectory, grammarName, lexer, packagePath);
         generateParser(grammarParentDirectory, grammarName, packagePath, library);
         return loadGeneratedSources(grammarParentDirectory, grammarName, packagePath, lexer);
     }
 
     private void createAntlrSourceToMatchRules(List<String> ruleNames, Path grammarParentDirectory, String grammarName,
-                                               String lexer) throws IOException {
+                                               String lexer, String packagePath) throws IOException {
         StringBuilder builder = new StringBuilder();
         String parserOfParserName = grammarParentDirectory.getFileName() + "MetaParser";
         builder.append("parser grammar " + grammarName + PARSER_SUFFIX + ";\n");
@@ -155,32 +158,100 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
                 StandardOpenOption.CREATE);
     }
 
-    private File[] getNewSourceFiles(Path grammarParentDirectory, String grammarName) {
-        // Create a File object on the root of the directory containing the class file
-        File directory = new File(grammarParentDirectory.toString());
-        if(!directory.isDirectory()) {
-            throw new IllegalArgumentException(directory +" is not a directory.");
+    private enum FileType {
+        JAVA,
+        PARSER,
+        CLASS;
+    }
+
+
+    private static class SourceFileFilter implements FileFilter {
+        private final Pattern p;
+        private final Pattern parserFiles;
+        private FileType strategy;
+
+        public void setStrategy(FileType strategy) {
+            this.strategy = strategy;
         }
-        final Pattern p = Pattern.compile(grammarName + PARSER_SUFFIX + ".*\\.java" );
-        File[] javaSourceFiles = directory.listFiles(new FileFilter(){
-            @Override
-            public boolean accept(File file) {
+
+        public SourceFileFilter(FileType strategy, String grammarName) {
+            this.p = Pattern.compile(grammarName + PARSER_SUFFIX +
+                    (strategy.equals(FileType.JAVA) ? ".*\\.java" : ".*\\.class"));
+            this.parserFiles = Pattern.compile(grammarName + PARSER_SUFFIX +
+                    "(.*\\.interp | .*\\.tokens)");
+            this.strategy = strategy;
+        }
+
+        @Override
+        public boolean accept(File file) {
+            if (strategy.equals(FileType.PARSER)) {
+                return parserFiles.matcher(file.getName()).matches();
+            } else {
                 return p.matcher(file.getName()).matches();
             }
-        });
+        }
+    }
+
+    /**
+     * Reads the interpreter file to find all grammar rules and generates new ANTLR4 source code in a temporary directory
+     * @param packagePath The package the source files should be contained in
+     * @param grammarParentDirectory The location of the .g4 grammar the source is being generated from
+     * @param grammarName The name of the grammar that is having an allRules rule created for
+     * @param fileType The type of files being located
+     * @return generated source files in the system temporary directory
+     */
+    private File[] getNewSourceFiles(File finalGeneratedCodeDirectory, String packagePath, Path grammarParentDirectory, String grammarName) {
+        try {
+            // Create a File object on the root of the directory containing the class file
+            File sourceDirectory = new File(grammarParentDirectory.toString());
+            if (!sourceDirectory.isDirectory()) {
+                throw new IllegalArgumentException(sourceDirectory + " is not a directory.");
+            }
+            SourceFileFilter sourceFileFilter = new SourceFileFilter(FileType.JAVA, grammarName);
+            File[] javaSourceFiles = sourceDirectory.listFiles(sourceFileFilter);
+            logger.info("Writing generated code to " + finalGeneratedCodeDirectory.getPath());
+            // Copy the files over to the temporary directory
+            for (File sourceFile : javaSourceFiles) {
+                logger.debug("Moving generated source file: " + sourceFile.getName());
+                Files.move(sourceFile.toPath(), finalGeneratedCodeDirectory.toPath().resolve(sourceFile.getName()),
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+            // Return the copies
+            return finalGeneratedCodeDirectory.listFiles(sourceFileFilter);
+        } catch (IOException e) {
+            // Cleanup if possible
+            finalGeneratedCodeDirectory.delete();
+            throw new PolymorphicDslFileException("Error when generating new source files for grammar!", e);
+        }
+    }
+
+    private File[] getCompiledClasses(File finalGeneratedCodeDirectory, String grammarName) {
+        SourceFileFilter sourceFileFilter = new SourceFileFilter(FileType.CLASS, grammarName);
+        File[] javaSourceFiles = finalGeneratedCodeDirectory.listFiles(sourceFileFilter);
+        assert(javaSourceFiles != null && javaSourceFiles.length > 0) : "The compiled classes were not found!";
+        logger.info("Writing generated code to " + finalGeneratedCodeDirectory.getPath());
         return javaSourceFiles;
+
     }
 
     private GeneratedCodeContainer loadGeneratedSources(Path grammarParentDirectory, String grammarName,
                                                         String packagePath, String lexerName) {
         boolean parserSuccessfullyProcessed = false;
         try {
+            Path tmpDirsLocation = Path.of(String.format("%s/pdsltemp/%s/%s/", System.getProperty("java.io.tmpdir"),
+                    UUID.randomUUID(), packagePath.replace(".", "/")));
+            File finalGeneratedCodeLocation = new File(tmpDirsLocation.toString());
+            finalGeneratedCodeLocation.mkdirs();
             // Write generated code
-            File[] sourceFiles = getNewSourceFiles(grammarParentDirectory, grammarName);
+            File[] sourceFiles = getNewSourceFiles(finalGeneratedCodeLocation, packagePath, grammarParentDirectory,
+                    grammarName);
             // Compile the generated code
-            compileGeneratedSources(sourceFiles);
+            compileGeneratedSources(packagePath, sourceFiles);
+            File[] compiledClasses = getCompiledClasses(finalGeneratedCodeLocation, grammarName);
+            Path sourcePath = putCompiledClassesInJarFile(grammarName, packagePath, compiledClasses);
+            logger.debug("Wrote generated grammars to " + sourcePath);
             // Load the generated classes
-            URL[] urls = new URL[] { grammarParentDirectory.toUri().toURL()};
+            URL[] urls = new URL[] { sourcePath.toUri().toURL()};
             ClassLoader cl = new URLClassLoader(urls);
             // Get the most important classes needed for filtering
             Class<?> parseTreeListenerClass = cl.loadClass(packagePath + "." + grammarName + "MetaParserBaseListener");
@@ -199,7 +270,11 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
         }
     }
 
-    private void compileGeneratedSources(File[] generatedFiles) {
+    /**
+     * Copies the source files to a temporary directory and compiles them
+     * @param generatedFiles An array of .java source files
+     */
+    private void compileGeneratedSources(String packagePath, File[] generatedFiles) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> ds = new
                 DiagnosticCollector<>();
@@ -221,6 +296,31 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
                 }
         } catch (IOException e) {
             throw new PolymorphicDslFileException("Could not compile generated source code for meta parser!", e);
+        }
+    }
+
+    /**
+     * Unfortunately a Java classloader will not find individual class files added at runtime if they are created on a
+     * pre-existing classpath
+     */
+    private Path putCompiledClassesInJarFile(String grammarName, String packagePath, File[] compiledClasses) {
+        String tmpDirsLocation = /*System.getProperty("java.io.tmpdir") + */"pdsltemp/" + packagePath.replace(".", "/") + "/";
+        try {
+            File tempJar = File.createTempFile(tmpDirsLocation + grammarName + "MetaGrammar", ".jar");
+            FileOutputStream fout = new FileOutputStream(tempJar);
+            String packageDirectory = packagePath.replace(".", "/") + "/";
+            JarOutputStream jarOut = new JarOutputStream(fout);
+            jarOut.putNextEntry(new ZipEntry(packageDirectory));
+            for (File compiledClass : compiledClasses) {
+                jarOut.putNextEntry(new ZipEntry(packageDirectory + compiledClass.getName()));
+                jarOut.write(Files.readAllBytes(compiledClass.toPath()));
+                jarOut.closeEntry();
+            }
+            jarOut.close();
+            fout.close();
+            return tempJar.toPath();
+        } catch (IOException e) {
+            throw new PolymorphicDslFileException("Could not put generated code into a jar in the temp directory!", e);
         }
     }
 
