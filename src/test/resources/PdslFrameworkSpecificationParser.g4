@@ -1,7 +1,7 @@
 parser grammar PdslFrameworkSpecificationParser;
 
 options {tokenVocab=PdslFrameworkSpecificationLexer;}
-givenTheTestResource :  GIVEN_THE_TEST_RESOURCE;
+givenTheTestResource :  GIVEN_THE_TEST_RESOURCE ;
 whenTheTestResourceIsProcessedByFactory : WHEN_THE_TEST_RESOURCE_IS_PROCESSED_BY_A_FACTORY ;
 testSpecificationIsProduced :  TEST_SPECIFICATION_IS_PRODUCED ;
 testSpecificationHasAnId : TEST_SPECIFICATION_HAS_AN_ID ;
@@ -15,7 +15,7 @@ testCaseHasProperTestBody : TEST_CASE_HAS_PROPER_TEST_BODY ;
 
 polymorphicDslTestExecutor : POLYMORPHIC_DSL_TEST_EXECUTOR ;
 pdslCanProcessAllPhrases : PDSL_CAN_PROCESS_ALL_PHRASES ;
-testCaseIsProcessed : TEST_CASE_IS_PROCESSED ;
+testCaseIsProcessed : TEST_CASE_IS_PROCESSED EOF ;
 testRunResultProduced : TEST_RUN_RESULT_PRODUCED ;
 
 passingTestTotal : PASSING_TEST_TOTAL ;
@@ -24,6 +24,7 @@ failingTestTotal : FAILING_TEST_TOTAL ;
 totalPhrases : TOTAL_PHRASES ;
 duplicateTestTotal : DUPLICATE_TEST_TOTAL ;
 
+/*
 polymorphicDslSyntaxRule :
 	givenTheTestResource+
 	whenTheTestResourceIsProcessedByFactory
@@ -54,4 +55,5 @@ polymorphicDslSyntaxRule :
 		duplicateTestTotal 
 	)+
 ;
+*/
 

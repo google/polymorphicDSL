@@ -3,6 +3,7 @@ package com.pdsl.gherkin;
 import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.models.GherkinBackground;
 
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -25,7 +26,7 @@ class PickleJar {
     private List<PickleJarScenario> scenarios;
     private List<PickleJarRule> rules;
     private final String featureTitle;
-    private final String location;
+    private final URL location;
     private Optional<String> longDescription;
 
     public PickleJar(Builder builder) {
@@ -46,12 +47,11 @@ class PickleJar {
         private List<PickleJarRule> rules = new LinkedList<>();
         private final String featureTitle;
         private Optional<String> longDescription = Optional.empty();
-        private final String location;
+        private final URL location;
         private String languageCode;
 
-        public Builder(String location, String featureTitle, String languageCode) {
-            Preconditions.checkNotNull(location, "Gherkin location cannot be null or empty!");
-            Preconditions.checkArgument(!location.isEmpty(), "Gherkin location cannot be null or empty!");
+        public Builder(URL location, String featureTitle, String languageCode) {
+            Preconditions.checkNotNull(location, "Gherkin location cannot be null!");
             this.location = location;
             this.featureTitle = featureTitle;
             this.languageCode = languageCode;
@@ -113,7 +113,7 @@ class PickleJar {
         return featureTitle;
     }
 
-    public String getLocation() {
+    public URL getLocation() {
         return location;
     }
 

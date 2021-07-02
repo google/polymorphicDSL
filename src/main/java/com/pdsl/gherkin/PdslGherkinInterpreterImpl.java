@@ -2,6 +2,7 @@ package com.pdsl.gherkin;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Optional;
 
 import com.pdsl.gherkin.parser.GherkinLexer;
@@ -12,12 +13,12 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-public class PdslGherkinInterpreterImpl implements PdslGherkinInterpreter {
+public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
 
     private PdslGherkinListener listener;
 
-    public Optional<com.pdsl.gherkin.models.GherkinFeature> interpretGherkinFile(String filepath, PdslGherkinListener listener) throws IOException {
-        GherkinLexer lexer = new GherkinLexer(CharStreams.fromFileName(filepath));
+    public Optional<com.pdsl.gherkin.models.GherkinFeature> interpretGherkinFile(URL testResource, PdslGherkinListener listener) throws IOException {
+        GherkinLexer lexer = new GherkinLexer(CharStreams.fromStream(testResource.openStream()));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GherkinParser parser = new GherkinParser(tokens);
         parser.setBuildParseTree(true); // tell ANTLR to build a parse tree
@@ -25,7 +26,7 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinInterpreter {
         ParseTreeWalker walker = new ParseTreeWalker();
         //GherkinTransformer interpreter = new GherkinTransformer();
         walker.walk(listener, tree);
-        return listener.getGherkinFeature(filepath);
+        return listener.getGherkinFeature(testResource);
     }
 
     /**
@@ -33,14 +34,14 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinInterpreter {
      *
      * In the event the gherkin can be interpreted but is not "well formed" a runtime exception will be thrown indicating what is missing
      *
-     * @param filepath The .feature file to convert to a GherkinFeature object
+     * @param gherkinLocation The .feature file to convert to a GherkinFeature object
      * @param listener The parse tree listener
      * @return
      * @throws IOException
      */
-    public GherkinFeature interpretGherkinFileStrictly(String filepath, PdslGherkinListener listener)
+    public GherkinFeature interpretGherkinFileStrictly(URL gherkinLocation, PdslGherkinListener listener)
             throws IOException {
-        Optional<GherkinFeature> gherkinFeatureOptional = interpretGherkinFile(filepath, listener);
+        Optional<GherkinFeature> gherkinFeatureOptional = interpretGherkinFile(gherkinLocation, listener);
         if (gherkinFeatureOptional.isEmpty()) {
             throw new MalformedGherkinException("Gherkin could not be parsed or file had no feature!");
         }
@@ -57,7 +58,7 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinInterpreter {
     }
 
     @Override
-    public Optional<GherkinFeature> interpretGherkinFileStrictly(InputStream featureFileContent, String featurePathOrId) throws IOException {
+    public Optional<GherkinFeature> interpretGherkinFileStrictly(InputStream featureFileContent, URL featurePathOrId) throws IOException {
         GherkinLexer lexer = new GherkinLexer(CharStreams.fromStream(featureFileContent));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GherkinParser parser = new GherkinParser(tokens);

@@ -4,39 +4,36 @@ import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.TestSpecification;
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
+import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.junit.Test;
 
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 
 public class GherkinPolymorphicDslTestExecutorTest {
 
-
-    private static final PickleJarFactory pickleJarFactory = PickleJarFactory.DEFAULT;
-    private static final TestSpecificationFactory stepBodyHelperFactory  =
-            new LineDelimitedTestSpecificationFactory(AllGrammarsParser.class,
-                    AllGrammarsLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.GRAMMAR);
-    private static final TestSpecificationFactory subgrammarHelperFactory  =
-            new LineDelimitedTestSpecificationFactory(AllGrammarsParser.class,
-                    AllGrammarsLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
     private static final TestSpecificationFactory provider =
-            new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-
-    private static final GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor
-            <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>
+            new DefaultGherkinTestSpecificationFactory(new DefaultPolymorphicDslPhraseFilter<AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>(
+                    AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class));
+    private static final GherkinTestExecutor gherkinTestExecutor = new <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer> GherkinTestExecutor
             (AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
 
     @Test
-    public void minimalFeature_runsAllTests() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/complex_background.feature").getFile()).getAbsolutePath();
+    public void minimalFeature_runsAllTests() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/complex_background.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
@@ -58,244 +55,218 @@ public class GherkinPolymorphicDslTestExecutorTest {
     }
 
     @Test
-    public void noTagFilters_runsAllTests() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void noTagFilters_runsAllTests() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(6);
         assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism");
     }
 
     @Test
-    public void featureLevelTag_runsAllTests() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void featureLevelTag_runsAllTests() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@feature_tag3");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(6);
     }
 
     @Test
-    public void notFeatureLevelTag_noTestsRun() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void notFeatureLevelTag_noTestsRun() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "not @feature_tag3");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(0);
     }
 
     @Test
-    public void scenarioLevelTag_testsRunForScenarioOnly() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void scenarioLevelTag_testsRunForScenarioOnly() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@scenario_tag1 and @scenario_tag2");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
     @Test
-    public void tableTag_testsRunForTableOnly() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void tableTag_testsRunForTableOnly() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
 
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@ex_tag1");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
     @Test
-    public void scenarioLevelTag_testsRunForOutlineOnly() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void scenarioLevelTag_testsRunForOutlineOnly() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@so_tag1");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(2);
     }
 
     @Test
-    public void firstJoinedTag_runsScenarioWithJoinedTag() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void firstJoinedTag_runsScenarioWithJoinedTag() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag3");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
     @Test
-    public void secondJoinedTag_runsScenarioWithJoinedTag() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).getAbsolutePath();
+    public void secondJoinedTag_runsScenarioWithJoinedTag() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/tags.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag4");
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
     @Test
-    public void datatables_runsValidScenario() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/datatables.feature").getFile()).getAbsolutePath();
+    public void datatables_runsValidScenario() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/datatables.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(5);
     }
 
     @Test
-    public void docstringsFeature_executesSuccessfully() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/docstrings.feature").getFile()).getAbsolutePath();
+    public void docstringsFeature_executesSuccessfully() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/docstrings.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
 
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(8);
     }
 
     @Test
-    public void i18nEmojiFeature_executesSuccessfully() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_emoji.feature").getFile()).getAbsolutePath();
+    public void i18nEmojiFeature_executesSuccessfully() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_emoji.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
     @Test
-    public void i18nNoFeature_executesSuccessfully() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_no.feature").getFile()).getAbsolutePath();
+    public void i18nNoFeature_executesSuccessfully() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_no.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(3);
     }
 
     @Test
-    public void i18nFrFeature_executesSuccessfully() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_fr.feature").getFile()).getAbsolutePath();
+    public void i18nFrFeature_executesSuccessfully() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/i18n_fr.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(39);
     }
 
     @Test
-    public void languageFeature_executesSuccessfully() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/language.feature").getFile()).getAbsolutePath();
+    public void languageFeature_executesSuccessfully() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/language.feature").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyHelperFactory, subgrammarHelperFactory);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 }

@@ -4,18 +4,16 @@ import static com.pdsl.logging.AnsiTerminalColorHelper.*;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.logging.AnsiTerminalColorHelper;
-import com.pdsl.specifications.DefaultTestSpecification;
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import org.antlr.v4.Tool;
 import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.atn.PredictionContextCache;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.tools.*;
-import javax.xml.transform.Source;
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,7 +27,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.*;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 
 public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
@@ -46,8 +43,8 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
     private static final String allRulesMethodName = "polymorphicDslAllRules";
     private final Optional<Path> codeGenerationDirectory;
 
-    @Override
-    public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput, String testId) {
+
+    private Optional<List<ParseTree>> processPhrases(List<InputStream> testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy strategy) {
         // Make copies of the input stream so we can read them more than once
         List<ByteArrayOutputStream> reusableCopies = new ArrayList<>(testInput.size());
         for (InputStream inputStream : testInput) {
@@ -60,49 +57,80 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
             reusableCopies.add(baos);
         }
         // Do an initial run with the grammar parser to make sure all phrases are in the overall grammar:
-         for (ByteArrayOutputStream baos : reusableCopies) {
-            Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()), testId,
+        List<ParseTree> grammarParseTrees = new ArrayList<>(reusableCopies.size());
+        for (ByteArrayOutputStream baos : reusableCopies) {
+            Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()),
                     TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR, grammarParser, grammarLexer);
             if (parser.isEmpty()) {
                 throw new PolymorphicDslTransformationException("A phrase was found that does not belong in the grammar!\n\tPhrase: " + testInput);
+            } else if (strategy.equals(DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR)){
+                    parser.get().setBuildParseTree(true);
+                    try {
+                        Method activePhrasesRule = grammarParser.getMethod(allRulesMethodName, (Class<?>[]) null);
+                        grammarParseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        throw new PolymorphicDslTransformationException(
+                                "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
+                    }
             }
         }
         // By this point we have verified that all phrases are valid in our grammar.
-        // Now we can filter out phrases that do not belong in the current context
-        List<ParseTree> parseTrees = new ArrayList<>(testInput.size());
-        int phrasesFilteredOut = 0;
-        for (ByteArrayOutputStream baos : reusableCopies) {
-            if (subgrammarParser.isEmpty()) {
-                break;
-            }
-            Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()), testId,
-                    TestSpecificationHelper.ErrorListenerStrategy.SUBGRAMMAR,
-                    subgrammarParser.get(),
-                    subgrammarLexer.isPresent() ? subgrammarLexer.get() : grammarLexer);
-            if (parser.isPresent()) {
-                parser.get().setBuildParseTree(true);
-                try {
-                    Method activePhrasesRule = subgrammarParser.get().getMethod(allRulesMethodName,  (Class<?>[]) null);
-                    parseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                    throw new PolymorphicDslTransformationException(
-                            "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
+        if (strategy.equals(DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR)) {
+            return Optional.of(grammarParseTrees);
+        } else {
+            // Now we can filter out phrases that do not belong in the current context
+            List<ParseTree> parseTrees = new ArrayList<>(testInput.size());
+            int phrasesFilteredOut = 0;
+            for (ByteArrayOutputStream baos : reusableCopies) {
+                if (subgrammarParser.isEmpty()) {
+                    break;
                 }
-            } else {
-                phrasesFilteredOut++;
+                Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()),
+                        TestSpecificationHelper.ErrorListenerStrategy.SUBGRAMMAR,
+                        subgrammarParser.get(),
+                        subgrammarLexer.isPresent() ? subgrammarLexer.get() : grammarLexer);
+                if (parser.isPresent()) {
+                    parser.get().setBuildParseTree(true);
+                    try {
+                        Method activePhrasesRule = subgrammarParser.get().getMethod(allRulesMethodName, (Class<?>[]) null);
+                        parseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        throw new PolymorphicDslTransformationException(
+                                "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
+                    }
+                } else {
+                    phrasesFilteredOut++;
+                }
             }
+            if (parseTrees.isEmpty()) { // Let the user know we couldn't parse
+                String errorType = phrasesFilteredOut == testInput.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
+                StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET);
+                errorMessage.append("\n\t" +
+                        BOLD + "Parser Context: " + RESET + grammarParser.getName() + "\n\t" +
+                        BOLD + "Strategy: " + RESET + TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR.name());
+                logger.warn(errorMessage.toString());
+                return Optional.empty();
+            }
+            return Optional.of(parseTrees);
         }
-        if (parseTrees.isEmpty()) { // Let the user know we couldn't parse
-            String errorType = phrasesFilteredOut == testInput.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
-            StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET);
-            errorMessage.append("\n\t" + BOLD + "Path: " + RESET + testId + "\n\t" +
-                    BOLD + "Parser Context: " + RESET + grammarParser.getName() + "\n\t" +
-                    BOLD + "Strategy: " + RESET + TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR.name());
-            logger.warn(errorMessage.toString());
-            return Optional.empty();
-        }
-        return Optional.of(parseTrees);
+    }
+    @Override
+    public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput) {
+        Preconditions.checkNotNull(testInput, "Test input was null!");
+        Preconditions.checkArgument(testInput.size() > 0, "Test input was empty!");
+        return processPhrases(testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.SUBGRAMMAR);
+    }
 
+    @Override
+    public List<ParseTree> validatePhrases(List<InputStream> testInput) {
+        Preconditions.checkNotNull(testInput, "Test input was null!");
+        Preconditions.checkArgument(testInput.size() > 0, "Test input was empty!");
+        Optional<List<ParseTree>> parseTrees =  processPhrases(testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR);
+        if (parseTrees.isPresent()) {
+            return  parseTrees.get();
+        } else { // A runtime exception should have been thrown earlier, but let's play it safe.
+            throw new PolymorphicDslTransformationException("Was not able to make recognize input with grammar " + grammarParser.getName());
+        }
     }
 
     private InterpreterBasedPhraseFilter(Builder builder) throws IOException {
@@ -230,14 +258,6 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
         }
     }
 
-    /**
-     * Reads the interpreter file to find all grammar rules and generates new ANTLR4 source code in a temporary directory
-     * @param packagePath The package the source files should be contained in
-     * @param grammarParentDirectory The location of the .g4 grammar the source is being generated from
-     * @param grammarName The name of the grammar that is having an allRules rule created for
-     * @param fileType The type of files being located
-     * @return generated source files in the system temporary directory
-     */
     private File[] getNewSourceFiles(File finalGeneratedCodeDirectory, String packagePath, Path grammarParentDirectory, String grammarName, SourceFileFilter sourceFileFilter) {
         try {
             // Create a File object on the root of the directory containing the class file

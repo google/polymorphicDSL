@@ -1,11 +1,12 @@
 package com.pdsl.gherkin.models;
 
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
-import com.pdsl.gherkin.PdslGherkinInterpreter;
+import com.pdsl.gherkin.PdslGherkinRecognizer;
 import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -13,12 +14,12 @@ import static com.google.common.truth.Truth.assertThat;
 public class IncompleteFeatureTest {
 
     private static final String resourcePath = "src/test/resources/testdata/good/";
-    private static final PdslGherkinInterpreter transformer = new PdslGherkinInterpreterImpl();
+    private static final PdslGherkinRecognizer transformer = new PdslGherkinInterpreterImpl();
     private static final PdslGherkinListenerImpl listener = new PdslGherkinListenerImpl();
 
     @Test
     public void backgroundWithNoSTeps_notPresent() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "incomplete_background_1.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_background_1.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         // Background should be present, but have no steps
         assertThat(featureOptional.get().getBackground().isPresent()).isTrue();
@@ -30,7 +31,7 @@ public class IncompleteFeatureTest {
 
     @Test
     public void backgroundWithNoStepsAndLongDescription_notPresent() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "incomplete_background_2.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_background_2.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         // Background should be present, but have no steps
         assertThat(featureOptional.get().getBackground().isPresent()).isTrue();
@@ -44,7 +45,7 @@ public class IncompleteFeatureTest {
     // TODO: Determine if we want to allow empty scenarios
     @Test
     public void featureWithOnlyDescription_stillParses() throws  IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "incomplete_feature_1.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_1.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         assertThat(feature.getTitle().isPresent()).isTrue();
@@ -57,7 +58,7 @@ public class IncompleteFeatureTest {
     // TODO: Determine if we want to allow empty features
     @Test
     public void featureContainingOnlyTitle_stillParses() throws  IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "incomplete_feature_2.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_2.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         assertThat(feature.getTitle().isPresent()).isTrue();
@@ -70,7 +71,7 @@ public class IncompleteFeatureTest {
     // TODO: Do we really want to allow gherkin features that only contain a comment?
     @Test
     public void featureContainingOnlyAComment_stillParses() throws  IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "incomplete_feature_3.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_3.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
     }
 }

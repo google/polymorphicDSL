@@ -12,9 +12,13 @@ import com.pdsl.gherkin.specifications.GherkinTestCaseSpecification;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.transformers.PolymorphicDslFileException;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -25,32 +29,31 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private PickleJarFactory pickleJarFactory;
     private Charset charset = Charset.defaultCharset();
     private final int DESCRIPTION_MAX_LENGTH;
-    private final TestSpecificationFactory grammarHelperFactory;
-    private final TestSpecificationFactory subgrammarHelperFactory;
+    private final PolymorphicDslPhraseFilter phraseFilter;
     private final static GherkinTagFilterer gherkinTagFilterer = new GherkinTagFiltererImpl();
+    private final static Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
 
-    public DefaultGherkinTestSpecificationFactory(PickleJarFactory pickleJarFactory, TestSpecificationFactory grammarHelperFactory, TestSpecificationFactory subgrammarHelperFactory) {
+    public DefaultGherkinTestSpecificationFactory(PickleJarFactory pickleJarFactory,
+                                                  PolymorphicDslPhraseFilter phraseFilter) {
         this.pickleJarFactory = pickleJarFactory;;
         DESCRIPTION_MAX_LENGTH = 1024;
-        this.grammarHelperFactory = grammarHelperFactory;
-        this.subgrammarHelperFactory = subgrammarHelperFactory;
+        this.phraseFilter = phraseFilter;
     }
 
-    public DefaultGherkinTestSpecificationFactory(TestSpecificationFactory grammarHelperFactory, TestSpecificationFactory subgrammarHelperFactory) {
+    public DefaultGherkinTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
         this.pickleJarFactory = PickleJarFactory.DEFAULT;;
         DESCRIPTION_MAX_LENGTH = 1024;
-        this.grammarHelperFactory = grammarHelperFactory;
-        this.subgrammarHelperFactory = subgrammarHelperFactory;
+        this.phraseFilter = phraseFilter;
     }
 
     @Override
-    public TestSpecification getTestSpecifications(Set<String> dslTestFilePaths) {
-        Preconditions.checkArgument(dslTestFilePaths != null && !dslTestFilePaths.isEmpty(), "filepaths cannot be null or empty!");
+    public Optional<TestSpecification> getTestSpecifications(Set<URL> testContent) {
+        Preconditions.checkArgument(testContent != null && !testContent.isEmpty(), "filepaths cannot be null or empty!");
         List<GherkinTestCaseSpecification> featureTestSpecifications = new LinkedList<>();
-        List<PickleJar> pickleJars = pickleJarFactory.getPickleJars(dslTestFilePaths);
+        List<PickleJar> pickleJars = pickleJarFactory.getPickleJars(testContent);
        for (PickleJar pickleJar : pickleJars) {
            Set<String> allTagsForTestCase = new HashSet<>();
-           DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation());
+           DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation().toString());
            // Create feature metadata
            ByteArrayOutputStream featureMetaData = new ByteArrayOutputStream();
            addBytesWithCorrectEncoding(featureMetaData, "#language:" + pickleJar.getLanguageCode() + "\n");
@@ -65,7 +68,8 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
            if (pickleJar.getBackground().isPresent()) {
                GherkinBackground bg = pickleJar.getBackground().get();
                addBytesWithCorrectEncoding(featureMetaData, getBackgroundText(bg));
-               Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get(), AnsiTerminalColorHelper.CYAN + "Top level " + AnsiTerminalColorHelper.BRIGHT_CYAN + "Background" + AnsiTerminalColorHelper.RESET + " in " + AnsiTerminalColorHelper.RESET + pickleJar.getLocation());
+               logger.info(AnsiTerminalColorHelper.CYAN + "Top level " + AnsiTerminalColorHelper.BRIGHT_CYAN + "Background" + AnsiTerminalColorHelper.RESET + " in " + AnsiTerminalColorHelper.RESET + pickleJar.getLocation());
+               Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
                if (filteredBackgroundStepBody.isPresent()) {
                    featureBuilder.withTestPhrases(filteredBackgroundStepBody.get());
                }
@@ -81,13 +85,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
            featureBuilder.withChildTestSpecifications(pickles);
            featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
        }
-       // Convert pickle jar into a list of TestSpecifications, where each TestSpecification represents a feature
-        return featureTestSpecifications.get(0);
-       //return new GherkinTestCaseSpecification(new HashSet<String>(), featureTestSpecifications);
-       /*
-        return
-
-        */
+        return Optional.of(featureTestSpecifications.get(0));
     }
 
     private List<GherkinTestSpecification> transformScenariosToTestSpecifications(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags) {
@@ -115,41 +113,22 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return gherkinTestSpecifications;
     }
 
-    private Optional<List<ParseTree>> processStepBodyContent(List<GherkinStep> stepBody, String gherkinContext) {
+    private Optional<List<ParseTree>> processStepBodyContent(List<GherkinStep> stepBody) {
         List<InputStream> stepBodyAsStrings = stepBody.stream()
                 .map(GherkinStep::getStepContent)
                 .map(GherkinString::getRawString) //No substitutions are done on background steps
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
-        Optional<TestSpecification> tempContainer = grammarHelperFactory.getTestSpecification(gherkinContext, stepBodyAsStrings);
-        if (tempContainer.isPresent()) { // Filter content
-            stepBodyAsStrings = stepBody.stream()
-                    .map(GherkinStep::getStepContent)
-                    .map(GherkinString::getRawString) //No substitutions are done on background steps
-                    .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
-                    .collect(Collectors.toUnmodifiableList());
-            tempContainer = subgrammarHelperFactory.getTestSpecification(gherkinContext, stepBodyAsStrings);
-        }
-        if (tempContainer.isPresent()) {
-            if (tempContainer.get().getPhrases().isPresent()) {
-                return tempContainer.get().getPhrases();
-            } else if (tempContainer.get().nestedTestSpecifications().isPresent()) {
-                throw new IllegalStateException("I wasn't expecting this...");
-            }
-        }
-        return Optional.empty();
+        return phraseFilter.validateAndFilterPhrases(stepBodyAsStrings);
     }
 
     private Optional<TestSpecification> processStepBody(String title, List<String> stepBody) {
         List<InputStream> stepBodyAsInputStream = stepBody.stream()
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
-        Optional<TestSpecification> stepBodyAsSpecification = grammarHelperFactory.getTestSpecification(title, stepBodyAsInputStream);
-        if (stepBodyAsSpecification.isPresent()) {
-            stepBodyAsInputStream = stepBody.stream()
-                    .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
-                    .collect(Collectors.toUnmodifiableList());
-            return subgrammarHelperFactory.getTestSpecification(title, stepBodyAsInputStream);
+        Optional<List<ParseTree>> phrases = phraseFilter.validateAndFilterPhrases(stepBodyAsInputStream);
+        if (phrases.isPresent()) {
+            return Optional.of(new DefaultTestSpecification.Builder(title).withPhrases(phrases.get()).build());
         } else {
             return Optional.empty();
         }
@@ -168,7 +147,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
-                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get(), AnsiTerminalColorHelper.CYAN + "Rule Background" + AnsiTerminalColorHelper.RESET +" in " + rule.getTitle());
+                logger.debug(AnsiTerminalColorHelper.CYAN + "Rule Background" + AnsiTerminalColorHelper.RESET +" in "
+                        + rule.getTitle());
+                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
                 if (filteredBackgroundStepBody.isPresent()) {
                     ruleBuilder.withTestPhrases(filteredBackgroundStepBody.get());
                 }
@@ -190,16 +171,6 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return gherkinTestSpecifications.stream()
                 .map(t -> (TestSpecification) t)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<TestSpecification> getTestSpecification(String id, List<InputStream> testContent) {
-        Optional<TestSpecification> matchGrammar = grammarHelperFactory.getTestSpecification(id, testContent);
-        if (matchGrammar.isPresent()) { //Filter content if we verified all sentences belong to grammar
-            return subgrammarHelperFactory.getTestSpecification(id, testContent);
-        } else {
-            return Optional.empty();
-        }
     }
 
     private ByteArrayOutputStream extractMetaData(PickleJar.PickleJarScenario pickleJarScenario) {

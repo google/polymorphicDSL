@@ -5,47 +5,57 @@ import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.gherkin.*;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
+import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
-public class GherkinTestExecutor<G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer> implements PolymorphicDslTestExecutor {
+public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
 
     private static final PickleJarFactory pickleJarFactory = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
-    private final TestSpecificationFactory stepBodyGrammarHelperFactory;
-    private final TestSpecificationFactory stepBodySubgrammarHelperFactory;
-    private final GherkinTestSpecificationFactory provider;
+    private final PolymorphicDslPhraseFilter phraseFilter;
+    private final GherkinTestSpecificationFactory testSpecificationFactory;
     private final TestCaseFactory testCaseFactory = new ParentForEachChildTestCaseFactory();
     private final Logger logger = LoggerFactory.getLogger(GherkinTestExecutor.class);
     private final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
 
-    public GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
-        stepBodyGrammarHelperFactory = new LineDelimitedTestSpecificationFactory<G, L>(grammarParser, grammarLexer, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.GRAMMAR);
-        stepBodySubgrammarHelperFactory = new LineDelimitedTestSpecificationFactory<SG, SL>(subgrammarParser, subgrammarLexer, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
-        provider = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, stepBodyGrammarHelperFactory, stepBodySubgrammarHelperFactory);
+    public <G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer>GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
+        phraseFilter = new DefaultPolymorphicDslPhraseFilter<G, L, SG, SL>(grammarParser, grammarLexer, subgrammarParser, subgrammarLexer);
+        testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
     }
 
-    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<String> fileLocations, String tagExpression,
+    public GherkinTestExecutor(PolymorphicDslPhraseFilter phraseFilter) {
+        this.phraseFilter = phraseFilter;
+        testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
+    }
+
+
+    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
                                                                 ParseTreeListener grammarListener, ParseTreeListener subgrammarListener) {
         // Use the file locations and convert the feature files to test specifications
-        TestSpecification testSpecification = provider.getTestSpecifications(fileLocations);
-
+        Optional<TestSpecification> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
+        if (testSpecificationOptional.isEmpty()) {
+            throw new IllegalStateException("None of the test resources could be converted into a test specification!");
+        }
         // If tag expressions were provided filter the test specification
         Optional<TestSpecification> filteredSpecification =
-                provider.filterGherkinTestSpecificationsByTagExpression(testSpecification, tagExpression);
+                testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
+        TestSpecification testSpecification;
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
             return new PolymorphicDslTestRunResults(System.out);
@@ -59,14 +69,17 @@ public class GherkinTestExecutor<G extends Parser, L extends Lexer, SG extends P
         return executor.runTests(testCases, grammarListener, subgrammarListener);
     }
 
-    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<String> fileLocations, String tagExpression,
+    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
                                                                 ParseTreeListener grammarListener) {
         // Use the file locations and convert the feature files to test specifications
-        TestSpecification testSpecification = provider.getTestSpecifications(fileLocations);
-
+        Optional<TestSpecification> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
+        if (testSpecificationOptional.isEmpty()) {
+            throw new IllegalStateException("Test resources could not be converted to a Test Specification");
+        }
         // If tag expressions were provided filter the test specification
         Optional<TestSpecification> filteredSpecification =
-                provider.filterGherkinTestSpecificationsByTagExpression(testSpecification, tagExpression);
+                testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
+        TestSpecification testSpecification;
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
             return new PolymorphicDslTestRunResults(System.out);
@@ -80,18 +93,18 @@ public class GherkinTestExecutor<G extends Parser, L extends Lexer, SG extends P
         return executor.runTests(testCases, grammarListener);
     }
 
-    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<String> fileLocations,
+    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources,
                                                                 ParseTreeListener grammarListener, ParseTreeListener subgrammarListener) {
-        return processFilesAndRunTests(fileLocations, "", grammarListener, subgrammarListener);
+        return processFilesAndRunTests(testResources, "", grammarListener, subgrammarListener);
     }
 
-    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<String> fileLocations,
+    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources,
                                                                 ParseTreeListener grammarListener, String tagExpression) {
-        return processFilesAndRunTests(fileLocations, tagExpression, grammarListener);
+        return processFilesAndRunTests(testResources, tagExpression, grammarListener);
     }
 
-    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<String> fileLocations, ParseTreeListener grammarListener) {
-        return processFilesAndRunTests(fileLocations, grammarListener, "");
+    public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources, ParseTreeListener grammarListener) {
+        return processFilesAndRunTests(testResources, grammarListener, "");
     }
 
     @Override

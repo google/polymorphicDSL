@@ -1,11 +1,12 @@
 package com.pdsl.gherkin.models;
 
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
-import com.pdsl.gherkin.PdslGherkinInterpreter;
+import com.pdsl.gherkin.PdslGherkinRecognizer;
 import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,14 +19,14 @@ public class GherkinTransformerTest
 {
 
     private static final String resourcePath = "src/test/resources/testdata/good/";
-    private static final PdslGherkinInterpreter transformer = new PdslGherkinInterpreterImpl();
+    private static final PdslGherkinRecognizer transformer = new PdslGherkinInterpreterImpl();
     private static final PdslGherkinListenerImpl listener = new PdslGherkinListenerImpl();
 
     @Test
     public void minimalFeature_hasSingleScenario() throws IOException
     {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "minimal.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal.feature").toUri().toURL(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -49,7 +50,7 @@ public class GherkinTransformerTest
     @Test
     public void minimalExample_exampleKeywordValid() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "minimal-example.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal-example.feature").toUri().toURL(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -61,7 +62,7 @@ public class GherkinTransformerTest
     @Test
     public void background_interpretsBackgroundAndScenarios() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "background.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "background.feature").toUri().toURL(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -92,7 +93,7 @@ public class GherkinTransformerTest
     @Test
     public void complexBackground_interpretsBackgroundAndScenarios() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "complex_background.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "complex_background.feature").toUri().toURL(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();

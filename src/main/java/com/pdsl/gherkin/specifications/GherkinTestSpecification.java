@@ -1,14 +1,12 @@
 package com.pdsl.gherkin.specifications;
 
+import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.TestSpecification;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class GherkinTestSpecification implements TestSpecification {
 
@@ -18,6 +16,13 @@ public class GherkinTestSpecification implements TestSpecification {
     public GherkinTestSpecification(TestSpecification testSpecification, Set<String> tags) {
         this.tags = tags;
         this.testSpecification = testSpecification;
+    }
+
+    public GherkinTestSpecification(List<GherkinTestSpecification> gherkinTestSpecifications) {
+        this.tags = Set.of();
+        this.testSpecification = new DefaultTestSpecification.Builder("Gherkin test container")
+                .withChildTestSpecifications(new ArrayList<TestSpecification>(gherkinTestSpecifications))
+                .build();
     }
 
     public Set<String> getTags() {

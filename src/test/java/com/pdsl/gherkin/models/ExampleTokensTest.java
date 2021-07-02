@@ -1,11 +1,12 @@
 package com.pdsl.gherkin.models;
 
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
-import com.pdsl.gherkin.PdslGherkinInterpreter;
+import com.pdsl.gherkin.PdslGherkinRecognizer;
 import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,13 +16,13 @@ import static com.google.common.truth.Truth.assertThat;
 public class ExampleTokensTest {
 
     private static final String resourcePath = "src/test/resources/testdata/good/";
-    private static final PdslGherkinInterpreter transformer = new PdslGherkinInterpreterImpl();
+    private static final PdslGherkinRecognizer transformer = new PdslGherkinInterpreterImpl();
     private static final PdslGherkinListenerImpl listener = new PdslGherkinListenerImpl();
 
     @Test
     public void exampleToken_canBeSubstitutedMultipleTimes() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "example_token_multiple.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "example_token_multiple.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         // Assert
         GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getStepsList().get().get(0);
@@ -33,7 +34,7 @@ public class ExampleTokensTest {
     @Test
     public void exampleToken_canBeSubstitutedOnce() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "example_tokens_everywhere.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "example_tokens_everywhere.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getStepsList().get().get(0);
         GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getExamples().get().get(0);
@@ -46,7 +47,7 @@ public class ExampleTokensTest {
     @Test
     public void exampleToken_canBeInDocstring() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "example_tokens_everywhere.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "example_tokens_everywhere.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getStepsList().get().get(0);
         GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getExamples().get().get(0);
@@ -59,7 +60,7 @@ public class ExampleTokensTest {
     @Test
     public void exampleToken_canBeInStepDataTable() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "example_tokens_everywhere.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "example_tokens_everywhere.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getStepsList().get().get(1);
         GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getExamples().get().get(0);

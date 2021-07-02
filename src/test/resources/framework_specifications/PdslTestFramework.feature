@@ -1,5 +1,23 @@
 Feature: Polymorphic DSL Test Framework
 
+The Polymorphic DSL (PDSL) pattern may or may not be used for Business Driven Development.
+This PDSL framework itself voluntarily chooses to write the specifications in Gherkin to produce
+living documentation.
+
+The ultimate idea behind the pdsl framework is that modern applications tend to either have many clients
+or follow distributed system architecture and the tests should be written to scale through the test pyramid and across
+the application boundary. This is because there are many (often massive) areas of shared concern.
+
+Problems with conventional development involve modifying a microservice or some other module and discovering after
+releasing that it completely breaks a foreign service (which the team may not have even known about due to the scale
+of modern application infrastructure)
+
+The PDSL framework allows requirements to be tested in many different contexts.
+
+The general flow of the framework is to create a grammar or use some other supported protocol (such as gherkin, which
+this test specification is written in) to describe the system under test in a formal way. In other words, the way you
+describe how to do something in one part of your application is the same way you describe it in another.
+
 Scenario Outline: Test Lifecycle
     Given the test resource "<resource>"
     When the test resource is processed by a "Test Specification Factory"

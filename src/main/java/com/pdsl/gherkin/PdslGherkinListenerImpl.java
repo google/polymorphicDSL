@@ -6,6 +6,7 @@ import com.pdsl.gherkin.models.*;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import com.pdsl.gherkin.parser.GherkinParser;
 
+import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -13,13 +14,13 @@ import java.util.stream.Collectors;
 
     private Optional<GherkinFeature.Builder> builderOptional = Optional.empty();
 
-    public Optional<GherkinFeature> getGherkinFeature(String featurePathOrId) {
+    public Optional<GherkinFeature> getGherkinFeature(URL featurePathOrId) {
         return builderOptional.isEmpty() ? Optional.empty() : Optional.of(builderOptional.get().withLocation(featurePathOrId).build());
     }
 
     public void enterGherkinDocument(GherkinParser.GherkinDocumentContext ctx) {
         if (ctx.feature() != null) {
-            GherkinFeature.Builder builder = new GherkinFeature.Builder(""); // The listener cannot know this in advance
+            GherkinFeature.Builder builder = new GherkinFeature.Builder();
             builderOptional = Optional.of(builder);
             // Get the language code
             if (ctx.LANGUAGE_HEADER() != null) {

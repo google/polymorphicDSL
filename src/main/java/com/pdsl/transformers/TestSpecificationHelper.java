@@ -22,16 +22,16 @@ public interface TestSpecificationHelper {
     }
 
 
-    public static Optional<Parser> parserOf(InputStream inputStream, String testId, ErrorListenerStrategy strategy, Class<?> parserClass, Class<?> lexerClass) {
+    static Optional<Parser> parserOf(InputStream inputStream, ErrorListenerStrategy strategy, Class<?> parserClass, Class<?> lexerClass) {
 
-        Optional<? extends Lexer> lexer = lexerOf(lexerClass, inputStream, testId, strategy);
+        Optional<? extends Lexer> lexer = lexerOf(lexerClass, inputStream, strategy);
         if (lexer.isEmpty()) {
             return Optional.empty();
         }
         try {
             // Create a parser-grammar file
             // Convert the grammar input to actual parser tokens
-            Parser dslParser =  (Parser) parserClass
+            Parser dslParser = (Parser) parserClass
                     .getDeclaredConstructor(TokenStream.class)
                     .newInstance(new CommonTokenStream(lexer.get()));
             if (strategy.equals(ErrorListenerStrategy.GRAMMAR)) {
@@ -44,7 +44,7 @@ public interface TestSpecificationHelper {
         }
     }
 
-    private static Optional<Lexer> lexerOf(Class<?> lexerClass, InputStream inputStream, String testId, ErrorListenerStrategy strategy) {
+    private static Optional<Lexer> lexerOf(Class<?> lexerClass, InputStream inputStream, ErrorListenerStrategy strategy) {
         try {
 
             final Logger logger = LoggerFactory.getLogger(TestSpecificationHelper.class);
@@ -55,20 +55,20 @@ public interface TestSpecificationHelper {
             inputStream.transferTo(baos);
             CharStream charStream = CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray()));
 
-            Lexer pdslLexer = (Lexer)lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray())));
-            pdslLexer.removeErrorListeners();
+            Lexer pdslLexer = (Lexer) lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray())));
+            if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
+                pdslLexer.removeErrorListeners();
+            }
             PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
-            if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.size() == 0 || errorListener.isErrorFound()) ) {
-                throw new SentenceNotFoundException(testId + ":\n" + "Could not find the following sentence in the grammar:\n" + new String(baos.toByteArray()));
+            if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.size() == 0 || errorListener.isErrorFound())) {
+                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:\n<START>%s<END>\n\nCommon errors include:\n\tNot having this sentence in the lexer\n\tForgetting to create a parser rule for this sentence\n\tLeading and trailing whitespace or newlines\n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens\n\nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", new String(baos.toByteArray())));
             } else {
                 if (allTokens.size() == 0) {
                     if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
                         logger.warn(AnsiTerminalColorHelper.BRIGHT_CYAN + "Filtering out phrase:\n\t" + new String(baos.toByteArray()) + AnsiTerminalColorHelper.RESET);
                         return Optional.empty();
-                    } else {
-
                     }
                 } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                     logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");

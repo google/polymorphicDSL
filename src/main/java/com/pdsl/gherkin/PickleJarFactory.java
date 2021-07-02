@@ -2,10 +2,10 @@ package com.pdsl.gherkin;
 
 import com.pdsl.gherkin.models.*;
 import com.pdsl.transformers.PolymorphicDslFileException;
-import com.pdsl.gherkin.models.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -14,13 +14,13 @@ import java.util.stream.Collectors;
 public class PickleJarFactory {
 
     private final int ABBREVIATED_DESCRIPTION_LENGTH = 1024;
-    private PdslGherkinInterpreter pdslGherkinInterpreter;
+    private PdslGherkinRecognizer pdslGherkinRecognizer;
     private PdslGherkinListener listener;
     private final Charset charset;
 
     public static PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
-    public PickleJarFactory(PdslGherkinInterpreter pdslGherkinInterpreter, PdslGherkinListener gherkinListener, Charset charset) {
-        this.pdslGherkinInterpreter = pdslGherkinInterpreter;
+    public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset) {
+        this.pdslGherkinRecognizer = pdslGherkinRecognizer;
         this.listener = gherkinListener;
         this.charset = charset;
     }
@@ -31,15 +31,15 @@ public class PickleJarFactory {
      * The primary purpose of this is to both  read all of the feature files (and making sure they exist) and
      * parameter substitutions on the text if needed
      *
-     * @param dslTestFilePaths List of paths to feature files
+     * @param testResources List of URLs to feature files
      * @return A List of PickleJars, where each pickle jar represents a processed feature
      */
-    public List<PickleJar> getPickleJars(Set<String> dslTestFilePaths) {
+    public List<PickleJar> getPickleJars(Set<URL> testResources) {
         List<GherkinFeature> features = new LinkedList<>();
         // Parse each gherkin file
         try {
-            for (String filepath : dslTestFilePaths) {
-                features.add(pdslGherkinInterpreter.interpretGherkinFileStrictly(filepath, listener));
+            for (URL url : testResources) {
+                features.add(pdslGherkinRecognizer.interpretGherkinFileStrictly(url, listener));
             }
         } catch (IOException e) {
             throw new PolymorphicDslFileException("Could not open file!", e);
