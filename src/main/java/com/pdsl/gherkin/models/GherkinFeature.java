@@ -2,6 +2,7 @@ package com.pdsl.gherkin.models;
 
 import com.google.common.base.Preconditions;
 
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public class GherkinFeature {
     private final Optional<List<GherkinScenario>> optionalGherkinScenarios;
     private final Optional<List<GherkinRule>> rules;
     private final Optional<List<String>> tags;
-    private final String location;
+    private final URL location;
 
     private GherkinFeature(Builder builder) {
         this.languageCode = builder.languageCode;
@@ -30,7 +31,7 @@ public class GherkinFeature {
     }
 
     public static class Builder {
-        private String location;
+        private URL location;
         private String languageCode = "en";
         private String title = "";
         private String longDescription = "";
@@ -39,22 +40,24 @@ public class GherkinFeature {
         private List<GherkinRule> rules = new LinkedList<>();
         private Optional<List<String>> tags = Optional.empty();
 
-        public Builder(String location) {
-            Preconditions.checkArgument(location == null || location.isEmpty(), "Location cannot be null or empty!");
+        public Builder(URL location) {
+            Preconditions.checkArgument(location == null, "Location cannot be null!");
             // preconditions on argument delayed until building
             this.location = location;
         }
 
-        public Builder withLocation(String location) {
-            Preconditions.checkArgument(location != null && !location.isEmpty(),
-                    "Location cannot be null or empty!");
+        public Builder() {}
+
+        public Builder withLocation(URL location) {
+            Preconditions.checkArgument(location != null,
+                    "Location cannot be null!");
             this.location = location;
             return this;
         }
 
         public GherkinFeature build() {
-            Preconditions.checkArgument(location != null && !location.isEmpty(),
-                    "Location cannot be null or empty!");
+            Preconditions.checkArgument(location != null,
+                    "Location cannot be null!");
             return new GherkinFeature(this);
         }
 
@@ -153,5 +156,5 @@ public class GherkinFeature {
         return tags;
     }
 
-    public String getLocation() {return location; }
+    public URL getLocation() {return location; }
 }

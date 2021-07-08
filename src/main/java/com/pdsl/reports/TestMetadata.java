@@ -26,6 +26,20 @@ public class TestMetadata {
         this.phraseBodyId = phraseBodyId;
     }
 
+    public static TestMetadata failedTest(String testSuiteId, int passingPhraseTotal,
+                                          int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason,
+            long phraseBodyId) {
+        return new TestMetadata(testSuiteId, passingPhraseTotal, phrasesSkippedDueToFailure, failingStep, failureReason, phraseBodyId);
+    }
+
+    public static TestMetadata duplicateTest(String testTitle, long testCaseId) {
+        return new TestMetadata(testTitle, 0, testCaseId);
+    }
+
+    public static TestMetadata passingTest(String testSuiteId, int passingPhraseTotal, long phraseBodyId) {
+        return new TestMetadata(testSuiteId, passingPhraseTotal, phraseBodyId);
+    }
+
     public TestMetadata(String testSuiteId, int passingPhraseTotal, int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason, long phraseBodyId) {
         this.isPassed = false;
         this.testSuiteId = testSuiteId;

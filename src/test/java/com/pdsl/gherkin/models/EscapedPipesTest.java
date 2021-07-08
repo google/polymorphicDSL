@@ -1,11 +1,12 @@
 package com.pdsl.gherkin.models;
 
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
-import com.pdsl.gherkin.PdslGherkinInterpreter;
+import com.pdsl.gherkin.PdslGherkinRecognizer;
 import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,13 +15,13 @@ import static com.google.common.truth.Truth.assertThat;
 public class EscapedPipesTest {
 
     private static final String resourcePath = "src/test/resources/testdata/good/";
-    private static final PdslGherkinInterpreter transformer = new PdslGherkinInterpreterImpl();
+    private static final PdslGherkinRecognizer transformer = new PdslGherkinInterpreterImpl();
     private static final PdslGherkinListenerImpl listener = new PdslGherkinListenerImpl();
 
     @Test
     public void escapedPipes_preservedInTableCells() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "escaped_pipes.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "escaped_pipes.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
 
         // Assert

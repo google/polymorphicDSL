@@ -38,8 +38,12 @@ public class GherkinString {
     public String getStringWithSubstitutions(Map<String, String> substitutions) {
         if (!hasSubstitutions()) { return rawString; }
         String substitutedString = rawString;
-        for (Map.Entry<String, String> entry : substitutions.entrySet()) {
-            substitutedString = substitutedString.replaceAll(entry.getKey(), entry.getValue()).trim();
+        try {
+            for (Map.Entry<String, String> entry : substitutions.entrySet()) {
+                substitutedString = substitutedString.replaceAll(entry.getKey(), Matcher.quoteReplacement(entry.getValue()).trim());
+            }
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("There was a problem when doing gherkin string substitutions!\n\tRaw string: <BEGIN>" + rawString + "<END>\n\tSubstitutions: " + substitutions.toString());
         }
         // If we didn't substitute everything in the string it was half formed
         if (parameterPattern.matcher(substitutedString).find()) {

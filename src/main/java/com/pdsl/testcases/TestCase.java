@@ -2,6 +2,9 @@ package com.pdsl.testcases;
 
 import java.util.Iterator;
 
+/**
+ * An executable
+ */
 public interface TestCase {
 
     /* Provides an identifier such that if the underlying, ordered phrases are identical to another group of phra they will have the same identifier

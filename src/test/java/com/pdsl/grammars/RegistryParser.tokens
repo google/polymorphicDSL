@@ -6,5 +6,6 @@ WS=5
 END_OF_FILE=6
 HELLO=7
 WORLD=8
+END_OF_LINE=9
 'Hello, '=7
 'world!'=8

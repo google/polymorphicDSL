@@ -1,5 +1,6 @@
 package com.pdsl.executors;
 
+import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.TestSpecification;
@@ -77,7 +78,7 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                     StringBuilder duplicateBody = new StringBuilder();
                     testCase.getTestBody().forEachRemaining(duplicateBody::append);
                     totalDuplicates++;
-                    results.addTestResult(new TestMetadata(testCase.getTestTitle(), 0, testCase.getTestCaseId()));
+                    results.addTestResult(TestMetadata.duplicateTest(testCase.getTestTitle(), testCase.getTestCaseId()));
                     continue;
                 } else {
                     previouslyExecutedTests.add(testCase.getTestCaseId());
@@ -90,17 +91,19 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                         notifyStreams((activePhrase.getText() + "\n").getBytes(charset));
                         walker.walk(phraseRegistry, activePhrase);
                         totalPassingPhrases++;
-                    }
-                    results.addTestResult(new TestMetadata(testCase.getTestTitle(), totalPassingPhrases, testCase.getTestCaseId()));
+                    };
+                    results.addTestResult(TestMetadata.passingTest(testCase.getTestTitle(), totalPassingPhrases, testCase.getTestCaseId()));
                     continue;
                 }
             } catch (Throwable e) {
                 int phrasesSkippedDueToFailure = testCase.getBodySize() // All phrases
                         - totalPassingPhrases // Minus successfully executed steps
                         - 1; // minus the failing phrase
-                results.addTestResult(new TestMetadata(testCase.getTestTitle(), totalPassingPhrases,
-                        phrasesSkippedDueToFailure, activePhrase != null ? activePhrase.getText() : "phrase was null!", e,
+                String errorPhrase = activePhrase != null ? activePhrase.getText() : "phrase was null!";
+                results.addTestResult(TestMetadata.failedTest(testCase.getTestTitle(), totalPassingPhrases,
+                        phrasesSkippedDueToFailure, errorPhrase, e,
                         testCase.getTestCaseId()));
+                e.printStackTrace();
                 continue;
             }
 
@@ -114,7 +117,7 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                 try {
                     stream.write(outputStream.toByteArray());
                 } catch (IOException e) {
-                    logger.error("An issue processing metadata occured!", e);
+                    logger.error("An issue processing metadata occurred!", e);
                 }
             }
         }
@@ -126,7 +129,7 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                 try {
                     stream.write(outputStream);
                 } catch (IOException e) {
-                    logger.error("An issue processing metadata occured!", e);
+                    logger.error("An issue processing metadata occurred!", e);
                 }
             }
         }

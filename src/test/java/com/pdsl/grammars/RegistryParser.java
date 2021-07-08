@@ -1,20 +1,24 @@
-// Generated from RegistryParser.g4 by ANTLR 4.9
+// Generated from RegistryParser.g4 by ANTLR 4.7.2
 package com.pdsl.grammars;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import java.util.List;
+import java.util.Iterator;
+import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class RegistryParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.9", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.7.2", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		SUM=1, MINUS=2, PRODUCT=3, NUMBER=4, WS=5, END_OF_FILE=6, HELLO=7, WORLD=8;
+		SUM=1, MINUS=2, PRODUCT=3, NUMBER=4, WS=5, END_OF_FILE=6, HELLO=7, WORLD=8, 
+		END_OF_LINE=9;
 	public static final int
 		RULE_mathematical_expression = 0, RULE_helloWorld = 1;
 	private static String[] makeRuleNames() {
@@ -33,7 +37,7 @@ public class RegistryParser extends Parser {
 	private static String[] makeSymbolicNames() {
 		return new String[] {
 			null, "SUM", "MINUS", "PRODUCT", "NUMBER", "WS", "END_OF_FILE", "HELLO", 
-			"WORLD"
+			"WORLD", "END_OF_LINE"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -86,7 +90,6 @@ public class RegistryParser extends Parser {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
-
 	public static class Mathematical_expressionContext extends ParserRuleContext {
 		public TerminalNode SUM() { return getToken(RegistryParser.SUM, 0); }
 		public TerminalNode MINUS() { return getToken(RegistryParser.MINUS, 0); }
@@ -138,11 +141,6 @@ public class RegistryParser extends Parser {
 	public static class HelloWorldContext extends ParserRuleContext {
 		public TerminalNode HELLO() { return getToken(RegistryParser.HELLO, 0); }
 		public TerminalNode WORLD() { return getToken(RegistryParser.WORLD, 0); }
-		public List<TerminalNode> WS() { return getTokens(RegistryParser.WS); }
-		public TerminalNode WS(int i) {
-			return getToken(RegistryParser.WS, i);
-		}
-		public TerminalNode EOF() { return getToken(RegistryParser.EOF, 0); }
 		public HelloWorldContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -160,7 +158,6 @@ public class RegistryParser extends Parser {
 	public final HelloWorldContext helloWorld() throws RecognitionException {
 		HelloWorldContext _localctx = new HelloWorldContext(_ctx, getState());
 		enterRule(_localctx, 2, RULE_helloWorld);
-		int _la;
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
@@ -168,30 +165,6 @@ public class RegistryParser extends Parser {
 			match(HELLO);
 			setState(7);
 			match(WORLD);
-			setState(11);
-			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while (_la==WS) {
-				{
-				{
-				setState(8);
-				match(WS);
-				}
-				}
-				setState(13);
-				_errHandler.sync(this);
-				_la = _input.LA(1);
-			}
-			setState(15);
-			_errHandler.sync(this);
-			switch ( getInterpreter().adaptivePredict(_input,1,_ctx) ) {
-			case 1:
-				{
-				setState(14);
-				match(EOF);
-				}
-				break;
-			}
 			}
 		}
 		catch (RecognitionException re) {
@@ -206,12 +179,9 @@ public class RegistryParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\n\24\4\2\t\2\4\3"+
-		"\t\3\3\2\3\2\3\3\3\3\3\3\7\3\f\n\3\f\3\16\3\17\13\3\3\3\5\3\22\n\3\3\3"+
-		"\2\2\4\2\4\2\3\3\2\3\5\2\23\2\6\3\2\2\2\4\b\3\2\2\2\6\7\t\2\2\2\7\3\3"+
-		"\2\2\2\b\t\7\t\2\2\t\r\7\n\2\2\n\f\7\7\2\2\13\n\3\2\2\2\f\17\3\2\2\2\r"+
-		"\13\3\2\2\2\r\16\3\2\2\2\16\21\3\2\2\2\17\r\3\2\2\2\20\22\7\2\2\3\21\20"+
-		"\3\2\2\2\21\22\3\2\2\2\22\5\3\2\2\2\4\r\21";
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\13\f\4\2\t\2\4\3"+
+		"\t\3\3\2\3\2\3\3\3\3\3\3\3\3\2\2\4\2\4\2\3\3\2\3\5\2\t\2\6\3\2\2\2\4\b"+
+		"\3\2\2\2\6\7\t\2\2\2\7\3\3\2\2\2\b\t\7\t\2\2\t\n\7\n\2\2\n\5\3\2\2\2\2";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

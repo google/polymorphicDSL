@@ -1,11 +1,12 @@
 package com.pdsl.gherkin.models;
 
-import com.pdsl.gherkin.PdslGherkinInterpreter;
+import com.pdsl.gherkin.PdslGherkinRecognizer;
 import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,13 +14,13 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class I18nEmojiTest {
     private static final String resourcePath = "src/test/resources/testdata/good/";
-    private static final PdslGherkinInterpreter transformer = new PdslGherkinInterpreterImpl();
+    private static final PdslGherkinRecognizer transformer = new PdslGherkinInterpreterImpl();
     private static final PdslGherkinListenerImpl listener = new PdslGherkinListenerImpl();
     private final List<GherkinStep> stepList;
 
     public I18nEmojiTest() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(resourcePath + "i18n_emoji.feature", listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "i18n_emoji.feature").toUri().toURL(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();

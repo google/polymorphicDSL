@@ -1,36 +1,52 @@
 package com.pdsl.grammars;
 
+import com.pdsl.FrameworkSpecificationsTest;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.reports.TestRunResults;
-import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
+import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import static com.google.common.truth.Truth.assertThat;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificationParserListener {
 
-    private Set<String> resourcePaths = new HashSet<>();
+    private Set<URL> resourcePaths = new HashSet<>();
     private TestSpecification testSpecification;
     private Collection<TestCase> testCases;
     private TestRunResults results;
     private ParseTreeListener grammarListener;
     private ParseTreeListener subGrammarListener;
 
+    private static final PolymorphicDslPhraseFilter allPhrases = new DefaultPolymorphicDslPhraseFilter
+            <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>(
+                    AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
+
     @Override
     public void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) {
-        resourcePaths.add(ctx.getText());
+            String fileName = ctx.getText().split("\"")[1].trim();
+            String resourcePath = "testdata/good/" + fileName;
+            URL resource = getClass().getClassLoader().getResource(resourcePath);
+            assertThat(resource).isNotNull();
+            resourcePaths.add(resource);
     }
 
     @Override
@@ -38,11 +54,11 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) {
-        TestSpecificationFactory testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(new LineDelimitedTestSpecificationFactory<AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class,
-                AllGrammarsLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.GRAMMAR),
-                new LineDelimitedTestSpecificationFactory<AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class,
-                        AllGrammarsLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR));
-        testSpecification = testSpecificationFactory.getTestSpecifications(resourcePaths);
+
+        TestSpecificationFactory testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(allPhrases);
+        Optional<TestSpecification> specification  = testSpecificationFactory.getTestSpecifications(resourcePaths);
+        assertThat(specification.isPresent()).isTrue();
+        testSpecification = specification.get();
     }
 
     @Override
@@ -236,6 +252,16 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void exitPolymorphicDslAllRules(PdslFrameworkSpecificationParser.PolymorphicDslAllRulesContext ctx) {
+
+    }
+
+    @Override
+    public void enterPolymorphicDslSyntaxRule(PdslFrameworkSpecificationParser.PolymorphicDslSyntaxRuleContext ctx) {
+
+    }
+
+    @Override
+    public void exitPolymorphicDslSyntaxRule(PdslFrameworkSpecificationParser.PolymorphicDslSyntaxRuleContext ctx) {
 
     }
 

@@ -9,16 +9,20 @@ import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.grammars.*;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.specifications.TestSpecification;
-import com.pdsl.transformers.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.testcases.TopDownDepthFirstTestCaseFactory;
+import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.*;
 
 /**
@@ -53,29 +57,30 @@ public class PolymorphicDslTest {
             return Optional.empty();
         }
     }
-
+    private final PolymorphicDslPhraseFilter betaPhraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslRegistryParser, RegistryLexer, PolymorphicDslBetaParser, BetaLexer>(
+            PolymorphicDslRegistryParser.class, RegistryLexer.class, PolymorphicDslBetaParser.class, BetaLexer.class
+    );
+    private final TestSpecificationFactory betaTestFactory = new LineDelimitedTestSpecificationFactory(betaPhraseFilter);
     private static final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
     private static final TestCaseFactory testCaseFactory = new TopDownDepthFirstTestCaseFactory();
     @Test
-    public void validGrammarWalkThroughRegistryAllStepsInContext_shouldSucceed()
-    {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).getAbsolutePath();
+    public void validGrammarWalkThroughRegistryAllStepsInContext_shouldSucceed() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new LineDelimitedTestSpecificationFactory<PolymorphicDslRegistryParser, RegistryLexer>(PolymorphicDslRegistryParser.class, RegistryLexer.class,
-                        LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.GRAMMAR);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> testSpecification = betaTestFactory.getTestSpecifications(dslFiles);
+        assertThat(testSpecification.isPresent()).isTrue();
+        TestSpecification specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         PolymorphicDslTestRunResults results = executor.runTests(testCases, new PolymorphicDslRegistryParserBaseListener());
         // Assert
         assertThat(specifications.nestedTestSpecifications().isPresent()).isTrue();
         assertThat(specifications.nestedTestSpecifications().get().size()).isEqualTo(1);
         assertThat(results.failingTestTotal()).isEqualTo(0);
-        assertThat(results.passingPhraseTotal()).isEqualTo(5);
-        assertThat(results.totalPhrases()).isEqualTo(5);
+        assertThat(results.passingPhraseTotal()).isEqualTo(1);
+        assertThat(results.totalPhrases()).isEqualTo(1);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
         assertThat(results.passingTestTotal()).isEqualTo(1);
         assertThat(results.failingTestTotal()).isEqualTo(0);
@@ -83,17 +88,15 @@ public class PolymorphicDslTest {
     }
 
     @Test
-    public void validGrammarWalkThroughContext_notAllStepsShouldRun()
-    {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).getAbsolutePath();
+    public void validGrammarWalkThroughContext_notAllStepsShouldRun() throws MalformedURLException {
+        final URL absolutePathValid = getClass().getClassLoader().getResource("sentences/valid.pdsl");
         // Arrange
-        TestSpecificationFactory provider =
-                new LineDelimitedTestSpecificationFactory<PolymorphicDslBetaParser, BetaLexer>(PolymorphicDslBetaParser.class, BetaLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
-        Set<String> dslFiles = new HashSet<>();
-
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
+        assertThat(testSpecifications.isPresent()).isTrue();
+        TestSpecification specifications = testSpecifications.get();
         Collection<TestCase> testCase = testCaseFactory.processTestSpecification(specifications);
         PolymorphicDslTestRunResults results = new DefaultPolymorphicDslTestExecutor()
                 .runTests(testCase, new PolymorphicDslBetaParserBaseListener());
@@ -111,33 +114,31 @@ public class PolymorphicDslTest {
 
     // NOTE: token recognition errors in the console are expected and indicate that the below test is working
     @Test
-    public void contextWalkMatchesNoSteps_noStepsShouldRunAndWarningIssued() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/math.pdsl").getFile()).getAbsolutePath();
+    public void contextWalkMatchesNoSteps_noStepsShouldRunAndWarningIssued() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/math.pdsl").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new LineDelimitedTestSpecificationFactory<PolymorphicDslBetaParser, BetaLexer>(PolymorphicDslBetaParser.class, BetaLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
 
         dslFiles.add(absolutePathValid);
 
         try {
             // Act
-            TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+            Optional<TestSpecification> testSpecification = betaTestFactory.getTestSpecifications(dslFiles);
             //Assert
             fail("No exception when no phrases run");
-        } catch (RuntimeException e) { }
+        } catch (Throwable e) { }
     }
 
     @Test
-    public void simpleParser_successfullyWalks() {
-        final String absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid_beta.pdsl").getFile()).getAbsolutePath();
+    public void simpleParser_successfullyWalks() throws MalformedURLException {
+        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid_beta.pdsl").getFile()).toURI().toURL();
         // Arrange
-        TestSpecificationFactory provider =
-                new LineDelimitedTestSpecificationFactory<PolymorphicDslBetaParser, BetaLexer>(PolymorphicDslBetaParser.class, BetaLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.SUBGRAMMAR);
-        Set<String> dslFiles = new HashSet<>();
+        Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
-        TestSpecification specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
+        assertThat(testSpecifications.isPresent()).isTrue();
+        TestSpecification specifications = testSpecifications.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         PolymorphicDslTestRunResults results = executor.runTests(testCases, new PolymorphicDslBetaParserBaseListener());
         // Assert
@@ -147,14 +148,6 @@ public class PolymorphicDslTest {
 
     @Test
     public void testWithEmptyFile_illegalArgument() {
-        // Arrange
-        TestSpecificationFactory provider =
-                new LineDelimitedTestSpecificationFactory<PolymorphicDslBetaParser, BetaLexer>(PolymorphicDslBetaParser.class, BetaLexer.class, LineDelimitedTestSpecificationFactory.ErrorListenerStrategy.GRAMMAR);
-        List<String> dslFiles = new LinkedList<>();
-
-
-        // Act
-        // Assert
         try {
             TestSpecification emptySpecification = new TestSpecificationStub();
             Collection<TestCase> testCases = testCaseFactory.processTestSpecification(emptySpecification);
