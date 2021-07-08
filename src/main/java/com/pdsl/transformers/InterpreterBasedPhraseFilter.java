@@ -29,7 +29,9 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
-public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
+//TODO: This class will be useless until we can either translate the Ctx objects to what the provided parseTreeListener
+// can use or generate classes that provide some sort of method forwarding. Marking it as default until this is solved.
+class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
 
     private final Logger logger = LoggerFactory.getLogger(LineDelimitedTestSpecificationFactory.class);
 
@@ -77,48 +79,51 @@ public class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter 
         // By this point we have verified that all phrases are valid in our grammar.
         if (strategy.equals(DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR)) {
             return Optional.of(grammarParseTrees);
+        } else if (subgrammarParser.isEmpty()) {
+            logger.warn("No subgrammar parser was provided, yet filtering was requested!");
+            return Optional.empty();
         } else {
-            // Now we can filter out phrases that do not belong in the current context
-            List<ParseTree> parseTrees = new ArrayList<>(testInput.size());
-            int phrasesFilteredOut = 0;
-            for (ByteArrayOutputStream baos : reusableCopies) {
-                if (subgrammarParser.isEmpty()) {
-                    break;
-                }
-                Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()),
-                        TestSpecificationHelper.ErrorListenerStrategy.SUBGRAMMAR,
-                        subgrammarParser.get(),
-                        subgrammarLexer.isPresent() ? subgrammarLexer.get() : grammarLexer);
-                if (parser.isPresent()) {
-                    parser.get().setBuildParseTree(true);
-                    try {
-                        Method activePhrasesRule = subgrammarParser.get().getMethod(allRulesMethodName, (Class<?>[]) null);
-                        parseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        throw new PolymorphicDslTransformationException(
-                                "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
+                // Now we can filter out phrases that do not belong in the current context
+                List<ParseTree> parseTrees = new ArrayList<>(testInput.size());
+                int phrasesFilteredOut = 0;
+                for (ByteArrayOutputStream baos : reusableCopies) {
+                    if (subgrammarParser.isEmpty()) {
+                        break;
                     }
-                } else {
-                    phrasesFilteredOut++;
+                    Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()),
+                            TestSpecificationHelper.ErrorListenerStrategy.SUBGRAMMAR,
+                            subgrammarParser.get(),
+                            subgrammarLexer.isPresent() ? subgrammarLexer.get() : grammarLexer);
+                    if (parser.isPresent()) {
+                        parser.get().setBuildParseTree(true);
+                        try {
+                            Method activePhrasesRule = subgrammarParser.get().getMethod(allRulesMethodName, (Class<?>[]) null);
+                            parseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            throw new PolymorphicDslTransformationException(
+                                    "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
+                        }
+                    } else {
+                        phrasesFilteredOut++;
+                    }
                 }
-            }
-            if (parseTrees.isEmpty()) { // Let the user know we couldn't parse
-                String errorType = phrasesFilteredOut == testInput.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
-                StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET);
-                errorMessage.append("\n\t" +
-                        BOLD + "Parser Context: " + RESET + grammarParser.getName() + "\n\t" +
-                        BOLD + "Strategy: " + RESET + TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR.name());
-                logger.warn(errorMessage.toString());
-                return Optional.empty();
-            }
-            return Optional.of(parseTrees);
+                if (parseTrees.isEmpty()) { // Let the user know we couldn't parse
+                    String errorType = phrasesFilteredOut == testInput.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
+                    StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET);
+                    errorMessage.append("\n\t" +
+                            BOLD + "Parser Context: " + RESET + grammarParser.getName() + "\n\t" +
+                            BOLD + "Strategy: " + RESET + TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR.name());
+                    logger.warn(errorMessage.toString());
+                    return Optional.empty();
+                }
+                return Optional.of(parseTrees);
         }
     }
     @Override
     public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput) {
         Preconditions.checkNotNull(testInput, "Test input was null!");
         Preconditions.checkArgument(testInput.size() > 0, "Test input was empty!");
-        return processPhrases(testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.SUBGRAMMAR);
+        return processPhrases(testInput, subgrammarParser.isPresent() ? DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.SUBGRAMMAR : DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR);
     }
 
     @Override

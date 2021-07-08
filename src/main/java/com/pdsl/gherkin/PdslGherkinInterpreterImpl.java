@@ -52,7 +52,7 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
                 s.getStepsList().get().isEmpty())) ||
                 (feature.getRules().isPresent() &&
             feature.getRules().get().stream().anyMatch(r -> r.getScenarios().isEmpty() || r.getScenarios().get().isEmpty()))) {
-            throw new MalformedGherkinException("Gherkin contained either a scenario with no steps!");
+            throw new MalformedGherkinException("Gherkin contained either no scenarios or at least one scenario with no steps!");
         }
         return feature;
     }

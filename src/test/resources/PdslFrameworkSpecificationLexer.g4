@@ -1,11 +1,10 @@
 lexer grammar PdslFrameworkSpecificationLexer;
-
-fragment GHERKIN_STEP_KEYWORD : WS* ('Given ' | 'When ' | 'Then ' | 'And ' | 'But ');
 fragment WS : [\r\n\t ] ;
 fragment END : WS* EOF? ;
+GHERKIN_STEP_KEYWORD : ' '* ('Given ' | 'When ' | 'Then ' | 'And ' | 'But ');
 INT : [0-9]+;
 GIVEN_THE_TEST_RESOURCE : GHERKIN_STEP_KEYWORD 'the test resource "' .+? '"' END ;
-WHEN_THE_TEST_RESOURCE_IS_PROCESSED_BY_A_FACTORY : GHERKIN_STEP_KEYWORD 'the test resource is processed by a "Test Specification Factory"\n' END ;
+WHEN_THE_TEST_RESOURCE_IS_PROCESSED_BY_A_FACTORY : GHERKIN_STEP_KEYWORD 'the test resource is processed by a "Test Specification Factory"' END ;
 TEST_SPECIFICATION_IS_PRODUCED : GHERKIN_STEP_KEYWORD 'a "Test Specification" is produced' END ;
 TEST_SPECIFICATION_HAS_AN_ID : GHERKIN_STEP_KEYWORD 'the Test Specification has an ID' END ;
 TEST_SPECIFICATION_IN_EXPECTED_FORMAT : GHERKIN_STEP_KEYWORD 'the Test Specification is in the expected format' END ;
@@ -26,3 +25,5 @@ PASSING_PHRASE_TOTAL : GHERKIN_STEP_KEYWORD 'the Test Run Result passing phrase 
 FAILING_TEST_TOTAL : GHERKIN_STEP_KEYWORD 'the Test Run Result has ' INT ' failing tests' END ;
 TOTAL_PHRASES : GHERKIN_STEP_KEYWORD 'the Test Run Result total phrases is ' INT END ;
 DUPLICATE_TEST_TOTAL : GHERKIN_STEP_KEYWORD 'the Test Run Result has ' INT ' "Total Filtered Duplicate Tests"' END ;
+
+

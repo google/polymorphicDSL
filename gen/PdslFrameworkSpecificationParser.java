@@ -1,5 +1,4 @@
-// Generated from PdslFrameworkSpecificationParser.g4 by ANTLR 4.9
-package com.pdsl.grammars;
+// Generated from /home/nboyer/repos/polymorphicDSL/src/test/resources/PdslFrameworkSpecificationParser.g4 by ANTLR 4.9.1
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
@@ -11,7 +10,7 @@ import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class PdslFrameworkSpecificationParser extends Parser {
-	static { RuntimeMetaData.checkVersion("4.9", RuntimeMetaData.VERSION); }
+	static { RuntimeMetaData.checkVersion("4.9.1", RuntimeMetaData.VERSION); }
 
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
@@ -127,6 +126,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitGivenTheTestResource(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitGivenTheTestResource(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final GivenTheTestResourceContext givenTheTestResource() throws RecognitionException {
@@ -163,6 +167,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitWhenTheTestResourceIsProcessedByFactory(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitWhenTheTestResourceIsProcessedByFactory(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -201,6 +210,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestSpecificationIsProduced(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestSpecificationIsProduced(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TestSpecificationIsProducedContext testSpecificationIsProduced() throws RecognitionException {
@@ -237,6 +251,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestSpecificationHasAnId(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestSpecificationHasAnId(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -275,6 +294,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestSpecificationInExpectedFormat(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestSpecificationInExpectedFormat(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TestSpecificationInExpectedFormatContext testSpecificationInExpectedFormat() throws RecognitionException {
@@ -311,6 +335,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestSpecificationIsProcessedByTestCaseFactory(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestSpecificationIsProcessedByTestCaseFactory(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -349,6 +378,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestCaseIsProduced(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestCaseIsProduced(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TestCaseIsProducedContext testCaseIsProduced() throws RecognitionException {
@@ -385,6 +419,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestCaseHasUniqueId(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestCaseHasUniqueId(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -423,6 +462,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestCaseHasTitle(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestCaseHasTitle(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TestCaseHasTitleContext testCaseHasTitle() throws RecognitionException {
@@ -459,6 +503,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestCaseHasProperTestBody(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestCaseHasProperTestBody(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -497,6 +546,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitPolymorphicDslTestExecutor(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitPolymorphicDslTestExecutor(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final PolymorphicDslTestExecutorContext polymorphicDslTestExecutor() throws RecognitionException {
@@ -533,6 +587,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitPdslCanProcessAllPhrases(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitPdslCanProcessAllPhrases(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -571,6 +630,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestCaseIsProcessed(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestCaseIsProcessed(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -611,6 +675,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTestRunResultProduced(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTestRunResultProduced(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TestRunResultProducedContext testRunResultProduced() throws RecognitionException {
@@ -647,6 +716,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitPassingTestTotal(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitPassingTestTotal(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -685,6 +759,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitPassingPhraseTotal(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitPassingPhraseTotal(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final PassingPhraseTotalContext passingPhraseTotal() throws RecognitionException {
@@ -721,6 +800,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitFailingTestTotal(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitFailingTestTotal(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -759,6 +843,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitTotalPhrases(this);
 		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitTotalPhrases(this);
+			else return visitor.visitChildren(this);
+		}
 	}
 
 	public final TotalPhrasesContext totalPhrases() throws RecognitionException {
@@ -795,6 +884,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitDuplicateTestTotal(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitDuplicateTestTotal(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -945,6 +1039,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitPolymorphicDslAllRules(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitPolymorphicDslAllRules(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 
@@ -1206,6 +1305,11 @@ public class PdslFrameworkSpecificationParser extends Parser {
 		@Override
 		public void exitRule(ParseTreeListener listener) {
 			if ( listener instanceof PdslFrameworkSpecificationParserListener ) ((PdslFrameworkSpecificationParserListener)listener).exitPolymorphicDslSyntaxRule(this);
+		}
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof PdslFrameworkSpecificationParserVisitor ) return ((PdslFrameworkSpecificationParserVisitor<? extends T>)visitor).visitPolymorphicDslSyntaxRule(this);
+			else return visitor.visitChildren(this);
 		}
 	}
 

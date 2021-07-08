@@ -24,7 +24,31 @@ failingTestTotal : FAILING_TEST_TOTAL ;
 totalPhrases : TOTAL_PHRASES ;
 duplicateTestTotal : DUPLICATE_TEST_TOTAL ;
 
-/*
+polymorphicDslAllRules :  (
+  givenTheTestResource |
+  whenTheTestResourceIsProcessedByFactory |
+  testSpecificationIsProduced |
+  testSpecificationHasAnId |
+  testSpecificationInExpectedFormat |
+
+    testSpecificationIsProcessedByTestCaseFactory |
+    testCaseIsProduced  |
+    testCaseHasUniqueId |
+    testCaseHasTitle |
+    testCaseHasProperTestBody |
+
+    polymorphicDslTestExecutor |
+    pdslCanProcessAllPhrases |
+    testCaseIsProcessed |
+    testRunResultProduced |
+
+    passingTestTotal |
+    passingPhraseTotal |
+    failingTestTotal |
+    totalPhrases |
+    duplicateTestTotal )+
+    ;
+
 polymorphicDslSyntaxRule :
 	givenTheTestResource+
 	whenTheTestResourceIsProcessedByFactory
@@ -55,5 +79,5 @@ polymorphicDslSyntaxRule :
 		duplicateTestTotal 
 	)+
 ;
-*/
+
 

@@ -67,7 +67,9 @@ public class GherkinPolymorphicDslTestExecutorTest {
         PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
-        assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(6);
+        assertThat(results.failingTestTotal()).isEqualTo(0);
+        assertThat(results.passingPhraseTotal()).isEqualTo(5);
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
         assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism");
     }
 
@@ -80,10 +82,12 @@ public class GherkinPolymorphicDslTestExecutorTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
-        gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@feature_tag3");
+        PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@feature_tag3");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
-        assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(6);
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
+        assertThat(results.passingPhraseTotal()).isEqualTo(5);
+        assertThat(results.failingTestTotal()).isEqualTo(0);
     }
 
     @Test

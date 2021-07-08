@@ -1,5 +1,6 @@
 package com.pdsl.grammars;
 
+import com.pdsl.FrameworkSpecificationsTest;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.reports.TestRunResults;
@@ -41,11 +42,11 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) {
-        try {
-            resourcePaths.add(Path.of(ctx.getText()).toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Didn't convert test resource location to a URL properly", e);
-        }
+            String fileName = ctx.getText().split("\"")[1].trim();
+            String resourcePath = "testdata/good/" + fileName;
+            URL resource = getClass().getClassLoader().getResource(resourcePath);
+            assertThat(resource).isNotNull();
+            resourcePaths.add(resource);
     }
 
     @Override
@@ -251,6 +252,16 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void exitPolymorphicDslAllRules(PdslFrameworkSpecificationParser.PolymorphicDslAllRulesContext ctx) {
+
+    }
+
+    @Override
+    public void enterPolymorphicDslSyntaxRule(PdslFrameworkSpecificationParser.PolymorphicDslSyntaxRuleContext ctx) {
+
+    }
+
+    @Override
+    public void exitPolymorphicDslSyntaxRule(PdslFrameworkSpecificationParser.PolymorphicDslSyntaxRuleContext ctx) {
 
     }
 

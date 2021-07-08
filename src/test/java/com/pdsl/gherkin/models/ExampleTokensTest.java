@@ -28,7 +28,7 @@ public class ExampleTokensTest {
         GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getStepsList().get().get(0);
         GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getExamples().get().get(0);
         List<Map<String, String>> rows = examplesTable.getRows();
-        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(0))).isEqualTo("Given usage usage");
+        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(0))).contains("Given usage usage");
     }
 
     @Test
@@ -40,8 +40,8 @@ public class ExampleTokensTest {
         GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getExamples().get().get(0);
         List<Map<String, String>> rows = examplesTable.getRows();
         // Assert
-        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(0))).isEqualTo("Given the deux:");
-        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(1))).isEqualTo("Given the dos:");
+        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(0))).contains("Given the deux:");
+        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(1))).contains("Given the dos:");
     }
 
     @Test
@@ -71,12 +71,12 @@ public class ExampleTokensTest {
         assertThat(stepDataTableCell.hasSubstitutions()).isTrue();
         Map<String, String> firstRowSubs = rows.get(0);
         assertThat(step.getStepContent().getStringWithSubstitutions(firstRowSubs))
-        .isEqualTo("Given the quatre:");
+        .isEqualTo("    Given the quatre:\n");
         assertThat("cinq").isEqualTo(stepDataTableCell.getStringWithSubstitutions(firstRowSubs));
 
         // Second examples row substitutions
         Map<String, String> secondRowSubs = rows.get(1);
-        assertThat("Given the quatro:").isEqualTo(step.getStepContent().getStringWithSubstitutions(secondRowSubs));
+        assertThat("    Given the quatro:\n").isEqualTo(step.getStepContent().getStringWithSubstitutions(secondRowSubs));
         assertThat("cinco").isEqualTo(stepDataTableCell.getStringWithSubstitutions(secondRowSubs));
     }
 }

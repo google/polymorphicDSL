@@ -1,4 +1,4 @@
-// Generated from PolymorphicDslRegistryParser.g4 by ANTLR 4.9
+// Generated from PolymorphicDslRegistryParser.g4 by ANTLR 4.7.2
 package com.pdsl.grammars;
 
 import org.antlr.v4.runtime.ParserRuleContext;

@@ -12,18 +12,16 @@ public class DefaultPdslTestCase implements TestCase {
 
     private final List<TestSection> testBody;
     private final String testCaseTitle;
+    private int hashCodeId; //TODO: How do we deal with collisions?
 
     @Override
     public long getTestCaseId() {
-        return testBody.stream()
-                .map(testSection -> testSection.getParseTree().getText())
-                .collect(Collectors.toUnmodifiableList())
-                .hashCode();
-    } //TODO: Find a method that won't potentially have collisions
+        return hashCodeId;
+    }
 
     @Override
     public String getTestTitle() {
-        return null;
+        return testCaseTitle;
     }
 
     @Override
@@ -42,5 +40,9 @@ public class DefaultPdslTestCase implements TestCase {
         Preconditions.checkArgument(!testCaseTitle.isEmpty(), errMessage);
         this.testBody = testBody;
         this.testCaseTitle = testCaseTitle;
+        this.hashCodeId = testBody.stream()
+                .map(testSection -> testSection.getParseTree().getText())
+                .collect(Collectors.toUnmodifiableList())
+                .hashCode();
     }
 }

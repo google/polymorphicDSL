@@ -10,6 +10,7 @@ import org.junit.runners.Suite;
 @Suite.SuiteClasses({PolymorphicDslTest.class, PolymorphicDslGherkinExecutionTest.class, GherkinTagFiltererTest.class,
         GherkinTagFiltererInvalidInputTest.class, GherkinPolymorphicDslTestExecutorTest.class, GherkinModelSuite.class,
         GherkinTestRunWithFailuresTest.class,
-        InterpreterBasedPhraseFilterTest.class
+        //InterpreterBasedPhraseFilterTest.class, //TODO: finish this feature then enable it
+        FrameworkSpecificationsTest.class
 })
 public class FullPolymorphicDslTestSuite {}

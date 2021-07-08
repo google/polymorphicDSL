@@ -3,7 +3,7 @@ package com.pdsl;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
 import com.pdsl.reports.TestRunResults;
-import com.pdsl.transformers.InterpreterBasedPhraseFilter;
+import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.junit.Test;
 
@@ -29,12 +29,21 @@ public class FrameworkSpecificationsTest {
         Set<URL> dslFiles = new HashSet<>();
         Path tmpDir = Files.createTempDirectory(String.format("pdsl_temp_test-%s", UUID.randomUUID()));
         dslFiles.add(testResources);
-        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor( new InterpreterBasedPhraseFilter.Builder(Path.of(System.getProperty("user.dir") + "/src/test/java/com/pdsl/grammars"),
+        /*
+        PolymorphicDslPhraseFilter phraseFilter = new InterpreterBasedPhraseFilter.Builder(Path.of(System.getProperty("user.dir") + "/src/test/resources"),
                 "PdslFrameworkSpecification", "com.pdsl.grammars")
                 .withGrammarLexer("PdslFrameworkSpecificationLexer")
                 .withGrammarLibrary(Path.of(System.getProperty("user.dir") + "/src/test/resources/"))
                 .withCodeGenerationDirectory(tmpDir)
-                .build());
+                .build();
+         */
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PdslFrameworkSpecificationParser, PdslFrameworkSpecificationLexer,
+                PdslFrameworkSpecificationParser, PdslFrameworkSpecificationLexer>(PdslFrameworkSpecificationParser.class,
+                PdslFrameworkSpecificationLexer.class,
+                PdslFrameworkSpecificationParser.class,
+                PdslFrameworkSpecificationLexer.class
+                );
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act
         TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
         assertThat(results.failingTestTotal()).isEqualTo(0);
