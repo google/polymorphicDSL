@@ -9,7 +9,10 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ParentForEachChildTestCaseFactory implements TestCaseFactory {
+/**
+ * A factory that processes Test Specifications doing a Preorder traversal
+ */
+public class PreorderTestCaseFactory implements TestCaseFactory {
 
     @Override
     public Collection<TestCase> processTestSpecification(TestSpecification testSpecification) {

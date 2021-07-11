@@ -103,7 +103,7 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
             inputStream.transferTo(baos);
             CharStream charStream = CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray()));
             SL pdslLexer = subgrammarLexerConstructor.newInstance(charStream);
-            pdslLexer.removeErrorListeners();
+            //pdslLexer.removeErrorListeners();
             PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
@@ -112,6 +112,7 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
                     return Optional.empty();
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                 logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
+                logger.warn("The match was: " + allTokens.toString());
                 logger.warn(AnsiTerminalColorHelper.BRIGHT_RED + "Filtering out phrase:\n\t" + new String((baos.toByteArray())) + RESET_ANSI);
                 return Optional.empty();
             } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file

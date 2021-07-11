@@ -5,10 +5,8 @@ import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseListener;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
-import com.pdsl.specifications.TestSpecificationFactory;
-import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
+import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -36,7 +34,7 @@ public class PolymorphicDslGherkinExecutionTest {
     private static final DefaultGherkinTestSpecificationFactory provider =
             new DefaultGherkinTestSpecificationFactory(pickleJarFactory, allGrammarsPhraseFilter);
 
-    private static final TestCaseFactory testCaseFactory = new ParentForEachChildTestCaseFactory();
+    private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private static final GherkinTestExecutor executor =
             new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class,
                     AllGrammarsLexer.class);

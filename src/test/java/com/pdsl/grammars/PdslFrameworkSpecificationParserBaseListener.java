@@ -16,42 +16,6 @@ public class PdslFrameworkSpecificationParserBaseListener implements PdslFramewo
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterTestSpecificationHasAnId(PdslFrameworkSpecificationParser.TestSpecificationHasAnIdContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -71,18 +35,6 @@ public class PdslFrameworkSpecificationParserBaseListener implements PdslFramewo
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTestSpecificationInExpectedFormat(PdslFrameworkSpecificationParser.TestSpecificationInExpectedFormatContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -136,18 +88,6 @@ public class PdslFrameworkSpecificationParserBaseListener implements PdslFramewo
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
-	@Override public void enterPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
 	@Override public void enterPdslCanProcessAllPhrases(PdslFrameworkSpecificationParser.PdslCanProcessAllPhrasesContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -167,18 +107,6 @@ public class PdslFrameworkSpecificationParserBaseListener implements PdslFramewo
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitTestCaseIsProcessed(PdslFrameworkSpecificationParser.TestCaseIsProcessedContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void enterTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 *
-	 * <p>The default implementation does nothing.</p>
-	 */
-	@Override public void exitTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx) { }
 	/**
 	 * {@inheritDoc}
 	 *
@@ -263,6 +191,138 @@ public class PdslFrameworkSpecificationParserBaseListener implements PdslFramewo
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitPolymorphicDslSyntaxRule(PdslFrameworkSpecificationParser.PolymorphicDslSyntaxRuleContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterDocstring(PdslFrameworkSpecificationParser.DocstringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitDocstring(PdslFrameworkSpecificationParser.DocstringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGivenTheRawResource(PdslFrameworkSpecificationParser.GivenTheRawResourceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGivenTheRawResource(PdslFrameworkSpecificationParser.GivenTheRawResourceContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterGherkinStepKeyword(PdslFrameworkSpecificationParser.GherkinStepKeywordContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitGherkinStepKeyword(PdslFrameworkSpecificationParser.GherkinStepKeywordContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterIntegerValue(PdslFrameworkSpecificationParser.IntegerValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitIntegerValue(PdslFrameworkSpecificationParser.IntegerValueContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTextInDoubleQuotes(PdslFrameworkSpecificationParser.TextInDoubleQuotesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTextInDoubleQuotes(PdslFrameworkSpecificationParser.TextInDoubleQuotesContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

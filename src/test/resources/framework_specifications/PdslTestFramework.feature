@@ -19,6 +19,7 @@ this test specification is written in) to describe the system under test in a fo
 describe how to do something in one part of your application is the same way you describe it in another.
 
 Scenario Outline: Test Lifecycle
+
 Given the test resource "<resource>"
 When the test resource is processed by a "Test Specification Factory"
 Then a "Test Specification" is produced
@@ -40,38 +41,70 @@ Then the Test Run Result has a passing test total of <passing test total>
 And the Test Run Result has 0 failing tests
 And the Test Run Result passing phrase total is <total phrases>
 And the Test Run Result total phrases is <total phrases>
-#And the Test Run Result has <duplicates> "Total Filtered Duplicate Tests"
+And the Test Run Result has <duplicates> "Total Filtered Duplicate Tests"
 
 Examples:
-    | resource 		 | passing test total | total phrases | duplicates |
-    | background.feature |1 		      | 2 	      | 1          |
-    | complex_background.feature | 3 | 8 | 1 |
-    | datatables.feature | 1 | 5 | 0 |
-    | datatables_with_new_lines.feature | 1 | 2 | 0 |
-    | descriptions.feature | 7 | 8 | 6 |
-    | docstrings.feature | 1 | 8 | 0 |
-    | escaped_pipes.feature | 1 | 2 | 0 |
-    | example_token_multiple.feature | 1 | 1 | 0 |
-    | example_tokens_everywhere.feature | 2 | 4 | 0 |
-    | i18n_emoji.feature | 1 | 1 | 0 |
-    | i18n_fr.feature | 1 | 3 | 10 |
-    | i18n_no.feature | 1 | 3 | 0 |
-    | language.feature | 1 | 1 | 0 |
-    | minimal-example.feature | 1 | 1 | 0 |
-    | minimal.feature | 1 | 1 | 0 |
-    | padded_example.feature | 1 | 1 | 0 |
-    | readme_example.feature | 2 | 2 | 0 |
-    | rule.feature | 2 | 5 | 0 |
-    | rule_without_name_and_description.feature | 1 | 1 | 0 |
-    | scenario_outline.feature | 1 | 1 | 0 |
-    | scenario_outline_no_newline.feature | 1 | 1 | 0 |
-    | scenario_outline_with_docstring.feature | 2 | 2 | 0 |
-    | scenario_outline_with_value_with_dollar_sign.feature | 1 | 1 | 0 |
-    | scenario_outlines_with_tags.feature | 2 | 2 | 0 |
-    # | several_examples.feature | 2 | 2 | 0 | # This file has a scenario with no steps, which fails a strict interpretation
-    | tagged_feature_with_scenario_outline.feature | 2 | 2 | 0 |
-    | tags.feature | 5 | 5 | 1 |
-    | very_long.feature | 1 | 5 | 99 |
+| resource                                             | passing test total   | total phrases  | duplicates |
+| background.feature                                   | 1                    | 2              | 1          |
+| complex_background.feature                           | 3                    | 8              | 1          |
+| datatables.feature                                   | 1                    | 5              | 0          |
+| datatables_with_new_lines.feature                    | 1                    | 2              | 0          |
+| descriptions.feature                                 | 7                    | 8              | 6          |
+| docstrings.feature                                   | 1                    | 8              | 0          |
+| escaped_pipes.feature                                | 1                    | 2              | 0          |
+| example_token_multiple.feature                       | 1                    | 1              | 0          |
+| example_tokens_everywhere.feature                    | 2                    | 4              | 0          |
+| i18n_emoji.feature                                   | 1                    | 1              | 0          |
+| i18n_fr.feature                                      | 1                    | 3              | 10         |
+| i18n_no.feature                                      | 1                    | 3              | 0          |
+| language.feature                                     | 1                    | 1              | 0          |
+| minimal-example.feature                              | 1                    | 1              | 0          |
+| minimal.feature                                      | 1                    | 1              | 0          |
+| padded_example.feature                               | 1                    | 1              | 0          |
+| readme_example.feature                               | 2                    | 2              | 0          |
+| rule.feature                                         | 2                    | 5              | 0          |
+| rule_without_name_and_description.feature            | 1                    | 1              | 0          |
+| scenario_outline.feature                             | 1                    | 1              | 0          |
+| scenario_outline_no_newline.feature                  | 1                    | 1              | 0          |
+| scenario_outline_with_docstring.feature              | 2                    | 2              | 0          |
+| scenario_outline_with_value_with_dollar_sign.feature | 1                    | 1              | 0          |
+| scenario_outlines_with_tags.feature                  | 2                    | 2              | 0          |
+| tagged_feature_with_scenario_outline.feature         | 2                    | 2              | 0          |
+| tags.feature                                         | 5                    | 5              | 1          |
+| very_long.feature                                    | 1                    | 5              | 99         |
 
-    #Scenario: Duplicate Test Cases Produced by Filtering are Filtered Out
 
+
+#	Scenario: Grammar Verification
+#		A Test Specification Factory will take a provided Test Resource (such as a gherkin file or any other grammar/protocol you give it) and convert it into a test case. Apart from extracting the executable "phrases" from the Test Resource (such as the step body in a gherkin feature file) the Test Specification Factory also determines whether or not the phrases are:
+#		1) Recognizable in the overall grammar
+#		2) Relevant to the subgrammar
+#If a phrase is encountered that the Grammar does not 
+#
+#Scenario: Test Filtering
+#	Either as a byproduct of filtering it is possible for two tests to become duplicated. For instance, suppose you have a grammar that understands the below phrases:
+#"""
+#I know Alpha
+#I know Beta
+#I know Gamma
+#"""
+#
+#Now suppose you have a SUBgrammar that knows the following phrases:
+#"""
+#I know Alpha
+#I know Gamma
+#"""
+#
+#Finally consider that you have the following test input:
+#"""
+#I know Alpha
+#I know Alpha
+#I know Beta
+#I know Beta
+#I know Gamma
+#I know Gamma
+#"""
+#
+#After this input is processed by the Test Specification factory, the phrases will be checked by the
+#
+#

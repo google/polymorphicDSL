@@ -5,10 +5,8 @@ import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.gherkin.*;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
-import com.pdsl.specifications.TestSpecificationFactory;
-import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
+import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -30,7 +28,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
     private static final PickleJarFactory pickleJarFactory = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     private final PolymorphicDslPhraseFilter phraseFilter;
     private final GherkinTestSpecificationFactory testSpecificationFactory;
-    private final TestCaseFactory testCaseFactory = new ParentForEachChildTestCaseFactory();
+    private final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private final Logger logger = LoggerFactory.getLogger(GherkinTestExecutor.class);
     private final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
 

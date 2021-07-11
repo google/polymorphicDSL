@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-//   Grab the names of all the rules from the parser and dynamically create a new rule?
 
 public class LineDelimitedTestSpecificationFactory implements TestSpecificationFactory {
 
@@ -37,6 +36,7 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
         this.charset = charset;
         this.phraseFilter = phraseFilter;
     }
+
 
     @Override
     public Optional<TestSpecification> getTestSpecifications(Set<URL> resourceLocations) {

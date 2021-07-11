@@ -3,11 +3,10 @@ package com.pdsl.gherkin;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.grammars.MinimalImpl;
-import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
+import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
@@ -16,7 +15,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -37,7 +35,7 @@ public class GherkinIntegrationTest {
     private static final GherkinTestExecutor minimalExecutor = new GherkinTestExecutor(MinimalParser.class, MinimalLexer.class, MinimalParser.class, MinimalLexer.class);
     private static final GherkinTestExecutor executor = new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
     // Only reads the text "Given the minimalism"
-    private static final TestCaseFactory testCaseFactory = new ParentForEachChildTestCaseFactory();
+    private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private static final ParseTreeListener allGrammarsListener = new AllGrammarsParserBaseListener();
 
     @Test

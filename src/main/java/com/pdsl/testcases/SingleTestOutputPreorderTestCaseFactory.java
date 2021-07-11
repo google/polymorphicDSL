@@ -12,7 +12,7 @@ import java.util.Optional;
 /**
  * This test case factory treats test specifications as a single script where the parents are read before the children.
  */
-public class TopDownDepthFirstTestCaseFactory implements TestCaseFactory {
+public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory {
 
     @Override
     public Collection<TestCase> processTestSpecification(TestSpecification testCaseSpecification)  {
@@ -25,11 +25,9 @@ public class TopDownDepthFirstTestCaseFactory implements TestCaseFactory {
 
     private void  recursivelyWalkSpecification(TestSpecification testSpecification, List<TestSection> testSections) {
         if (testSpecification.getPhrases().isPresent()) {
-            boolean metaDataIsAdded = false;
             for (ParseTree parseTree : testSpecification.getPhrases().get()) {
                 if (testSpecification.getMetaData().isPresent()) {
                     testSections.add(new DefaultTestSection(testSpecification.getMetaData().get(), parseTree));
-                    metaDataIsAdded = true;
                 } else {
                     testSections.add(new DefaultTestSection(parseTree));
                 }

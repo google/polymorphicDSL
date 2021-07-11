@@ -13,7 +13,7 @@ import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
-import com.pdsl.testcases.TopDownDepthFirstTestCaseFactory;
+import com.pdsl.testcases.SingleTestOutputPreorderTestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -62,7 +62,7 @@ public class PolymorphicDslTest {
     );
     private final TestSpecificationFactory betaTestFactory = new LineDelimitedTestSpecificationFactory(betaPhraseFilter);
     private static final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
-    private static final TestCaseFactory testCaseFactory = new TopDownDepthFirstTestCaseFactory();
+    private static final TestCaseFactory testCaseFactory = new SingleTestOutputPreorderTestCaseFactory();
     @Test
     public void validGrammarWalkThroughRegistryAllStepsInContext_shouldSucceed() throws MalformedURLException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).toURI().toURL();

@@ -1,8 +1,8 @@
 package com.pdsl;
 
+import com.pdsl.framework.FrameworkSpecificationsTest;
 import com.pdsl.gherkin.*;
 import com.pdsl.gherkin.models.GherkinModelSuite;
-import com.pdsl.transformers.InterpreterBasedPhraseFilterTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 

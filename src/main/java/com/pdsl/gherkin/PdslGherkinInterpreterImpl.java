@@ -47,12 +47,12 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
         }
         GherkinFeature feature = gherkinFeatureOptional.get();
         if (feature.getOptionalGherkinScenarios().isEmpty() && feature.getRules().isEmpty()) {
-            throw new MalformedGherkinException("Gherkin file had no scenarios or rules!");
+            throw new MalformedGherkinException("Gherkin file had no scenarios or rules!\n\tLocation: " + feature.getLocation() );
         } else if ((feature.getOptionalGherkinScenarios().isPresent() && feature.getOptionalGherkinScenarios().get().stream().anyMatch(s -> s.getStepsList().isEmpty() ||
                 s.getStepsList().get().isEmpty())) ||
                 (feature.getRules().isPresent() &&
             feature.getRules().get().stream().anyMatch(r -> r.getScenarios().isEmpty() || r.getScenarios().get().isEmpty()))) {
-            throw new MalformedGherkinException("Gherkin contained either no scenarios or at least one scenario with no steps!");
+            throw new MalformedGherkinException("Gherkin contained either no scenarios or at least one scenario with no steps!\n\tLocation: " +feature.getLocation());
         }
         return feature;
     }
