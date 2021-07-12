@@ -23,7 +23,7 @@ DATA_ROW : WS* '|' CELL_DATA+ END ;
 
 GHERKIN_STEP_KEYWORD : WS* (GIVEN | WHEN | THEN | WILD) ;
 INT : [0-9]+ ;
-TEXT_IN_DOUBLE_QUOTES : ~'"'+ ;
-END_QUOTE : '"' END ;
+QUOTED_TEXT_END : '"' .*? '"' END;
+QUOTED_TEXT : '"' .*? '"' ;
 
 fragment NEWLINE : [\r\n];

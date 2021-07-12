@@ -165,11 +165,9 @@ Rule: Line Delimited Test Specification Factory
 
 		Scenario: Valid input
 			Given the following test resource:
-			"""
-			Phrase 1
+			"""Phrase 1
 			Phrase 2
-			Phrase 3
-			"""
+			Phrase 3"""
 			When the test resource is processed by the Test Specification Factory
 			Then a Test Specification is produced 
 			And the test specification has 3 total phrases

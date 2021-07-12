@@ -196,6 +196,18 @@ public class TestSpecificationFactoryParserBaseListener implements TestSpecifica
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterGivenTheTestResource(TestSpecificationFactoryParser.GivenTheTestResourceContext ctx) { }
 	/**
 	 * {@inheritDoc}

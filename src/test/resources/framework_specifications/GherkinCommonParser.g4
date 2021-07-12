@@ -4,5 +4,6 @@ options {tokenVocab=GherkinCommonLexer; }
 
 gherkinStepKeyword : GHERKIN_STEP_KEYWORD ;
 integerValue : INT ;
-textInDoubleQuotes : TEXT_IN_DOUBLE_QUOTES ;
+textInDoubleQuotes : QUOTED_TEXT ;
 docstring : DOCSTRING ;
+textInDoubleQuotesEnd : QUOTED_TEXT_END ;

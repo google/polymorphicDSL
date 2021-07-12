@@ -17,8 +17,7 @@ public class GherkinCommonParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		DOCSTRING=1, DATA_ROW=2, GHERKIN_STEP_KEYWORD=3, INT=4, TEXT_IN_DOUBLE_QUOTES=5, 
-		END_QUOTE=6;
+		DOCSTRING=1, DATA_ROW=2, GHERKIN_STEP_KEYWORD=3, INT=4, QUOTED_TEXT=5;
 	public static final int
 		RULE_gherkinStepKeyword = 0, RULE_integerValue = 1, RULE_textInDoubleQuotes = 2, 
 		RULE_docstring = 3;
@@ -36,8 +35,7 @@ public class GherkinCommonParser extends Parser {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "DOCSTRING", "DATA_ROW", "GHERKIN_STEP_KEYWORD", "INT", "TEXT_IN_DOUBLE_QUOTES", 
-			"END_QUOTE"
+			null, "DOCSTRING", "DATA_ROW", "GHERKIN_STEP_KEYWORD", "INT", "QUOTED_TEXT"
 		};
 	}
 	private static final String[] _SYMBOLIC_NAMES = makeSymbolicNames();
@@ -166,7 +164,7 @@ public class GherkinCommonParser extends Parser {
 	}
 
 	public static class TextInDoubleQuotesContext extends ParserRuleContext {
-		public TerminalNode TEXT_IN_DOUBLE_QUOTES() { return getToken(GherkinCommonParser.TEXT_IN_DOUBLE_QUOTES, 0); }
+		public TerminalNode QUOTED_TEXT() { return getToken(GherkinCommonParser.QUOTED_TEXT, 0); }
 		public TextInDoubleQuotesContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -188,7 +186,7 @@ public class GherkinCommonParser extends Parser {
 			enterOuterAlt(_localctx, 1);
 			{
 			setState(12);
-			match(TEXT_IN_DOUBLE_QUOTES);
+			match(QUOTED_TEXT);
 			}
 		}
 		catch (RecognitionException re) {
@@ -240,7 +238,7 @@ public class GherkinCommonParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\b\23\4\2\t\2\4\3"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3\7\23\4\2\t\2\4\3"+
 		"\t\3\4\4\t\4\4\5\t\5\3\2\3\2\3\3\3\3\3\4\3\4\3\5\3\5\3\5\2\2\6\2\4\6\b"+
 		"\2\2\2\16\2\n\3\2\2\2\4\f\3\2\2\2\6\16\3\2\2\2\b\20\3\2\2\2\n\13\7\5\2"+
 		"\2\13\3\3\2\2\2\f\r\7\6\2\2\r\5\3\2\2\2\16\17\7\7\2\2\17\7\3\2\2\2\20"+

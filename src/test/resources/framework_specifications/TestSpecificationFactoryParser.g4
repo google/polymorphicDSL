@@ -4,9 +4,9 @@ import GherkinCommonParser, TestResourceParser ;
 
 options {tokenVocab=TestSpecificationFactoryLexer;}
 
-givenSpecificTestSpecificationFactory : GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY textInDoubleQuotes END_QUOTE ;
-givenSpecificGrammar : GIVEN_SPECIFIC_GRAMMAR textInDoubleQuotes END_QUOTE ;
-givenSpecificSubgrammar : GIVEN_SPECIFIC_SUBGRAMMAR textInDoubleQuotes END_QUOTE ;
+givenSpecificTestSpecificationFactory : GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY textInDoubleQuotesEnd ;
+givenSpecificGrammar : GIVEN_SPECIFIC_GRAMMAR textInDoubleQuotesEnd  ;
+givenSpecificSubgrammar : GIVEN_SPECIFIC_SUBGRAMMAR textInDoubleQuotesEnd  ;
 thenTestSpecificationFailsDueToMissingScenario : THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO ;
 thenTestSpecificationFailsBecauseOfMissingStepBody : THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY ;
 givenNonExistentUrl : GIVEN_NONEXISTENT_URL ;

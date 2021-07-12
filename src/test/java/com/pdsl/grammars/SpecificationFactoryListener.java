@@ -44,7 +44,7 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
 
     @Override
     public void enterGivenSpecificTestSpecificationFactory(TestSpecificationFactoryParser.GivenSpecificTestSpecificationFactoryContext ctx) {
-        factoryType = TestSpecificationFactoryType.valueOf(ctx.textInDoubleQuotes().getText().toUpperCase().replaceAll(" ", "_"));
+        factoryType = TestSpecificationFactoryType.valueOf(ctx.textInDoubleQuotesEnd().getText().toUpperCase().replaceAll(" ", "_"));
     }
 
     @Override
@@ -72,7 +72,7 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
 
     @Override
     public void enterGivenSpecificGrammar(TestSpecificationFactoryParser.GivenSpecificGrammarContext ctx) {
-        GrammarType grammarType = GrammarType.valueOf(ctx.textInDoubleQuotes().getText().toUpperCase().replaceAll(" ", "_"));
+        GrammarType grammarType = GrammarType.valueOf(ctx.textInDoubleQuotesEnd().getText().toUpperCase().replaceAll(" ", "_"));
         parserGrammarClass = grammarType.getParser();
         lexerGrammarClass = grammarType.getLexer();
     }
@@ -82,7 +82,7 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
 
     @Override
     public void enterGivenSpecificSubgrammar(TestSpecificationFactoryParser.GivenSpecificSubgrammarContext ctx) {
-        GrammarType grammarType = GrammarType.valueOf(ctx.textInDoubleQuotes().getText().replaceAll(" ", "_").toUpperCase());
+        GrammarType grammarType = GrammarType.valueOf(ctx.textInDoubleQuotesEnd().getText().replaceAll(" ", "_").toUpperCase());
         parserSubgrammarClass = grammarType.getParser();
         lexerSubgrammarClass = grammarType.getLexer();
     }
@@ -217,6 +217,16 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
 
     @Override
     public void exitDocstring(TestSpecificationFactoryParser.DocstringContext ctx) { }
+
+    @Override
+    public void enterTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) {
+
+    }
+
+    @Override
+    public void exitTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) {
+
+    }
 
     @Override
     public void enterGivenTheTestResource(TestSpecificationFactoryParser.GivenTheTestResourceContext ctx) {

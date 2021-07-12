@@ -158,6 +158,16 @@ public interface TestSpecificationFactoryParserListener extends ParseTreeListene
 	 */
 	void exitDocstring(TestSpecificationFactoryParser.DocstringContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link TestSpecificationFactoryParser#textInDoubleQuotesEnd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TestSpecificationFactoryParser#textInDoubleQuotesEnd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link TestSpecificationFactoryParser#givenTheTestResource}.
 	 * @param ctx the parse tree
 	 */

@@ -60,12 +60,12 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
     }
 
     private String textToUnderscoreScreamingCase(String text) {
-        return text.toUpperCase().replaceAll(" ", "_");
+        return text.toUpperCase().replaceAll("\"", "").replaceAll(" ", "_");
     }
 
     @Override
     public void enterGivenSpecificTestSpecificationFactory(TestSpecificationFactoryParser.GivenSpecificTestSpecificationFactoryContext ctx) {
-        factoryType = Factories.valueOf(ctx.textInDoubleQuotes().getText().replaceAll(" ", "_").toUpperCase());
+        factoryType = Factories.valueOf(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()).replaceAll(" ", "_").toUpperCase());
     }
 
     @Override
@@ -73,8 +73,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificGrammar(TestSpecificationFactoryParser.GivenSpecificGrammarContext ctx) {
-        grammar = Optional.of(SupportedGrammars.valueOf(textToUnderscoreScreamingCase(ctx.textInDoubleQuotes()
-                .getText())));
+        grammar = Optional.of(SupportedGrammars.valueOf(textToUnderscoreScreamingCase(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()))));
     }
 
     @Override
@@ -82,8 +81,12 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificSubgrammar(TestSpecificationFactoryParser.GivenSpecificSubgrammarContext ctx) {
-        subgrammar = Optional.of(SupportedGrammars.valueOf(textToUnderscoreScreamingCase(ctx.textInDoubleQuotes()
-                .getText())));
+        subgrammar = Optional.of(SupportedGrammars.valueOf(textToUnderscoreScreamingCase(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText())
+                )));
+    }
+
+    private String textInDoubleQuotes(String txt) {
+        return txt.strip().substring(1, txt.length()-2);
     }
 
     @Override
@@ -128,13 +131,13 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
         assertThat(actual).isEqualTo(Integer.parseInt(ctx.integerValue().getText()));
     }
 
-    private int totalPhrasesInTestSpecification(TestSpecification specification, int total) {
+    private int totalPhrasesInTestSpecification(TestSpecification specification, Integer total) {
         if (specification.getPhrases().isPresent()) {
             total += specification.getPhrases().get().size();
         }
         if (specification.nestedTestSpecifications().isPresent()) {
             for (TestSpecification childSpecification : specification.nestedTestSpecifications().get()) {
-                totalPhrasesInTestSpecification(childSpecification, total);
+                total += totalPhrasesInTestSpecification(childSpecification, total);
             }
         }
         return total;
@@ -180,7 +183,11 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
             default:
                 throw new IllegalArgumentException("Do not support the test factory " + factoryType.name());
         }
-        lastTestSpecification = factory.get().getTestSpecifications(testResources);
+        try {
+            lastTestSpecification = factory.get().getTestSpecifications(testResources);
+        } catch (Exception e) {
+            exception = Optional.of(e);
+        }
     }
 
     @Override
@@ -219,6 +226,16 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
     public void exitDocstring(TestSpecificationFactoryParser.DocstringContext ctx) { }
 
     @Override
+    public void enterTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) {
+
+    }
+
+    @Override
+    public void exitTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) {
+
+    }
+
+    @Override
     public void enterGivenTheTestResource(TestSpecificationFactoryParser.GivenTheTestResourceContext ctx) {
         String resource = ctx.textInDoubleQuotes().getText();
         URL url = getClass().getClassLoader().getResource(resource);
@@ -232,7 +249,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenTheRawResource(TestSpecificationFactoryParser.GivenTheRawResourceContext ctx) {
-        String resourceBody = ctx.docstring().getText();
+        String resourceBody = ctx.docstring().getText().strip().replaceAll("\"\"\"", "");
         // Create a temporary file
         try {
             lastFile = Optional.of(Files.createTempFile("pdsl" + UUID.randomUUID(), ".tmp.txt"));

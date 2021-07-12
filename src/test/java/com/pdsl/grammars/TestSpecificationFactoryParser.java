@@ -17,20 +17,20 @@ public class TestSpecificationFactoryParser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY=1, GIVEN_SPECIFIC_GRAMMAR=2, 
-		GIVEN_SPECIFIC_SUBGRAMMAR=3, THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO=4, 
-		THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY=5, GIVEN_NONEXISTENT_URL=6, 
-		THEN_NO_SUCH_RESOURCE_ERROR=7, TEST_SPECIFICATION_TOTAL_PHRASES_START=8, 
-		TEST_SPECIFICATION_TOTAL_PHRASES_END=9, TEST_SPECIFICATION_MAY_BE_PRODUCED=10, 
-		TEST_SPECIFICATION_IS_PROCESSED_BY_THE_FACTORY=11, DOCSTRING=12, DATA_ROW=13, 
-		GHERKIN_STEP_KEYWORD=14, INT=15, TEXT_IN_DOUBLE_QUOTES=16, END_QUOTE=17, 
-		THEN_TEST_RESOURCE_VALIDITY=18, TEST_SPECIFICATION_HAS_AN_ID=19, TEST_SPECIFICATION_IN_EXPECTED_FORMAT=20, 
-		TEST_CASE_IS_PRODUCED=21, TEST_CASE_HAS_A_UNIQUE_ID=22, TEST_CASE_HAS_A_TITLE=23, 
-		TEST_CASE_HAS_PROPER_TEST_BODY=24, PDSL_CAN_PROCESS_ALL_PHRASES=25, PASSING_TEST_TOTAL=26, 
-		PASSING_PHRASE_TOTAL=27, FAILING_TEST_TOTAL=28, TOTAL_PHRASES=29, DUPLICATE_TEST_TOTAL=30, 
-		GIVEN_THE_TEST_RESOURCE=31, GIVEN_THE_FOLLOWING_TEST_RESOURCE=32, WHEN_THE_TEST_RESOURCE_IS_PROCESSED_BY_A_FACTORY=33, 
-		TEST_SPECIFICATION_IS_PRODUCED=34, TEST_SPECIFICATION_IS_PROCESSED_BY_TEST_CASE_FACTORY=35, 
-		POLYMORPHIC_DSL_TEST_EXECUTOR=36, TEST_CASE_IS_PROCESSED=37, TEST_RUN_RESULT_PRODUCED=38;
+		END=1, GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY=2, GIVEN_SPECIFIC_GRAMMAR=3, 
+		GIVEN_SPECIFIC_SUBGRAMMAR=4, THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO=5, 
+		THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY=6, GIVEN_NONEXISTENT_URL=7, 
+		THEN_NO_SUCH_RESOURCE_ERROR=8, TEST_SPECIFICATION_TOTAL_PHRASES_START=9, 
+		TEST_SPECIFICATION_TOTAL_PHRASES_END=10, TEST_SPECIFICATION_MAY_BE_PRODUCED=11, 
+		TEST_SPECIFICATION_IS_PROCESSED_BY_THE_FACTORY=12, DOCSTRING=13, DATA_ROW=14, 
+		GHERKIN_STEP_KEYWORD=15, INT=16, QUOTED_TEXT_END=17, QUOTED_TEXT=18, THEN_TEST_RESOURCE_VALIDITY=19, 
+		TEST_SPECIFICATION_HAS_AN_ID=20, TEST_SPECIFICATION_IN_EXPECTED_FORMAT=21, 
+		TEST_CASE_IS_PRODUCED=22, TEST_CASE_HAS_A_UNIQUE_ID=23, TEST_CASE_HAS_A_TITLE=24, 
+		TEST_CASE_HAS_PROPER_TEST_BODY=25, PDSL_CAN_PROCESS_ALL_PHRASES=26, PASSING_TEST_TOTAL=27, 
+		PASSING_PHRASE_TOTAL=28, FAILING_TEST_TOTAL=29, TOTAL_PHRASES=30, DUPLICATE_TEST_TOTAL=31, 
+		GIVEN_THE_TEST_RESOURCE=32, GIVEN_THE_FOLLOWING_TEST_RESOURCE=33, WHEN_THE_TEST_RESOURCE_IS_PROCESSED_BY_A_FACTORY=34, 
+		TEST_SPECIFICATION_IS_PRODUCED=35, TEST_SPECIFICATION_IS_PROCESSED_BY_TEST_CASE_FACTORY=36, 
+		POLYMORPHIC_DSL_TEST_EXECUTOR=37, TEST_CASE_IS_PROCESSED=38, TEST_RUN_RESULT_PRODUCED=39;
 	public static final int
 		RULE_givenSpecificTestSpecificationFactory = 0, RULE_givenSpecificGrammar = 1, 
 		RULE_givenSpecificSubgrammar = 2, RULE_thenTestSpecificationFailsDueToMissingScenario = 3, 
@@ -38,8 +38,8 @@ public class TestSpecificationFactoryParser extends Parser {
 		RULE_thenNoSuchResourceError = 6, RULE_thenTestSpecificationHasTotalPhrases = 7, 
 		RULE_testSpecificationMayBeProduced = 8, RULE_testResourceProcessedByFactory = 9, 
 		RULE_polymorphicDslAllRules = 10, RULE_gherkinStepKeyword = 11, RULE_integerValue = 12, 
-		RULE_textInDoubleQuotes = 13, RULE_docstring = 14, RULE_givenTheTestResource = 15, 
-		RULE_givenTheRawResource = 16;
+		RULE_textInDoubleQuotes = 13, RULE_docstring = 14, RULE_textInDoubleQuotesEnd = 15, 
+		RULE_givenTheTestResource = 16, RULE_givenTheRawResource = 17;
 	private static String[] makeRuleNames() {
 		return new String[] {
 			"givenSpecificTestSpecificationFactory", "givenSpecificGrammar", "givenSpecificSubgrammar", 
@@ -47,7 +47,7 @@ public class TestSpecificationFactoryParser extends Parser {
 			"givenNonExistentUrl", "thenNoSuchResourceError", "thenTestSpecificationHasTotalPhrases", 
 			"testSpecificationMayBeProduced", "testResourceProcessedByFactory", "polymorphicDslAllRules", 
 			"gherkinStepKeyword", "integerValue", "textInDoubleQuotes", "docstring", 
-			"givenTheTestResource", "givenTheRawResource"
+			"textInDoubleQuotesEnd", "givenTheTestResource", "givenTheRawResource"
 		};
 	}
 	public static final String[] ruleNames = makeRuleNames();
@@ -59,14 +59,14 @@ public class TestSpecificationFactoryParser extends Parser {
 	private static final String[] _LITERAL_NAMES = makeLiteralNames();
 	private static String[] makeSymbolicNames() {
 		return new String[] {
-			null, "GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY", "GIVEN_SPECIFIC_GRAMMAR", 
+			null, "END", "GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY", "GIVEN_SPECIFIC_GRAMMAR", 
 			"GIVEN_SPECIFIC_SUBGRAMMAR", "THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO", 
 			"THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY", "GIVEN_NONEXISTENT_URL", 
 			"THEN_NO_SUCH_RESOURCE_ERROR", "TEST_SPECIFICATION_TOTAL_PHRASES_START", 
 			"TEST_SPECIFICATION_TOTAL_PHRASES_END", "TEST_SPECIFICATION_MAY_BE_PRODUCED", 
 			"TEST_SPECIFICATION_IS_PROCESSED_BY_THE_FACTORY", "DOCSTRING", "DATA_ROW", 
-			"GHERKIN_STEP_KEYWORD", "INT", "TEXT_IN_DOUBLE_QUOTES", "END_QUOTE", 
-			"THEN_TEST_RESOURCE_VALIDITY", "TEST_SPECIFICATION_HAS_AN_ID", "TEST_SPECIFICATION_IN_EXPECTED_FORMAT", 
+			"GHERKIN_STEP_KEYWORD", "INT", "QUOTED_TEXT_END", "QUOTED_TEXT", "THEN_TEST_RESOURCE_VALIDITY", 
+			"TEST_SPECIFICATION_HAS_AN_ID", "TEST_SPECIFICATION_IN_EXPECTED_FORMAT", 
 			"TEST_CASE_IS_PRODUCED", "TEST_CASE_HAS_A_UNIQUE_ID", "TEST_CASE_HAS_A_TITLE", 
 			"TEST_CASE_HAS_PROPER_TEST_BODY", "PDSL_CAN_PROCESS_ALL_PHRASES", "PASSING_TEST_TOTAL", 
 			"PASSING_PHRASE_TOTAL", "FAILING_TEST_TOTAL", "TOTAL_PHRASES", "DUPLICATE_TEST_TOTAL", 
@@ -128,10 +128,9 @@ public class TestSpecificationFactoryParser extends Parser {
 
 	public static class GivenSpecificTestSpecificationFactoryContext extends ParserRuleContext {
 		public TerminalNode GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY() { return getToken(TestSpecificationFactoryParser.GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY, 0); }
-		public TextInDoubleQuotesContext textInDoubleQuotes() {
-			return getRuleContext(TextInDoubleQuotesContext.class,0);
+		public TextInDoubleQuotesEndContext textInDoubleQuotesEnd() {
+			return getRuleContext(TextInDoubleQuotesEndContext.class,0);
 		}
-		public TerminalNode END_QUOTE() { return getToken(TestSpecificationFactoryParser.END_QUOTE, 0); }
 		public GivenSpecificTestSpecificationFactoryContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -152,12 +151,10 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(34);
-			match(GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY);
-			setState(35);
-			textInDoubleQuotes();
 			setState(36);
-			match(END_QUOTE);
+			match(GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY);
+			setState(37);
+			textInDoubleQuotesEnd();
 			}
 		}
 		catch (RecognitionException re) {
@@ -173,10 +170,9 @@ public class TestSpecificationFactoryParser extends Parser {
 
 	public static class GivenSpecificGrammarContext extends ParserRuleContext {
 		public TerminalNode GIVEN_SPECIFIC_GRAMMAR() { return getToken(TestSpecificationFactoryParser.GIVEN_SPECIFIC_GRAMMAR, 0); }
-		public TextInDoubleQuotesContext textInDoubleQuotes() {
-			return getRuleContext(TextInDoubleQuotesContext.class,0);
+		public TextInDoubleQuotesEndContext textInDoubleQuotesEnd() {
+			return getRuleContext(TextInDoubleQuotesEndContext.class,0);
 		}
-		public TerminalNode END_QUOTE() { return getToken(TestSpecificationFactoryParser.END_QUOTE, 0); }
 		public GivenSpecificGrammarContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -197,12 +193,10 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(38);
-			match(GIVEN_SPECIFIC_GRAMMAR);
 			setState(39);
-			textInDoubleQuotes();
+			match(GIVEN_SPECIFIC_GRAMMAR);
 			setState(40);
-			match(END_QUOTE);
+			textInDoubleQuotesEnd();
 			}
 		}
 		catch (RecognitionException re) {
@@ -218,10 +212,9 @@ public class TestSpecificationFactoryParser extends Parser {
 
 	public static class GivenSpecificSubgrammarContext extends ParserRuleContext {
 		public TerminalNode GIVEN_SPECIFIC_SUBGRAMMAR() { return getToken(TestSpecificationFactoryParser.GIVEN_SPECIFIC_SUBGRAMMAR, 0); }
-		public TextInDoubleQuotesContext textInDoubleQuotes() {
-			return getRuleContext(TextInDoubleQuotesContext.class,0);
+		public TextInDoubleQuotesEndContext textInDoubleQuotesEnd() {
+			return getRuleContext(TextInDoubleQuotesEndContext.class,0);
 		}
-		public TerminalNode END_QUOTE() { return getToken(TestSpecificationFactoryParser.END_QUOTE, 0); }
 		public GivenSpecificSubgrammarContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -245,9 +238,7 @@ public class TestSpecificationFactoryParser extends Parser {
 			setState(42);
 			match(GIVEN_SPECIFIC_SUBGRAMMAR);
 			setState(43);
-			textInDoubleQuotes();
-			setState(44);
-			match(END_QUOTE);
+			textInDoubleQuotesEnd();
 			}
 		}
 		catch (RecognitionException re) {
@@ -283,7 +274,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(46);
+			setState(45);
 			match(THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO);
 			}
 		}
@@ -320,7 +311,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(48);
+			setState(47);
 			match(THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY);
 			}
 		}
@@ -357,7 +348,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(50);
+			setState(49);
 			match(GIVEN_NONEXISTENT_URL);
 			}
 		}
@@ -394,7 +385,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(52);
+			setState(51);
 			match(THEN_NO_SUCH_RESOURCE_ERROR);
 			}
 		}
@@ -435,11 +426,11 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(54);
+			setState(53);
 			match(TEST_SPECIFICATION_TOTAL_PHRASES_START);
-			setState(55);
+			setState(54);
 			integerValue();
-			setState(56);
+			setState(55);
 			match(TEST_SPECIFICATION_TOTAL_PHRASES_END);
 			}
 		}
@@ -476,7 +467,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(58);
+			setState(57);
 			match(TEST_SPECIFICATION_MAY_BE_PRODUCED);
 			}
 		}
@@ -513,7 +504,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(60);
+			setState(59);
 			match(TEST_SPECIFICATION_IS_PROCESSED_BY_THE_FACTORY);
 			}
 		}
@@ -616,77 +607,77 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(73); 
+			setState(72); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
-				setState(73);
+				setState(72);
 				_errHandler.sync(this);
 				switch (_input.LA(1)) {
 				case GIVEN_THE_FOLLOWING_TEST_RESOURCE:
 					{
-					setState(62);
+					setState(61);
 					givenTheRawResource();
 					}
 					break;
 				case GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY:
 					{
-					setState(63);
+					setState(62);
 					givenSpecificTestSpecificationFactory();
 					}
 					break;
 				case GIVEN_SPECIFIC_GRAMMAR:
 					{
-					setState(64);
+					setState(63);
 					givenSpecificGrammar();
 					}
 					break;
 				case GIVEN_SPECIFIC_SUBGRAMMAR:
 					{
-					setState(65);
+					setState(64);
 					givenSpecificSubgrammar();
 					}
 					break;
 				case THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO:
 					{
-					setState(66);
+					setState(65);
 					thenTestSpecificationFailsDueToMissingScenario();
 					}
 					break;
 				case THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY:
 					{
-					setState(67);
+					setState(66);
 					thenTestSpecificationFailsBecauseOfMissingStepBody();
 					}
 					break;
 				case GIVEN_NONEXISTENT_URL:
 					{
-					setState(68);
+					setState(67);
 					givenNonExistentUrl();
 					}
 					break;
 				case THEN_NO_SUCH_RESOURCE_ERROR:
 					{
-					setState(69);
+					setState(68);
 					thenNoSuchResourceError();
 					}
 					break;
 				case TEST_SPECIFICATION_TOTAL_PHRASES_START:
 					{
-					setState(70);
+					setState(69);
 					thenTestSpecificationHasTotalPhrases();
 					}
 					break;
 				case TEST_SPECIFICATION_MAY_BE_PRODUCED:
 					{
-					setState(71);
+					setState(70);
 					testSpecificationMayBeProduced();
 					}
 					break;
 				case TEST_SPECIFICATION_IS_PROCESSED_BY_THE_FACTORY:
 					{
-					setState(72);
+					setState(71);
 					testResourceProcessedByFactory();
 					}
 					break;
@@ -694,7 +685,7 @@ public class TestSpecificationFactoryParser extends Parser {
 					throw new NoViableAltException(this);
 				}
 				}
-				setState(75); 
+				setState(74); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( (((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY) | (1L << GIVEN_SPECIFIC_GRAMMAR) | (1L << GIVEN_SPECIFIC_SUBGRAMMAR) | (1L << THEN_TEST_SPECIFICATION_FAILS_DUE_TO_MISSING_SCENARIO) | (1L << THEN_TEST_SPECIFICATION_FAILS_BECAUSE_OF_MISSING_STEP_BODY) | (1L << GIVEN_NONEXISTENT_URL) | (1L << THEN_NO_SUCH_RESOURCE_ERROR) | (1L << TEST_SPECIFICATION_TOTAL_PHRASES_START) | (1L << TEST_SPECIFICATION_MAY_BE_PRODUCED) | (1L << TEST_SPECIFICATION_IS_PROCESSED_BY_THE_FACTORY) | (1L << GIVEN_THE_FOLLOWING_TEST_RESOURCE))) != 0) );
@@ -733,7 +724,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(77);
+			setState(76);
 			match(GHERKIN_STEP_KEYWORD);
 			}
 		}
@@ -770,7 +761,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(79);
+			setState(78);
 			match(INT);
 			}
 		}
@@ -786,7 +777,7 @@ public class TestSpecificationFactoryParser extends Parser {
 	}
 
 	public static class TextInDoubleQuotesContext extends ParserRuleContext {
-		public TerminalNode TEXT_IN_DOUBLE_QUOTES() { return getToken(TestSpecificationFactoryParser.TEXT_IN_DOUBLE_QUOTES, 0); }
+		public TerminalNode QUOTED_TEXT() { return getToken(TestSpecificationFactoryParser.QUOTED_TEXT, 0); }
 		public TextInDoubleQuotesContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -807,8 +798,8 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(81);
-			match(TEXT_IN_DOUBLE_QUOTES);
+			setState(80);
+			match(QUOTED_TEXT);
 			}
 		}
 		catch (RecognitionException re) {
@@ -844,8 +835,45 @@ public class TestSpecificationFactoryParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(83);
+			setState(82);
 			match(DOCSTRING);
+			}
+		}
+		catch (RecognitionException re) {
+			_localctx.exception = re;
+			_errHandler.reportError(this, re);
+			_errHandler.recover(this, re);
+		}
+		finally {
+			exitRule();
+		}
+		return _localctx;
+	}
+
+	public static class TextInDoubleQuotesEndContext extends ParserRuleContext {
+		public TerminalNode QUOTED_TEXT_END() { return getToken(TestSpecificationFactoryParser.QUOTED_TEXT_END, 0); }
+		public TextInDoubleQuotesEndContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_textInDoubleQuotesEnd; }
+		@Override
+		public void enterRule(ParseTreeListener listener) {
+			if ( listener instanceof TestSpecificationFactoryParserListener ) ((TestSpecificationFactoryParserListener)listener).enterTextInDoubleQuotesEnd(this);
+		}
+		@Override
+		public void exitRule(ParseTreeListener listener) {
+			if ( listener instanceof TestSpecificationFactoryParserListener ) ((TestSpecificationFactoryParserListener)listener).exitTextInDoubleQuotesEnd(this);
+		}
+	}
+
+	public final TextInDoubleQuotesEndContext textInDoubleQuotesEnd() throws RecognitionException {
+		TextInDoubleQuotesEndContext _localctx = new TextInDoubleQuotesEndContext(_ctx, getState());
+		enterRule(_localctx, 30, RULE_textInDoubleQuotesEnd);
+		try {
+			enterOuterAlt(_localctx, 1);
+			{
+			setState(84);
+			match(QUOTED_TEXT_END);
 			}
 		}
 		catch (RecognitionException re) {
@@ -864,7 +892,7 @@ public class TestSpecificationFactoryParser extends Parser {
 		public TextInDoubleQuotesContext textInDoubleQuotes() {
 			return getRuleContext(TextInDoubleQuotesContext.class,0);
 		}
-		public TerminalNode END_QUOTE() { return getToken(TestSpecificationFactoryParser.END_QUOTE, 0); }
+		public TerminalNode END() { return getToken(TestSpecificationFactoryParser.END, 0); }
 		public GivenTheTestResourceContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -881,16 +909,16 @@ public class TestSpecificationFactoryParser extends Parser {
 
 	public final GivenTheTestResourceContext givenTheTestResource() throws RecognitionException {
 		GivenTheTestResourceContext _localctx = new GivenTheTestResourceContext(_ctx, getState());
-		enterRule(_localctx, 30, RULE_givenTheTestResource);
+		enterRule(_localctx, 32, RULE_givenTheTestResource);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(85);
-			match(GIVEN_THE_TEST_RESOURCE);
 			setState(86);
-			textInDoubleQuotes();
+			match(GIVEN_THE_TEST_RESOURCE);
 			setState(87);
-			match(END_QUOTE);
+			textInDoubleQuotes();
+			setState(88);
+			match(END);
 			}
 		}
 		catch (RecognitionException re) {
@@ -925,13 +953,13 @@ public class TestSpecificationFactoryParser extends Parser {
 
 	public final GivenTheRawResourceContext givenTheRawResource() throws RecognitionException {
 		GivenTheRawResourceContext _localctx = new GivenTheRawResourceContext(_ctx, getState());
-		enterRule(_localctx, 32, RULE_givenTheRawResource);
+		enterRule(_localctx, 34, RULE_givenTheRawResource);
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(89);
-			match(GIVEN_THE_FOLLOWING_TEST_RESOURCE);
 			setState(90);
+			match(GIVEN_THE_FOLLOWING_TEST_RESOURCE);
+			setState(91);
 			docstring();
 			}
 		}
@@ -947,28 +975,28 @@ public class TestSpecificationFactoryParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3(_\4\2\t\2\4\3\t\3"+
+		"\3\u608b\ua72a\u8133\ub9ed\u417c\u3be7\u7786\u5964\3)`\4\2\t\2\4\3\t\3"+
 		"\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t\13\4\f"+
-		"\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\3\2\3\2"+
-		"\3\2\3\2\3\3\3\3\3\3\3\3\3\4\3\4\3\4\3\4\3\5\3\5\3\6\3\6\3\7\3\7\3\b\3"+
+		"\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22\4\23\t"+
+		"\23\3\2\3\2\3\2\3\3\3\3\3\3\3\4\3\4\3\4\3\5\3\5\3\6\3\6\3\7\3\7\3\b\3"+
 		"\b\3\t\3\t\3\t\3\t\3\n\3\n\3\13\3\13\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3\f\3"+
-		"\f\3\f\3\f\6\fL\n\f\r\f\16\fM\3\r\3\r\3\16\3\16\3\17\3\17\3\20\3\20\3"+
-		"\21\3\21\3\21\3\21\3\22\3\22\3\22\3\22\2\2\23\2\4\6\b\n\f\16\20\22\24"+
-		"\26\30\32\34\36 \"\2\2\2X\2$\3\2\2\2\4(\3\2\2\2\6,\3\2\2\2\b\60\3\2\2"+
-		"\2\n\62\3\2\2\2\f\64\3\2\2\2\16\66\3\2\2\2\208\3\2\2\2\22<\3\2\2\2\24"+
-		">\3\2\2\2\26K\3\2\2\2\30O\3\2\2\2\32Q\3\2\2\2\34S\3\2\2\2\36U\3\2\2\2"+
-		" W\3\2\2\2\"[\3\2\2\2$%\7\3\2\2%&\5\34\17\2&\'\7\23\2\2\'\3\3\2\2\2()"+
-		"\7\4\2\2)*\5\34\17\2*+\7\23\2\2+\5\3\2\2\2,-\7\5\2\2-.\5\34\17\2./\7\23"+
-		"\2\2/\7\3\2\2\2\60\61\7\6\2\2\61\t\3\2\2\2\62\63\7\7\2\2\63\13\3\2\2\2"+
-		"\64\65\7\b\2\2\65\r\3\2\2\2\66\67\7\t\2\2\67\17\3\2\2\289\7\n\2\29:\5"+
-		"\32\16\2:;\7\13\2\2;\21\3\2\2\2<=\7\f\2\2=\23\3\2\2\2>?\7\r\2\2?\25\3"+
-		"\2\2\2@L\5\"\22\2AL\5\2\2\2BL\5\4\3\2CL\5\6\4\2DL\5\b\5\2EL\5\n\6\2FL"+
-		"\5\f\7\2GL\5\16\b\2HL\5\20\t\2IL\5\22\n\2JL\5\24\13\2K@\3\2\2\2KA\3\2"+
-		"\2\2KB\3\2\2\2KC\3\2\2\2KD\3\2\2\2KE\3\2\2\2KF\3\2\2\2KG\3\2\2\2KH\3\2"+
-		"\2\2KI\3\2\2\2KJ\3\2\2\2LM\3\2\2\2MK\3\2\2\2MN\3\2\2\2N\27\3\2\2\2OP\7"+
-		"\20\2\2P\31\3\2\2\2QR\7\21\2\2R\33\3\2\2\2ST\7\22\2\2T\35\3\2\2\2UV\7"+
-		"\16\2\2V\37\3\2\2\2WX\7!\2\2XY\5\34\17\2YZ\7\23\2\2Z!\3\2\2\2[\\\7\"\2"+
-		"\2\\]\5\36\20\2]#\3\2\2\2\4KM";
+		"\f\3\f\3\f\6\fK\n\f\r\f\16\fL\3\r\3\r\3\16\3\16\3\17\3\17\3\20\3\20\3"+
+		"\21\3\21\3\22\3\22\3\22\3\22\3\23\3\23\3\23\3\23\2\2\24\2\4\6\b\n\f\16"+
+		"\20\22\24\26\30\32\34\36 \"$\2\2\2X\2&\3\2\2\2\4)\3\2\2\2\6,\3\2\2\2\b"+
+		"/\3\2\2\2\n\61\3\2\2\2\f\63\3\2\2\2\16\65\3\2\2\2\20\67\3\2\2\2\22;\3"+
+		"\2\2\2\24=\3\2\2\2\26J\3\2\2\2\30N\3\2\2\2\32P\3\2\2\2\34R\3\2\2\2\36"+
+		"T\3\2\2\2 V\3\2\2\2\"X\3\2\2\2$\\\3\2\2\2&\'\7\4\2\2\'(\5 \21\2(\3\3\2"+
+		"\2\2)*\7\5\2\2*+\5 \21\2+\5\3\2\2\2,-\7\6\2\2-.\5 \21\2.\7\3\2\2\2/\60"+
+		"\7\7\2\2\60\t\3\2\2\2\61\62\7\b\2\2\62\13\3\2\2\2\63\64\7\t\2\2\64\r\3"+
+		"\2\2\2\65\66\7\n\2\2\66\17\3\2\2\2\678\7\13\2\289\5\32\16\29:\7\f\2\2"+
+		":\21\3\2\2\2;<\7\r\2\2<\23\3\2\2\2=>\7\16\2\2>\25\3\2\2\2?K\5$\23\2@K"+
+		"\5\2\2\2AK\5\4\3\2BK\5\6\4\2CK\5\b\5\2DK\5\n\6\2EK\5\f\7\2FK\5\16\b\2"+
+		"GK\5\20\t\2HK\5\22\n\2IK\5\24\13\2J?\3\2\2\2J@\3\2\2\2JA\3\2\2\2JB\3\2"+
+		"\2\2JC\3\2\2\2JD\3\2\2\2JE\3\2\2\2JF\3\2\2\2JG\3\2\2\2JH\3\2\2\2JI\3\2"+
+		"\2\2KL\3\2\2\2LJ\3\2\2\2LM\3\2\2\2M\27\3\2\2\2NO\7\21\2\2O\31\3\2\2\2"+
+		"PQ\7\22\2\2Q\33\3\2\2\2RS\7\24\2\2S\35\3\2\2\2TU\7\17\2\2U\37\3\2\2\2"+
+		"VW\7\23\2\2W!\3\2\2\2XY\7\"\2\2YZ\5\34\17\2Z[\7\3\2\2[#\3\2\2\2\\]\7#"+
+		"\2\2]^\5\36\20\2^%\3\2\2\2\4JL";
 	public static final ATN _ATN =
 		new ATNDeserializer().deserialize(_serializedATN.toCharArray());
 	static {

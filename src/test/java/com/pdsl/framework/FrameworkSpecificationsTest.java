@@ -102,4 +102,25 @@ public class FrameworkSpecificationsTest {
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
         assertThat(results.totalPhrases()).isGreaterThan(0);
     }
+
+    @Test
+    public void testExecutor_meetsSpecifications() {
+        final URL testResources = getClass().getClassLoader()
+                .getResource("framework_specifications/TestExecutor.feature");
+        // Arrange
+        Set<URL> dslFiles = new HashSet<>();
+        dslFiles.add(testResources);
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<TestCaseFactoryParser, TestCaseFactoryLexer,
+                TestCaseFactoryParser, TestCaseFactoryLexer>(TestCaseFactoryParser.class,
+                TestCaseFactoryLexer.class,
+                TestCaseFactoryParser.class,
+                TestCaseFactoryLexer.class
+        );
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
+        // Act
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new TestCaseFactoryParserListenerImpl());
+        assertThat(results.failingTestTotal()).isEqualTo(0);
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
+        assertThat(results.totalPhrases()).isGreaterThan(0);
+    }
 }
