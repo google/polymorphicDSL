@@ -8,36 +8,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface PdslFrameworkSpecificationParserListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#givenTheTestResource}.
-	 * @param ctx the parse tree
-	 */
-	void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#givenTheTestResource}.
-	 * @param ctx the parse tree
-	 */
-	void exitGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#whenTheTestResourceIsProcessedByFactory}.
-	 * @param ctx the parse tree
-	 */
-	void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#whenTheTestResourceIsProcessedByFactory}.
-	 * @param ctx the parse tree
-	 */
-	void exitWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProduced}.
-	 * @param ctx the parse tree
-	 */
-	void enterTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProduced}.
-	 * @param ctx the parse tree
-	 */
-	void exitTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationHasAnId}.
 	 * @param ctx the parse tree
 	 */
@@ -57,16 +27,6 @@ public interface PdslFrameworkSpecificationParserListener extends ParseTreeListe
 	 * @param ctx the parse tree
 	 */
 	void exitTestSpecificationInExpectedFormat(PdslFrameworkSpecificationParser.TestSpecificationInExpectedFormatContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProcessedByTestCaseFactory}.
-	 * @param ctx the parse tree
-	 */
-	void enterTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProcessedByTestCaseFactory}.
-	 * @param ctx the parse tree
-	 */
-	void exitTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testCaseIsProduced}.
 	 * @param ctx the parse tree
@@ -108,16 +68,6 @@ public interface PdslFrameworkSpecificationParserListener extends ParseTreeListe
 	 */
 	void exitTestCaseHasProperTestBody(PdslFrameworkSpecificationParser.TestCaseHasProperTestBodyContext ctx);
 	/**
-	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#polymorphicDslTestExecutor}.
-	 * @param ctx the parse tree
-	 */
-	void enterPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#polymorphicDslTestExecutor}.
-	 * @param ctx the parse tree
-	 */
-	void exitPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx);
-	/**
 	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#pdslCanProcessAllPhrases}.
 	 * @param ctx the parse tree
 	 */
@@ -137,16 +87,6 @@ public interface PdslFrameworkSpecificationParserListener extends ParseTreeListe
 	 * @param ctx the parse tree
 	 */
 	void exitTestCaseIsProcessed(PdslFrameworkSpecificationParser.TestCaseIsProcessedContext ctx);
-	/**
-	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testRunResultProduced}.
-	 * @param ctx the parse tree
-	 */
-	void enterTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#testRunResultProduced}.
-	 * @param ctx the parse tree
-	 */
-	void exitTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx);
 	/**
 	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#passingTestTotal}.
 	 * @param ctx the parse tree
@@ -217,4 +157,114 @@ public interface PdslFrameworkSpecificationParserListener extends ParseTreeListe
 	 * @param ctx the parse tree
 	 */
 	void exitPolymorphicDslSyntaxRule(PdslFrameworkSpecificationParser.PolymorphicDslSyntaxRuleContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#docstring}.
+	 * @param ctx the parse tree
+	 */
+	void enterDocstring(PdslFrameworkSpecificationParser.DocstringContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#docstring}.
+	 * @param ctx the parse tree
+	 */
+	void exitDocstring(PdslFrameworkSpecificationParser.DocstringContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#givenTheTestResource}.
+	 * @param ctx the parse tree
+	 */
+	void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#givenTheTestResource}.
+	 * @param ctx the parse tree
+	 */
+	void exitGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#givenTheRawResource}.
+	 * @param ctx the parse tree
+	 */
+	void enterGivenTheRawResource(PdslFrameworkSpecificationParser.GivenTheRawResourceContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#givenTheRawResource}.
+	 * @param ctx the parse tree
+	 */
+	void exitGivenTheRawResource(PdslFrameworkSpecificationParser.GivenTheRawResourceContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#gherkinStepKeyword}.
+	 * @param ctx the parse tree
+	 */
+	void enterGherkinStepKeyword(PdslFrameworkSpecificationParser.GherkinStepKeywordContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#gherkinStepKeyword}.
+	 * @param ctx the parse tree
+	 */
+	void exitGherkinStepKeyword(PdslFrameworkSpecificationParser.GherkinStepKeywordContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#integerValue}.
+	 * @param ctx the parse tree
+	 */
+	void enterIntegerValue(PdslFrameworkSpecificationParser.IntegerValueContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#integerValue}.
+	 * @param ctx the parse tree
+	 */
+	void exitIntegerValue(PdslFrameworkSpecificationParser.IntegerValueContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#textInDoubleQuotes}.
+	 * @param ctx the parse tree
+	 */
+	void enterTextInDoubleQuotes(PdslFrameworkSpecificationParser.TextInDoubleQuotesContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#textInDoubleQuotes}.
+	 * @param ctx the parse tree
+	 */
+	void exitTextInDoubleQuotes(PdslFrameworkSpecificationParser.TextInDoubleQuotesContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#whenTheTestResourceIsProcessedByFactory}.
+	 * @param ctx the parse tree
+	 */
+	void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#whenTheTestResourceIsProcessedByFactory}.
+	 * @param ctx the parse tree
+	 */
+	void exitWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProduced}.
+	 * @param ctx the parse tree
+	 */
+	void enterTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProduced}.
+	 * @param ctx the parse tree
+	 */
+	void exitTestSpecificationIsProduced(PdslFrameworkSpecificationParser.TestSpecificationIsProducedContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProcessedByTestCaseFactory}.
+	 * @param ctx the parse tree
+	 */
+	void enterTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#testSpecificationIsProcessedByTestCaseFactory}.
+	 * @param ctx the parse tree
+	 */
+	void exitTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#polymorphicDslTestExecutor}.
+	 * @param ctx the parse tree
+	 */
+	void enterPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#polymorphicDslTestExecutor}.
+	 * @param ctx the parse tree
+	 */
+	void exitPolymorphicDslTestExecutor(PdslFrameworkSpecificationParser.PolymorphicDslTestExecutorContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link PdslFrameworkSpecificationParser#testRunResultProduced}.
+	 * @param ctx the parse tree
+	 */
+	void enterTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslFrameworkSpecificationParser#testRunResultProduced}.
+	 * @param ctx the parse tree
+	 */
+	void exitTestRunResultProduced(PdslFrameworkSpecificationParser.TestRunResultProducedContext ctx);
 }

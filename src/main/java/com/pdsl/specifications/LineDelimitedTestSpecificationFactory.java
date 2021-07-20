@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.stream.Collectors;
-//   Grab the names of all the rules from the parser and dynamically create a new rule?
 
 public class LineDelimitedTestSpecificationFactory implements TestSpecificationFactory {
 
@@ -38,8 +37,7 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
         this.phraseFilter = phraseFilter;
     }
 
-    @Override
-    public Optional<TestSpecification> getTestSpecifications(Set<URL> resourceLocations) {
+    public Optional<Collection<TestSpecification>> getTestSpecifications(Set<URL> resourceLocations) {
         Objects.requireNonNull(resourceLocations, "Resource paths cannot be null!");
         Preconditions.checkArgument(!resourceLocations.isEmpty(), "Test Resources cannot be empty!");
         List<TestSpecification> testSpecifications = new ArrayList<>(resourceLocations.size());
@@ -63,11 +61,7 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
         if (testSpecifications.isEmpty()) {
             return Optional.empty();
         } else {
-            return Optional.of(new DefaultTestSpecification.Builder("Line-delimited test Specification Container ("
-                    + testSpecifications.size() + " out of " + resourceLocations.size() +
-                    " containing at least 1 valid phrase)")
-                    .withChildTestSpecifications(testSpecifications)
-                    .build());
+            return Optional.of(testSpecifications);
         }
     }
 }

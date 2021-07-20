@@ -5,10 +5,8 @@ import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseListener;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
-import com.pdsl.specifications.TestSpecificationFactory;
-import com.pdsl.testcases.ParentForEachChildTestCaseFactory;
+import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -36,7 +34,7 @@ public class PolymorphicDslGherkinExecutionTest {
     private static final DefaultGherkinTestSpecificationFactory provider =
             new DefaultGherkinTestSpecificationFactory(pickleJarFactory, allGrammarsPhraseFilter);
 
-    private static final TestCaseFactory testCaseFactory = new ParentForEachChildTestCaseFactory();
+    private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private static final GherkinTestExecutor executor =
             new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class,
                     AllGrammarsLexer.class);
@@ -53,12 +51,11 @@ public class PolymorphicDslGherkinExecutionTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> testSpecification = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
+        Collection<TestSpecification> specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         PolymorphicDslTestRunResults results = executor.runTests(testCases, stepCounterListener);
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
         assertThat(results.failingTestTotal()).isEqualTo(0);
@@ -76,12 +73,11 @@ public class PolymorphicDslGherkinExecutionTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> testSpecification = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
+        Collection<TestSpecification> specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
-        // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+        // Assert));
         PolymorphicDslTestRunResults results = executor.runTests(testCases, stepCounterListener);
         assertThat(results.totalPhrases()).isEqualTo(5);
         assertThat(results.passingTestTotal()).isEqualTo(1);
@@ -97,12 +93,11 @@ public class PolymorphicDslGherkinExecutionTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> testSpecification = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
+        Collection<TestSpecification> specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         executor.runTests(testCases, stepCounterListener);
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(2);
     }
@@ -115,13 +110,12 @@ public class PolymorphicDslGherkinExecutionTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> testSpecificatons = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecificatons = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecificatons.isPresent()).isTrue();
-        TestSpecification specifications = testSpecificatons.get();
+        Collection<TestSpecification> specifications = testSpecificatons.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         executor.runTests(testCases, stepCounterListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(5);
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given fb");
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given ab");
@@ -139,12 +133,11 @@ public class PolymorphicDslGherkinExecutionTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> testSpecification = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
+        Collection<TestSpecification> specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         executor.runTests(testCases, stepCounterListener);
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(4);
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given the minimalism inside a background");
@@ -162,12 +155,11 @@ public class PolymorphicDslGherkinExecutionTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> testSpecification = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
+        Collection<TestSpecification> specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         PolymorphicDslTestRunResults results = executor.runTests(testCases, stepCounterListener);
         assertThat(results.passingPhraseTotal()).isEqualTo(8);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);

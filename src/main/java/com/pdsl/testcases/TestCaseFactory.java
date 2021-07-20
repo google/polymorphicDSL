@@ -15,5 +15,5 @@ public interface TestCaseFactory {
      * @param testCaseSpecification The blueprint for creating the test cases
      * @return A collection of Test Cases
      */
-    Collection<TestCase> processTestSpecification(TestSpecification testCaseSpecification);
+    Collection<TestCase> processTestSpecification(Collection<TestSpecification> testCaseSpecification);
 }

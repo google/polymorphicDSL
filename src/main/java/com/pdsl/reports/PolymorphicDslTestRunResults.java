@@ -28,6 +28,10 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
         dslReports = new LinkedList<>(reports);
     }
 
+    public List<TestMetadata> getTestResultMetadata() {
+        return results;
+    }
+
     @Override
     public void addTestResult(TestMetadata testMetadata) {
         Preconditions.checkNotNull(testMetadata, "Test metadata cannot be null!");

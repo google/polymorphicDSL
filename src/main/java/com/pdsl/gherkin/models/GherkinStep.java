@@ -76,4 +76,18 @@ public class GherkinStep {
     public GherkinString getStepContent() {
         return stepContent;
     }
+
+    /**
+     * Returns the text content of this step including the docstring xor datatable if present
+     * @return
+     */
+    public String getFullRawStepText() {
+        StringBuilder str = new StringBuilder(getStepContent().getRawString());
+        if (docString.isPresent()) {
+            str.append(docString.get().getGherkinString().getRawString());
+        } else if (dataTable.isPresent()) {
+            str.append(dataTable.get().toString());
+        }
+        return str.toString();
+    }
 }
