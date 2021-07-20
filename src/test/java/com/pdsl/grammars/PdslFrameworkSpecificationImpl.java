@@ -17,10 +17,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import static com.google.common.truth.Truth.assertThat;
 
 import java.net.URL;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificationParserListener {
 
@@ -91,9 +88,11 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     public void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) {
 
         TestSpecificationFactory testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(allPhrases);
-        Optional<TestSpecification> specification  = testSpecificationFactory.getTestSpecifications(resourcePaths);
+        Optional<Collection<TestSpecification>> specification  = testSpecificationFactory.getTestSpecifications(resourcePaths);
         assertThat(specification.isPresent()).isTrue();
-        testSpecification = specification.get();
+        Optional<TestSpecification> onlySpecification = specification.get().stream().findFirst();
+        assertThat(onlySpecification.isPresent()).isTrue();
+        testSpecification = onlySpecification.get();
     }
 
     @Override
@@ -118,7 +117,6 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void enterTestSpecificationInExpectedFormat(PdslFrameworkSpecificationParser.TestSpecificationInExpectedFormatContext ctx) {
-        //TODO: Implement for each test resource
     }
 
     @Override
@@ -127,7 +125,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     @Override
     public void enterTestSpecificationIsProcessedByTestCaseFactory(PdslFrameworkSpecificationParser.TestSpecificationIsProcessedByTestCaseFactoryContext ctx) {
         TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
-        testCases = testCaseFactory.processTestSpecification(testSpecification);
+        testCases = testCaseFactory.processTestSpecification(List.of(testSpecification));
     }
 
     @Override
@@ -209,6 +207,8 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
         TestRunResults results2 = gherkinTestExecutor.runTests(testCases, grammarListener);
         TestRunResults results3 = gherkinTestExecutor.processFilesAndRunTests(resourcePaths, grammarListener);
         TestRunResults results4 = gherkinTestExecutor.processFilesAndRunTests(resourcePaths, grammarListener, subGrammarListener);
+        // Reset the URLs
+        resourcePaths = new HashSet<>();
         // Results should be identical for all runs
         compareTestRunResults(results1, results2);
         compareTestRunResults(results2, results3);

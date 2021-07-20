@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -63,14 +64,18 @@ public class GherkinPolymorphicDslTestExecutorTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
-        PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
-        // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
-        assertThat(results.failingTestTotal()).isEqualTo(0);
-        assertThat(results.passingPhraseTotal()).isEqualTo(5);
-        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
-        assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism");
+        Optional<Collection<TestSpecification>> allSpecifications = provider.getTestSpecifications(dslFiles);
+        assertThat(allSpecifications.isPresent()).isTrue();
+        assertThat(allSpecifications.get().size()).isEqualTo(1);
+        for (TestSpecification specifications : allSpecifications.get()) {
+            PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
+            // Assert
+            assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
+            assertThat(results.failingTestTotal()).isEqualTo(0);
+            assertThat(results.passingPhraseTotal()).isEqualTo(5);
+            assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
+            assertThat(stepCounterListener.getStepsInOrderRun().poll().strip()).isEqualTo("Given the minimalism");
+        }
     }
 
     @Test
@@ -81,7 +86,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@feature_tag3");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -98,7 +103,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "not @feature_tag3");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -113,7 +118,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@scenario_tag1 and @scenario_tag2");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -129,7 +134,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
 
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@ex_tag1");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -144,7 +149,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@so_tag1");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -160,7 +165,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag3");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -175,7 +180,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag4");
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -190,7 +195,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -207,7 +212,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -222,7 +227,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -237,7 +242,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -252,7 +257,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
@@ -267,7 +272,8 @@ public class GherkinPolymorphicDslTestExecutorTest {
         dslFiles.add(absolutePathValid);
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
+
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());

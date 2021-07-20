@@ -172,7 +172,7 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
             default:
                 throw new IllegalArgumentException("Do not have any implementation for factory " + factoryType.name());
         };
-        specification = factory.getTestSpecifications(urls);
+        specification = factory.getTestSpecifications(urls).get().stream().findFirst();
     }
 
     @Override

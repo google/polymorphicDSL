@@ -5,6 +5,7 @@ import com.pdsl.grammars.*;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -36,7 +37,7 @@ public class FrameworkSpecificationsTest {
                 );
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act
-        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
+        TestRunResults results = gherkinTestExecutor. processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
         assertThat(results.failingTestTotal()).isEqualTo(0);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
     }
@@ -110,17 +111,40 @@ public class FrameworkSpecificationsTest {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<TestCaseFactoryParser, TestCaseFactoryLexer,
-                TestCaseFactoryParser, TestCaseFactoryLexer>(TestCaseFactoryParser.class,
-                TestCaseFactoryLexer.class,
-                TestCaseFactoryParser.class,
-                TestCaseFactoryLexer.class
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<TestExecutorMetaParser, TestExecutorLexer,
+                TestExecutorMetaParser, TestExecutorLexer>(TestExecutorMetaParser.class,
+                TestExecutorLexer.class,
+                TestExecutorMetaParser.class,
+                TestExecutorLexer.class
         );
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act
-        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new TestCaseFactoryParserListenerImpl());
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new TestExecutorMetaParserListenerImpl());
         assertThat(results.failingTestTotal()).isEqualTo(0);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
         assertThat(results.totalPhrases()).isGreaterThan(0);
     }
+
+    @Test
+    public void testRunResults_meetsSpecifications() {
+        final URL testResources = getClass().getClassLoader()
+                .getResource("framework_specifications/TestRunResults.feature");
+        // Arrange
+        Set<URL> dslFiles = new HashSet<>();
+        dslFiles.add(testResources);
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PdslTestRunResultsMetaParser, PdslTestRunResultsMetaLexer,
+                PdslTestRunResultsMetaParser, PdslTestRunResultsMetaLexer>(PdslTestRunResultsMetaParser.class,
+                PdslTestRunResultsMetaLexer.class,
+                PdslTestRunResultsMetaParser.class,
+                PdslTestRunResultsMetaLexer.class
+        );
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
+        // Act
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslTestRunResultsMetaParserListenerImpl());
+        assertThat(results.failingTestTotal()).isEqualTo(0);
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
+        assertThat(results.totalPhrases()).isGreaterThan(0);
+    }
+
+
 }

@@ -3,7 +3,6 @@ lexer grammar TestSpecificationFactoryLexer ;
 import GherkinCommonLexer, PdslFrameworkSpecificationLexer ;
 tokens { END }
 
-GIVEN_SPECIFIC_TEST_SPECIFICATION_FACTORY : GHERKIN_STEP_KEYWORD 'the Test Specification Factory being used is a ';
 
 GIVEN_SPECIFIC_GRAMMAR : GHERKIN_STEP_KEYWORD 'the Grammar being used is ';
 GIVEN_SPECIFIC_SUBGRAMMAR : GHERKIN_STEP_KEYWORD 'the Subgrammar being used is ';

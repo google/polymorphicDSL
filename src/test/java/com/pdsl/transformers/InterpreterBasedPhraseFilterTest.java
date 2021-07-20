@@ -35,11 +35,9 @@ public class InterpreterBasedPhraseFilterTest {
                     .collect(Collectors.toList()));
         }
         TestSpecificationFactory testSpecificationFactory = new LineDelimitedTestSpecificationFactory(phraseTransformer);
-        Optional<TestSpecification> testSpecification = testSpecificationFactory.getTestSpecifications(testResources);
+        Optional<Collection<TestSpecification>> testSpecification = testSpecificationFactory.getTestSpecifications(testResources);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
-        assertThat(specifications.getPhrases().isPresent() || specifications.nestedTestSpecifications().isPresent());
-
+        Collection<TestSpecification> specifications = testSpecification.get();
         Optional<List<ParseTree>> parseTreeList = phraseTransformer.validateAndFilterPhrases(inputStreams);
         assertThat(parseTreeList.isPresent()).isTrue();
         assertThat(parseTreeList.get().size()).isEqualTo(1);
@@ -64,9 +62,8 @@ public class InterpreterBasedPhraseFilterTest {
                 .build();
         TestSpecificationFactory lineDelimitedFactory = new LineDelimitedTestSpecificationFactory(phraseTransformer);
         Set<URL> testResources = Set.of(getClass().getClassLoader().getResource("sentences/valid.pdsl"));
-        Optional<TestSpecification> testSpecification = lineDelimitedFactory.getTestSpecifications(testResources);
+        Optional<Collection<TestSpecification>> testSpecification = lineDelimitedFactory.getTestSpecifications(testResources);
         assertThat(testSpecification.isPresent());
-        assertThat(testSpecification.get().getPhrases().isPresent());
         List<InputStream> inputStreams = new ArrayList<>(testResources.size());
         for (URL url : testResources) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));

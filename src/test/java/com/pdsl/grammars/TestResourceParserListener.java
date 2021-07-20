@@ -67,4 +67,14 @@ public interface TestResourceParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitDocstring(TestResourceParser.DocstringContext ctx);
+	/**
+	 * Enter a parse tree produced by {@link TestResourceParser#textInDoubleQuotesEnd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTextInDoubleQuotesEnd(TestResourceParser.TextInDoubleQuotesEndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link TestResourceParser#textInDoubleQuotesEnd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTextInDoubleQuotesEnd(TestResourceParser.TextInDoubleQuotesEndContext ctx);
 }

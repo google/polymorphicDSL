@@ -75,4 +75,8 @@ public class TestMetadata {
     public int getTotalPhrases() {
         return passingPhraseTotal + phrasesSkippedDueToFailure  + (isPassed ? 0 : 1);
     }
+
+    public Optional<Throwable> getFailureReason() {
+        return failureReason;
+    }
 }

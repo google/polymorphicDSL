@@ -18,54 +18,23 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileAttribute;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestSpecificationFactoryParserListenerImpl implements TestSpecificationFactoryParserListener {
     private Optional<Path> lastFile = Optional.empty();
-    private Optional<TestSpecification>  lastTestSpecification = Optional.empty();
+    private Optional<Collection<TestSpecification>>  lastTestSpecification = Optional.empty();
     private Optional<TestSpecificationFactory> factory = Optional.empty();
     private Set<URL> testResources = new HashSet<>();
     private Optional<Exception> exception = Optional.empty();
-    private Optional<SupportedGrammars> grammar = Optional.empty();
-    private Optional<SupportedGrammars> subgrammar = Optional.empty();
-    private Factories factoryType;
-
-    private enum SupportedGrammars {
-        ALL_GRAMMARS(AllGrammarsLexer.class, AllGrammarsParser.class);
-
-        private Class<?> parser;
-        private Class<?> lexer;
-        private SupportedGrammars(Class<?> lexer, Class<?> parser) {
-            this.parser = parser;
-            this.lexer = lexer;
-        }
-
-        public Class<?> getLexerClass() {
-            return lexer;
-        }
-
-        public Class<?> getParserClass() {
-            return parser;
-        }
-    }
-
-    private enum Factories {
-        GHERKIN_TEST_SPECIFICATION_FACTORY,
-        LINE_DELIMITED_TEST_SPECIFICATION_FACTORY;
-    }
-
-    private String textToUnderscoreScreamingCase(String text) {
-        return text.toUpperCase().replaceAll("\"", "").replaceAll(" ", "_");
-    }
+    private Optional<PdslHelper.SupportedGrammars> grammar = Optional.empty();
+    private Optional<PdslHelper.SupportedGrammars> subgrammar = Optional.empty();
+    private PdslHelper.Factories factoryType;
 
     @Override
     public void enterGivenSpecificTestSpecificationFactory(TestSpecificationFactoryParser.GivenSpecificTestSpecificationFactoryContext ctx) {
-        factoryType = Factories.valueOf(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()).replaceAll(" ", "_").toUpperCase());
+        factoryType = PdslHelper.Factories.valueOf(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()).replaceAll(" ", "_").toUpperCase());
     }
 
     @Override
@@ -73,7 +42,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificGrammar(TestSpecificationFactoryParser.GivenSpecificGrammarContext ctx) {
-        grammar = Optional.of(SupportedGrammars.valueOf(textToUnderscoreScreamingCase(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()))));
+        grammar = Optional.of(PdslHelper.SupportedGrammars.valueOf(PdslHelper.convertToEnumCase(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()))));
     }
 
     @Override
@@ -81,7 +50,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificSubgrammar(TestSpecificationFactoryParser.GivenSpecificSubgrammarContext ctx) {
-        subgrammar = Optional.of(SupportedGrammars.valueOf(textToUnderscoreScreamingCase(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText())
+        subgrammar = Optional.of(PdslHelper.SupportedGrammars.valueOf(PdslHelper.convertToEnumCase(PdslHelper.extractStringInQuotes(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()))
                 )));
     }
 
@@ -127,7 +96,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
     @Override
     public void enterThenTestSpecificationHasTotalPhrases(TestSpecificationFactoryParser.ThenTestSpecificationHasTotalPhrasesContext ctx) {
         assertThat(lastTestSpecification.isPresent()).isTrue();
-        int actual = totalPhrasesInTestSpecification(lastTestSpecification.get(), 0);
+        int actual = totalPhrasesInTestSpecification(lastTestSpecification.get().stream().findFirst().get(), 0);
         assertThat(actual).isEqualTo(Integer.parseInt(ctx.integerValue().getText()));
     }
 
@@ -170,8 +139,8 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
         if (subgrammar.isEmpty()) {
             subgrammar = grammar;
         }
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.get().parser,
-                grammar.get().lexer, subgrammar.get().parser, subgrammar.get().lexer);
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.get().getParserClass(),
+                grammar.get().getLexerClass(), subgrammar.get().getParserClass(), subgrammar.get().getLexerClass());
 
         switch(factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:

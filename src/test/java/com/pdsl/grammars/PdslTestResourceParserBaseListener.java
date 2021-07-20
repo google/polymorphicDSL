@@ -100,6 +100,18 @@ public class PdslTestResourceParserBaseListener implements PdslTestResourceParse
 	 *
 	 * <p>The default implementation does nothing.</p>
 	 */
+	@Override public void enterTextInDoubleQuotesEnd(PdslTestResourceParser.TextInDoubleQuotesEndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTextInDoubleQuotesEnd(PdslTestResourceParser.TextInDoubleQuotesEndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
 	@Override public void enterTestResourceValidity(PdslTestResourceParser.TestResourceValidityContext ctx) { }
 	/**
 	 * {@inheritDoc}

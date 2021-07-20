@@ -19,6 +19,7 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -48,11 +49,12 @@ public class GherkinIntegrationTest {
 
         MinimalImpl minimalListener = new MinimalImpl();
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> specifications = provider.getTestSpecifications(dslFiles);
         assertThat(specifications.isPresent()).isTrue();
-        executor.runTests(testCaseFactory.processTestSpecification(specifications.get()), new AllGrammarsParserBaseListener());
+        PolymorphicDslTestRunResults results = executor.runTests(testCaseFactory.processTestSpecification(specifications.get()), new AllGrammarsParserBaseListener());
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
+        assertThat(results.failingTestTotal()).isEqualTo(0);
+        assertThat(results.passingTestTotal()).isGreaterThan(0);
     }
 
     @Test
@@ -65,12 +67,10 @@ public class GherkinIntegrationTest {
 
         MinimalImpl minimalListener = new MinimalImpl();
         // Act
-        Optional<TestSpecification> testSpecification = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
-        PolymorphicDslTestRunResults results = minimalExecutor.runTests(testCaseFactory.processTestSpecification(specifications), allGrammarsListener);
+        PolymorphicDslTestRunResults results = minimalExecutor.runTests(testCaseFactory.processTestSpecification(testSpecification.get()), allGrammarsListener);
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(results.passingPhraseTotal()).isEqualTo(1);
     }
 
@@ -86,11 +86,10 @@ public class GherkinIntegrationTest {
         MinimalImpl minimalListener = new MinimalImpl();
 
         // Act
-        Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> specifications = provider.getTestSpecifications(dslFiles);
         assertThat(specifications.isPresent()).isTrue();
         PolymorphicDslTestRunResults results = executor.runTests(testCaseFactory.processTestSpecification(specifications.get()), allGrammarsListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent());
         assertThat(results.passingPhraseTotal()).isEqualTo(4);
     }
 }

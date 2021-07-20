@@ -184,7 +184,7 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
     @Override
     public void enterWhenTestSpecificationProcessedByFactory(TestCaseFactoryParser.WhenTestSpecificationProcessedByFactoryContext ctx) {
         Preconditions.checkNotNull(testCaseFactory, "Test Case factory was not set!");
-        testCases = testCaseFactory.processTestSpecification(builder.build());
+        testCases = testCaseFactory.processTestSpecification(List.of(builder.build()));
     }
 
     @Override

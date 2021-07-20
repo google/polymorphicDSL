@@ -83,6 +83,18 @@ public class TestResourceParserBaseListener implements TestResourceParserListene
 	 * <p>The default implementation does nothing.</p>
 	 */
 	@Override public void exitDocstring(TestResourceParser.DocstringContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void enterTextInDoubleQuotesEnd(TestResourceParser.TextInDoubleQuotesEndContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation does nothing.</p>
+	 */
+	@Override public void exitTextInDoubleQuotesEnd(TestResourceParser.TextInDoubleQuotesEndContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

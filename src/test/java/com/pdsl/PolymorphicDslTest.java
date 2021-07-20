@@ -70,14 +70,12 @@ public class PolymorphicDslTest {
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
-        Optional<TestSpecification> testSpecification = betaTestFactory.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecification = betaTestFactory.getTestSpecifications(dslFiles);
         assertThat(testSpecification.isPresent()).isTrue();
-        TestSpecification specifications = testSpecification.get();
+        Collection<TestSpecification> specifications = testSpecification.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         PolymorphicDslTestRunResults results = executor.runTests(testCases, new PolymorphicDslRegistryParserBaseListener());
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent()).isTrue();
-        assertThat(specifications.nestedTestSpecifications().get().size()).isEqualTo(1);
         assertThat(results.failingTestTotal()).isEqualTo(0);
         assertThat(results.passingPhraseTotal()).isEqualTo(1);
         assertThat(results.totalPhrases()).isEqualTo(1);
@@ -94,16 +92,13 @@ public class PolymorphicDslTest {
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
-        Optional<TestSpecification> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
         assertThat(testSpecifications.isPresent()).isTrue();
-        TestSpecification specifications = testSpecifications.get();
+        Collection<TestSpecification> specifications = testSpecifications.get();
         Collection<TestCase> testCase = testCaseFactory.processTestSpecification(specifications);
         PolymorphicDslTestRunResults results = new DefaultPolymorphicDslTestExecutor()
                 .runTests(testCase, new PolymorphicDslBetaParserBaseListener());
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent()).isTrue();
-        assertThat(specifications.nestedTestSpecifications().get().size()).isEqualTo(1);
-        assertThat(specifications.nestedTestSpecifications().get().get(0).getPhrases().get().size()).isEqualTo(1);
         assertThat(results.passingPhraseTotal()).isEqualTo(1);
         assertThat(results.totalPhrases()).isEqualTo(1);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
@@ -123,7 +118,7 @@ public class PolymorphicDslTest {
 
         try {
             // Act
-            Optional<TestSpecification> testSpecification = betaTestFactory.getTestSpecifications(dslFiles);
+            betaTestFactory.getTestSpecifications(dslFiles);
             //Assert
             fail("No exception when no phrases run");
         } catch (Throwable e) { }
@@ -136,13 +131,12 @@ public class PolymorphicDslTest {
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
-        Optional<TestSpecification> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
+        Optional<Collection<TestSpecification>> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
         assertThat(testSpecifications.isPresent()).isTrue();
-        TestSpecification specifications = testSpecifications.get();
+        Collection<TestSpecification> specifications = testSpecifications.get();
         Collection<TestCase> testCases = testCaseFactory.processTestSpecification(specifications);
         PolymorphicDslTestRunResults results = executor.runTests(testCases, new PolymorphicDslBetaParserBaseListener());
         // Assert
-        assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent());
         assertThat(results.passingTestTotal()).isEqualTo(1);
     }
 
@@ -150,7 +144,7 @@ public class PolymorphicDslTest {
     public void testWithEmptyFile_illegalArgument() {
         try {
             TestSpecification emptySpecification = new TestSpecificationStub();
-            Collection<TestCase> testCases = testCaseFactory.processTestSpecification(emptySpecification);
+            Collection<TestCase> testCases = testCaseFactory.processTestSpecification(List.of(emptySpecification));
             executor.runTests(testCases, new PolymorphicDslBetaParserBaseListener());
              assert(false) : "No exception thrown when running empty list of specifications!";
         } catch (Throwable e) {

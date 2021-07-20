@@ -15,9 +15,14 @@ import java.util.stream.Stream;
 public class PreorderTestCaseFactory implements TestCaseFactory {
 
     @Override
-    public Collection<TestCase> processTestSpecification(TestSpecification testSpecification) {
-        List<TestSection> testBody = new ArrayList<>();
-        return recursiveWalkAndCreateOnLeaf(testSpecification, testBody, Optional.empty(), testSpecification.getId(), new Accumulator());
+    public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
+        Collection<TestCase> testCases = new ArrayList<TestCase>(testSpecifications.size()); // Capacity likely too small
+        for (TestSpecification testSpecification : testSpecifications) {
+            List<TestSection> testBody = new ArrayList<>();
+            testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, testBody, Optional.empty(),
+                    testSpecification.getId(), new Accumulator()));
+        }
+        return testCases;
     }
 
     private static class Accumulator {

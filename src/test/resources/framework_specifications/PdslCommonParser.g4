@@ -9,3 +9,5 @@ testSpecificationIsProcessedByTestCaseFactory : TEST_SPECIFICATION_IS_PROCESSED_
 polymorphicDslTestExecutor : POLYMORPHIC_DSL_TEST_EXECUTOR ;
 
 testRunResultProduced : TEST_RUN_RESULT_PRODUCED ;
+
+whenTheTestCaseIsProcessedByAnyPdslTestExecutor : TEST_CASE_IS_PROCESSED ;

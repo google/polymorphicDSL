@@ -4,6 +4,7 @@ import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -24,7 +25,7 @@ public interface TestSpecificationFactory {
      * @param testContent The data to be processed into a Test Specification
      * @return TestSpecification if the test content could be processed, empty if not
      */
-    Optional<TestSpecification> getTestSpecifications(Set<URL> testContent);
+    Optional<Collection<TestSpecification>> getTestSpecifications(Set<URL> testContent);
 
 
 }

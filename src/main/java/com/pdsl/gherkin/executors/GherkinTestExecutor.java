@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,14 +47,14 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
     public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
                                                                 ParseTreeListener grammarListener, ParseTreeListener subgrammarListener) {
         // Use the file locations and convert the feature files to test specifications
-        Optional<TestSpecification> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
+        Optional<Collection<TestSpecification>> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
         if (testSpecificationOptional.isEmpty()) {
             throw new IllegalStateException("None of the test resources could be converted into a test specification!");
         }
         // If tag expressions were provided filter the test specification
-        Optional<TestSpecification> filteredSpecification =
+        Optional<Collection<TestSpecification>> filteredSpecification =
                 testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
-        TestSpecification testSpecification;
+        Collection<TestSpecification> testSpecification;
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
             return new PolymorphicDslTestRunResults(System.out);
@@ -70,25 +71,23 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
     public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
                                                                 ParseTreeListener grammarListener) {
         // Use the file locations and convert the feature files to test specifications
-        Optional<TestSpecification> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
+        Optional<Collection<TestSpecification>> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
         if (testSpecificationOptional.isEmpty()) {
             throw new IllegalStateException("Test resources could not be converted to a Test Specification");
         }
         // If tag expressions were provided filter the test specification
-        Optional<TestSpecification> filteredSpecification =
+        Optional<Collection<TestSpecification>> filteredSpecification =
                 testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
-        TestSpecification testSpecification;
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
             return new PolymorphicDslTestRunResults(System.out);
         } else {
-            testSpecification = filteredSpecification.get();
+            Collection<TestSpecification> testSpecifications = filteredSpecification.get();
+            // Convert the test specifications into test cases
+            Collection<TestCase> testCases = testCaseFactory.processTestSpecification(testSpecifications);
+            //Finally execute the tests
+            return executor.runTests(testCases, grammarListener);
         }
-
-        // Convert the test specifications into test cases
-        Collection<TestCase> testCases = testCaseFactory.processTestSpecification(testSpecification);
-        //Finally execute the tests
-        return executor.runTests(testCases, grammarListener);
     }
 
     public PolymorphicDslTestRunResults processFilesAndRunTests(Set<URL> testResources,

@@ -78,6 +78,16 @@ public interface PdslTestResourceParserListener extends ParseTreeListener {
 	 */
 	void exitDocstring(PdslTestResourceParser.DocstringContext ctx);
 	/**
+	 * Enter a parse tree produced by {@link PdslTestResourceParser#textInDoubleQuotesEnd}.
+	 * @param ctx the parse tree
+	 */
+	void enterTextInDoubleQuotesEnd(PdslTestResourceParser.TextInDoubleQuotesEndContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link PdslTestResourceParser#textInDoubleQuotesEnd}.
+	 * @param ctx the parse tree
+	 */
+	void exitTextInDoubleQuotesEnd(PdslTestResourceParser.TextInDoubleQuotesEndContext ctx);
+	/**
 	 * Enter a parse tree produced by {@link PdslTestResourceParser#testResourceValidity}.
 	 * @param ctx the parse tree
 	 */
