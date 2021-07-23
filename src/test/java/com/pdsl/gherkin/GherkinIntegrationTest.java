@@ -33,7 +33,7 @@ public class GherkinIntegrationTest {
             AllGrammarsParser.class, AllGrammarsLexer.class, PolymorphicDslMinimalParser.class, AllGrammarsLexer.class);
     private static final TestSpecificationFactory provider =
             new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
-    private static final GherkinTestExecutor minimalExecutor = new GherkinTestExecutor(MinimalParser.class, MinimalLexer.class, MinimalParser.class, MinimalLexer.class);
+    private static final GherkinTestExecutor minimalExecutor = new GherkinTestExecutor(PolymorphicDslMinimalParser.class, MinimalLexer.class, PolymorphicDslMinimalParser.class, MinimalLexer.class);
     private static final GherkinTestExecutor executor = new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
     // Only reads the text "Given the minimalism"
     private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();

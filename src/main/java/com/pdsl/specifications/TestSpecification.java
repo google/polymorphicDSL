@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,4 +55,5 @@ public interface TestSpecification {
      */
     Optional<Iterator<ParseTree>> getPhraseIterator();
     Optional<List<ParseTree>> getPhrases();
+
 }
