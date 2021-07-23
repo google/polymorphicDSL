@@ -51,19 +51,6 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
         return results;
     }
 
-    public static List<ParseTree> getPhrases(TestSpecification testSpecification) {
-        List<ParseTree> phrases = new LinkedList<>();
-        if (testSpecification.getPhrases().isPresent()) {
-            phrases.addAll(testSpecification.getPhrases().get());
-        }
-        if (testSpecification.nestedTestSpecifications().isPresent()) {
-            for (TestSpecification specification : testSpecification.nestedTestSpecifications().get()) {
-                phrases.addAll(getPhrases(specification));
-            }
-        }
-        return phrases;
-    }
-
     private PolymorphicDslTestRunResults walk(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
         PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(System.out);
         Set<Long> previouslyExecutedTests = new HashSet<>();
