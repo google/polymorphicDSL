@@ -3,17 +3,11 @@ package com.pdsl.gherkin;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
-import com.pdsl.specifications.TestSpecification;
-import com.pdsl.specifications.TestSpecificationFactory;
 import org.junit.Test;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;

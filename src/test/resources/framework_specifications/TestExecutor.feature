@@ -53,6 +53,7 @@ Background:
 		Then a "Test Run Result" is produced
 		And the test run results has 2 passing tests
 
+	Scenario: Tag Expressions
 		When the Gherkin Test Executor runs the tests with the tag expression "@SomeTag or @AnotherTag"
 		Then a "Test Run Result" is produced
 		And the test run results have 2 passing tests

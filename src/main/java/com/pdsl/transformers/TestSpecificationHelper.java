@@ -16,12 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TestSpecificationHelper {
-    public enum ErrorListenerStrategy {
-        GRAMMAR,
-        SUBGRAMMAR;
-    }
-
-
     static Optional<Parser> parserOf(InputStream inputStream, ErrorListenerStrategy strategy, Class<?> parserClass, Class<?> lexerClass) {
 
         Optional<? extends Lexer> lexer = lexerOf(lexerClass, inputStream, strategy);
@@ -84,5 +78,10 @@ public interface TestSpecificationHelper {
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException | IOException | NoSuchMethodException e) {
             throw new PolymorphicDslTransformationException("Could not create a lexer from the input stream!", e);
         }
+    }
+
+    public enum ErrorListenerStrategy {
+        GRAMMAR,
+        SUBGRAMMAR;
     }
 }

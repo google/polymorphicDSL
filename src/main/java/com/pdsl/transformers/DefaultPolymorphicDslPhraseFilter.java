@@ -22,6 +22,8 @@ import java.util.Optional;
 public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer, SP extends Parser, SL extends Lexer>
         implements PolymorphicDslPhraseFilter {
 
+    private static final String BOLD = "\033[1m";
+    private static final String RESET_ANSI = "\033[0m";
     private final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslPhraseFilter.class);
     private final Constructor<L> lexerConstructor;
     private final Constructor<P> parserConstructor;
@@ -30,8 +32,22 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
     private final Method subgrammarActivePhraseRule;
     private final Method activePhrasesRule;
     private final ErrorListenerStrategy strategy;
-    private static final String BOLD = "\033[1m";
-    private static final String RESET_ANSI = "\033[0m";
+
+    public DefaultPolymorphicDslPhraseFilter(Class<P> parserClass, Class<L> lexerClass, Class<SP> subgrammarParser, Class<SL> subgrammarLexer) {
+        final String allRulesMethodName = "polymorphicDslAllRules";
+        try {
+            this.lexerConstructor = lexerClass.getConstructor(CharStream.class);
+            this.parserConstructor = parserClass.getConstructor(TokenStream.class);
+            this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
+            this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
+            this.activePhrasesRule = parserClass.getMethod(allRulesMethodName, (Class<?>[]) null);
+            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(allRulesMethodName, (Class<?>[]) null);
+            this.strategy = ErrorListenerStrategy.GRAMMAR;
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException(
+                    String.format("Trouble creating either the lexer or parser!\nNote the parser MUST Have a rule in the grammar called '%s'", allRulesMethodName), e);
+        }
+    }
 
     @Override
     public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testContent) {
@@ -73,27 +89,6 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
         return parserTrees;
     }
 
-    public enum ErrorListenerStrategy {
-        SUBGRAMMAR, // Ignore token recognition errors
-        GRAMMAR // Report any errors detected
-    }
-
-    public DefaultPolymorphicDslPhraseFilter(Class<P> parserClass, Class<L> lexerClass, Class<SP> subgrammarParser, Class<SL> subgrammarLexer) {
-        final String allRulesMethodName = "polymorphicDslAllRules";
-        try {
-            this.lexerConstructor = lexerClass.getConstructor(CharStream.class);
-            this.parserConstructor = parserClass.getConstructor(TokenStream.class);
-            this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
-            this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
-            this.activePhrasesRule = parserClass.getMethod(allRulesMethodName, (Class<?>[]) null);
-            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(allRulesMethodName, (Class<?>[]) null);
-            this.strategy = ErrorListenerStrategy.GRAMMAR;
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException(
-                    String.format("Trouble creating either the lexer or parser!\nNote the parser MUST Have a rule in the grammar called '%s'", allRulesMethodName), e);
-        }
-    }
-
     private Optional<SL> createSublexer(InputStream inputStream) {
         try {
             // We need to see if the lexer will recognize any of the tokens in the input stream
@@ -108,8 +103,8 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
             if (allTokens.size() == 0) {
-                    logger.warn(AnsiTerminalColorHelper.BRIGHT_CYAN + "Filtering out phrase:\n" + RESET_ANSI + "<START>" + AnsiTerminalColorHelper.BRIGHT_CYAN + new String(baos.toByteArray()) + RESET_ANSI + "<END>");
-                    return Optional.empty();
+                logger.warn(AnsiTerminalColorHelper.BRIGHT_CYAN + "Filtering out phrase:\n" + RESET_ANSI + "<START>" + AnsiTerminalColorHelper.BRIGHT_CYAN + new String(baos.toByteArray()) + RESET_ANSI + "<END>");
+                return Optional.empty();
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                 logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
                 logger.warn("The match was: " + allTokens.toString());
@@ -194,6 +189,11 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new PolymorphicDslTransformationException("Could not make parse tree from phrase!", e);
         }
+    }
+
+    public enum ErrorListenerStrategy {
+        SUBGRAMMAR, // Ignore token recognition errors
+        GRAMMAR // Report any errors detected
     }
 
 }

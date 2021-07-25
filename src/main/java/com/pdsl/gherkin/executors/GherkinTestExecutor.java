@@ -2,7 +2,10 @@ package com.pdsl.gherkin.executors;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
-import com.pdsl.gherkin.*;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
+import com.pdsl.gherkin.PdslGherkinListenerImpl;
+import com.pdsl.gherkin.PickleJarFactory;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.specifications.TestSpecification;
@@ -20,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,7 +35,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
     private final Logger logger = LoggerFactory.getLogger(GherkinTestExecutor.class);
     private final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
 
-    public <G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer>GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
+    public <G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
         phraseFilter = new DefaultPolymorphicDslPhraseFilter<G, L, SG, SL>(grammarParser, grammarLexer, subgrammarParser, subgrammarLexer);
         testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
     }

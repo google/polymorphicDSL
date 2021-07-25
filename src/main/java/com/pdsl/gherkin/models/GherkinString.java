@@ -1,19 +1,23 @@
 package com.pdsl.gherkin.models;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class GherkinString {
-    private Set<String> parameterSubstitutionKeys;
-    private String rawString;
     private static final Pattern parameterPattern;
 
     static {
         String regex = "(<[^>]*>)";
         Pattern pattern = Pattern.compile(regex);
         parameterPattern = pattern;
-    };
+    }
+
+    private final Set<String> parameterSubstitutionKeys;
+    private final String rawString;
 
     public GherkinString(String data) {
         Matcher matcher = parameterPattern.matcher(data);
@@ -36,7 +40,9 @@ public class GherkinString {
     }
 
     public String getStringWithSubstitutions(Map<String, String> substitutions) {
-        if (!hasSubstitutions()) { return rawString; }
+        if (!hasSubstitutions()) {
+            return rawString;
+        }
         String substitutedString = rawString;
         try {
             for (Map.Entry<String, String> entry : substitutions.entrySet()) {

@@ -5,7 +5,6 @@ import com.pdsl.specifications.TestSpecification;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.util.*;
 
 public class GherkinTestSpecification implements TestSpecification {

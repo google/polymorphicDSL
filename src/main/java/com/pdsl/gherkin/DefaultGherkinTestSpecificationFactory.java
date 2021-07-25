@@ -1,6 +1,9 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.gherkin.filter.GherkinTagsLexer;
+import com.pdsl.gherkin.filter.GherkinTagsParser;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.models.GherkinBackground;
 import com.pdsl.gherkin.models.GherkinStep;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
@@ -11,6 +14,9 @@ import com.pdsl.gherkin.specifications.GherkinTestCaseSpecification;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,18 +34,17 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private Charset charset = Charset.defaultCharset();
     private final int DESCRIPTION_MAX_LENGTH;
     private final PolymorphicDslPhraseFilter phraseFilter;
-    private final static GherkinTagFilterer gherkinTagFilterer = new GherkinTagFiltererImpl();
-    private final static Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
-
+    //private static final GherkinTagFilterer gherkinTagFilterer = new GherkinTagsVisitorImpl();
+    private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
     public DefaultGherkinTestSpecificationFactory(PickleJarFactory pickleJarFactory,
                                                   PolymorphicDslPhraseFilter phraseFilter) {
-        this.pickleJarFactory = pickleJarFactory;;
+        this.pickleJarFactory = pickleJarFactory;
         DESCRIPTION_MAX_LENGTH = 1024;
         this.phraseFilter = phraseFilter;
     }
 
     public DefaultGherkinTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
-        this.pickleJarFactory = PickleJarFactory.DEFAULT;;
+        this.pickleJarFactory = PickleJarFactory.DEFAULT;
         DESCRIPTION_MAX_LENGTH = 1024;
         this.phraseFilter = phraseFilter;
     }
@@ -250,7 +255,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             }
         } else { // This is a leaf node, i.e a pickle
             // See if this pickle matches the tag expression or not
-            if (!gherkinTagFilterer.tagExpressionMatchesPickle(allGherkinItemTags, tagExpression, charset)) {
+            if (!new GherkinTagsVisitorImpl().tagExpressionMatchesPickle(allGherkinItemTags, tagExpression)) {
                 return Optional.empty();
             } else {
                 builder.withTestPhrases(testSpecification.getPhrases().orElseThrow()); // scenario must have steps

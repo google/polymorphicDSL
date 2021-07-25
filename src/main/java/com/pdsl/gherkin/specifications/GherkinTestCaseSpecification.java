@@ -9,8 +9,8 @@ import java.util.*;
 
 public class GherkinTestCaseSpecification implements TestSpecification {
 
-    private TestSpecification testSpecification;
     private final Set<String> tags;
+    private final TestSpecification testSpecification;
 
     public GherkinTestCaseSpecification(Set<String> tags, TestSpecification testSpecification) {
         this.testSpecification = testSpecification;

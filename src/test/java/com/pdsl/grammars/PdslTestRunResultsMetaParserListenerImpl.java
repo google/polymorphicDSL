@@ -219,7 +219,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
 
         SingleTestOutputPreorderTestCaseFactory factory = new SingleTestOutputPreorderTestCaseFactory();
         Optional<Collection<TestSpecification>> testSpecification = testSpecificationFactory.getTestSpecifications(urlSet);
-        assertThat(testSpecification.isPresent());
+        assertThat(testSpecification.isPresent()).isTrue();
         Collection<TestCase> testCases = factory.processTestSpecification(testSpecification.get());
         testCaseCollection = Optional.of(testCases);
     }

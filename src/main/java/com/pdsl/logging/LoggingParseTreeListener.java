@@ -11,18 +11,19 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class LoggingParseTreeListener implements ParseTreeListener {
-    private Logger logger = LoggerFactory.getLogger(LoggingParseTreeListener.class);
-    private boolean odd = false;
     private static final String YELLOW = "\033[93m";
     private static final String RED = "\033[31;1m";
     private static final String GREEN = "\033[92;1;2m";
     private static final String CLEAR_LINE = "\033[1G";
     private static final String RESET_ANSI = "\033[0m";
     private final List<String> rules;
+    private Logger logger = LoggerFactory.getLogger(LoggingParseTreeListener.class);
+    private boolean odd = false;
 
     public LoggingParseTreeListener() {
         this.rules = new LinkedList<>();
     }
+
     public LoggingParseTreeListener(List<String> rules) {
         this.rules = rules;
     }

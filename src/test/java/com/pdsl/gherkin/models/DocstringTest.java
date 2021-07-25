@@ -1,8 +1,8 @@
 package com.pdsl.gherkin.models;
 
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import com.pdsl.gherkin.PdslGherkinRecognizer;
-import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;

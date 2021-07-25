@@ -1,19 +1,16 @@
 package com.pdsl;
 
 
-import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
-
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.grammars.*;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
+import com.pdsl.testcases.SingleTestOutputPreorderTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
-import com.pdsl.testcases.SingleTestOutputPreorderTestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -25,44 +22,21 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
+import static com.google.common.truth.Truth.assertThat;
+import static org.junit.Assert.fail;
+
 /**
  * Component tests for PolymorphicDslTestExecutor
  */
 public class PolymorphicDslTest {
 
-    private static class TestSpecificationStub implements  TestSpecification {
-
-        @Override
-        public Optional<ByteArrayOutputStream> getMetaData() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
-            return Optional.empty();
-        }
-
-        @Override
-        public String getId() {
-            return null;
-        }
-
-        @Override
-        public Optional<Iterator<ParseTree>> getPhraseIterator() {
-            return Optional.empty();
-        }
-
-        @Override
-        public Optional<List<ParseTree>> getPhrases() {
-            return Optional.empty();
-        }
-    }
+    private static final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
+    private static final TestCaseFactory testCaseFactory = new SingleTestOutputPreorderTestCaseFactory();
     private final PolymorphicDslPhraseFilter betaPhraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslRegistryParser, RegistryLexer, PolymorphicDslBetaParser, BetaLexer>(
             PolymorphicDslRegistryParser.class, RegistryLexer.class, PolymorphicDslBetaParser.class, BetaLexer.class
     );
     private final TestSpecificationFactory betaTestFactory = new LineDelimitedTestSpecificationFactory(betaPhraseFilter);
-    private static final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
-    private static final TestCaseFactory testCaseFactory = new SingleTestOutputPreorderTestCaseFactory();
+
     @Test
     public void validGrammarWalkThroughRegistryAllStepsInContext_shouldSucceed() throws MalformedURLException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).toURI().toURL();
@@ -121,7 +95,8 @@ public class PolymorphicDslTest {
             betaTestFactory.getTestSpecifications(dslFiles);
             //Assert
             fail("No exception when no phrases run");
-        } catch (Throwable e) { }
+        } catch (Throwable e) {
+        }
     }
 
     @Test
@@ -142,13 +117,42 @@ public class PolymorphicDslTest {
 
     @Test
     public void testWithEmptyFile_illegalArgument() {
+				boolean exceptionFound = false;
         try {
             TestSpecification emptySpecification = new TestSpecificationStub();
             Collection<TestCase> testCases = testCaseFactory.processTestSpecification(List.of(emptySpecification));
             executor.runTests(testCases, new PolymorphicDslBetaParserBaseListener());
-             assert(false) : "No exception thrown when running empty list of specifications!";
         } catch (Throwable e) {
+					exceptionFound = true;
+        }
+				assertThat(exceptionFound).isTrue();
+    }
 
+    private static class TestSpecificationStub implements TestSpecification {
+
+        @Override
+        public Optional<ByteArrayOutputStream> getMetaData() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
+            return Optional.empty();
+        }
+
+        @Override
+        public String getId() {
+            return null;
+        }
+
+        @Override
+        public Optional<Iterator<ParseTree>> getPhraseIterator() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<List<ParseTree>> getPhrases() {
+            return Optional.empty();
         }
     }
 

@@ -1,8 +1,8 @@
 package com.pdsl.gherkin.models;
 
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import com.pdsl.gherkin.PdslGherkinRecognizer;
-import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,19 +12,18 @@ import java.util.Map;
 import java.util.Optional;
 
 import static com.google.common.truth.Truth.assertThat;
+
 /**
  * Tests that the interpreter structures the gherkin file correctly
  */
-public class GherkinTransformerTest
-{
+public class GherkinTransformerTest {
 
     private static final String resourcePath = "src/test/resources/testdata/good/";
     private static final PdslGherkinRecognizer transformer = new PdslGherkinInterpreterImpl();
     private static final PdslGherkinListenerImpl listener = new PdslGherkinListenerImpl();
 
     @Test
-    public void minimalFeature_hasSingleScenario() throws IOException
-    {
+    public void minimalFeature_hasSingleScenario() throws IOException {
         // Arrange
         Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal.feature").toUri().toURL(), listener);
         // Act
@@ -34,7 +33,7 @@ public class GherkinTransformerTest
         assertThat(feature.getTitle().isPresent()).isTrue();
         assertThat(feature.getTitle().get()).contains("Minimal");
         // Scenario
-        assertThat(feature.getOptionalGherkinScenarios().isPresent());
+        assertThat(feature.getOptionalGherkinScenarios().isPresent()).isTrue();
         List<GherkinScenario> scenarioList = feature.getOptionalGherkinScenarios().get();
         assertThat(scenarioList.size()).isEqualTo(1);
         GherkinScenario scenario = scenarioList.get(0);
@@ -134,7 +133,7 @@ public class GherkinTransformerTest
         // Examples
         GherkinScenario ruleScenario = rule.getScenarios().get().get(0);
         assertThat(ruleScenario.getExamples().isPresent()).isTrue();
-        List<GherkinExamplesTable> examplesTableList  = ruleScenario.getExamples().get();
+        List<GherkinExamplesTable> examplesTableList = ruleScenario.getExamples().get();
         assertThat(examplesTableList.size()).isEqualTo(1);
         Map<String, List<String>> dataTable = examplesTableList.get(0).getTable().get();
         assertThat(dataTable.keySet().size()).isEqualTo(1);

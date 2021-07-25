@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 public class PickleJarFactory {
 
+    public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     private final int ABBREVIATED_DESCRIPTION_LENGTH = 1024;
+    private final Charset charset;
     private PdslGherkinRecognizer pdslGherkinRecognizer;
     private PdslGherkinListener listener;
-    private final Charset charset;
 
-    public static PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset) {
         this.pdslGherkinRecognizer = pdslGherkinRecognizer;
         this.listener = gherkinListener;
@@ -259,6 +259,6 @@ public class PickleJarFactory {
             tags.add(remainingTag);
             tagBuilder.reset();
         }
-            return tags;
+        return tags;
     }
 }

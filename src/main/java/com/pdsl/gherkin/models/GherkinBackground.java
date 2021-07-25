@@ -8,14 +8,26 @@ import java.util.Optional;
  * A background that contains shared functionality with lower level {@code GherkinScenario} or {@GherkinRule}s.
  */
 public class GherkinBackground {
-    private Optional<GherkinString> title; //TODO: See if substitutions can be done in background at all
-    private Optional<GherkinString> longDescription; //TODO: See if substitutions can be done in background at all
-    private Optional<List<GherkinStep>> steps;
+    private final Optional<GherkinString> title; //TODO: See if substitutions can be done in background at all
+    private final Optional<GherkinString> longDescription; //TODO: See if substitutions can be done in background at all
+    private final Optional<List<GherkinStep>> steps;
 
     public GherkinBackground(Builder builder) {
         this.title = builder.title.isEmpty() ? Optional.empty() : Optional.of(new GherkinString(builder.title));
         this.longDescription = Optional.of(new GherkinString(builder.longDescription));
         this.steps = builder.steps.isEmpty() ? Optional.empty() : Optional.of(builder.steps);
+    }
+
+    public Optional<GherkinString> getTitle() {
+        return title;
+    }
+
+    public Optional<GherkinString> getLongDescription() {
+        return longDescription;
+    }
+
+    public Optional<List<GherkinStep>> getSteps() {
+        return steps;
     }
 
     public static class Builder {
@@ -41,17 +53,5 @@ public class GherkinBackground {
         public GherkinBackground build() {
             return new GherkinBackground(this);
         }
-    }
-
-    public Optional<GherkinString> getTitle() {
-        return title;
-    }
-
-    public Optional<GherkinString> getLongDescription() {
-        return longDescription;
-    }
-
-    public Optional<List<GherkinStep>> getSteps() {
-        return steps;
     }
 }

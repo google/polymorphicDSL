@@ -1,21 +1,14 @@
 package com.pdsl.reports;
 
-import org.antlr.runtime.tree.ParseTree;
-
-import javax.swing.text.html.Option;
-import java.util.List;
 import java.util.Optional;
 
 public class TestMetadata {
 
-    private boolean isPassed;
     private final String testSuiteId;
-
+    private final long phraseBodyId;
+    private boolean isPassed;
     private int phrasesSkippedDueToFailure = 0;
     private int passingPhraseTotal = 0;
-
-    private final long phraseBodyId;
-
     private Optional<String> failingPhrase = Optional.empty();
     private Optional<Throwable> failureReason = Optional.empty();
 
@@ -24,20 +17,6 @@ public class TestMetadata {
         this.testSuiteId = testSuiteId;
         this.passingPhraseTotal = passingPhraseTotal;
         this.phraseBodyId = phraseBodyId;
-    }
-
-    public static TestMetadata failedTest(String testSuiteId, int passingPhraseTotal,
-                                          int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason,
-            long phraseBodyId) {
-        return new TestMetadata(testSuiteId, passingPhraseTotal, phrasesSkippedDueToFailure, failingStep, failureReason, phraseBodyId);
-    }
-
-    public static TestMetadata duplicateTest(String testTitle, long testCaseId) {
-        return new TestMetadata(testTitle, 0, testCaseId);
-    }
-
-    public static TestMetadata passingTest(String testSuiteId, int passingPhraseTotal, long phraseBodyId) {
-        return new TestMetadata(testSuiteId, passingPhraseTotal, phraseBodyId);
     }
 
     public TestMetadata(String testSuiteId, int passingPhraseTotal, int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason, long phraseBodyId) {
@@ -50,11 +29,27 @@ public class TestMetadata {
         this.phraseBodyId = phraseBodyId;
     }
 
+    public static TestMetadata failedTest(String testSuiteId, int passingPhraseTotal,
+                                          int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason,
+                                          long phraseBodyId) {
+        return new TestMetadata(testSuiteId, passingPhraseTotal, phrasesSkippedDueToFailure, failingStep, failureReason, phraseBodyId);
+    }
+
+    public static TestMetadata duplicateTest(String testTitle, long testCaseId) {
+        return new TestMetadata(testTitle, 0, testCaseId);
+    }
+
+    public static TestMetadata passingTest(String testSuiteId, int passingPhraseTotal, long phraseBodyId) {
+        return new TestMetadata(testSuiteId, passingPhraseTotal, phraseBodyId);
+    }
+
     public long getPhraseBodyId() {
         return phraseBodyId;
     }
 
-    public boolean getIsPassed() { return isPassed; }
+    public boolean getIsPassed() {
+        return isPassed;
+    }
 
     public String getTestSuiteId() {
         return testSuiteId;
@@ -73,7 +68,7 @@ public class TestMetadata {
     }
 
     public int getTotalPhrases() {
-        return passingPhraseTotal + phrasesSkippedDueToFailure  + (isPassed ? 0 : 1);
+        return passingPhraseTotal + phrasesSkippedDueToFailure + (isPassed ? 0 : 1);
     }
 
     public Optional<Throwable> getFailureReason() {
