@@ -17,5 +17,5 @@ public interface ReportListener {
      * @param postFilteredTestId Identifier of the TestSpecification after filtering out phrases
      * @return true if report contains this test or false if not
      */
-    boolean containsFilteredTest(int postFilteredTestId);
+    boolean containsFilteredTest(long postFilteredTestId);
 }

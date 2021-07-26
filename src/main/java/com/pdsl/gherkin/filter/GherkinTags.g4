@@ -16,11 +16,9 @@ OR : O R;
 NOT : N O T;
 L_PAREN : '(' ;
 R_PAREN : ')' ;
-//////////////////////// https://stackoverflow.com/questions/68248549/how-can-i-modify-my-ebnf-to-handle-cases-like-not-12-not-1
-
-//not : NOT? TAG (L_PAREN expr R_PAREN)* ;
-
+//////////////////////// https://stackoverflow.com/questions/68248549/how-can-i-modify-my-ebnf-to-handle-cases-like-not-12-not       -1
 not : (NOT)? expr ;
 and : not (AND not)* ;
 or : and (OR and)* EOF?;
 expr : TAG | (L_PAREN or R_PAREN) ;
+

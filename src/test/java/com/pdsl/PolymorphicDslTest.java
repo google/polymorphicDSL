@@ -87,16 +87,9 @@ public class PolymorphicDslTest {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/math.pdsl").getFile()).toURI().toURL();
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
-
         dslFiles.add(absolutePathValid);
-
-        try {
-            // Act
-            betaTestFactory.getTestSpecifications(dslFiles);
-            //Assert
-            fail("No exception when no phrases run");
-        } catch (Throwable e) {
-        }
+        Optional<Collection<TestSpecification>>  specification = betaTestFactory.getTestSpecifications(dslFiles);
+        assertThat(specification.isEmpty()).isTrue();
     }
 
     @Test

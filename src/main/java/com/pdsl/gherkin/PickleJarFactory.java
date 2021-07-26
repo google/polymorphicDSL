@@ -91,10 +91,10 @@ public class PickleJarFactory {
                     for (Map<String, String> substitutions : table.getRows()) {
                         // steps list is guaranteed to be present by the pdslGherkinInterpreter
                         // Substitutions may need to be made on each step, docstring or gherkin table
-                        List<String> substitutedSteps = getTextSubstitutionsForStepBody(scenario.getStepsList().get(), substitutions);
+                        List<String> substitutedSteps = getTextSubstitutionsForStepBody(scenario.getStepsList().orElseThrow(), substitutions);
                         // Create a pickle with the substituted steps
                         PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
-                                scenario.getTitle().get().getStringWithSubstitutions(substitutions),
+                                scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
                                 substitutedSteps);
                         if (scenario.getLongDescription().isPresent()) {
                             builder.withLongDescription(scenario.getLongDescription().get().getStringWithSubstitutions(substitutions));
@@ -109,10 +109,10 @@ public class PickleJarFactory {
             } else { // No substitutions needed
                 // steps list is guaranteed to be present by the pdslGherkinInterpreter
                 // Substitutions may need to be made on each step, docstring or gherkin table
-                List<String> stepBody = getTextFromStepBody(scenario.getStepsList().get());
+                List<String> stepBody = getTextFromStepBody(scenario.getStepsList().orElseThrow());
                 // Create a pickle with the substituted steps
                 PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
-                        scenario.getTitle().get().getRawString(),
+                        scenario.getTitle().orElseThrow().getRawString(),
                         stepBody);
                 if (!tags.isEmpty()) {
                     builder.withTags(processTags(tags));
@@ -131,7 +131,7 @@ public class PickleJarFactory {
         List<PickleJar.PickleJarRule> pickleJarRules = new LinkedList<>();
         for (GherkinRule rule : rules) {
 
-            List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().get());
+            List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().orElseThrow());
             PickleJar.PickleJarRule.Builder builder = new PickleJar.PickleJarRule.Builder(rule.getTitle().orElseThrow(), scenarios);
             if (rule.getBackground().isPresent()) {
                 builder.withBackground(rule.getBackground().get());

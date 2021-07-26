@@ -102,7 +102,7 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
     }
 
     @Override
-    public boolean containsFilteredTest(int postFilteredTestId) {
+    public boolean containsFilteredTest(long postFilteredTestId) {
         return resultIds.contains(postFilteredTestId);
     }
 }

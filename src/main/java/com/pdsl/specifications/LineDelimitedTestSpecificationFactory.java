@@ -31,8 +31,7 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
         Preconditions.checkArgument(!resourceLocations.isEmpty(), "Test Resources cannot be empty!");
         List<TestSpecification> testSpecifications = new ArrayList<>(resourceLocations.size());
         for (URL resource : resourceLocations) {
-            try {
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()));
+            try (BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(resource.openStream()))) {
                 List<InputStream> lines = bufferedReader.lines()
                         .map(line -> new ByteArrayInputStream(line.getBytes(charset)))
                         .collect(Collectors.toList());

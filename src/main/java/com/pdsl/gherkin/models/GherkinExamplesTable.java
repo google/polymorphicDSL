@@ -32,7 +32,6 @@ public class GherkinExamplesTable {
         return table;
     }
 
-    // TODO: See if the return value should be made optional
     public List<Map<String, String>> getRows() {
         if (table.isEmpty()) {
             return new LinkedList<>();
@@ -42,8 +41,8 @@ public class GherkinExamplesTable {
         List<Map<String, String>> rows = new ArrayList<>(TOTAL_ROWS);
         for (int i = 0; i < TOTAL_ROWS; i++) {
             Map<String, String> rowSubstitutions = new HashMap<>();
-            for (String key : tableData.keySet()) {
-                rowSubstitutions.put(key, tableData.get(key).get(i));
+            for (Map.Entry<String, List<String>> entry : tableData.entrySet()) {
+                rowSubstitutions.put(entry.getKey(), tableData.get(entry.getKey()).get(i));
             }
             rows.add(rowSubstitutions);
         }

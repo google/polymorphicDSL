@@ -8,8 +8,8 @@ import java.util.Optional;
  * A background that contains shared functionality with lower level {@code GherkinScenario} or {@GherkinRule}s.
  */
 public class GherkinBackground {
-    private final Optional<GherkinString> title; //TODO: See if substitutions can be done in background at all
-    private final Optional<GherkinString> longDescription; //TODO: See if substitutions can be done in background at all
+    private final Optional<GherkinString> title;
+    private final Optional<GherkinString> longDescription;
     private final Optional<List<GherkinStep>> steps;
 
     public GherkinBackground(Builder builder) {

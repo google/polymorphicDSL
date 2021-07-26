@@ -212,4 +212,13 @@ public class GherkinTagFiltererTest {
                 Set.of("@tag1", "@tag2", "@tag3"), "(not @tag1 and not @tag2) and @tag2")).isFalse();
     }
 
+    @Test
+    public void tagExpression_isCaseInsensitive() throws IOException {
+        assertThat(filter.tagExpressionMatchesPickle(
+                Set.of("@tag1", "@tag2", "@tag3"), "@tag1 AND @tag2")).isTrue();
+        assertThat(filter.tagExpressionMatchesPickle(
+                Set.of("@tag1", "@tag2", "@tag3"), "@tag1 OR @tag9")).isTrue();
+        assertThat(filter.tagExpressionMatchesPickle(
+                Set.of("@tag1", "@tag2", "@tag3"), "@tag1 AnD NOT @tag9")).isTrue();
+    }
 }
