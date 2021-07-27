@@ -7,6 +7,7 @@ import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import com.pdsl.gherkin.PickleJarFactory;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
+import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.PreorderTestCaseFactory;
@@ -59,7 +60,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
         Collection<TestSpecification> testSpecification;
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
-            return new PolymorphicDslTestRunResults(System.out);
+            return new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream());
         } else {
             testSpecification = filteredSpecification.get();
         }
@@ -82,7 +83,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
                 testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
-            return new PolymorphicDslTestRunResults(System.out);
+            return new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream());
         } else {
             Collection<TestSpecification> testSpecifications = filteredSpecification.get();
             // Convert the test specifications into test cases

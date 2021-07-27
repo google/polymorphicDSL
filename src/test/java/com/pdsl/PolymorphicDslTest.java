@@ -129,7 +129,7 @@ public class PolymorphicDslTest {
         }
 
         @Override
-        public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
+        public Optional<List<TestSpecification>> nestedTestSpecifications() {
             return Optional.empty();
         }
 

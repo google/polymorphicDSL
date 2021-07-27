@@ -13,7 +13,7 @@ public final class DefaultTestSpecification implements TestSpecification {
     private final String id;
     private final Optional<List<ParseTree>> phrases;
     private final Optional<ByteArrayOutputStream> metaData;
-    private final Optional<List<? extends TestSpecification>> childItems;
+    private final Optional<List<TestSpecification>> childItems;
 
     private DefaultTestSpecification(Builder builder) {
         this.id = builder.id;
@@ -28,7 +28,7 @@ public final class DefaultTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
+    public Optional<List<TestSpecification>> nestedTestSpecifications() {
         return childItems;
     }
 
@@ -51,7 +51,7 @@ public final class DefaultTestSpecification implements TestSpecification {
         private final String id;
         private Optional<List<ParseTree>> phrases = Optional.empty();
         private Optional<ByteArrayOutputStream> metaData = Optional.empty();
-        private Optional<List<? extends TestSpecification>> childItems = Optional.empty();
+        private Optional<List<TestSpecification>> childItems = Optional.empty();
 
         public Builder(String id) {
             Preconditions.checkArgument(id != null && !id.isEmpty(), "Test Specification ID cannot be mepty or null!");
@@ -87,7 +87,7 @@ public final class DefaultTestSpecification implements TestSpecification {
             return this;
         }
 
-        public void withChildItems(List<? extends TestSpecification> childItems) {
+        public void withChildItems(List<TestSpecification> childItems) {
             this.childItems = Optional.of(childItems);
         }
     }

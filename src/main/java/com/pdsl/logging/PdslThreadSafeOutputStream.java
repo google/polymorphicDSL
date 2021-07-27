@@ -1,9 +1,7 @@
 package com.pdsl.logging;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
@@ -15,40 +13,54 @@ import java.util.logging.SimpleFormatter;
  *
  * Due to the class being thread safe it is not particularly efficient
  */
-public class DefaultPdslLogger extends OutputStream {
+public final class PdslThreadSafeOutputStream extends OutputStream {
 
-    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DefaultPdslLogger.class.getName());
-    private final StringBuilder stringBuilder = new StringBuilder();
+    private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(PdslThreadSafeOutputStream.class.getName());
+
     static {
+        // Modify the logger so it will only print the message and NOT the timestamp, logging level, etc
         logger.setUseParentHandlers(false);
         ConsoleHandler handler = new ConsoleHandler();
 
         handler.setFormatter(new SimpleFormatter() {
-            private static final String format = "%s";
-
             @Override
             public synchronized String format(LogRecord lr) {
-                return String.format(format, lr.getMessage());
+                return String.format("%s", lr.getMessage());
             }
         });
         logger.addHandler(handler);
     }
-    /** The internal memory for the written bytes. */
-    private StringBuffer mem = new StringBuffer();
+
+    //The internal memory for the written bytes.
+    //String builder is unsynchronized and faster than StringBuffer, but is made thread safe by being local to each thread
+    private ThreadLocal<StringBuilder> mem = new ThreadLocal<>();
 
     @Override
     public void write( final int b ) {
         char c = (char) b;
-        mem = mem.append(c);
-        if (c == '\n') {
-            flush();
-            return;
-        }
+        mem.get().append(c);
+        flush();
+    }
+
+    @Override
+    public void write(byte[] bytes, int start, int stop) {
+        String message = new String(bytes);
+        // Multibyte characters may require us to have an earlier stop point
+        message = new String(bytes).substring(start, stop <= message.length() ? stop : message.length());
+        logger.info(message);
     }
 
     @Override
     public void flush() {
-        logger.info( mem.toString() );
-        mem = new StringBuffer();
+        String message = mem.toString();
+        logger.info(message);
+        mem.get().setLength(0);
+    }
+
+    @Override
+    public void close() throws IOException {
+        super.close();
+        mem.remove();
+        mem = null;
     }
 }

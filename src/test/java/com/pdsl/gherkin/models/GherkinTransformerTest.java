@@ -96,15 +96,12 @@ public class GherkinTransformerTest {
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
-        assertThat(feature.getTitle().get()).contains("Complex background");
-        assertThat(feature.getBackground().isPresent()).isTrue();
+        assertThat(feature.getTitle().orElseThrow()).contains("Complex background");
         // Backgrounds
-        GherkinBackground background = feature.getBackground().get();
-        assertThat(background.getTitle().isPresent()).isTrue();
-        assertThat(background.getTitle().get().getRawString().contains("a simple background")).isTrue();
+        GherkinBackground background = feature.getBackground().orElseThrow();
+        assertThat(background.getTitle().orElseThrow().getRawString().contains("a simple background")).isTrue();
         // Background steps
-        assertThat(background.getSteps().isPresent()).isTrue();
-        List<GherkinStep> backgroundSteps = background.getSteps().get();
+        List<GherkinStep> backgroundSteps = background.getSteps().orElseThrow();
         assertThat(backgroundSteps.size()).isEqualTo(1);
         assertThat(backgroundSteps.get(0).getStepType()).isEqualTo(GherkinStep.StepType.GIVEN);
         assertThat(backgroundSteps.get(0).getDataTable().isPresent()).isFalse();
@@ -114,26 +111,19 @@ public class GherkinTransformerTest {
         List<GherkinScenario> scenarioList = feature.getOptionalGherkinScenarios().get();
         assertThat(scenarioList.size()).isEqualTo(2);
         GherkinScenario scenario1 = scenarioList.get(0);
-        assertThat(scenario1.getStepsList().isPresent()).isTrue();
-        assertThat(scenario1.getStepsList().get().size()).isEqualTo(1);
+        assertThat(scenario1.getStepsList().orElseThrow().size()).isEqualTo(1);
         GherkinScenario scenario2 = scenarioList.get(1);
-        assertThat(scenario2.getStepsList().isPresent()).isTrue();
-        assertThat(scenario2.getStepsList().get().size()).isEqualTo(1);
-        // Rules
-        assertThat(feature.getRules().isPresent()).isTrue();
-        List<GherkinRule> rules = feature.getRules().get();
+        assertThat(scenario2.getStepsList().orElseThrow().size()).isEqualTo(1);
+        // Rules();
+        List<GherkinRule> rules = feature.getRules().orElseThrow();
         assertThat(rules.size()).isEqualTo(1);
         GherkinRule rule = rules.get(0);
-        assertThat(rule.getTitle().isPresent()).isTrue();
-        assertThat(rule.getTitle().get()).contains("My Rule");
-        assertThat(rule.getBackground().isPresent()).isTrue();
-        GherkinBackground ruleBackground = rule.getBackground().get();
-        assertThat(ruleBackground.getTitle().isPresent()).isTrue();
-        assertThat(ruleBackground.getSteps().get().size()).isEqualTo(1);
+        assertThat(rule.getTitle().orElseThrow()).contains("My Rule");
+        GherkinBackground ruleBackground = rule.getBackground().orElseThrow();
+        assertThat(ruleBackground.getSteps().orElseThrow().size()).isEqualTo(1);
         // Examples
         GherkinScenario ruleScenario = rule.getScenarios().get().get(0);
-        assertThat(ruleScenario.getExamples().isPresent()).isTrue();
-        List<GherkinExamplesTable> examplesTableList = ruleScenario.getExamples().get();
+        List<GherkinExamplesTable> examplesTableList = ruleScenario.getExamples().orElseThrow();
         assertThat(examplesTableList.size()).isEqualTo(1);
         Map<String, List<String>> dataTable = examplesTableList.get(0).getTable().get();
         assertThat(dataTable.keySet().size()).isEqualTo(1);

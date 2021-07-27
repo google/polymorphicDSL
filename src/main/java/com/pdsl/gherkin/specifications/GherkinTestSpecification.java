@@ -20,7 +20,7 @@ public class GherkinTestSpecification implements TestSpecification {
     public GherkinTestSpecification(List<GherkinTestSpecification> gherkinTestSpecifications) {
         this.tags = Set.of();
         this.testSpecification = new DefaultTestSpecification.Builder("Gherkin test container")
-                .withChildTestSpecifications(new ArrayList<TestSpecification>(gherkinTestSpecifications))
+                .withChildTestSpecifications(new ArrayList<>(gherkinTestSpecifications))
                 .build();
     }
 
@@ -34,7 +34,7 @@ public class GherkinTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
+    public Optional<List<TestSpecification>> nestedTestSpecifications() {
         return testSpecification.nestedTestSpecifications();
     }
 

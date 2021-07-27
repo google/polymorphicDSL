@@ -14,7 +14,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
-        Collection<TestCase> testCases = new ArrayList<TestCase>(testSpecifications.size()); // Capacity likely too small
+        Collection<TestCase> testCases = new ArrayList<>(testSpecifications.size()); // Capacity likely too small
         for (TestSpecification testSpecification : testSpecifications) {
             List<TestSection> testBody = new ArrayList<>();
             testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, testBody, Optional.empty(),

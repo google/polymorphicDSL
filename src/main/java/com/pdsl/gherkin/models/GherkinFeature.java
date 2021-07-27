@@ -71,9 +71,10 @@ public class GherkinFeature {
         private List<GherkinScenario> gherkinScenarios = new LinkedList<>();
         private List<GherkinRule> rules = new LinkedList<>();
         private Optional<List<String>> tags = Optional.empty();
-
+				private static final String LOCATION_ERROR = "Location cannot be null!";
         public Builder(URL location) {
-            Preconditions.checkArgument(location == null, "Location cannot be null!");
+					
+            Preconditions.checkArgument(location == null, LOCATION_ERROR);
             // preconditions on argument delayed until building
             this.location = location;
         }
@@ -83,14 +84,14 @@ public class GherkinFeature {
 
         public Builder withLocation(URL location) {
             Preconditions.checkArgument(location != null,
-                    "Location cannot be null!");
+                    LOCATION_ERROR);
             this.location = location;
             return this;
         }
 
         public GherkinFeature build() {
             Preconditions.checkArgument(location != null,
-                    "Location cannot be null!");
+                    LOCATION_ERROR);
             return new GherkinFeature(this);
         }
 

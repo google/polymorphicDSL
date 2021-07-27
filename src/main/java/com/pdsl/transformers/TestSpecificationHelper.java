@@ -47,8 +47,6 @@ public interface TestSpecificationHelper {
             // so we create two: one to check if this line is relevant at all and the other to use if it is
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             inputStream.transferTo(baos);
-            CharStream charStream = CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray()));
-
             Lexer pdslLexer = (Lexer) lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray())));
             if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
                 pdslLexer.removeErrorListeners();
@@ -56,20 +54,24 @@ public interface TestSpecificationHelper {
             PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
-            if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.size() == 0 || errorListener.isErrorFound())) {
-                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:\n<START>%s<END>\n\nCommon errors include:\n\tNot having this sentence in the lexer\n\tForgetting to create a parser rule for this sentence\n\tLeading and trailing whitespace or newlines\n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens\n\nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", new String(baos.toByteArray())));
+            if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.isEmpty() || errorListener.isErrorFound())) {
+                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:%n<START>%s<END>%n%nCommon errors include:%n\tNot having this sentence in the lexer%n\tForgetting to create a parser rule for this sentence%n\tLeading and trailing whitespace or newlines%n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens%n%nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", new String(baos.toByteArray())));
             } else {
-                if (allTokens.size() == 0) {
+                if (allTokens.isEmpty()) {
                     if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
-                        logger.warn(AnsiTerminalColorHelper.BRIGHT_CYAN + "Filtering out phrase:\n\t" + new String(baos.toByteArray()) + AnsiTerminalColorHelper.RESET);
+                        if (logger.isWarnEnabled()) {
+                            logger.warn("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, new String(baos.toByteArray()), AnsiTerminalColorHelper.RESET);
+                        }
                         return Optional.empty();
                     }
                 } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
-                    logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
-                    logger.warn(AnsiTerminalColorHelper.BRIGHT_RED + "Filtering out phrase:\n\t" + new String((baos.toByteArray())) + AnsiTerminalColorHelper.RESET);
+                    if (logger.isWarnEnabled()) {
+                        logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
+                        logger.warn("%sFiltering out phrase:%n\t%s%s",AnsiTerminalColorHelper.BRIGHT_RED, new String((baos.toByteArray())), AnsiTerminalColorHelper.RESET);
+                    }
                     return Optional.empty();
                 } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file
-                    logger.warn(AnsiTerminalColorHelper.YELLOW + "Only the End of File was left. Treating as though everything has been filtered out of this phrase:\n" + pdslLexer.getText() + AnsiTerminalColorHelper.RESET);
+                    logger.warn("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s", AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(), AnsiTerminalColorHelper.RESET);
                     return Optional.empty();
                 }
             }

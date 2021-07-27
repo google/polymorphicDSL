@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 public class PickleJarFactory {
 
     public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
-    private final int ABBREVIATED_DESCRIPTION_LENGTH = 1024;
     private final Charset charset;
     private PdslGherkinRecognizer pdslGherkinRecognizer;
     private PdslGherkinListener listener;
@@ -160,7 +159,6 @@ public class PickleJarFactory {
                                 row.stream().map(cell -> cell.getStringWithSubstitutions(substitutions))
                                         .collect(Collectors.toUnmodifiableList()))
                                 .collect(Collectors.toUnmodifiableList());
-                List<List<GherkinString>> dataTable = step.getDataTable().get();
                 // Convert to a string
                 substitutedStep.append(getDataTableText(substitutedDataTable));
             }
@@ -182,10 +180,9 @@ public class PickleJarFactory {
                 // Perform all substitutions
                 List<List<String>> substitutedDataTable =
                         step.getDataTable().get().stream().map(row ->
-                                row.stream().map(cell -> cell.getRawString())
+                                row.stream().map(GherkinString::getRawString)
                                         .collect(Collectors.toUnmodifiableList()))
                                 .collect(Collectors.toUnmodifiableList());
-                List<List<GherkinString>> dataTable = step.getDataTable().get();
                 // Convert to a string
                 stepText.append(getDataTableText(substitutedDataTable));
             }
@@ -198,11 +195,6 @@ public class PickleJarFactory {
         return String.join("\n",  // Separate each row by a line break
                 substitutedDataTable.stream().map(row -> "|" + String.join("|", row) + "|") // Separate each cell with a pipe
                         .collect(Collectors.toUnmodifiableList())) + "\n";
-    }
-
-    private String abbreviateStringIfRequired(String str) {
-        return str.length() > ABBREVIATED_DESCRIPTION_LENGTH
-                ? str.substring(0, ABBREVIATED_DESCRIPTION_LENGTH) + "\n<abbrevated>" : str;
     }
 
     private Set<String> processTags(Collection<String> rawTags) {
@@ -221,13 +213,10 @@ public class PickleJarFactory {
                     case ' ': /* fall through */
                     case '\t': /* fall through */
                     case '\n': /* fall through */
-                        if (buildingTag) { // We encountered an @ earlier
+                        if (buildingTag) { // We encountered an @ earlier, otherwise we're skipping whitespace at the start of a string
                             tags.add(tagBuilder.toString(charset));
                             tagBuilder.reset();
-                            ;
                             buildingTag = false;
-                        } else { // We're skipping whitespace at the start of the string
-                            continue;
                         }
                         break;
                     case '#':

@@ -64,22 +64,22 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
 
     @Override
     public int passingTestTotal() {
-        return results.stream().filter(r -> r.getIsPassed()).collect(Collectors.toList()).size();
+        return results.stream().filter(TestMetadata::getIsPassed).collect(Collectors.toList()).size();
     }
 
     @Override
     public int failingTestTotal() {
-        return results.stream().filter(r -> !r.getIsPassed()).collect(Collectors.toList()).size();
+        return results.stream().filter(t -> !t.getIsPassed()).collect(Collectors.toList()).size();
     }
 
     @Override
     public int passingPhraseTotal() {
-        return results.stream().mapToInt(r -> r.getPassingPhraseTotal()).sum();
+        return results.stream().mapToInt(TestMetadata::getPassingPhraseTotal).sum();
     }
 
     @Override
     public int totalPhrases() {
-        return results.stream().mapToInt(r -> r.getTotalPhrases()).sum();
+        return results.stream().mapToInt(TestMetadata::getTotalPhrases).sum();
     }
 
     @Override

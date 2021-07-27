@@ -1,7 +1,6 @@
 package com.pdsl.gherkin.filter;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.antlr.v4.runtime.tree.ErrorNode;
@@ -13,8 +12,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.*;
+import java.util.List;
+import java.util.Set;
 
 public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, GherkinTagFilterer {
 
@@ -48,31 +47,33 @@ public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, Gher
         if (ctx.L_PAREN() != null) {
             return visitOr(ctx.or());
         } else {
-            if (ctx.TAG() != null) {
-                return tags.get().contains(ctx.getText());
+            if (ctx.TAG() == null) {
+                String message = String.format("Expected to have a single gherkin tag, but found %s",
+                        ctx.TAG().getText());
+                throw new IllegalStateException(message);
             }
-            return null;
+            return tags.get().contains(ctx.getText());
         }
     }
 
     @Override
     public Boolean visit(ParseTree tree) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Boolean visitChildren(RuleNode node) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Boolean visitTerminal(TerminalNode node) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Boolean visitErrorNode(ErrorNode node) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -85,10 +86,14 @@ public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, Gher
         GherkinTagsParser parser = getParser(tagExpression);
         parser.setErrorHandler(new BailErrorStrategy());
         try {
-            return visitOr(parser.or());
+            boolean match = visitOr(parser.or());
+            tags.remove();
+            return match;
         } catch (ParseCancellationException e) {
+            tags.remove();
+						String message = String.format("The gherkin tag expression is invalid!%n\tTag Expression: %s", tagExpression);
             throw new IllegalArgumentException(
-                    String.format("The gherkin tag expression is invalid!%n\tTag Expression: %s", tagExpression), e);
+                    message, e);
         }
     }
 
@@ -99,7 +104,8 @@ public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, Gher
             GherkinTagsLexer lexer = new GherkinTagsLexer(charStream);
             lexer.addErrorListener(new TagExpressionErrorListener(tagExpression));
             List<? extends Token> allTokens = lexer.getAllTokens();
-            logger.debug(String.format("Parsing tag expression%n\tExpression: %s%n\tResults: %s", tagExpression, allTokens));
+						String message = String.format(String.format("Parsing tag expression%n\tExpression: %s%n\tResults: %s", tagExpression, allTokens));
+            logger.debug(message);
             if (allTokens.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Could not parse tag expression: %s", tagExpression));
             }
@@ -107,7 +113,7 @@ public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, Gher
             return new GherkinTagsParser(new CommonTokenStream(lexer));
         } catch (IOException e) {
             throw new IllegalArgumentException(
-                    String.format("Could not perform test arrangement with tag expression:\n%s", tagExpression), e);
+                    String.format("Could not perform test arrangement with tag expression:%n%s", tagExpression), e);
         }
     }
 }

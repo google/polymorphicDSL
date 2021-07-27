@@ -1,6 +1,5 @@
 package com.pdsl.grammars;
 
-import ch.qos.logback.classic.html.UrlCssBuilder;
 import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;

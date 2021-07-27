@@ -53,7 +53,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation().toString());
             // Create feature metadata
             ByteArrayOutputStream featureMetaData = new ByteArrayOutputStream();
-            addBytesWithCorrectEncoding(featureMetaData, "#language:" + pickleJar.getLanguageCode() + "\n");
+            addBytesWithCorrectEncoding(featureMetaData, String.format("#language:%s%n", pickleJar.getLanguageCode()));
             if (!pickleJar.getFeatureTags().isEmpty()) {
                 addBytesWithCorrectEncoding(featureMetaData, String.join(" ", pickleJar.getFeatureTags()) + "\n");
                 allTagsForTestCase.addAll(pickleJar.getFeatureTags());
@@ -65,10 +65,10 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             if (pickleJar.getBackground().isPresent()) {
                 GherkinBackground bg = pickleJar.getBackground().get();
                 if (bg.getSteps().isEmpty()) {
-                    throw new IllegalStateException("Gherkin background had no steps!\n\tFeature Title: " + pickleJar.getFeatureTitle());
+                    throw new IllegalStateException(String.format("Gherkin background had no steps!%n\tFeature Title: %s", pickleJar.getFeatureTitle()));
                 }
                 addBytesWithCorrectEncoding(featureMetaData, getBackgroundText(bg));
-                logger.info(AnsiTerminalColorHelper.CYAN + "Top level " + AnsiTerminalColorHelper.BRIGHT_CYAN + "Background" + AnsiTerminalColorHelper.RESET + " in " + AnsiTerminalColorHelper.RESET + pickleJar.getLocation());
+                logger.info( "%sTop level%s Background%s in %s%s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.BRIGHT_CYAN, AnsiTerminalColorHelper.RESET, pickleJar.getLocation());
                 Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
                 if (filteredBackgroundStepBody.isPresent()) {
                     featureBuilder.withTestPhrases(filteredBackgroundStepBody.get());
@@ -83,7 +83,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules()));
             }
             featureBuilder.withChildTestSpecifications(pickles);
-            featureTestSpecifications.add((TestSpecification) new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
+            featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
         }
         return Optional.of(featureTestSpecifications);
     }
@@ -147,8 +147,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
-                logger.debug(AnsiTerminalColorHelper.CYAN + "Rule Background" + AnsiTerminalColorHelper.RESET + " in "
-                        + rule.getTitle());
+                logger.debug("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle());
                 Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
                 if (filteredBackgroundStepBody.isPresent()) {
                     ruleBuilder.withTestPhrases(filteredBackgroundStepBody.get());
@@ -169,7 +168,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         gherkinTestSpecifications.addAll(transformScenariosToTestSpecifications(scenarios, parentTags));
         // Generics are not covarient. Cast to TestSpecification
         return gherkinTestSpecifications.stream()
-                .map(t -> (TestSpecification) t)
+                .map(TestSpecification.class::cast)
                 .collect(Collectors.toList());
     }
 
@@ -227,7 +226,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 filteredSpecifications.add(filteredValue.get());
             }
         }
-        return filteredSpecifications.size() > 0 ? Optional.of(filteredSpecifications) : Optional.empty();
+        return !filteredSpecifications.isEmpty() ? Optional.of(filteredSpecifications) : Optional.empty();
     }
 
     private Optional<TestSpecification> recursivelyGetTagsAndFilterPickles(TestSpecification testSpecification, Set<String> allParentTags, String tagExpression) {

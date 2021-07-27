@@ -34,7 +34,7 @@ public interface TestSpecification {
      *
      * @return An optional containing a collection of child TestItems if this TestItem is high level or empty if not
      */
-    Optional<List<? extends TestSpecification>> nestedTestSpecifications();
+    Optional<List<TestSpecification>> nestedTestSpecifications();
 
     /**
      * Returns a unique identifier associated with this TestItem.

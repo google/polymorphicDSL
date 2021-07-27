@@ -17,7 +17,7 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
         return builderOptional.isEmpty() ? Optional.empty() : Optional.of(builderOptional.get().withLocation(featurePathOrId).build());
     }
 
-		@Override
+    @Override
     public void enterGherkinDocument(GherkinParser.GherkinDocumentContext ctx) {
         if (ctx.feature() != null) {
             GherkinFeature.Builder builder = new GherkinFeature.Builder();
@@ -30,7 +30,7 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
         }
     }
 
-		@Override
+    @Override
     public void enterFeature(GherkinParser.FeatureContext ctx) {
         assert (builderOptional.isPresent()) : "GherkinFeature builder not initialized!";
         GherkinFeature.Builder builder = builderOptional.get();
@@ -150,43 +150,40 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
         if (ctx.startingStep() == null) {
             return steps;
         } else { // TODO: Refactor the duplicate code. This is ugly
-            {
-                GherkinStep.Builder stepBuilder = new GherkinStep.Builder();
-                if (ctx.startingStep().GIVEN_STEP() != null) {
-                    stepBuilder.withStepContent(ctx.startingStep().GIVEN_STEP().getText());
-                    stepBuilder.withStepKeyword(GherkinStep.StepType.GIVEN,
-                            ctx.startingStep().GIVEN_STEP().getSymbol().getText());
-                } else if (ctx.startingStep().WHEN_STEP() != null) {
-                    stepBuilder.withStepContent(ctx.startingStep().WHEN_STEP().getText());
-                    stepBuilder.withStepKeyword(GherkinStep.StepType.WHEN,
-                            ctx.startingStep().WHEN_STEP().getSymbol().getText());
-                } else if (ctx.startingStep().THEN_STEP() != null) {
-                    stepBuilder.withStepContent(ctx.startingStep().THEN_STEP().getText());
-                    stepBuilder.withStepKeyword(GherkinStep.StepType.THEN,
-                            ctx.startingStep().THEN_STEP().getSymbol().getText());
-                } else if (ctx.startingStep().WILD_STEP() != null) {
-                    stepBuilder.withStepContent(ctx.startingStep().WILD_STEP().getText());
-                    stepBuilder.withStepKeyword(GherkinStep.StepType.WILD,
-                            ctx.startingStep().WILD_STEP().getSymbol().getText());
-                } else {
-                    throw new IllegalArgumentException("Error creating a step");
-                }
-
-                // Docstring XOR Datatable
-                if (ctx.startingStep().DOCSTRING() != null) {
-                    stepBuilder.withDocString(ctx.startingStep().DOCSTRING().getText());
-                } else if (ctx.startingStep().DATA_ROW() != null) {
-                    List<List<GherkinString>> tableData = new LinkedList<>();
-                    ctx.startingStep().DATA_ROW().forEach(r -> tableData.add(transformRowData(r.getText())
-                            .stream()
-                            .map(GherkinString::new)
-                            .collect(Collectors.toList())
-                    ));
-                    stepBuilder.withDataTable(tableData);
-                }
-                steps.add(stepBuilder.build());
+            GherkinStep.Builder stepBuilder = new GherkinStep.Builder();
+            if (ctx.startingStep().GIVEN_STEP() != null) {
+                stepBuilder.withStepContent(ctx.startingStep().GIVEN_STEP().getText());
+                stepBuilder.withStepKeyword(GherkinStep.StepType.GIVEN,
+                        ctx.startingStep().GIVEN_STEP().getSymbol().getText());
+            } else if (ctx.startingStep().WHEN_STEP() != null) {
+                stepBuilder.withStepContent(ctx.startingStep().WHEN_STEP().getText());
+                stepBuilder.withStepKeyword(GherkinStep.StepType.WHEN,
+                        ctx.startingStep().WHEN_STEP().getSymbol().getText());
+            } else if (ctx.startingStep().THEN_STEP() != null) {
+                stepBuilder.withStepContent(ctx.startingStep().THEN_STEP().getText());
+                stepBuilder.withStepKeyword(GherkinStep.StepType.THEN,
+                        ctx.startingStep().THEN_STEP().getSymbol().getText());
+            } else if (ctx.startingStep().WILD_STEP() != null) {
+                stepBuilder.withStepContent(ctx.startingStep().WILD_STEP().getText());
+                stepBuilder.withStepKeyword(GherkinStep.StepType.WILD,
+                        ctx.startingStep().WILD_STEP().getSymbol().getText());
+            } else {
+                throw new IllegalArgumentException("Error creating a step");
             }
 
+            // Docstring XOR Datatable
+            if (ctx.startingStep().DOCSTRING() != null) {
+                stepBuilder.withDocString(ctx.startingStep().DOCSTRING().getText());
+            } else if (ctx.startingStep().DATA_ROW() != null) {
+                List<List<GherkinString>> tableData = new LinkedList<>();
+                ctx.startingStep().DATA_ROW().forEach(r -> tableData.add(transformRowData(r.getText())
+                        .stream()
+                        .map(GherkinString::new)
+                        .collect(Collectors.toList())
+                ));
+                stepBuilder.withDataTable(tableData);
+            }
+            steps.add(stepBuilder.build());
             // all other steps
             for (GherkinParser.AnyStepContext stepCtx : ctx.anyStep()) {
                 GherkinStep.Builder anyStepBuilder = new GherkinStep.Builder();
@@ -226,7 +223,7 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
                     List<List<GherkinString>> tableData = new LinkedList<>();
                     stepCtx.DATA_ROW().forEach(r -> tableData.add(transformRowData(r.getText())
                             .stream()
-                            .map(rowData -> new GherkinString(rowData))
+                            .map(GherkinString::new)
                             .collect(Collectors.toList())
                     ));
                     anyStepBuilder.withDataTable(tableData);

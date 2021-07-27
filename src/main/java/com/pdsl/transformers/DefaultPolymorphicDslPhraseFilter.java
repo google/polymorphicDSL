@@ -68,7 +68,8 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
             StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET_ANSI);
             errorMessage.append(BOLD + "\n\tParser Context: " + RESET_ANSI + parserConstructor.getName() + "\n\t" +
                     BOLD + "Strategy: " + RESET_ANSI + strategy.name());
-            logger.warn(errorMessage.toString());
+            String message = errorMessage.toString();
+            logger.warn(message);
             return Optional.empty();
         }
         return Optional.of(parserTrees);
@@ -102,15 +103,20 @@ public class DefaultPolymorphicDslPhraseFilter<P extends Parser, L extends Lexer
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
             if (allTokens.isEmpty()) {
-                logger.warn(String.format("%sFiltering out phrase:\n%s<START>%s%s%s<END>", AnsiTerminalColorHelper.BRIGHT_CYAN, RESET_ANSI, AnsiTerminalColorHelper.BRIGHT_CYAN, new String(baos.toByteArray()), RESET_ANSI));
+                if (logger.isWarnEnabled()) {
+                    logger.warn("%sFiltering out phrase:%n%s<START>%s%s%s<END>", AnsiTerminalColorHelper.BRIGHT_CYAN, RESET_ANSI, AnsiTerminalColorHelper.BRIGHT_CYAN, new String(baos.toByteArray()), RESET_ANSI);
+                }
                 return Optional.empty();
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
-                logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
-                logger.warn(String.format("The match was: %s", allTokens.toString()));
-                logger.warn("%sFiltering out phrase:%n\t%s%s",AnsiTerminalColorHelper.BRIGHT_RED, new String((baos.toByteArray())), RESET_ANSI);
+                if (logger.isWarnEnabled()) {
+                    logger.warn("%sA line was partially matched! This may indicate an error in the grammar!", AnsiTerminalColorHelper.BRIGHT_YELLOW);
+                    logger.warn("The match was: %s", allTokens);
+                    logger.warn("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, new String((baos.toByteArray())), RESET_ANSI);
+                }
                 return Optional.empty();
             } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file
-                logger.warn("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s",AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(),AnsiTerminalColorHelper.RESET);
+                String message = String.format("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s",AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(),AnsiTerminalColorHelper.RESET);
+                logger.warn(message);
                 return Optional.empty();
             }
             pdslLexer.reset();

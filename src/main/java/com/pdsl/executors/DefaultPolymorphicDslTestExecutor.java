@@ -1,5 +1,6 @@
 package com.pdsl.executors;
 
+import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestMetadata;
 import com.pdsl.testcases.TestCase;
@@ -20,8 +21,9 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslTestExecutor.class);
     private ParseTreeWalker walker = new ParseTreeWalker();
-    private Optional<Collection<OutputStream>> outputStreams = Optional.of(List.of(System.out));
+    private Optional<Collection<OutputStream>> outputStreams = Optional.of(List.of(new PdslThreadSafeOutputStream()));
     private Charset charset = Charset.defaultCharset();
+
 
     @Override
     public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
@@ -48,7 +50,7 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
     }
 
     private PolymorphicDslTestRunResults walk(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
-        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(System.out);
+        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream());
         Set<Long> previouslyExecutedTests = new HashSet<>();
         for (TestCase testCase : testCases) {
             int totalPassingPhrases = 0;
@@ -56,7 +58,7 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
             Iterator<TestSection> testBody = testCase.getTestBody();
             try {
                 if (previouslyExecutedTests.contains(testCase.getTestCaseId())) {
-                    logger.warn(String.format("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle()));
+                    logger.warn("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle());
                     StringBuilder duplicateBody = new StringBuilder();
                     testCase.getTestBody().forEachRemaining(duplicateBody::append);
                     results.addTestResult(TestMetadata.duplicateTest(testCase.getTestTitle(), testCase.getTestCaseId()));
