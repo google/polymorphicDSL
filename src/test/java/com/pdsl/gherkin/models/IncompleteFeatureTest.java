@@ -1,8 +1,8 @@
 package com.pdsl.gherkin.models;
 
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import com.pdsl.gherkin.PdslGherkinRecognizer;
-import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class IncompleteFeatureTest {
 
     // TODO: Determine if we want to allow empty scenarios
     @Test
-    public void featureWithOnlyDescription_stillParses() throws  IOException {
+    public void featureWithOnlyDescription_stillParses() throws IOException {
         Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_1.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -57,7 +57,7 @@ public class IncompleteFeatureTest {
 
     // TODO: Determine if we want to allow empty features
     @Test
-    public void featureContainingOnlyTitle_stillParses() throws  IOException {
+    public void featureContainingOnlyTitle_stillParses() throws IOException {
         Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_2.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -70,7 +70,7 @@ public class IncompleteFeatureTest {
 
     // TODO: Do we really want to allow gherkin features that only contain a comment?
     @Test
-    public void featureContainingOnlyAComment_stillParses() throws  IOException {
+    public void featureContainingOnlyAComment_stillParses() throws IOException {
         Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_3.feature").toUri().toURL(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
     }

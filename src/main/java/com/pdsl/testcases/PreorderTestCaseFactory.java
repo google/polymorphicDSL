@@ -1,13 +1,11 @@
 package com.pdsl.testcases;
 
-import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.TestSpecification;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * A factory that processes Test Specifications doing a Preorder traversal
@@ -16,7 +14,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
-        Collection<TestCase> testCases = new ArrayList<TestCase>(testSpecifications.size()); // Capacity likely too small
+        Collection<TestCase> testCases = new ArrayList<>(testSpecifications.size()); // Capacity likely too small
         for (TestSpecification testSpecification : testSpecifications) {
             List<TestSection> testBody = new ArrayList<>();
             testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, testBody, Optional.empty(),
@@ -25,13 +23,6 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         return testCases;
     }
 
-    private static class Accumulator {
-        private int testNumber = 0;
-
-        public int nextInt() {
-            return testNumber++;
-        }
-    }
     private List<TestCase> recursiveWalkAndCreateOnLeaf(TestSpecification testSpecification,
                                                         List<TestSection> parentTestSections,
                                                         Optional<ByteArrayOutputStream> parentMetaData,
@@ -56,15 +47,15 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
                 if (parseTrees.size() > 1) {
                     parseTrees = parseTrees.subList(1, parseTrees.size());
                     List<TestSection> sections = parseTrees.stream()
-                        .map(DefaultTestSection::new)
-                        .collect(Collectors.toList());
+                            .map(DefaultTestSection::new)
+                            .collect(Collectors.toList());
                     testSections.addAll(sections);
                 }
             } else {
                 List<TestSection> sections = parseTrees.stream()
                         .map(DefaultTestSection::new)
                         .collect(Collectors.toList());
-                testSections.addAll(testSections);
+                testSections.addAll(sections);
             }
         }
         if (testSpecification.nestedTestSpecifications().isPresent()) {
@@ -77,6 +68,14 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
             List<TestCase> singleTestCase = new ArrayList<>(1);
             singleTestCase.add(testCase);
             return singleTestCase;
+        }
+    }
+
+    private static class Accumulator {
+        private int testNumber = 0;
+
+        public int nextInt() {
+            return testNumber++;
         }
     }
 }

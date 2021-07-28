@@ -3,10 +3,10 @@ package com.pdsl.gherkin.models;
 import java.util.*;
 
 public class GherkinExamplesTable {
-    private Optional<List<String>> tags;
-    private Optional<String> title;
-    private Optional<String> longDescription;
-    private Optional<Map<String, List<String>>> table;
+    private final Optional<List<String>> tags;
+    private final Optional<String> title;
+    private final Optional<String> longDescription;
+    private final Optional<Map<String, List<String>>> table;
 
     private GherkinExamplesTable(Builder builder) {
         this.title = builder.title.isEmpty() ? Optional.empty() : Optional.of(builder.title);
@@ -14,6 +14,39 @@ public class GherkinExamplesTable {
                 : Optional.of(builder.longDescription);
         this.tags = builder.tags.isEmpty() ? Optional.empty() : Optional.of(builder.tags);
         this.table = builder.table;
+    }
+
+    public Optional<List<String>> getTags() {
+        return tags;
+    }
+
+    public Optional<String> getTitle() {
+        return title;
+    }
+
+    public Optional<String> getLongDescription() {
+        return longDescription;
+    }
+
+    public Optional<Map<String, List<String>>> getTable() {
+        return table;
+    }
+
+    public List<Map<String, String>> getRows() {
+        if (table.isEmpty()) {
+            return new LinkedList<>();
+        }
+        Map<String, List<String>> tableData = table.get();
+        final int TOTAL_ROWS = tableData.get(new LinkedList<>(tableData.keySet()).get(0)).size();
+        List<Map<String, String>> rows = new ArrayList<>(TOTAL_ROWS);
+        for (int i = 0; i < TOTAL_ROWS; i++) {
+            Map<String, String> rowSubstitutions = new HashMap<>();
+            for (Map.Entry<String, List<String>> entry : tableData.entrySet()) {
+                rowSubstitutions.put(entry.getKey(), tableData.get(entry.getKey()).get(i));
+            }
+            rows.add(rowSubstitutions);
+        }
+        return rows;
     }
 
     public static class Builder {
@@ -45,37 +78,5 @@ public class GherkinExamplesTable {
             this.longDescription = longDescription;
             return this;
         }
-    }
-
-    public Optional<List<String>> getTags() {
-        return tags;
-    }
-
-    public Optional<String> getTitle() {
-        return title;
-    }
-
-    public Optional<String> getLongDescription() {
-        return longDescription;
-    }
-
-    public Optional<Map<String, List<String>>> getTable() {
-        return table;
-    }
-
-    // TODO: See if the return value should be made optional
-    public List<Map<String, String>> getRows() {
-        if (table.isEmpty()) { return new LinkedList<>(); }
-        Map<String, List<String>> tableData = table.get();
-        final int TOTAL_ROWS = tableData.get(new LinkedList<>(tableData.keySet()).get(0)).size();
-        List<Map<String, String>> rows = new ArrayList<>(TOTAL_ROWS);
-        for (int i=0; i < TOTAL_ROWS; i++) {
-            Map<String, String> rowSubstitutions = new HashMap<>();
-            for (String key : tableData.keySet()) {
-                rowSubstitutions.put(key, tableData.get(key).get(i));
-            }
-            rows.add(rowSubstitutions);
-        }
-        return rows;
     }
 }

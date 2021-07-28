@@ -9,21 +9,21 @@ import java.util.stream.Collectors;
 
 public class PolymorphicDslTestRunResults implements TestRunResults, ReportListener {
 
+    private final List<OutputStream> dslReports;
     private List<TestMetadata> results = new LinkedList<>();
     private Set<Long> resultIds = new HashSet<>();
     // map for fast lookup
     private Map<Long, List<TestMetadata>> duplicateIdToTestResult = new HashMap<>();
     // The map cannot hold more than one duplicate
     private List<TestMetadata> duplicateTestResults = new LinkedList<>();
-    private final List<OutputStream> dslReports;
 
     public PolymorphicDslTestRunResults(OutputStream report) {
-        Preconditions.checkNotNull(report, "reports cannot be null!");;
+        Preconditions.checkNotNull(report, "reports cannot be null!");
         dslReports = List.of(report);
     }
 
     public PolymorphicDslTestRunResults(List<OutputStream> reports) {
-        Preconditions.checkNotNull(reports, "reports cannot be null!");;
+        Preconditions.checkNotNull(reports, "reports cannot be null!");
         Preconditions.checkArgument(reports.isEmpty(), "report output streams cannot be empty");
         dslReports = new LinkedList<>(reports);
     }
@@ -64,22 +64,22 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
 
     @Override
     public int passingTestTotal() {
-        return results.stream().filter(r -> r.getIsPassed()).collect(Collectors.toList()).size();
+        return results.stream().filter(TestMetadata::getIsPassed).collect(Collectors.toList()).size();
     }
 
     @Override
     public int failingTestTotal() {
-        return results.stream().filter(r -> !r.getIsPassed()).collect(Collectors.toList()).size();
+        return results.stream().filter(t -> !t.getIsPassed()).collect(Collectors.toList()).size();
     }
 
     @Override
     public int passingPhraseTotal() {
-        return results.stream().mapToInt(r -> r.getPassingPhraseTotal()).sum();
+        return results.stream().mapToInt(TestMetadata::getPassingPhraseTotal).sum();
     }
 
     @Override
     public int totalPhrases() {
-        return results.stream().mapToInt(r -> r.getTotalPhrases()).sum();
+        return results.stream().mapToInt(TestMetadata::getTotalPhrases).sum();
     }
 
     @Override
@@ -102,7 +102,7 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
     }
 
     @Override
-    public boolean containsFilteredTest(int postFilteredTestId) {
+    public boolean containsFilteredTest(long postFilteredTestId) {
         return resultIds.contains(postFilteredTestId);
     }
 }

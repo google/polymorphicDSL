@@ -9,8 +9,8 @@ import java.util.*;
 
 public class GherkinTestCaseSpecification implements TestSpecification {
 
-    private TestSpecification testSpecification;
     private final Set<String> tags;
+    private final TestSpecification testSpecification;
 
     public GherkinTestCaseSpecification(Set<String> tags, TestSpecification testSpecification) {
         this.testSpecification = testSpecification;
@@ -19,7 +19,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
 
     public GherkinTestCaseSpecification(List<GherkinTestCaseSpecification> childFeatures) {
         this.testSpecification = new DefaultTestSpecification.Builder("Gherkin Test Container")
-                .withChildTestSpecifications(new ArrayList<TestSpecification>(childFeatures))
+                .withChildTestSpecifications(new ArrayList<>(childFeatures))
                 .build();
         this.tags = Set.of();
     }
@@ -34,7 +34,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
+    public Optional<List<TestSpecification>> nestedTestSpecifications() {
         return testSpecification.nestedTestSpecifications();
     }
 

@@ -2,8 +2,12 @@ package com.pdsl.gherkin.executors;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
-import com.pdsl.gherkin.*;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
+import com.pdsl.gherkin.PdslGherkinListenerImpl;
+import com.pdsl.gherkin.PickleJarFactory;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
+import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.PreorderTestCaseFactory;
@@ -20,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -33,7 +36,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
     private final Logger logger = LoggerFactory.getLogger(GherkinTestExecutor.class);
     private final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
 
-    public <G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer>GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
+    public <G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
         phraseFilter = new DefaultPolymorphicDslPhraseFilter<G, L, SG, SL>(grammarParser, grammarLexer, subgrammarParser, subgrammarLexer);
         testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
     }
@@ -57,7 +60,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
         Collection<TestSpecification> testSpecification;
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
-            return new PolymorphicDslTestRunResults(System.out);
+            return new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream());
         } else {
             testSpecification = filteredSpecification.get();
         }
@@ -80,7 +83,7 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
                 testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
         if (filteredSpecification.isEmpty()) {
             logger.warn("All tests were filtered out! Nothing to execute!");
-            return new PolymorphicDslTestRunResults(System.out);
+            return new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream());
         } else {
             Collection<TestSpecification> testSpecifications = filteredSpecification.get();
             // Convert the test specifications into test cases

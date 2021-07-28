@@ -1,9 +1,6 @@
 package com.pdsl.component;
 
-import com.pdsl.grammars.BetaLexer;
-import com.pdsl.grammars.PolymorphicDslBetaParser;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
-import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.tree.ParseTree;

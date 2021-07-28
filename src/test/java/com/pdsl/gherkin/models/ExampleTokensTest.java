@@ -1,8 +1,8 @@
 package com.pdsl.gherkin.models;
 
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import com.pdsl.gherkin.PdslGherkinRecognizer;
-import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -71,7 +71,7 @@ public class ExampleTokensTest {
         assertThat(stepDataTableCell.hasSubstitutions()).isTrue();
         Map<String, String> firstRowSubs = rows.get(0);
         assertThat(step.getStepContent().getStringWithSubstitutions(firstRowSubs))
-        .isEqualTo("    Given the quatre:\n");
+                .isEqualTo("    Given the quatre:\n");
         assertThat("cinq").isEqualTo(stepDataTableCell.getStringWithSubstitutions(firstRowSubs));
 
         // Second examples row substitutions

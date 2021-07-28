@@ -13,12 +13,11 @@ import java.util.stream.Collectors;
 
 public class PickleJarFactory {
 
-    private final int ABBREVIATED_DESCRIPTION_LENGTH = 1024;
+    public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
+    private final Charset charset;
     private PdslGherkinRecognizer pdslGherkinRecognizer;
     private PdslGherkinListener listener;
-    private final Charset charset;
 
-    public static PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset) {
         this.pdslGherkinRecognizer = pdslGherkinRecognizer;
         this.listener = gherkinListener;
@@ -91,10 +90,10 @@ public class PickleJarFactory {
                     for (Map<String, String> substitutions : table.getRows()) {
                         // steps list is guaranteed to be present by the pdslGherkinInterpreter
                         // Substitutions may need to be made on each step, docstring or gherkin table
-                        List<String> substitutedSteps = getTextSubstitutionsForStepBody(scenario.getStepsList().get(), substitutions);
+                        List<String> substitutedSteps = getTextSubstitutionsForStepBody(scenario.getStepsList().orElseThrow(), substitutions);
                         // Create a pickle with the substituted steps
                         PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
-                                scenario.getTitle().get().getStringWithSubstitutions(substitutions),
+                                scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
                                 substitutedSteps);
                         if (scenario.getLongDescription().isPresent()) {
                             builder.withLongDescription(scenario.getLongDescription().get().getStringWithSubstitutions(substitutions));
@@ -109,10 +108,10 @@ public class PickleJarFactory {
             } else { // No substitutions needed
                 // steps list is guaranteed to be present by the pdslGherkinInterpreter
                 // Substitutions may need to be made on each step, docstring or gherkin table
-                List<String> stepBody = getTextFromStepBody(scenario.getStepsList().get());
+                List<String> stepBody = getTextFromStepBody(scenario.getStepsList().orElseThrow());
                 // Create a pickle with the substituted steps
                 PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
-                        scenario.getTitle().get().getRawString(),
+                        scenario.getTitle().orElseThrow().getRawString(),
                         stepBody);
                 if (!tags.isEmpty()) {
                     builder.withTags(processTags(tags));
@@ -131,7 +130,7 @@ public class PickleJarFactory {
         List<PickleJar.PickleJarRule> pickleJarRules = new LinkedList<>();
         for (GherkinRule rule : rules) {
 
-            List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().get());
+            List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().orElseThrow());
             PickleJar.PickleJarRule.Builder builder = new PickleJar.PickleJarRule.Builder(rule.getTitle().orElseThrow(), scenarios);
             if (rule.getBackground().isPresent()) {
                 builder.withBackground(rule.getBackground().get());
@@ -160,7 +159,6 @@ public class PickleJarFactory {
                                 row.stream().map(cell -> cell.getStringWithSubstitutions(substitutions))
                                         .collect(Collectors.toUnmodifiableList()))
                                 .collect(Collectors.toUnmodifiableList());
-                List<List<GherkinString>> dataTable = step.getDataTable().get();
                 // Convert to a string
                 substitutedStep.append(getDataTableText(substitutedDataTable));
             }
@@ -182,10 +180,9 @@ public class PickleJarFactory {
                 // Perform all substitutions
                 List<List<String>> substitutedDataTable =
                         step.getDataTable().get().stream().map(row ->
-                                row.stream().map(cell -> cell.getRawString())
+                                row.stream().map(GherkinString::getRawString)
                                         .collect(Collectors.toUnmodifiableList()))
                                 .collect(Collectors.toUnmodifiableList());
-                List<List<GherkinString>> dataTable = step.getDataTable().get();
                 // Convert to a string
                 stepText.append(getDataTableText(substitutedDataTable));
             }
@@ -198,11 +195,6 @@ public class PickleJarFactory {
         return String.join("\n",  // Separate each row by a line break
                 substitutedDataTable.stream().map(row -> "|" + String.join("|", row) + "|") // Separate each cell with a pipe
                         .collect(Collectors.toUnmodifiableList())) + "\n";
-    }
-
-    private String abbreviateStringIfRequired(String str) {
-        return str.length() > ABBREVIATED_DESCRIPTION_LENGTH
-                ? str.substring(0, ABBREVIATED_DESCRIPTION_LENGTH) + "\n<abbrevated>" : str;
     }
 
     private Set<String> processTags(Collection<String> rawTags) {
@@ -221,13 +213,10 @@ public class PickleJarFactory {
                     case ' ': /* fall through */
                     case '\t': /* fall through */
                     case '\n': /* fall through */
-                        if (buildingTag) { // We encountered an @ earlier
+                        if (buildingTag) { // We encountered an @ earlier, otherwise we're skipping whitespace at the start of a string
                             tags.add(tagBuilder.toString(charset));
                             tagBuilder.reset();
-                            ;
                             buildingTag = false;
-                        } else { // We're skipping whitespace at the start of the string
-                            continue;
                         }
                         break;
                     case '#':
@@ -259,6 +248,6 @@ public class PickleJarFactory {
             tags.add(remainingTag);
             tagBuilder.reset();
         }
-            return tags;
+        return tags;
     }
 }

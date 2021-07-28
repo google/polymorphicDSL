@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class GherkinRule {
-    private Optional<String> title;
-    private Optional<String> longDescription;
-    private Optional<GherkinBackground> background;
-    private Optional<List<GherkinScenario>> scenarios;
+    private final Optional<String> title;
+    private final Optional<String> longDescription;
+    private final Optional<GherkinBackground> background;
+    private final Optional<List<GherkinScenario>> scenarios;
 
 
     private GherkinRule(Builder builder) {
@@ -19,11 +19,27 @@ public class GherkinRule {
         this.scenarios = builder.scenarios.isEmpty() ? Optional.empty() : Optional.of(builder.scenarios);
     }
 
+    public Optional<String> getTitle() {
+        return title;
+    }
+
+    public Optional<String> getLongDescription() {
+        return longDescription;
+    }
+
+    public Optional<GherkinBackground> getBackground() {
+        return background;
+    }
+
+    public Optional<List<GherkinScenario>> getScenarios() {
+        return scenarios;
+    }
+
     public static class Builder {
+        private final List<GherkinScenario> scenarios = new ArrayList<>();
         private String title = "";
         private String longDescription = "";
         private Optional<GherkinBackground> background = Optional.empty();
-        private List<GherkinScenario> scenarios = new ArrayList<>();
 
         public GherkinRule build() {
             return new GherkinRule(this);
@@ -48,21 +64,5 @@ public class GherkinRule {
             scenarios.add(scenario);
             return this;
         }
-    }
-
-    public Optional<String> getTitle() {
-        return title;
-    }
-
-    public Optional<String> getLongDescription() {
-        return longDescription;
-    }
-
-    public Optional<GherkinBackground> getBackground() {
-        return background;
-    }
-
-    public Optional<List<GherkinScenario>> getScenarios() {
-        return scenarios;
     }
 }

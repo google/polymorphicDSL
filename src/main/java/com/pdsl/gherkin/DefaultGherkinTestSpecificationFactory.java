@@ -1,13 +1,14 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.models.GherkinBackground;
 import com.pdsl.gherkin.models.GherkinStep;
+import com.pdsl.gherkin.specifications.GherkinTestCaseSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.DefaultTestSpecification;
-import com.pdsl.gherkin.specifications.GherkinTestCaseSpecification;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
@@ -23,23 +24,21 @@ import java.util.stream.Collectors;
 
 public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory {
 
-    // TOOD: create builder
-    private PickleJarFactory pickleJarFactory;
-    private Charset charset = Charset.defaultCharset();
+    private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
     private final int DESCRIPTION_MAX_LENGTH;
     private final PolymorphicDslPhraseFilter phraseFilter;
-    private final static GherkinTagFilterer gherkinTagFilterer = new GherkinTagFiltererImpl();
-    private final static Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
+    private PickleJarFactory pickleJarFactory;
+    private Charset charset = Charset.defaultCharset();
 
     public DefaultGherkinTestSpecificationFactory(PickleJarFactory pickleJarFactory,
                                                   PolymorphicDslPhraseFilter phraseFilter) {
-        this.pickleJarFactory = pickleJarFactory;;
+        this.pickleJarFactory = pickleJarFactory;
         DESCRIPTION_MAX_LENGTH = 1024;
         this.phraseFilter = phraseFilter;
     }
 
     public DefaultGherkinTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
-        this.pickleJarFactory = PickleJarFactory.DEFAULT;;
+        this.pickleJarFactory = PickleJarFactory.DEFAULT;
         DESCRIPTION_MAX_LENGTH = 1024;
         this.phraseFilter = phraseFilter;
     }
@@ -49,43 +48,43 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         Preconditions.checkArgument(testContent != null && !testContent.isEmpty(), "filepaths cannot be null or empty!");
         List<TestSpecification> featureTestSpecifications = new LinkedList<>();
         List<PickleJar> pickleJars = pickleJarFactory.getPickleJars(testContent);
-       for (PickleJar pickleJar : pickleJars) {
-           Set<String> allTagsForTestCase = new HashSet<>();
-           DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation().toString());
-           // Create feature metadata
-           ByteArrayOutputStream featureMetaData = new ByteArrayOutputStream();
-           addBytesWithCorrectEncoding(featureMetaData, "#language:" + pickleJar.getLanguageCode() + "\n");
-           if (!pickleJar.getFeatureTags().isEmpty()) {
-               addBytesWithCorrectEncoding(featureMetaData, String.join(" ", pickleJar.getFeatureTags()) + "\n");
-               allTagsForTestCase.addAll(pickleJar.getFeatureTags());
-           }
-           addBytesWithCorrectEncoding(featureMetaData,pickleJar.getFeatureTitle() + "\n");
-           if (pickleJar.getLongDescription().isPresent()) {
-               addBytesWithCorrectEncoding(featureMetaData, pickleJar.getLongDescription().get());
-           }
-           if (pickleJar.getBackground().isPresent()) {
-               GherkinBackground bg = pickleJar.getBackground().get();
-               if (bg.getSteps().isEmpty()) {
-                   throw new IllegalStateException("Gherkin background had no steps!\n\tFeature Title: " + pickleJar.getFeatureTitle());
-               }
-               addBytesWithCorrectEncoding(featureMetaData, getBackgroundText(bg));
-               logger.info(AnsiTerminalColorHelper.CYAN + "Top level " + AnsiTerminalColorHelper.BRIGHT_CYAN + "Background" + AnsiTerminalColorHelper.RESET + " in " + AnsiTerminalColorHelper.RESET + pickleJar.getLocation());
-               Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
-               if (filteredBackgroundStepBody.isPresent()) {
-                   featureBuilder.withTestPhrases(filteredBackgroundStepBody.get());
-               }
-           }
-           featureBuilder.withMetaData(featureMetaData);
-           List<TestSpecification> pickles = getGherkinStepSpecificationScenarios(pickleJar.getScenarios(),
-                   allTagsForTestCase);
+        for (PickleJar pickleJar : pickleJars) {
+            Set<String> allTagsForTestCase = new HashSet<>();
+            DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation().toString());
+            // Create feature metadata
+            ByteArrayOutputStream featureMetaData = new ByteArrayOutputStream();
+            addBytesWithCorrectEncoding(featureMetaData, String.format("#language:%s%n", pickleJar.getLanguageCode()));
+            if (!pickleJar.getFeatureTags().isEmpty()) {
+                addBytesWithCorrectEncoding(featureMetaData, String.join(" ", pickleJar.getFeatureTags()) + "\n");
+                allTagsForTestCase.addAll(pickleJar.getFeatureTags());
+            }
+            addBytesWithCorrectEncoding(featureMetaData, pickleJar.getFeatureTitle() + "\n");
+            if (pickleJar.getLongDescription().isPresent()) {
+                addBytesWithCorrectEncoding(featureMetaData, pickleJar.getLongDescription().get());
+            }
+            if (pickleJar.getBackground().isPresent()) {
+                GherkinBackground bg = pickleJar.getBackground().get();
+                if (bg.getSteps().isEmpty()) {
+                    throw new IllegalStateException(String.format("Gherkin background had no steps!%n\tFeature Title: %s", pickleJar.getFeatureTitle()));
+                }
+                addBytesWithCorrectEncoding(featureMetaData, getBackgroundText(bg));
+                logger.info( "%sTop level%s Background%s in %s%s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.BRIGHT_CYAN, AnsiTerminalColorHelper.RESET, pickleJar.getLocation());
+                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
+                if (filteredBackgroundStepBody.isPresent()) {
+                    featureBuilder.withTestPhrases(filteredBackgroundStepBody.get());
+                }
+            }
+            featureBuilder.withMetaData(featureMetaData);
+            List<TestSpecification> pickles = getGherkinStepSpecificationScenarios(pickleJar.getScenarios(),
+                    allTagsForTestCase);
 
-           // Process all rules
-           if (!pickleJar.getRules().isEmpty()) {
-               pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules()));
-           }
-           featureBuilder.withChildTestSpecifications(pickles);
-           featureTestSpecifications.add((TestSpecification)new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
-       }
+            // Process all rules
+            if (!pickleJar.getRules().isEmpty()) {
+                pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules()));
+            }
+            featureBuilder.withChildTestSpecifications(pickles);
+            featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
+        }
         return Optional.of(featureTestSpecifications);
     }
 
@@ -148,9 +147,8 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
-                logger.debug(AnsiTerminalColorHelper.CYAN + "Rule Background" + AnsiTerminalColorHelper.RESET +" in "
-                        + rule.getTitle());
-                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
+                logger.debug("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle());
+                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
                 if (filteredBackgroundStepBody.isPresent()) {
                     ruleBuilder.withTestPhrases(filteredBackgroundStepBody.get());
                 }
@@ -170,7 +168,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         gherkinTestSpecifications.addAll(transformScenariosToTestSpecifications(scenarios, parentTags));
         // Generics are not covarient. Cast to TestSpecification
         return gherkinTestSpecifications.stream()
-                .map(t -> (TestSpecification) t)
+                .map(TestSpecification.class::cast)
                 .collect(Collectors.toList());
     }
 
@@ -190,7 +188,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
 
     private String getBackgroundText(GherkinBackground background) {
         StringBuilder backgroundText = new StringBuilder();
-        backgroundText.append(background.getTitle().get().getRawString() + "\n");
+        if (background.getTitle().isPresent()) {
+            backgroundText.append(background.getTitle().get().getRawString() + "\n");
+        }
         if (background.getLongDescription().isPresent()) {
             backgroundText.append(getAbridgedText(background.getLongDescription().get().getRawString()));
         }
@@ -215,7 +215,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
 
     @Override
     public Optional<Collection<TestSpecification>> filterGherkinTestSpecificationsByTagExpression(Collection<TestSpecification> testSpecification, String tagExpression) {
-        if (tagExpression == null || tagExpression.isEmpty()) { return Optional.of(testSpecification); }
+        if (tagExpression == null || tagExpression.isEmpty()) {
+            return Optional.of(testSpecification);
+        }
         Set<String> allPickleTags = new HashSet<>();
         List<TestSpecification> filteredSpecifications = new ArrayList<>(testSpecification.size());
         for (TestSpecification specification : testSpecification) {
@@ -224,7 +226,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 filteredSpecifications.add(filteredValue.get());
             }
         }
-        return filteredSpecifications.size() > 0 ? Optional.of(filteredSpecifications) : Optional.empty();
+        return !filteredSpecifications.isEmpty() ? Optional.of(filteredSpecifications) : Optional.empty();
     }
 
     private Optional<TestSpecification> recursivelyGetTagsAndFilterPickles(TestSpecification testSpecification, Set<String> allParentTags, String tagExpression) {
@@ -232,7 +234,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         DefaultTestSpecification.Builder builder = new DefaultTestSpecification.Builder(testSpecification.getId());
         // See if this is a gherkin test specification we can get tags from
         if (testSpecification instanceof GherkinTestSpecification) {
-            allGherkinItemTags.addAll(((GherkinTestSpecification)testSpecification).getTags());
+            allGherkinItemTags.addAll(((GherkinTestSpecification) testSpecification).getTags());
         }
         // If there are child nodes then this is a container, feature, scenario outline or rule
         if (testSpecification.nestedTestSpecifications().isPresent()) {
@@ -250,7 +252,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             }
         } else { // This is a leaf node, i.e a pickle
             // See if this pickle matches the tag expression or not
-            if (!gherkinTagFilterer.tagExpressionMatchesPickle(allGherkinItemTags, tagExpression, charset)) {
+            if (!new GherkinTagsVisitorImpl().tagExpressionMatchesPickle(allGherkinItemTags, tagExpression)) {
                 return Optional.empty();
             } else {
                 builder.withTestPhrases(testSpecification.getPhrases().orElseThrow()); // scenario must have steps

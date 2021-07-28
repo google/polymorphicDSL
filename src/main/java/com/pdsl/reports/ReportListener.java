@@ -3,7 +3,7 @@ package com.pdsl.reports;
 import java.io.OutputStream;
 import java.util.List;
 
-public interface ReportListener  {
+public interface ReportListener {
 
     void addTestResult(TestMetadata testMetadata);
 
@@ -13,8 +13,9 @@ public interface ReportListener  {
 
     /**
      * Checks to see if the test ID has already been recorded in the report
+     *
      * @param postFilteredTestId Identifier of the TestSpecification after filtering out phrases
      * @return true if report contains this test or false if not
      */
-    boolean containsFilteredTest(int postFilteredTestId);
+    boolean containsFilteredTest(long postFilteredTestId);
 }

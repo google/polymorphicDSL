@@ -15,7 +15,10 @@ public interface TestCase {
      *
      */
     long getTestCaseId();
+
     String getTestTitle();
+
     int getBodySize();
+
     Iterator<TestSection> getTestBody();
 }

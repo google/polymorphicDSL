@@ -6,16 +6,16 @@
 
   <groupId>com.google</groupId>
   <artifactId>pdsl</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>0.1.1-SNAPSHOT</version>
 
   <name>pdsl</name>
-  <!-- FIXME change it to the project's website -->
-  <url>http://www.example.com</url>
+	<url>http://www.github.com/google/polymorphicDSL</url>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>11</maven.compiler.source>
     <maven.compiler.target>11</maven.compiler.target>
+		<jacoco.version>0.8.7</jacoco.version>
   </properties>
 
   <dependencies>
@@ -25,6 +25,12 @@
       <version>4.11</version>
       <scope>test</scope>
     </dependency>
+		<!-- code coverage -->
+		<dependency>
+			<groupId>org.jacoco</groupId> 
+			<artifactId>jacoco-maven-plugin</artifactId>
+			<version>${jacoco.version}</version>
+		</dependency>
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-runtime</artifactId>
@@ -45,26 +51,8 @@
     <!-- Logging -->
     <dependency>
       <groupId>ch.qos.logback</groupId>
-      <artifactId>logback-core</artifactId>
-      <version>1.2.3</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.30</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.2.3</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>1.7.30</version>
-      <scope>compile</scope>
+      <version>1.1.7</version>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>
@@ -72,7 +60,6 @@
       <version>30.1-android</version>
       <scope>compile</scope>
     </dependency>
-    <!-- End logging -->
   </dependencies>
 
   <build>
@@ -133,7 +120,27 @@
             </execution>
           </executions>
         </plugin>
-      </plugins>
+				<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacoco.version}</version>
+						<executions>
+								<execution>
+										<id>jacoco-initialize</id>
+										<goals>
+												<goal>prepare-agent</goal>
+										</goals>
+								</execution>
+								<execution>
+										<id>jacoco-site</id>
+										<phase>package</phase>
+										<goals>
+												<goal>report</goal>
+										</goals>
+								</execution>
+						</executions>
+				</plugin>
+			</plugins>
     </pluginManagement>
   </build>
 </project>

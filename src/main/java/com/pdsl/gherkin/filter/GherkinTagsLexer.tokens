@@ -1,0 +1,9 @@
+TAG=1
+WS=2
+AND=3
+OR=4
+NOT=5
+L_PAREN=6
+R_PAREN=7
+'('=6
+')'=7

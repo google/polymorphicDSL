@@ -8,29 +8,29 @@ import java.util.*;
 
 /**
  * A wrapper object used by a {@code GherkinTestSpecificationFactory} to produce pickle {@code TestSpecification}s.
- *
+ * <p>
  * The PickleJar is roughly analogous to a {@code GherkinFeature}
- *
+ * <p>
  * The practical need for a PickleJar is that a {@GherkinFeature} is abstract enough that some further processing is needed
  * to determine what the actual test cases are, particularly with parameter substitutions in the text in the event
  * the scenario or rule has an Example table
- *
+ * <p>
  * A pickle jar contains a group of pickles that have had the text substitutions already performed
  */
 class PickleJar {
 
-    // Gherkin does not support substitutions on backgrounds, so we can recycle the regular GherkinBackground
-    private String languageCode;
-    private Set<String> featureTags;
-    private Optional<GherkinBackground> background;
-    private List<PickleJarScenario> scenarios;
-    private List<PickleJarRule> rules;
     private final String featureTitle;
     private final URL location;
-    private Optional<String> longDescription;
+    // Gherkin does not support substitutions on backgrounds, so we can recycle the regular GherkinBackground
+    private final String languageCode;
+    private final Set<String> featureTags;
+    private final Optional<GherkinBackground> background;
+    private final List<PickleJarScenario> scenarios;
+    private final List<PickleJarRule> rules;
+    private final Optional<String> longDescription;
 
     public PickleJar(Builder builder) {
-        this.featureTitle = builder.featureTitle;;
+        this.featureTitle = builder.featureTitle;
         this.location = builder.location;
         this.languageCode = builder.languageCode;
         this.background = builder.background;
@@ -40,15 +40,47 @@ class PickleJar {
         this.scenarios = builder.scenarios;
     }
 
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public Set<String> getFeatureTags() {
+        return featureTags;
+    }
+
+    public Optional<GherkinBackground> getBackground() {
+        return background;
+    }
+
+    public List<PickleJarScenario> getScenarios() {
+        return scenarios;
+    }
+
+    public List<PickleJarRule> getRules() {
+        return rules;
+    }
+
+    public String getFeatureTitle() {
+        return featureTitle;
+    }
+
+    public URL getLocation() {
+        return location;
+    }
+
+    public Optional<String> getLongDescription() {
+        return longDescription;
+    }
+
     public static class Builder {
+        private final String featureTitle;
+        private final URL location;
+        private final List<PickleJarScenario> scenarios = new LinkedList<>();
+        private final List<PickleJarRule> rules = new LinkedList<>();
+        private final String languageCode;
         private Set<String> featureTags = new HashSet<>();
         private Optional<GherkinBackground> background = Optional.empty();
-        private List<PickleJarScenario> scenarios = new LinkedList<>();
-        private List<PickleJarRule> rules = new LinkedList<>();
-        private final String featureTitle;
         private Optional<String> longDescription = Optional.empty();
-        private final URL location;
-        private String languageCode;
 
         public Builder(URL location, String featureTitle, String languageCode) {
             Preconditions.checkNotNull(location, "Gherkin location cannot be null!");
@@ -89,49 +121,24 @@ class PickleJar {
         }
     }
 
-    public String getLanguageCode() {
-        return languageCode;
-    }
-
-    public Set<String> getFeatureTags() {
-        return featureTags;
-    }
-
-    public Optional<GherkinBackground> getBackground() {
-        return background;
-    }
-
-    public List<PickleJarScenario> getScenarios() {
-        return scenarios;
-    }
-
-    public List<PickleJarRule> getRules() {
-        return rules;
-    }
-
-    public String getFeatureTitle() {
-        return featureTitle;
-    }
-
-    public URL getLocation() {
-        return location;
-    }
-
-    public Optional<String> getLongDescription() {
-        return longDescription;
-    }
     /**
      * A Gherkin rule that encapsulates additional PickleJarScenarios with a shared context.
-     *
+     * <p>
      * The rule can contain a background that will extend the top level background (if it exists) for all scenarios
      * within this rule
-     *
      */
     static class PickleJarRule {
-        private String title;
+        private final String title;
+        private final List<PickleJarScenario> scenarios;
         private Optional<String> longDescription = Optional.empty();
         private Optional<GherkinBackground> background = Optional.empty();
-        private List<PickleJarScenario> scenarios;
+
+        private PickleJarRule(Builder builder) {
+            this.title = builder.title;
+            this.longDescription = builder.longDescription;
+            this.background = builder.background;
+            this.scenarios = builder.scenarios;
+        }
 
         public String getTitle() {
             return title;
@@ -149,18 +156,11 @@ class PickleJar {
             return scenarios;
         }
 
-        private PickleJarRule(Builder builder) {
-            this.title = builder.title;
-            this.longDescription = builder.longDescription;
-            this.background = builder.background;
-            this.scenarios = builder.scenarios;
-        }
-
         public static class Builder {
-            private String title;
+            private final String title;
+            private final List<PickleJarScenario> scenarios;
             private Optional<String> longDescription = Optional.empty();
             private Optional<GherkinBackground> background = Optional.empty();
-            private List<PickleJarScenario> scenarios;
 
             public Builder(String title, List<PickleJarScenario> scenarios) {
                 Preconditions.checkArgument(title != null || title.isEmpty(), "Title cannot be null or empty!");
@@ -186,20 +186,28 @@ class PickleJar {
 
     /**
      * A Gherkin Scenario that has had parameter substitutions performed on the scenario and step text.
-     *
+     * <p>
      * This scenario may represent a test created from a row from an Examples table, which in turn was from a
      * more abstract {@Code GherkinScenario}
-     *
+     * <p>
      * In any case the PickleJarScenario does not have any examples table because it is intended to be more concrete,
      * only missing parent tags and background steps to be a fully concrete pickle
-     *
+     * <p>
      * It contains the tags from both the scenario and examples table it was derived from
      */
     static class PickleJarScenario {
+        private final String scenarioTitleWithParameterSubstitutionsIfNeeded;
+        private final Optional<String> longDescription;
+        private final List<String> stepsWithParameterSubstitutionsIfNeeded;
         private Optional<Set<String>> tags;
-        private String scenarioTitleWithParameterSubstitutionsIfNeeded;
-        private Optional<String> longDescription;
-        private List<String> stepsWithParameterSubstitutionsIfNeeded;
+
+        private PickleJarScenario(Builder builder) {
+            this.tags = builder.tags;
+            this.longDescription = builder.longDescription;
+            this.tags = builder.tags;
+            this.scenarioTitleWithParameterSubstitutionsIfNeeded = builder.titleWithSubstitutions;
+            this.stepsWithParameterSubstitutionsIfNeeded = builder.stepsWithSubstitutions;
+        }
 
         public Optional<Set<String>> getTags() {
             return tags;
@@ -217,19 +225,11 @@ class PickleJar {
             return stepsWithParameterSubstitutionsIfNeeded;
         }
 
-        private PickleJarScenario(Builder builder) {
-            this.tags = builder.tags;
-            this.longDescription = builder.longDescription;
-            this.tags = builder.tags;
-            this.scenarioTitleWithParameterSubstitutionsIfNeeded = builder.titleWithSubstitutions;
-            this.stepsWithParameterSubstitutionsIfNeeded = builder.stepsWithSubstitutions;
-        }
-
         public static class Builder {
+            private final String titleWithSubstitutions;
+            private final List<String> stepsWithSubstitutions;
             private Optional<Set<String>> tags = Optional.empty();
-            private String titleWithSubstitutions;
             private Optional<String> longDescription = Optional.empty();
-            private List<String> stepsWithSubstitutions;
 
             public Builder(String titleWithSubstitutions, List<String> stepsWithSubstitutions) {
                 this.titleWithSubstitutions = titleWithSubstitutions;

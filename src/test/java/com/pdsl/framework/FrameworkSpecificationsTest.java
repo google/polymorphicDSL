@@ -2,10 +2,10 @@ package com.pdsl.framework;
 
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
+import com.pdsl.reports.TestMetadata;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -34,10 +34,10 @@ public class FrameworkSpecificationsTest {
                 PdslFrameworkSpecificationLexer.class,
                 PdslFrameworkSpecificationParser.class,
                 PdslFrameworkSpecificationLexer.class
-                );
+        );
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act
-        TestRunResults results = gherkinTestExecutor. processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
         assertThat(results.failingTestTotal()).isEqualTo(0);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
     }

@@ -13,11 +13,11 @@ public interface PdslGherkinRecognizer {
 
     /**
      * Reads a gherkin file and transforms it into an object if and only if it has scenarios AND all those scenarios have at least one step.
-     *
+     * <p>
      * In the event the gherkin can be interpreted but is not "well formed" a runtime exception will be thrown indicating what is missing
      *
      * @param gherkinLocation The .feature file to convert to a GherkinFeature object
-     * @param listener The parse tree listener
+     * @param listener        The parse tree listener
      * @return a GherkinFeature matching the contents of the file
      * @throws IOException
      */

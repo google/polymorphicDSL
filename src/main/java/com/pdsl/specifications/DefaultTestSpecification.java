@@ -4,15 +4,16 @@ import com.google.common.base.Preconditions;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
 public final class DefaultTestSpecification implements TestSpecification {
 
     private final String id;
     private final Optional<List<ParseTree>> phrases;
     private final Optional<ByteArrayOutputStream> metaData;
-    private final Optional<List<? extends TestSpecification>> childItems;
+    private final Optional<List<TestSpecification>> childItems;
 
     private DefaultTestSpecification(Builder builder) {
         this.id = builder.id;
@@ -21,11 +22,36 @@ public final class DefaultTestSpecification implements TestSpecification {
         this.childItems = builder.childItems;
     }
 
+    @Override
+    public Optional<ByteArrayOutputStream> getMetaData() {
+        return metaData;
+    }
+
+    @Override
+    public Optional<List<TestSpecification>> nestedTestSpecifications() {
+        return childItems;
+    }
+
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    @Override
+    public Optional<Iterator<ParseTree>> getPhraseIterator() {
+        return phrases.isPresent() ? Optional.of(phrases.get().iterator()) : Optional.empty();
+    }
+
+    @Override
+    public Optional<List<ParseTree>> getPhrases() {
+        return phrases;
+    }
+
     public static class Builder {
         private final String id;
         private Optional<List<ParseTree>> phrases = Optional.empty();
         private Optional<ByteArrayOutputStream> metaData = Optional.empty();
-        private Optional<List<? extends TestSpecification>> childItems = Optional.empty();
+        private Optional<List<TestSpecification>> childItems = Optional.empty();
 
         public Builder(String id) {
             Preconditions.checkArgument(id != null && !id.isEmpty(), "Test Specification ID cannot be mepty or null!");
@@ -61,34 +87,9 @@ public final class DefaultTestSpecification implements TestSpecification {
             return this;
         }
 
-        public void withChildItems(List<? extends TestSpecification> childItems) {
+        public void withChildItems(List<TestSpecification> childItems) {
             this.childItems = Optional.of(childItems);
         }
-    }
-
-    @Override
-    public Optional<ByteArrayOutputStream> getMetaData() {
-        return metaData;
-    }
-
-    @Override
-    public Optional<List<? extends TestSpecification>> nestedTestSpecifications() {
-        return childItems;
-    }
-
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public Optional<Iterator<ParseTree>> getPhraseIterator() {
-        return phrases.isPresent() ? Optional.of(phrases.get().iterator()) : Optional.empty();
-    }
-
-    @Override
-    public Optional<List<ParseTree>> getPhrases() {
-        return phrases;
     }
 
 }

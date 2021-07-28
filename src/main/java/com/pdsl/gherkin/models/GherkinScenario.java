@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 
 public class GherkinScenario {
-    private Optional<List<String>> tags;
-    private Optional<GherkinString> title;
-    private Optional<GherkinString> longDescription;
-    private Optional<List<GherkinStep>> stepsList;
-    private Optional<List<GherkinExamplesTable>> examples;
+    private final Optional<List<String>> tags;
+    private final Optional<GherkinString> title;
+    private final Optional<GherkinString> longDescription;
+    private final Optional<List<GherkinStep>> stepsList;
+    private final Optional<List<GherkinExamplesTable>> examples;
 
     public GherkinScenario(Builder builder) {
         this.tags = builder.tags;
@@ -22,12 +22,32 @@ public class GherkinScenario {
                 : Optional.of(builder.examples);
     }
 
+    public Optional<List<String>> getTags() {
+        return tags;
+    }
+
+    public Optional<GherkinString> getTitle() {
+        return title;
+    }
+
+    public Optional<GherkinString> getLongDescription() {
+        return longDescription;
+    }
+
+    public Optional<List<GherkinStep>> getStepsList() {
+        return stepsList;
+    }
+
+    public Optional<List<GherkinExamplesTable>> getExamples() {
+        return examples;
+    }
+
     public static class Builder {
+        private final List<GherkinExamplesTable> examples = new LinkedList<>();
         private Optional<List<String>> tags = Optional.empty();
         private String title = "";
         private String longDescription = "";
         private Optional<List<GherkinStep>> stepsList = Optional.empty();
-        private List<GherkinExamplesTable> examples = new LinkedList<>();
 
         public GherkinScenario build() {
             return new GherkinScenario(this);
@@ -57,25 +77,5 @@ public class GherkinScenario {
             this.tags = Optional.of(tags);
             return this;
         }
-    }
-
-    public Optional<List<String>> getTags() {
-        return tags;
-    }
-
-    public Optional<GherkinString> getTitle() {
-        return title;
-    }
-
-    public Optional<GherkinString> getLongDescription() {
-        return longDescription;
-    }
-
-    public Optional<List<GherkinStep>> getStepsList() {
-        return stepsList;
-    }
-
-    public Optional<List<GherkinExamplesTable>> getExamples() {
-        return examples;
     }
 }

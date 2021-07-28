@@ -10,16 +10,21 @@ import java.util.Queue;
 
 /**
  * A listener that keeps track of each phrase visited.
- *
+ * <p>
  * This is used for assertions in testing
  */
 public class StepCounterListener implements ParseTreeListener {
     private int stepsEncountered = 0;
     private Queue<String> steps = new LinkedList<>();
-    public int getPhrasesEncountered() { return stepsEncountered; }
+
+    public int getPhrasesEncountered() {
+        return stepsEncountered;
+    }
+
     public Queue<String> getStepsInOrderRun() {
         return steps;
     }
+
     @Override
     public void visitTerminal(TerminalNode node) {
 

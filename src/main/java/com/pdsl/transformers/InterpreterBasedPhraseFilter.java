@@ -1,13 +1,11 @@
 package com.pdsl.transformers;
 
-import static com.pdsl.logging.AnsiTerminalColorHelper.*;
-
 import com.google.common.base.Preconditions;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import org.antlr.v4.Tool;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.slf4j.Logger;
@@ -29,22 +27,56 @@ import java.util.jar.JarOutputStream;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 
+import static com.pdsl.logging.AnsiTerminalColorHelper.BOLD;
+import static com.pdsl.logging.AnsiTerminalColorHelper.RESET;
+
 //TODO: This class will be useless until we can either translate the Ctx objects to what the provided parseTreeListener
 // can use or generate classes that provide some sort of method forwarding. Marking it as default until this is solved.
+
 class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
 
-    private final Logger logger = LoggerFactory.getLogger(LineDelimitedTestSpecificationFactory.class);
-
     private static final String PARSER_SUFFIX = "MetaParser";
+		private static final String LEXER = "Lexer";
+    private static final String ALL_RULES_METHOD_NAME = "polymorphicDslAllRules";
+    private final Logger logger = LoggerFactory.getLogger(LineDelimitedTestSpecificationFactory.class);
     private final ParseTreeListener grammarListener;
     private final Class<?> grammarParser;
     private final Optional<Class<?>> subgrammarParser;
     private final Optional<ParseTreeListener> subgrammarLister;
     private final Class<?> grammarLexer;
     private final Optional<Class<?>> subgrammarLexer;
-    private static final String allRulesMethodName = "polymorphicDslAllRules";
     private final Optional<Path> codeGenerationDirectory;
 
+    private InterpreterBasedPhraseFilter(Builder builder) throws IOException {
+        codeGenerationDirectory = builder.getCodeGenerationDirectory();
+
+        GeneratedCodeContainer grammarContainer = generatedPdslAllRulesListener(builder.grammarParentDirectory, builder.grammarName, builder.grammarPackagePath,
+                builder.grammarLexer.isPresent() ? builder.grammarLexer.get() : String.format("%s%s", builder.grammarName, LEXER),
+                builder.grammarLibrary.isPresent() ? builder.grammarLibrary.get() : builder.grammarParentDirectory);
+        String parserName = grammarContainer.getParserClass().getName();
+        Preconditions.checkArgument(parserName.contains(PARSER_SUFFIX), String.format("The parser %s did not end with %s!", parserName, PARSER_SUFFIX));
+        grammarLexer = grammarContainer.getLexerClass();
+        grammarParser = grammarContainer.getParserClass();
+        grammarListener = grammarContainer.getParseTreeListener();
+        if (builder.subgrammarName.isPresent()) {
+            Path parentDirectory = builder.subgrammarParentDirectory.isPresent() ? builder.subgrammarParentDirectory.get() : builder.grammarParentDirectory;
+            GeneratedCodeContainer subgrammarContainer =
+                    generatedPdslAllRulesListener(
+                            parentDirectory,
+                            builder.subgrammarName.get(),
+                            builder.subgrammarPackagepath.isPresent() ? builder.subgrammarPackagepath.get() : builder.grammarPackagePath,
+                            builder.subgrammarLexer.isPresent() ? builder.subgrammarLexer.get() : String.format("%s%s", builder.subgrammarName.get(), LEXER),
+                            builder.subgrammarLibrary.isPresent() ? builder.subgrammarLibrary.get() : parentDirectory
+                    );
+            subgrammarLexer = Optional.of(subgrammarContainer.getLexerClass());
+            subgrammarParser = Optional.of(subgrammarContainer.getParserClass());
+            subgrammarLister = Optional.of(subgrammarContainer.getParseTreeListener());
+        } else {
+            subgrammarLister = Optional.empty();
+            subgrammarLexer = Optional.empty();
+            subgrammarParser = Optional.empty();
+        }
+    }
 
     private Optional<List<ParseTree>> processPhrases(List<InputStream> testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy strategy) {
         // Make copies of the input stream so we can read them more than once
@@ -65,15 +97,15 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
                     TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR, grammarParser, grammarLexer);
             if (parser.isEmpty()) {
                 throw new PolymorphicDslTransformationException("A phrase was found that does not belong in the grammar!\n\tPhrase: " + testInput);
-            } else if (strategy.equals(DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR)){
-                    parser.get().setBuildParseTree(true);
-                    try {
-                        Method activePhrasesRule = grammarParser.getMethod(allRulesMethodName, (Class<?>[]) null);
-                        grammarParseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                        throw new PolymorphicDslTransformationException(
-                                "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
-                    }
+            } else if (strategy.equals(DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR)) {
+                parser.get().setBuildParseTree(true);
+                try {
+                    Method activePhrasesRule = grammarParser.getMethod(ALL_RULES_METHOD_NAME, (Class<?>[]) null);
+                    grammarParseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    throw new PolymorphicDslTransformationException(
+                            "Unable to create parse tree using the " + ALL_RULES_METHOD_NAME + " rule!", e);
+                }
             }
         }
         // By this point we have verified that all phrases are valid in our grammar.
@@ -83,42 +115,43 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
             logger.warn("No subgrammar parser was provided, yet filtering was requested!");
             return Optional.empty();
         } else {
-                // Now we can filter out phrases that do not belong in the current context
-                List<ParseTree> parseTrees = new ArrayList<>(testInput.size());
-                int phrasesFilteredOut = 0;
-                for (ByteArrayOutputStream baos : reusableCopies) {
-                    if (subgrammarParser.isEmpty()) {
-                        break;
-                    }
-                    Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()),
-                            TestSpecificationHelper.ErrorListenerStrategy.SUBGRAMMAR,
-                            subgrammarParser.get(),
-                            subgrammarLexer.isPresent() ? subgrammarLexer.get() : grammarLexer);
-                    if (parser.isPresent()) {
-                        parser.get().setBuildParseTree(true);
-                        try {
-                            Method activePhrasesRule = subgrammarParser.get().getMethod(allRulesMethodName, (Class<?>[]) null);
-                            parseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
-                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-                            throw new PolymorphicDslTransformationException(
-                                    "Unable to create parse tree using the " + allRulesMethodName + " rule!", e);
-                        }
-                    } else {
-                        phrasesFilteredOut++;
-                    }
+            // Now we can filter out phrases that do not belong in the current context
+            List<ParseTree> parseTrees = new ArrayList<>(testInput.size());
+            int phrasesFilteredOut = 0;
+            for (ByteArrayOutputStream baos : reusableCopies) {
+                if (subgrammarParser.isEmpty()) {
+                    break;
                 }
-                if (parseTrees.isEmpty()) { // Let the user know we couldn't parse
-                    String errorType = phrasesFilteredOut == testInput.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
-                    StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET);
-                    errorMessage.append("\n\t" +
-                            BOLD + "Parser Context: " + RESET + grammarParser.getName() + "\n\t" +
-                            BOLD + "Strategy: " + RESET + TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR.name());
-                    logger.warn(errorMessage.toString());
-                    return Optional.empty();
+                Optional<Parser> parser = TestSpecificationHelper.parserOf(new ByteArrayInputStream(baos.toByteArray()),
+                        TestSpecificationHelper.ErrorListenerStrategy.SUBGRAMMAR,
+                        subgrammarParser.get(),
+                        subgrammarLexer.isPresent() ? subgrammarLexer.get() : grammarLexer);
+                if (parser.isPresent()) {
+                    parser.get().setBuildParseTree(true);
+                    try {
+                        Method activePhrasesRule = subgrammarParser.get().getMethod(ALL_RULES_METHOD_NAME, (Class<?>[]) null);
+                        parseTrees.add((ParseTree) activePhrasesRule.invoke(parser.get(), null));
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                        throw new PolymorphicDslTransformationException(
+                                "Unable to create parse tree using the " + ALL_RULES_METHOD_NAME + " rule!", e);
+                    }
+                } else {
+                    phrasesFilteredOut++;
                 }
-                return Optional.of(parseTrees);
+            }
+            if (parseTrees.isEmpty()) { // Let the user know we couldn't parse
+                String errorType = phrasesFilteredOut == testInput.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
+                StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET);
+                errorMessage.append("\n\t" +
+                        BOLD + "Parser Context: " + RESET + grammarParser.getName() + "\n\t" +
+                        BOLD + "Strategy: " + RESET + TestSpecificationHelper.ErrorListenerStrategy.GRAMMAR.name());
+                logger.warn(errorMessage.toString());
+                return Optional.empty();
+            }
+            return Optional.of(parseTrees);
         }
     }
+
     @Override
     public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput) {
         Preconditions.checkNotNull(testInput, "Test input was null!");
@@ -130,47 +163,16 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
     public List<ParseTree> validatePhrases(List<InputStream> testInput) {
         Preconditions.checkNotNull(testInput, "Test input was null!");
         Preconditions.checkArgument(testInput.size() > 0, "Test input was empty!");
-        Optional<List<ParseTree>> parseTrees =  processPhrases(testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR);
+        Optional<List<ParseTree>> parseTrees = processPhrases(testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR);
         if (parseTrees.isPresent()) {
-            return  parseTrees.get();
+            return parseTrees.get();
         } else { // A runtime exception should have been thrown earlier, but let's play it safe.
             throw new PolymorphicDslTransformationException("Was not able to make recognize input with grammar " + grammarParser.getName());
         }
     }
 
-    private InterpreterBasedPhraseFilter(Builder builder) throws IOException {
-        codeGenerationDirectory = builder.getCodeGenerationDirectory();
-
-        GeneratedCodeContainer grammarContainer = generatedPdslAllRulesListener(builder.grammarParentDirectory, builder.grammarName, builder.grammarPackagePath,
-                builder.grammarLexer.isPresent() ? builder.grammarLexer.get() : builder.grammarName + "Lexer",
-                builder.grammarLibrary.isPresent() ? builder.grammarLibrary.get() : builder.grammarParentDirectory);
-        String parserName = grammarContainer.getParserClass().getName();
-        Preconditions.checkArgument(parserName.contains(PARSER_SUFFIX), String.format("The parser %s did not end with %s!", parserName, PARSER_SUFFIX));
-        grammarLexer = grammarContainer.getLexerClass();
-        grammarParser = grammarContainer.getParserClass();
-        grammarListener = grammarContainer.getParseTreeListener();
-        if (builder.subgrammarName.isPresent()) {
-            Path parentDirectory = builder.subgrammarParentDirectory.isPresent() ? builder.subgrammarParentDirectory.get() : builder.grammarParentDirectory;
-            GeneratedCodeContainer subgrammarContainer =
-                 generatedPdslAllRulesListener(
-                         parentDirectory,
-                    builder.subgrammarName.get(),
-                    builder.subgrammarPackagepath.isPresent() ? builder.subgrammarPackagepath.get() : builder.grammarPackagePath,
-                    builder.subgrammarLexer.isPresent() ? builder.subgrammarLexer.get() : builder.subgrammarName.get() + "Lexer",
-                         builder.subgrammarLibrary.isPresent() ? builder.subgrammarLibrary.get() : parentDirectory
-            );
-            subgrammarLexer = Optional.of(subgrammarContainer.getLexerClass());
-            subgrammarParser = Optional.of(subgrammarContainer.getParserClass());
-            subgrammarLister = Optional.of(subgrammarContainer.getParseTreeListener());
-        } else {
-            subgrammarLister = Optional.empty();
-            subgrammarLexer = Optional.empty();
-            subgrammarParser = Optional.empty();
-        }
-    }
-
     private GeneratedCodeContainer generatedPdslAllRulesListener(Path grammarParentDirectory, String grammarName,
-                                                            String packagePath, String lexer, Path library) throws IOException{
+                                                                 String packagePath, String lexer, Path library) throws IOException {
         List<String> ruleNames = getRuleNamesFromInterpreterFile(grammarParentDirectory, grammarName);
         // Write a new antlr parser that will match any rule names
         Path codeGenerationLocation = codeGenerationDirectory.orElseGet(() -> Path.of(String.format("%s/pdsltemp/%s/%s/", System.getProperty("java.io.tmpdir"),
@@ -205,62 +207,18 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
     private void createAntlrSourceToMatchRules(List<String> ruleNames, Path grammarParentDirectory, String grammarName,
                                                String lexer, String packagePath) throws IOException {
         StringBuilder builder = new StringBuilder();
-        String parserOfParserName = grammarParentDirectory.getFileName() + "MetaParser";
+        String parserOfParserName = String.format("%s%s", grammarParentDirectory.getFileName(), PARSER_SUFFIX);
         builder.append("parser grammar " + grammarName + PARSER_SUFFIX + ";\n");
         builder.append("options {tokenVocab=" + lexer + ";}\n");
         builder.append("import " + grammarName + "Parser;\n");
-        builder.append(allRulesMethodName + " : (\n");
+        builder.append(ALL_RULES_METHOD_NAME + " : (\n");
         builder.append("\t" + ruleNames.get(0));
         ruleNames.subList(1, ruleNames.size()).stream()
-                .forEach(rule -> builder.append( " |\n\t" + rule));
+                .forEach(rule -> builder.append(" |\n\t" + rule));
         builder.append("\t)+\n");
         builder.append("\t;\n");
         Files.writeString(grammarParentDirectory.resolve(grammarName + PARSER_SUFFIX + ".g4"), builder.toString(),
                 StandardOpenOption.CREATE);
-    }
-
-    private enum FileType {
-        JAVA,
-        ALL_ANTLR,
-        CLASS;
-    }
-
-
-    private static class SourceFileFilter implements FileFilter {
-
-        private static final Pattern TOKENS = Pattern.compile(".*\\.tokens");
-        private static final Pattern G4 = Pattern.compile(".*\\.g4");
-        private static final Pattern INTERP = Pattern.compile(".*\\.interp");
-        private final Pattern CLASS;
-        private final Pattern JAVA;
-        private FileType strategy;
-
-        public void setStrategy(FileType strategy) {
-            this.strategy = strategy;
-        }
-
-        public SourceFileFilter(FileType strategy, String grammarName) {
-            this.JAVA = Pattern.compile(grammarName + PARSER_SUFFIX + ".*\\.java");
-            this.CLASS = Pattern.compile(grammarName + PARSER_SUFFIX + ".*\\.class");
-            this.strategy = strategy;
-        }
-
-        @Override
-        public boolean accept(File file) {
-            String fileName = file.getName();
-            switch (strategy) {
-                case JAVA:
-                    return JAVA.matcher(fileName).matches();
-                case CLASS:
-                    return CLASS.matcher(fileName).matches();
-                case ALL_ANTLR:
-                    return INTERP.matcher(fileName).matches() ||
-                            TOKENS.matcher(fileName).matches() ||
-                            G4.matcher(fileName).matches();
-                default:
-                    throw new IllegalArgumentException("Do not support file matching for type " + strategy.name());
-            }
-        }
     }
 
     private File[] getNewSourceFiles(File finalGeneratedCodeDirectory, String packagePath, Path grammarParentDirectory, String grammarName, SourceFileFilter sourceFileFilter) {
@@ -282,15 +240,19 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
             return finalGeneratedCodeDirectory.listFiles(sourceFileFilter);
         } catch (IOException e) {
             // Cleanup if possible
-            finalGeneratedCodeDirectory.delete();
-            throw new PolymorphicDslFileException("Error when generating new source files for grammar!", e);
+            boolean cleamupSuccessful = finalGeneratedCodeDirectory.delete();
+            if (cleamupSuccessful) {
+                throw new PolymorphicDslFileException("Error when generating new source files for grammar!", e);
+            } else {
+                throw new PolymorphicDslFileException(String.format("Error when generating new source files for grammar!%nCleanup of the directory also failed! Could not delete %s", finalGeneratedCodeDirectory.getPath()), e);
+            }
         }
     }
 
     private File[] getCompiledClasses(File finalGeneratedCodeDirectory, String grammarName, SourceFileFilter sourceFileFilter) {
         sourceFileFilter.setStrategy(FileType.CLASS);
         File[] javaSourceFiles = finalGeneratedCodeDirectory.listFiles(sourceFileFilter);
-        assert(javaSourceFiles != null && javaSourceFiles.length > 0) : "The compiled classes were not found!";
+        assert (javaSourceFiles != null && javaSourceFiles.length > 0) : "The compiled classes were not found!";
         logger.info("Writing generated code to " + finalGeneratedCodeDirectory.getPath());
         return javaSourceFiles;
 
@@ -311,15 +273,18 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
             Path sourcePath = putCompiledClassesInJarFile(grammarName, packagePath, compiledClasses, grammarParentDirectory);
             logger.debug("Wrote generated grammars to " + sourcePath);
             // Load the generated classes
-            URL[] urls = new URL[] { sourcePath.toUri().toURL()};
-            ClassLoader cl = new URLClassLoader(urls);
-            // Get the most important classes needed for filtering
-            Class<?> parseTreeListenerClass = cl.loadClass(packagePath + "." + grammarName + "MetaParserBaseListener");
-            Class<?> parser = cl.loadClass(packagePath + "." + grammarName + PARSER_SUFFIX);
-            parserSuccessfullyProcessed = true;
-            Class<?> lexer = cl.loadClass(packagePath + "." + lexerName);
-            ParseTreeListener listener = (ParseTreeListener) parseTreeListenerClass.getDeclaredConstructor().newInstance();
-            return new GeneratedCodeContainer(parser, lexer, listener);
+            URL[] urls = new URL[]{sourcePath.toUri().toURL()};
+           try ( URLClassLoader cl = new URLClassLoader(urls)) {
+               // Get the most important classes needed for filtering
+               Class<?> parseTreeListenerClass = cl.loadClass(packagePath + "." + grammarName + "MetaParserBaseListener");
+               Class<?> parser = cl.loadClass(packagePath + "." + grammarName + PARSER_SUFFIX);
+               parserSuccessfullyProcessed = true;
+               Class<?> lexer = cl.loadClass(packagePath + "." + lexerName);
+               ParseTreeListener listener = (ParseTreeListener) parseTreeListenerClass.getDeclaredConstructor().newInstance();
+               return new GeneratedCodeContainer(parser, lexer, listener);
+           } catch (IOException e) {
+               throw new PolymorphicDslFileException("Error creating classloader", e);
+           }
 
         } catch (MalformedURLException | ClassNotFoundException | NoSuchMethodException | IllegalAccessException
                 | InstantiationException | InvocationTargetException e) {
@@ -332,28 +297,29 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
 
     /**
      * Copies the source files to a temporary directory and compiles them
+     *
      * @param generatedFiles An array of .java source files
      */
     private void compileGeneratedSources(String packagePath, File[] generatedFiles) {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> ds = new
                 DiagnosticCollector<>();
-        try(StandardJavaFileManager mgr =
-                     compiler.getStandardFileManager( ds, null, null ) ) {
-                Iterable<? extends JavaFileObject> sources =
-                        mgr.getJavaFileObjectsFromFiles(Arrays.
-                                asList(generatedFiles));
-                JavaCompiler.CompilationTask task =
-                        compiler.getTask(null, mgr, ds, null,
-                                null, sources);
-                task.call();
+        try (StandardJavaFileManager mgr =
+                     compiler.getStandardFileManager(ds, null, null)) {
+            Iterable<? extends JavaFileObject> sources =
+                    mgr.getJavaFileObjectsFromFiles(Arrays.
+                            asList(generatedFiles));
+            JavaCompiler.CompilationTask task =
+                    compiler.getTask(null, mgr, ds, null,
+                            null, sources);
+            task.call();
 
-                for (Diagnostic<? extends JavaFileObject>
-                        d : ds.getDiagnostics()) {
-                    System.out.format("Line: %d, %s in %s",
-                            d.getLineNumber(), d.getMessage(null),
-                            d.getSource().getName());
-                }
+            for (Diagnostic<? extends JavaFileObject>
+                    d : ds.getDiagnostics()) {
+                System.out.format("Line: %d, %s in %s",
+                        d.getLineNumber(), d.getMessage(null),
+                        d.getSource().getName());
+            }
         } catch (IOException e) {
             throw new PolymorphicDslFileException("Could not compile generated source code for meta parser!", e);
         }
@@ -380,30 +346,6 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
             return tempJar.toPath();
         } catch (IOException e) {
             throw new PolymorphicDslFileException("Could not put generated code into a jar in the temp directory!", e);
-        }
-    }
-
-    private static class GeneratedCodeContainer {
-        private Class<?> parserClass;
-        private Class<?> lexerClass;
-        private ParseTreeListener parserTreeListener;
-
-        public Class<?> getParserClass() {
-            return parserClass;
-        }
-
-        public Class<?> getLexerClass() {
-            return lexerClass;
-        }
-
-        public ParseTreeListener getParseTreeListener() {
-            return parserTreeListener;
-        }
-
-        public GeneratedCodeContainer(Class<?> parserClass, Class<?> lexerClass, ParseTreeListener parserTreeListener) {
-            this.parserClass = parserClass;
-            this.lexerClass = lexerClass;
-            this.parserTreeListener = parserTreeListener;
         }
     }
 
@@ -444,6 +386,73 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
         return ruleNames;
     }
 
+    private enum FileType {
+        JAVA,
+        ALL_ANTLR,
+        CLASS;
+    }
+
+    private static class SourceFileFilter implements FileFilter {
+
+        private static final Pattern TOKENS = Pattern.compile(".*\\.tokens");
+        private static final Pattern G4 = Pattern.compile(".*\\.g4");
+        private static final Pattern INTERP = Pattern.compile(".*\\.interp");
+        private final Pattern CLASS;
+        private final Pattern JAVA;
+        private FileType strategy;
+
+        public SourceFileFilter(FileType strategy, String grammarName) {
+            this.JAVA = Pattern.compile(grammarName + PARSER_SUFFIX + ".*\\.java");
+            this.CLASS = Pattern.compile(grammarName + PARSER_SUFFIX + ".*\\.class");
+            this.strategy = strategy;
+        }
+
+        public void setStrategy(FileType strategy) {
+            this.strategy = strategy;
+        }
+
+        @Override
+        public boolean accept(File file) {
+            String fileName = file.getName();
+            switch (strategy) {
+                case JAVA:
+                    return JAVA.matcher(fileName).matches();
+                case CLASS:
+                    return CLASS.matcher(fileName).matches();
+                case ALL_ANTLR:
+                    return INTERP.matcher(fileName).matches() ||
+                            TOKENS.matcher(fileName).matches() ||
+                            G4.matcher(fileName).matches();
+                default:
+                    throw new IllegalArgumentException("Do not support file matching for type " + strategy.name());
+            }
+        }
+    }
+
+    private static class GeneratedCodeContainer {
+        private Class<?> parserClass;
+        private Class<?> lexerClass;
+        private ParseTreeListener parserTreeListener;
+
+        public GeneratedCodeContainer(Class<?> parserClass, Class<?> lexerClass, ParseTreeListener parserTreeListener) {
+            this.parserClass = parserClass;
+            this.lexerClass = lexerClass;
+            this.parserTreeListener = parserTreeListener;
+        }
+
+        public Class<?> getParserClass() {
+            return parserClass;
+        }
+
+        public Class<?> getLexerClass() {
+            return lexerClass;
+        }
+
+        public ParseTreeListener getParseTreeListener() {
+            return parserTreeListener;
+        }
+    }
+
     public static class Builder {
         private Path grammarParentDirectory;
         private Optional<Path> subgrammarParentDirectory = Optional.empty();
@@ -481,13 +490,13 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
         }
 
         public Builder withGrammarLexer(String grammarLexer) {
-            Preconditions.checkArgument(grammarLexer.endsWith("Lexer"), "the lexer file name must end with the word 'Lexer', e.g, 'SomeLexer'");
+            Preconditions.checkArgument(grammarLexer.endsWith(LEXER), "the lexer file name must end with the word 'Lexer', e.g, 'SomeLexer'");
             this.grammarLexer = Optional.of(grammarLexer);
             return this;
         }
 
         public Builder withSubgrammarLexer(String subgrammarLexer) {
-            Preconditions.checkArgument(subgrammarLexer.endsWith("Lexer"), "All lexer names need to end with with the word 'Lexer' e.g, 'SomeLexer'");
+            Preconditions.checkArgument(subgrammarLexer.endsWith(LEXER), "All lexer names need to end with with the word 'Lexer' e.g, 'SomeLexer'");
             this.subgrammarLexer = Optional.of(subgrammarLexer);
             return this;
         }

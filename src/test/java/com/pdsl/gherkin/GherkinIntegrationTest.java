@@ -5,7 +5,6 @@ import com.pdsl.grammars.*;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
-import com.pdsl.grammars.MinimalImpl;
 import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;

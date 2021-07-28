@@ -3,11 +3,9 @@ package com.pdsl.testcases;
 import com.pdsl.specifications.TestSpecification;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * This test case factory treats test specifications as a single script where the parents are read before the children.
@@ -15,7 +13,7 @@ import java.util.Optional;
 public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory {
 
     @Override
-    public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testCaseSpecifications)  {
+    public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testCaseSpecifications) {
         // Capacity does not necessarily match expected value
         Collection<TestCase> testCases = new ArrayList<>(testCaseSpecifications.size());
         for (TestSpecification testCaseSpecification : testCaseSpecifications) {
@@ -28,7 +26,7 @@ public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory 
         return testCases;
     }
 
-    private void  recursivelyWalkSpecification(TestSpecification testSpecification, List<TestSection> testSections) {
+    private void recursivelyWalkSpecification(TestSpecification testSpecification, List<TestSection> testSections) {
         if (testSpecification.getPhrases().isPresent()) {
             for (ParseTree parseTree : testSpecification.getPhrases().get()) {
                 if (testSpecification.getMetaData().isPresent()) {

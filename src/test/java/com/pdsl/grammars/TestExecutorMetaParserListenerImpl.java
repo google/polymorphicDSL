@@ -7,6 +7,7 @@ import com.pdsl.gherkin.GherkinPolymorphicDslTestExecutorTest;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
+import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -21,6 +22,8 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -45,6 +48,8 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     private TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private PdslHelper.Factories factoryType;
     private Collection<TestCase> testCases;
+    private final Logger logger = LoggerFactory.getLogger(TestExecutorMetaParserListenerImpl.class);
+
     private String extractQuotedText(String str) {
         return str.strip().replaceAll("\"", "");
     }
@@ -299,6 +304,11 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedPassingTests(TestExecutorMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
         assertThat(results.isPresent()).isTrue();
+        for (TestMetadata metadata : results.get().getTestResultMetadata()) {
+            if (metadata.getFailingPhrase().isPresent()) {
+                logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestSuiteId(), metadata.getFailureReason().orElseThrow());
+            }
+        }
         assertThat(results.get().passingTestTotal()).isEqualTo(Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText())));
 
     }

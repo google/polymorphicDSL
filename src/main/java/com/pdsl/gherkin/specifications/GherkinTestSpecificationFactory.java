@@ -7,6 +7,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface GherkinTestSpecificationFactory extends TestSpecificationFactory {
-    public Optional<Collection<TestSpecification>> filterGherkinTestSpecificationsByTagExpression(
+    Optional<Collection<TestSpecification>> filterGherkinTestSpecificationsByTagExpression(
             Collection<TestSpecification> testSpecification, String tagExpression);
 }

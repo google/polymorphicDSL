@@ -19,7 +19,10 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;
 

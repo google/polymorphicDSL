@@ -1,8 +1,8 @@
 package com.pdsl.gherkin.models;
 
+import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
 import com.pdsl.gherkin.PdslGherkinRecognizer;
-import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -47,7 +47,7 @@ public class DescriptionsTest {
                 "  has an empty line in the middle");
         // Scenario 4
         assertThat(scenarioList.get(3).getLongDescription().get().getRawString()).isEqualTo("  This description\n" +
-               "  has an empty lines around\n\n");
+                "  has an empty lines around\n\n");
         // Scenario 5
         assertThat(scenarioList.get(4).getLongDescription().get().getRawString().trim()).isEqualTo("This description\n" +
                 "  has a comment after");

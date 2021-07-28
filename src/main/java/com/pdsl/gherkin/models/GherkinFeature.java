@@ -30,6 +30,38 @@ public class GherkinFeature {
         this.location = builder.location;
     }
 
+    public String getLanguageCode() {
+        return languageCode;
+    }
+
+    public Optional<String> getTitle() {
+        return title;
+    }
+
+    public Optional<String> getLongDescription() {
+        return longDescription;
+    }
+
+    public Optional<GherkinBackground> getBackground() {
+        return background;
+    }
+
+    public Optional<List<GherkinScenario>> getOptionalGherkinScenarios() {
+        return optionalGherkinScenarios;
+    }
+
+    public Optional<List<GherkinRule>> getRules() {
+        return rules;
+    }
+
+    public Optional<List<String>> getTags() {
+        return tags;
+    }
+
+    public URL getLocation() {
+        return location;
+    }
+
     public static class Builder {
         private URL location;
         private String languageCode = "en";
@@ -39,25 +71,27 @@ public class GherkinFeature {
         private List<GherkinScenario> gherkinScenarios = new LinkedList<>();
         private List<GherkinRule> rules = new LinkedList<>();
         private Optional<List<String>> tags = Optional.empty();
-
+				private static final String LOCATION_ERROR = "Location cannot be null!";
         public Builder(URL location) {
-            Preconditions.checkArgument(location == null, "Location cannot be null!");
+					
+            Preconditions.checkArgument(location == null, LOCATION_ERROR);
             // preconditions on argument delayed until building
             this.location = location;
         }
 
-        public Builder() {}
+        public Builder() {
+        }
 
         public Builder withLocation(URL location) {
             Preconditions.checkArgument(location != null,
-                    "Location cannot be null!");
+                    LOCATION_ERROR);
             this.location = location;
             return this;
         }
 
         public GherkinFeature build() {
             Preconditions.checkArgument(location != null,
-                    "Location cannot be null!");
+                    LOCATION_ERROR);
             return new GherkinFeature(this);
         }
 
@@ -65,14 +99,17 @@ public class GherkinFeature {
             gherkinScenarios.add(scenario);
             return this;
         }
+
         public Builder addRule(GherkinRule rule) {
             rules.add(rule);
             return this;
         }
+
         public Builder withTags(List<String> tags) {
             this.tags = Optional.of(tags);
             return this;
         }
+
         public Builder withRules(List<GherkinRule> rules) {
             this.rules = rules;
             return this;
@@ -127,34 +164,4 @@ public class GherkinFeature {
             return rules;
         }
     }
-
-    public String getLanguageCode() {
-        return languageCode;
-    }
-
-    public Optional<String> getTitle() {
-        return title;
-    }
-
-    public Optional<String> getLongDescription() {
-        return longDescription;
-    }
-
-    public Optional<GherkinBackground> getBackground() {
-        return background;
-    }
-
-    public Optional<List<GherkinScenario>> getOptionalGherkinScenarios() {
-        return optionalGherkinScenarios;
-    }
-
-    public Optional<List<GherkinRule>> getRules() {
-        return rules;
-    }
-
-    public Optional<List<String>> getTags() {
-        return tags;
-    }
-
-    public URL getLocation() {return location; }
 }
