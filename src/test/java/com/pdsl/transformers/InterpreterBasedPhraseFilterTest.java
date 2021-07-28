@@ -4,6 +4,7 @@ import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.*;
@@ -14,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
-
+@Ignore
 public class InterpreterBasedPhraseFilterTest {
 
     @Test
