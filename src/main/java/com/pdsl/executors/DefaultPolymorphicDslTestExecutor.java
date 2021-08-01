@@ -3,17 +3,17 @@ package com.pdsl.executors;
 import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestMetadata;
+import com.pdsl.specifications.Phrase;
+import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestSection;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.*;
 
@@ -21,9 +21,8 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslTestExecutor.class);
     private ParseTreeWalker walker = new ParseTreeWalker();
-    private Optional<Collection<OutputStream>> outputStreams = Optional.of(List.of(new PdslThreadSafeOutputStream()));
+    private Optional<MultiOutputStream> outputStreams = Optional.of(new MultiOutputStream(new PdslThreadSafeOutputStream()));
     private Charset charset = Charset.defaultCharset();
-
 
     @Override
     public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
@@ -43,7 +42,7 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
         logger.info("Beginning  Polymorphic DSL test case execution.");
         logger.debug("Executing grammar");
         for (TestCase testCase : testCases) {
-            testCase.getTestBody().forEachRemaining(testSection -> walker.walk(grammarListener, testSection.getParseTree()));
+            testCase.getTestSectionIterator().forEachRemaining(testSection -> walker.walk(grammarListener, testSection.getPhrase().getParseTree()));
         }
         logger.debug("Executing subgrammars...");
         return walk(testCases, subgrammarListener);
@@ -54,15 +53,15 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
         Set<Long> previouslyExecutedTests = new HashSet<>();
         for (TestCase testCase : testCases) {
             int totalPassingPhrases = 0;
-            ParseTree activePhrase = null;
-            Iterator<TestSection> testBody = testCase.getTestBody();
+            Phrase activePhrase = null;
+            Iterator<TestSection> testBody = testCase.getTestSectionIterator();
+            int testBodySize = 0;
             try {
                 if (previouslyExecutedTests.contains(testCase.getTestCaseId())) {
                     logger.warn("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle());
                     StringBuilder duplicateBody = new StringBuilder();
-                    testCase.getTestBody().forEachRemaining(duplicateBody::append);
+                    testCase.getTestSectionIterator().forEachRemaining(duplicateBody::append);
                     results.addTestResult(TestMetadata.duplicateTest(testCase.getTestTitle(), testCase.getTestCaseId()));
-                    continue;
                 } else {
                     previouslyExecutedTests.add(testCase.getTestCaseId());
                     while (testBody.hasNext()) {
@@ -70,19 +69,24 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                         if (section.getMetaData().isPresent()) {
                             notifyStreams(section.getMetaData().get());
                         }
-                        activePhrase = section.getParseTree();
-                        notifyStreams((activePhrase.getText() + "\n").getBytes(charset));
-                        walker.walk(phraseRegistry, activePhrase);
+                        activePhrase = section.getPhrase();
+                        testBodySize++;
+                        notifyStreams((activePhrase.getParseTree().getText() + "\n").getBytes(charset));
+                        walker.walk(phraseRegistry, activePhrase.getParseTree());
                         totalPassingPhrases++;
                     }
                     results.addTestResult(TestMetadata.passingTest(testCase.getTestTitle(), totalPassingPhrases, testCase.getTestCaseId()));
-                    continue;
                 }
+                continue;
             } catch (Throwable e) {
-                int phrasesSkippedDueToFailure = testCase.getBodySize() // All phrases
+                while (testBody.hasNext()) {
+                    testBody.next();
+                    testBodySize++;
+                }
+                int phrasesSkippedDueToFailure = testBodySize                                                                                                                                        // All phrases
                         - totalPassingPhrases // Minus successfully executed steps
                         - 1; // minus the failing phrase
-                String errorPhrase = activePhrase != null ? activePhrase.getText() : "phrase was null!";
+                String errorPhrase = activePhrase != null ? activePhrase.getParseTree().getText() : "phrase was null!";
                 results.addTestResult(TestMetadata.failedTest(testCase.getTestTitle(), totalPassingPhrases,
                         phrasesSkippedDueToFailure, errorPhrase, e,
                         testCase.getTestCaseId()));
@@ -94,26 +98,22 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
         return results;
     }
 
-    private void notifyStreams(ByteArrayOutputStream outputStream) {
+    private void notifyStreams(InputStream inputStream) {
         if (outputStreams.isPresent()) {
-            for (OutputStream stream : outputStreams.get()) {
-                try {
-                    stream.write(outputStream.toByteArray());
-                } catch (IOException e) {
-                    logger.error("An issue processing metadata occurred!", e);
-                }
+            try {
+                outputStreams.get().write(inputStream.readAllBytes());
+            } catch (IOException e) {
+                throw new PolymorphicDslTransformationException("Could not notify streams!", e);
             }
         }
     }
 
-    private void notifyStreams(byte[] outputStream) {
+    private void notifyStreams(byte[] bytes) {
         if (outputStreams.isPresent()) {
-            for (OutputStream stream : outputStreams.get()) {
-                try {
-                    stream.write(outputStream);
-                } catch (IOException e) {
-                    logger.error("An issue processing metadata occurred!", e);
-                }
+            try {
+                outputStreams.get().write(bytes);
+            } catch (IOException e) {
+                throw new PolymorphicDslTransformationException("Could not notify streams!", e);
             }
         }
     }

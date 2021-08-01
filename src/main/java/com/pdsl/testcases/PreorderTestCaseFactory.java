@@ -1,16 +1,17 @@
 package com.pdsl.testcases;
 
-import com.pdsl.specifications.TestSpecification;
-import org.antlr.v4.runtime.tree.ParseTree;
+import com.pdsl.specifications.*;
 
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
  * A factory that processes Test Specifications doing a Preorder traversal
  */
-public class PreorderTestCaseFactory implements TestCaseFactory {
+public class PreorderTestCaseFactory implements TestCaseFactory, TraceableTestCaseFactory {
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
@@ -25,34 +26,47 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
 
     private List<TestCase> recursiveWalkAndCreateOnLeaf(TestSpecification testSpecification,
                                                         List<TestSection> parentTestSections,
-                                                        Optional<ByteArrayOutputStream> parentMetaData,
+                                                        Optional<InputStream> parentMetaData,
                                                         String rootId,
                                                         Accumulator accumulator) {
         List<TestSection> testSections = new LinkedList<>(parentTestSections);
-        Optional<ByteArrayOutputStream> childMetaData = testSpecification.getMetaData();
+        Optional<InputStream> childMetaData = testSpecification.getMetaData();
         List<TestCase> testCases = new ArrayList<>();
         if (parentMetaData.isPresent() && childMetaData.isPresent()) {
-            ByteArrayOutputStream combinedStream = new ByteArrayOutputStream(parentMetaData.get().toByteArray().length + childMetaData.get().toByteArray().length);
-            combinedStream.writeBytes(parentMetaData.get().toByteArray());
-            combinedStream.writeBytes(childMetaData.get().toByteArray());
-            childMetaData = Optional.of(combinedStream);
+            try {
+                byte[] parentData = parentMetaData.get().readAllBytes();
+                byte[] childData = childMetaData.get().readAllBytes();
+                byte[] combinedStream = new byte[parentData.length + childData.length];
+                System.arraycopy(combinedStream, 0, parentData, 0, parentData.length);
+                System.arraycopy(combinedStream, parentData.length, childData, 0, childData.length);
+                childMetaData = Optional.of(new ByteArrayInputStream(combinedStream));
+            } catch (IOException e) {
+                throw new PolymorphicDslTransformationException("Could not get metadata from test specification!", e);
+            }
         } else if (parentMetaData.isPresent()) {
             childMetaData = parentMetaData;
         }
 
-        if (testSpecification.getPhrases().isPresent()) {
-            List<ParseTree> parseTrees = testSpecification.getPhrases().get();
+        if (testSpecification.getFilteredPhrases().isPresent()) {
+            List<FilteredPhrase> filteredPhrases = testSpecification.getFilteredPhrases().get();
+            List<Phrase> phrases = new ArrayList<>();
+            for (int i=0;  i < filteredPhrases.size(); i++) {
+                FilteredPhrase filteredPhrase = filteredPhrases.get(i);
+                if (filteredPhrase.getParseTree().isPresent()) {
+                    phrases.add(new DefaultPhrase(filteredPhrase.getParseTree().get(), i));
+                }
+            }
             if (childMetaData.isPresent()) {
-                testSections.add(new DefaultTestSection(childMetaData.get(), parseTrees.get(0)));
-                if (parseTrees.size() > 1) {
-                    parseTrees = parseTrees.subList(1, parseTrees.size());
-                    List<TestSection> sections = parseTrees.stream()
+                testSections.add(new DefaultTestSection(childMetaData.get(), phrases.get(0)));
+                if (phrases.size() > 1) {
+                    phrases = phrases.subList(1, phrases.size());
+                    List<TestSection> sections = phrases.stream()
                             .map(DefaultTestSection::new)
                             .collect(Collectors.toList());
                     testSections.addAll(sections);
                 }
             } else {
-                List<TestSection> sections = parseTrees.stream()
+                List<TestSection> sections = phrases.stream()
                         .map(DefaultTestSection::new)
                         .collect(Collectors.toList());
                 testSections.addAll(sections);
@@ -69,6 +83,11 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
             singleTestCase.add(testCase);
             return singleTestCase;
         }
+    }
+
+    @Override
+    public TraceableTestData processTestSpecificationToTraceable(Collection<TestSpecification> testSpecifications) {
+        return null;
     }
 
     private static class Accumulator {

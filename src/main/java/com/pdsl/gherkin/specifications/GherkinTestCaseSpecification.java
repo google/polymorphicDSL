@@ -1,11 +1,14 @@
 package com.pdsl.gherkin.specifications;
 
 import com.pdsl.specifications.DefaultTestSpecification;
+import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
-import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class GherkinTestCaseSpecification implements TestSpecification {
 
@@ -29,7 +32,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> getMetaData() {
+    public Optional<InputStream> getMetaData() {
         return testSpecification.getMetaData();
     }
 
@@ -44,12 +47,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<Iterator<ParseTree>> getPhraseIterator() {
-        return testSpecification.getPhraseIterator();
-    }
-
-    @Override
-    public Optional<List<ParseTree>> getPhrases() {
-        return testSpecification.getPhrases();
+    public Optional<List<FilteredPhrase>> getFilteredPhrases() {
+        return testSpecification.getFilteredPhrases();
     }
 }

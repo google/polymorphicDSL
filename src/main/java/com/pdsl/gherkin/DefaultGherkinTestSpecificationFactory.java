@@ -9,10 +9,10 @@ import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.DefaultTestSpecification;
+import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,12 +69,12 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 }
                 addBytesWithCorrectEncoding(featureMetaData, getBackgroundText(bg));
                 logger.info( "%sTop level%s Background%s in %s%s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.BRIGHT_CYAN, AnsiTerminalColorHelper.RESET, pickleJar.getLocation());
-                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
+                Optional<List<FilteredPhrase>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().get());
                 if (filteredBackgroundStepBody.isPresent()) {
                     featureBuilder.withTestPhrases(filteredBackgroundStepBody.get());
                 }
             }
-            featureBuilder.withMetaData(featureMetaData);
+            featureBuilder.withMetaData(new ByteArrayInputStream(featureMetaData.toByteArray()));
             List<TestSpecification> pickles = getGherkinStepSpecificationScenarios(pickleJar.getScenarios(),
                     allTagsForTestCase);
 
@@ -93,12 +93,12 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         for (PickleJar.PickleJarScenario pickleJarScenario : scenarios) {
             DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(pickleJarScenario.getTitleWithSubstitutions());
             // Provide metadata
-            topLevelScenario.withMetaData(extractMetaData(pickleJarScenario));
+            topLevelScenario.withMetaData(new ByteArrayInputStream(extractMetaData(pickleJarScenario).toByteArray()));
             // Process step body
             // transform step body into list of InputStreams
             Optional<TestSpecification> stepBodyAsTestSpecification = processStepBody(pickleJarScenario.getTitleWithSubstitutions(), pickleJarScenario.getStepsWithSubstitutions());
             if (stepBodyAsTestSpecification.isPresent()) {
-                topLevelScenario.withTestPhrases(stepBodyAsTestSpecification.get().getPhrases().get());
+                topLevelScenario.withTestPhrases(stepBodyAsTestSpecification.get().getFilteredPhrases().get());
             } else { // Failure to parse step body
                 // Logging on failure should be handled by the stepBodyHelperFactory
                 continue;
@@ -113,20 +113,20 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return gherkinTestSpecifications;
     }
 
-    private Optional<List<ParseTree>> processStepBodyContent(List<GherkinStep> stepBody) {
+    private Optional<List<FilteredPhrase>> processStepBodyContent(List<GherkinStep> stepBody) {
         List<InputStream> stepBodyAsStrings = stepBody.stream()
                 .map(GherkinStep::getFullRawStepText)
                 //.map(GherkinString::getRawString) //No substitutions are done on background steps
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
-        return phraseFilter.validateAndFilterPhrases(stepBodyAsStrings);
+        return phraseFilter.filterPhrases(stepBodyAsStrings);
     }
 
     private Optional<TestSpecification> processStepBody(String title, List<String> stepBody) {
         List<InputStream> stepBodyAsInputStream = stepBody.stream()
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
-        Optional<List<ParseTree>> phrases = phraseFilter.validateAndFilterPhrases(stepBodyAsInputStream);
+        Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream);
         if (phrases.isPresent()) {
             return Optional.of(new DefaultTestSpecification.Builder(title).withPhrases(phrases.get()).build());
         } else {
@@ -141,21 +141,21 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             ByteArrayOutputStream ruleMetaData = new ByteArrayOutputStream();
             if (rule.getLongDescription().isPresent()) {
                 addBytesWithCorrectEncoding(ruleMetaData, rule.getLongDescription().get());
-                ruleBuilder.withMetaData(ruleMetaData);
+                ruleBuilder.withMetaData(new ByteArrayInputStream(ruleMetaData.toByteArray()));
             }
             if (rule.getBackground().isPresent()) {
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
                 logger.debug("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle());
-                Optional<List<ParseTree>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
+                Optional<List<FilteredPhrase>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
                 if (filteredBackgroundStepBody.isPresent()) {
                     ruleBuilder.withTestPhrases(filteredBackgroundStepBody.get());
                 }
             }
             List<TestSpecification> filteredScenarios = getGherkinStepSpecificationScenarios(rule.getScenarios(), new HashSet<>());
             if (!filteredScenarios.isEmpty()) {
-                ruleBuilder.withMetaData(ruleMetaData);
+                ruleBuilder.withMetaData(new ByteArrayInputStream(ruleMetaData.toByteArray()));
                 ruleBuilder.withChildTestSpecifications(filteredScenarios);
                 testSpecifications.add(ruleBuilder.build());
             }
@@ -255,16 +255,16 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             if (!new GherkinTagsVisitorImpl().tagExpressionMatchesPickle(allGherkinItemTags, tagExpression)) {
                 return Optional.empty();
             } else {
-                builder.withTestPhrases(testSpecification.getPhrases().orElseThrow()); // scenario must have steps
+                builder.withTestPhrases(testSpecification.getFilteredPhrases().orElseThrow()); // scenario must have steps
             }
         }
         if (testSpecification.getMetaData().isPresent()) {
             builder.withMetaData(testSpecification.getMetaData().get());
         }
-        if (testSpecification.getPhrases().isPresent()) {
-            builder.withTestPhrases(testSpecification.getPhrases().get());
+        if (testSpecification.getFilteredPhrases().isPresent()) {
+            builder.withTestPhrases(testSpecification.getFilteredPhrases().get());
         }
-        if (testSpecification.getPhrases().isEmpty() && testSpecification.nestedTestSpecifications().isEmpty()) {
+        if (testSpecification.getFilteredPhrases().isEmpty() && testSpecification.nestedTestSpecifications().isEmpty()) {
             // Everything was filtered out
             return Optional.empty();
         }

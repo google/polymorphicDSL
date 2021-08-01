@@ -14,9 +14,9 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class GherkinTestRunWithFailuresTest {
 
-    private static final GherkinTestExecutor gherkinTestExecutor = new <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>
+    private static final GherkinTestExecutor gherkinTestExecutor = new <AllGrammarsParser, AllGrammarsLexer>
             GherkinTestExecutor
-            (AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
+            (AllGrammarsParser.class, AllGrammarsLexer.class);
 
     @Test
     public void failedMinimal_logsFailedStepResults() throws MalformedURLException {

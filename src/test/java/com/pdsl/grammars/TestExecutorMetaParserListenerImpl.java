@@ -93,7 +93,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         if (subgrammarListener == null) {
             subgrammarListener = grammarListener;
         }
-        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter(grammar.getParserClass(), grammar.getLexerClass(), subgrammar.getParserClass(), subgrammar.getLexerClass()));
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter(subgrammar.getParserClass(), subgrammar.getLexerClass()));
         executor = gherkinTestExecutor;
         String tagExpression = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
         PolymorphicDslTestRunResults runResults = ((GherkinTestExecutor)executor).processFilesAndRunTests(urls, tagExpression, grammarListener.getListener(), subgrammarListener.getListener());
@@ -217,7 +217,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
             subgrammar = grammar;
         }
         TestSpecificationFactory factory;
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.getParserClass(), grammar.getLexerClass(), subgrammar.getParserClass(), subgrammar.getLexerClass());
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(subgrammar.getParserClass(), subgrammar.getLexerClass());
         switch (factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:
                 factory = new DefaultGherkinTestSpecificationFactory(phraseFilter);

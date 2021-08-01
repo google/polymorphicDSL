@@ -1,13 +1,13 @@
 package com.pdsl.testcases;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import com.pdsl.specifications.Phrase;
 
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Optional;
 
 public interface TestSection {
 
-    Optional<ByteArrayOutputStream> getMetaData();
+    Optional<InputStream> getMetaData();
 
-    ParseTree getParseTree();
+    Phrase getPhrase();
 }

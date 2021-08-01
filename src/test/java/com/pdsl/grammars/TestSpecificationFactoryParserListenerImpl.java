@@ -1,6 +1,5 @@
 package com.pdsl.grammars;
 
-import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
@@ -11,12 +10,10 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -100,8 +97,8 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
     }
 
     private int totalPhrasesInTestSpecification(TestSpecification specification, Integer total) {
-        if (specification.getPhrases().isPresent()) {
-            total += specification.getPhrases().get().size();
+        if (specification.getFilteredPhrases().isPresent()) {
+            total += specification.getFilteredPhrases().get().size();
         }
         if (specification.nestedTestSpecifications().isPresent()) {
             for (TestSpecification childSpecification : specification.nestedTestSpecifications().get()) {
@@ -138,8 +135,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
         if (subgrammar.isEmpty()) {
             subgrammar = grammar;
         }
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.get().getParserClass(),
-                grammar.get().getLexerClass(), subgrammar.get().getParserClass(), subgrammar.get().getLexerClass());
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(subgrammar.get().getParserClass(), subgrammar.get().getLexerClass());
 
         switch(factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:

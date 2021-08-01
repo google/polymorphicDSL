@@ -1,32 +1,32 @@
 package com.pdsl.testcases;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import com.pdsl.specifications.Phrase;
 
-import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.Optional;
 
 public class DefaultTestSection implements TestSection {
 
-    private Optional<ByteArrayOutputStream> metaData;
-    private ParseTree parseTree;
+    private Optional<InputStream> metaData;
+    private Phrase phrase;
 
-    public DefaultTestSection(ByteArrayOutputStream metaData, ParseTree parseTree) {
+    public DefaultTestSection(InputStream metaData, Phrase phrase) {
         this.metaData = Optional.ofNullable(metaData);
-        this.parseTree = parseTree;
+        this.phrase = phrase;
     }
 
-    public DefaultTestSection(ParseTree parseTree) {
+    public DefaultTestSection(Phrase phrase) {
         this.metaData = Optional.empty();
-        this.parseTree = parseTree;
+        this.phrase = phrase;
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> getMetaData() {
+    public Optional<InputStream> getMetaData() {
         return metaData;
     }
 
     @Override
-    public ParseTree getParseTree() {
-        return parseTree;
+    public Phrase getPhrase() {
+        return phrase;
     }
 }

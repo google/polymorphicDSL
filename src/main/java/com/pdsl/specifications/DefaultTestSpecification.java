@@ -1,18 +1,16 @@
 package com.pdsl.specifications;
 
 import com.google.common.base.Preconditions;
-import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.ByteArrayOutputStream;
-import java.util.Iterator;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
 public final class DefaultTestSpecification implements TestSpecification {
 
     private final String id;
-    private final Optional<List<ParseTree>> phrases;
-    private final Optional<ByteArrayOutputStream> metaData;
+    private final Optional<List<FilteredPhrase>> phrases;
+    private final Optional<InputStream> metaData;
     private final Optional<List<TestSpecification>> childItems;
 
     private DefaultTestSpecification(Builder builder) {
@@ -23,7 +21,7 @@ public final class DefaultTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> getMetaData() {
+    public Optional<InputStream> getMetaData() {
         return metaData;
     }
 
@@ -38,19 +36,14 @@ public final class DefaultTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<Iterator<ParseTree>> getPhraseIterator() {
-        return phrases.isPresent() ? Optional.of(phrases.get().iterator()) : Optional.empty();
-    }
-
-    @Override
-    public Optional<List<ParseTree>> getPhrases() {
+    public Optional<List<FilteredPhrase>> getFilteredPhrases() {
         return phrases;
     }
 
     public static class Builder {
         private final String id;
-        private Optional<List<ParseTree>> phrases = Optional.empty();
-        private Optional<ByteArrayOutputStream> metaData = Optional.empty();
+        private Optional<List<FilteredPhrase>> phrases = Optional.empty();
+        private Optional<InputStream> metaData = Optional.empty();
         private Optional<List<TestSpecification>> childItems = Optional.empty();
 
         public Builder(String id) {
@@ -64,7 +57,7 @@ public final class DefaultTestSpecification implements TestSpecification {
             return new DefaultTestSpecification(this);
         }
 
-        public Builder withTestPhrases(List<ParseTree> phrases) {
+        public Builder withTestPhrases(List<FilteredPhrase> phrases) {
             Preconditions.checkArgument(!phrases.isEmpty(), "Phrases cannot be empty!");
             this.phrases = Optional.of(phrases);
             return this;
@@ -76,12 +69,12 @@ public final class DefaultTestSpecification implements TestSpecification {
             return this;
         }
 
-        public Builder withMetaData(ByteArrayOutputStream metaData) {
+        public Builder withMetaData(InputStream metaData) {
             this.metaData = Optional.of(metaData);
             return this;
         }
 
-        public Builder withPhrases(List<ParseTree> phrases) {
+        public Builder withPhrases(List<FilteredPhrase> phrases) {
             Preconditions.checkArgument(!phrases.isEmpty(), "phrases cannot be empty!");
             this.phrases = Optional.of(phrases); // TODO: Make a defensive copy
             return this;

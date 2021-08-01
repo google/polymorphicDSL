@@ -1,5 +1,6 @@
 package com.pdsl.component;
 
+import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
@@ -23,13 +24,8 @@ public class TestSpecificationTest {
         TestSpecificationFactory provider =
                 new LineDelimitedTestSpecificationFactory(new PolymorphicDslPhraseFilter() {
                     @Override
-                    public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput) {
+                    public Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput) {
                         return Optional.empty();
-                    }
-
-                    @Override
-                    public List<ParseTree> validatePhrases(List<InputStream> testInput) {
-                        return new ArrayList<ParseTree>();
                     }
                 });
         Set<URL> dslFiles = new HashSet<>();

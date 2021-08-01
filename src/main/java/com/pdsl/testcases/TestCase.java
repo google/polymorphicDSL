@@ -18,7 +18,5 @@ public interface TestCase {
 
     String getTestTitle();
 
-    int getBodySize();
-
-    Iterator<TestSection> getTestBody();
+    Iterator<TestSection> getTestSectionIterator();
 }

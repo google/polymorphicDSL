@@ -30,8 +30,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class PolymorphicDslGherkinExecutionTest {
 
     private static final PickleJarFactory pickleJarFactory = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
-    private static final PolymorphicDslPhraseFilter allGrammarsPhraseFilter = new DefaultPolymorphicDslPhraseFilter<AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>(
-            AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class
+    private static final PolymorphicDslPhraseFilter allGrammarsPhraseFilter = new DefaultPolymorphicDslPhraseFilter<AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class
     );
 
     private static final DefaultGherkinTestSpecificationFactory provider =
@@ -39,7 +38,7 @@ public class PolymorphicDslGherkinExecutionTest {
 
     private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private static final GherkinTestExecutor executor =
-            new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class,
+            new GherkinTestExecutor(AllGrammarsParser.class,
                     AllGrammarsLexer.class);
     private static final AllGrammarsParserBaseListener listener = new AllGrammarsParserBaseListener();
 

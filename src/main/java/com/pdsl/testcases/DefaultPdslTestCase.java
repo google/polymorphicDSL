@@ -16,10 +16,12 @@ public class DefaultPdslTestCase implements TestCase {
         String errMessage = "Test case title cannot be empty or null!";
         Preconditions.checkNotNull(testCaseTitle, errMessage);
         Preconditions.checkArgument(!testCaseTitle.isEmpty(), errMessage);
+        Preconditions.checkNotNull(testBody);
+        Preconditions.checkArgument(!testBody.isEmpty());
         this.testBody = testBody;
         this.testCaseTitle = testCaseTitle;
         this.hashCodeId = testBody.stream()
-                .map(testSection -> testSection.getParseTree().getText())
+                .map(testSection -> testSection.getPhrase().getParseTree().getText())
                 .collect(Collectors.toUnmodifiableList())
                 .hashCode();
     }
@@ -35,12 +37,7 @@ public class DefaultPdslTestCase implements TestCase {
     }
 
     @Override
-    public int getBodySize() {
-        return testBody.size();
-    }
-
-    @Override
-    public Iterator<TestSection> getTestBody() {
+    public Iterator<TestSection> getTestSectionIterator() {
         return testBody.listIterator();
     }
 }

@@ -5,6 +5,7 @@ import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.grammars.*;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
+import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -18,6 +19,7 @@ import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
@@ -32,8 +34,8 @@ public class PolymorphicDslTest {
 
     private static final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
     private static final TestCaseFactory testCaseFactory = new SingleTestOutputPreorderTestCaseFactory();
-    private final PolymorphicDslPhraseFilter betaPhraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslRegistryParser, RegistryLexer, PolymorphicDslBetaParser, BetaLexer>(
-            PolymorphicDslRegistryParser.class, RegistryLexer.class, PolymorphicDslBetaParser.class, BetaLexer.class
+    private final PolymorphicDslPhraseFilter betaPhraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslBetaParser, BetaLexer>(
+          PolymorphicDslBetaParser.class, BetaLexer.class
     );
     private final TestSpecificationFactory betaTestFactory = new LineDelimitedTestSpecificationFactory(betaPhraseFilter);
 
@@ -124,7 +126,7 @@ public class PolymorphicDslTest {
     private static class TestSpecificationStub implements TestSpecification {
 
         @Override
-        public Optional<ByteArrayOutputStream> getMetaData() {
+        public Optional<InputStream> getMetaData() {
             return Optional.empty();
         }
 
@@ -139,14 +141,11 @@ public class PolymorphicDslTest {
         }
 
         @Override
-        public Optional<Iterator<ParseTree>> getPhraseIterator() {
+        public Optional<List<FilteredPhrase>> getFilteredPhrases() {
             return Optional.empty();
         }
 
-        @Override
-        public Optional<List<ParseTree>> getPhrases() {
-            return Optional.empty();
-        }
+
     }
 
     // empty file

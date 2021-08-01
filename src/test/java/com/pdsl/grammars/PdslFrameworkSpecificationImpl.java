@@ -29,8 +29,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     private ParseTreeListener subGrammarListener;
 
     private static final PolymorphicDslPhraseFilter allPhrases = new DefaultPolymorphicDslPhraseFilter
-            <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>(
-                    AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
+            < AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class);
 
     @Override
     public void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) {
@@ -199,7 +198,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void enterTestCaseIsProcessed(PdslFrameworkSpecificationParser.TestCaseIsProcessedContext ctx) {
-        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class,
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(
                 AllGrammarsParser.class, AllGrammarsLexer.class);
         // Empty listener that passes everything
         // Check each implementation for run tests (should be side effect free)

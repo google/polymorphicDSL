@@ -2,11 +2,9 @@ package com.pdsl.grammars;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.specifications.DefaultTestSpecification;
+import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
-import com.pdsl.testcases.PreorderTestCaseFactory;
-import com.pdsl.testcases.SingleTestOutputPreorderTestCaseFactory;
-import com.pdsl.testcases.TestCase;
-import com.pdsl.testcases.TestCaseFactory;
+import com.pdsl.testcases.*;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RuleContext;
@@ -17,6 +15,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -41,58 +40,19 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
         builder.withTestPhrases(generateParseTreeStubs(numberOfPhrases));
     }
 
-    private List<ParseTree> generateParseTreeStubs(int count) {
-        List<ParseTree> parseTrees = new ArrayList<>(count);
+    private List<FilteredPhrase> generateParseTreeStubs(int count) {
+        List<FilteredPhrase> parseTrees = new ArrayList<>(count);
         for (int i=0; i < count; i++) {
-            parseTrees.add(new ParseTree() {
+            parseTrees.add(new FilteredPhrase() {
+
                 @Override
-                public Interval getSourceInterval() {
+                public String getPhrase() {
                     return null;
                 }
 
                 @Override
-                public ParseTree getParent() {
-                    return null;
-                }
-
-                @Override
-                public Object getPayload() {
-                    return null;
-                }
-
-                @Override
-                public ParseTree getChild(int i) {
-                    return null;
-                }
-
-                @Override
-                public int getChildCount() {
-                    return 0;
-                }
-
-                @Override
-                public String toStringTree() {
-                    return null;
-                }
-
-                @Override
-                public void setParent(RuleContext ruleContext) {
-
-                }
-
-                @Override
-                public <T> T accept(ParseTreeVisitor<? extends T> parseTreeVisitor) {
-                    return null;
-                }
-
-                @Override
-                public String getText() {
-                    return null;
-                }
-
-                @Override
-                public String toStringTree(Parser parser) {
-                    return null;
+                public Optional<ParseTree> getParseTree() {
+                    return Optional.empty();
                 }
             });
         }
@@ -109,7 +69,7 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
         for (int i=0; i < childrenCount; i++) {
             testSpecifications.add(new TestSpecification() {
                 @Override
-                public Optional<ByteArrayOutputStream> getMetaData() {
+                public Optional<InputStream> getMetaData() {
                     return Optional.empty();
                 }
 
@@ -124,12 +84,7 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
                 }
 
                 @Override
-                public Optional<Iterator<ParseTree>> getPhraseIterator() {
-                    return Optional.empty();
-                }
-
-                @Override
-                public Optional<List<ParseTree>> getPhrases() {
+                public Optional<List<FilteredPhrase>> getFilteredPhrases() {
                     return Optional.empty();
                 }
             });
@@ -152,9 +107,17 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
     public void enterThenEachTestCaseHasPhrases(TestCaseFactoryParser.ThenEachTestCaseHasPhrasesContext ctx) {
         Preconditions.checkNotNull(testCases, "Test cases were not instantiated!");
         int phraseCount = Integer.parseInt(ctx.integerValue().getText());
-        testCases.stream().forEach(c -> assertThat(c.getBodySize()).isEqualTo(phraseCount));
+        testCases.stream().forEach(c -> assertThat(getIteratorCount(c.getTestSectionIterator())).isEqualTo(phraseCount));
     }
 
+    private int getIteratorCount(Iterator<TestSection> iterator) {
+        int size = 0;
+        while (iterator.hasNext()) {
+            iterator.next();
+            size++;
+        }
+        return size;
+    }
     @Override
     public void exitThenEachTestCaseHasPhrases(TestCaseFactoryParser.ThenEachTestCaseHasPhrasesContext ctx) { }
 

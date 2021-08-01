@@ -3,6 +3,7 @@ package com.pdsl.transformers;
 import com.google.common.base.Preconditions;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.Phrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import org.antlr.v4.Tool;
 import org.antlr.v4.runtime.Parser;
@@ -153,14 +154,14 @@ class InterpreterBasedPhraseFilter implements PolymorphicDslPhraseFilter {
     }
 
     @Override
-    public Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput) {
+    public Optional<List<Phrase>> filterPhrases(List<InputStream> testInput) {
         Preconditions.checkNotNull(testInput, "Test input was null!");
         Preconditions.checkArgument(testInput.size() > 0, "Test input was empty!");
         return processPhrases(testInput, subgrammarParser.isPresent() ? DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.SUBGRAMMAR : DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR);
     }
 
     @Override
-    public List<ParseTree> validatePhrases(List<InputStream> testInput) {
+    public List<Phrase> validatePhrases(List<InputStream> testInput) {
         Preconditions.checkNotNull(testInput, "Test input was null!");
         Preconditions.checkArgument(testInput.size() > 0, "Test input was empty!");
         Optional<List<ParseTree>> parseTrees = processPhrases(testInput, DefaultPolymorphicDslPhraseFilter.ErrorListenerStrategy.GRAMMAR);

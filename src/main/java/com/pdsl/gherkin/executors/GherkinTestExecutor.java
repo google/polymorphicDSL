@@ -36,8 +36,8 @@ public class GherkinTestExecutor implements PolymorphicDslTestExecutor {
     private final Logger logger = LoggerFactory.getLogger(GherkinTestExecutor.class);
     private final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
 
-    public <G extends Parser, L extends Lexer, SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<G> grammarParser, Class<L> grammarLexer, Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
-        phraseFilter = new DefaultPolymorphicDslPhraseFilter<G, L, SG, SL>(grammarParser, grammarLexer, subgrammarParser, subgrammarLexer);
+    public <SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
+        phraseFilter = new DefaultPolymorphicDslPhraseFilter<SG, SL>(subgrammarParser, subgrammarLexer);
         testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
     }
 

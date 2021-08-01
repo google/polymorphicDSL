@@ -4,7 +4,6 @@ import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestMetadata;
-import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -38,9 +37,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     private Path path;
 
     private static final PolymorphicDslTestExecutor testExecutor = new DefaultPolymorphicDslTestExecutor();
-    private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<SimpleArithmeticParser,
-            SimpleArithmeticLexer, SimpleArithmeticParser, SimpleArithmeticLexer>
-            (SimpleArithmeticParser.class, SimpleArithmeticLexer.class, SimpleArithmeticParser.class,
+    private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<SimpleArithmeticParser, SimpleArithmeticLexer>
+            ( SimpleArithmeticParser.class,
                     SimpleArithmeticLexer.class);
     private static final TestSpecificationFactory testSpecificationFactory = new LineDelimitedTestSpecificationFactory(phraseFilter);
     private static final TestCaseFactory testCaseFactory = new SingleTestOutputPreorderTestCaseFactory();
@@ -54,7 +52,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void enterPolymorphicDslAllRules(PdslTestRunResultsMetaParser.PolymorphicDslAllRulesContext ctx) {    }
+    public void enterPolymorphicDslAllRules(PdslTestRunResultsMetaParser.PolymorphicDslAllRulesContext ctx) {
+    }
 
     @Override
     public void exitPolymorphicDslAllRules(PdslTestRunResultsMetaParser.PolymorphicDslAllRulesContext ctx) {
@@ -106,7 +105,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitTestRunResultProduced(PdslTestRunResultsMetaParser.TestRunResultProducedContext ctx) { }
+    public void exitTestRunResultProduced(PdslTestRunResultsMetaParser.TestRunResultProducedContext ctx) {
+    }
 
     @Override
     public void enterWhenTheTestCaseIsProcessedByAnyPdslTestExecutor(PdslTestRunResultsMetaParser.WhenTheTestCaseIsProcessedByAnyPdslTestExecutorContext ctx) {
@@ -123,13 +123,16 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitWhenTheTestCaseIsProcessedByAnyPdslTestExecutor(PdslTestRunResultsMetaParser.WhenTheTestCaseIsProcessedByAnyPdslTestExecutorContext ctx) { }
+    public void exitWhenTheTestCaseIsProcessedByAnyPdslTestExecutor(PdslTestRunResultsMetaParser.WhenTheTestCaseIsProcessedByAnyPdslTestExecutorContext ctx) {
+    }
 
     @Override
-    public void enterIntegerValue(PdslTestRunResultsMetaParser.IntegerValueContext ctx) { }
+    public void enterIntegerValue(PdslTestRunResultsMetaParser.IntegerValueContext ctx) {
+    }
 
     @Override
-    public void exitIntegerValue(PdslTestRunResultsMetaParser.IntegerValueContext ctx) { }
+    public void exitIntegerValue(PdslTestRunResultsMetaParser.IntegerValueContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedPassingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
@@ -139,7 +142,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestRunResultsHaveSpecifiedPassingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) { }
+    public void exitThenTheTestRunResultsHaveSpecifiedPassingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedFailingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedFailingTestsContext ctx) {
@@ -149,7 +153,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestRunResultsHaveSpecifiedFailingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedFailingTestsContext ctx) { }
+    public void exitThenTheTestRunResultsHaveSpecifiedFailingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedFailingTestsContext ctx) {
+    }
 
     @Override
     public void enterGivenTheTestResource(PdslTestRunResultsMetaParser.GivenTheTestResourceContext ctx) {
@@ -157,7 +162,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitGivenTheTestResource(PdslTestRunResultsMetaParser.GivenTheTestResourceContext ctx) { }
+    public void exitGivenTheTestResource(PdslTestRunResultsMetaParser.GivenTheTestResourceContext ctx) {
+    }
 
     @Override
     public void enterGivenTheRawResource(PdslTestRunResultsMetaParser.GivenTheRawResourceContext ctx) {
@@ -171,31 +177,40 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitGivenTheRawResource(PdslTestRunResultsMetaParser.GivenTheRawResourceContext ctx) { }
+    public void exitGivenTheRawResource(PdslTestRunResultsMetaParser.GivenTheRawResourceContext ctx) {
+    }
 
     @Override
-    public void enterGherkinStepKeyword(PdslTestRunResultsMetaParser.GherkinStepKeywordContext ctx) { }
+    public void enterGherkinStepKeyword(PdslTestRunResultsMetaParser.GherkinStepKeywordContext ctx) {
+    }
 
     @Override
-    public void exitGherkinStepKeyword(PdslTestRunResultsMetaParser.GherkinStepKeywordContext ctx) { }
+    public void exitGherkinStepKeyword(PdslTestRunResultsMetaParser.GherkinStepKeywordContext ctx) {
+    }
 
     @Override
-    public void enterTextInDoubleQuotes(PdslTestRunResultsMetaParser.TextInDoubleQuotesContext ctx) { }
+    public void enterTextInDoubleQuotes(PdslTestRunResultsMetaParser.TextInDoubleQuotesContext ctx) {
+    }
 
     @Override
-    public void exitTextInDoubleQuotes(PdslTestRunResultsMetaParser.TextInDoubleQuotesContext ctx) { }
+    public void exitTextInDoubleQuotes(PdslTestRunResultsMetaParser.TextInDoubleQuotesContext ctx) {
+    }
 
     @Override
-    public void enterDocstring(PdslTestRunResultsMetaParser.DocstringContext ctx) { }
+    public void enterDocstring(PdslTestRunResultsMetaParser.DocstringContext ctx) {
+    }
 
     @Override
-    public void exitDocstring(PdslTestRunResultsMetaParser.DocstringContext ctx) { }
+    public void exitDocstring(PdslTestRunResultsMetaParser.DocstringContext ctx) {
+    }
 
     @Override
-    public void enterTextInDoubleQuotesEnd(PdslTestRunResultsMetaParser.TextInDoubleQuotesEndContext ctx) { }
+    public void enterTextInDoubleQuotesEnd(PdslTestRunResultsMetaParser.TextInDoubleQuotesEndContext ctx) {
+    }
 
     @Override
-    public void exitTextInDoubleQuotesEnd(PdslTestRunResultsMetaParser.TextInDoubleQuotesEndContext ctx) { }
+    public void exitTextInDoubleQuotesEnd(PdslTestRunResultsMetaParser.TextInDoubleQuotesEndContext ctx) {
+    }
 
     @Override
     public void enterGivenAnotherTestResource(PdslTestRunResultsMetaParser.GivenAnotherTestResourceContext ctx) {
@@ -214,7 +229,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
 
     @Override
     public void enterConvertTestResourcesToCollectionWithSingleTestCase(PdslTestRunResultsMetaParser.ConvertTestResourcesToCollectionWithSingleTestCaseContext ctx) {
-        assertThat(urlSet).isNotNull();;
+        assertThat(urlSet).isNotNull();
+        ;
         assertThat(urlSet).isNotEmpty();
 
         SingleTestOutputPreorderTestCaseFactory factory = new SingleTestOutputPreorderTestCaseFactory();
@@ -225,7 +241,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitConvertTestResourcesToCollectionWithSingleTestCase(PdslTestRunResultsMetaParser.ConvertTestResourcesToCollectionWithSingleTestCaseContext ctx) { }
+    public void exitConvertTestResourcesToCollectionWithSingleTestCase(PdslTestRunResultsMetaParser.ConvertTestResourcesToCollectionWithSingleTestCaseContext ctx) {
+    }
 
     @Override
     public void enterThenTestCaseCollectionHasSpecifiedTestCases(PdslTestRunResultsMetaParser.ThenTestCaseCollectionHasSpecifiedTestCasesContext ctx) {
@@ -235,7 +252,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTestCaseCollectionHasSpecifiedTestCases(PdslTestRunResultsMetaParser.ThenTestCaseCollectionHasSpecifiedTestCasesContext ctx) { }
+    public void exitThenTestCaseCollectionHasSpecifiedTestCases(PdslTestRunResultsMetaParser.ThenTestCaseCollectionHasSpecifiedTestCasesContext ctx) {
+    }
 
     @Override
     public void enterGivenTheSpecifiedGrammarParseTreeListener(PdslTestRunResultsMetaParser.GivenTheSpecifiedGrammarParseTreeListenerContext ctx) {
@@ -245,7 +263,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitGivenTheSpecifiedGrammarParseTreeListener(PdslTestRunResultsMetaParser.GivenTheSpecifiedGrammarParseTreeListenerContext ctx) { }
+    public void exitGivenTheSpecifiedGrammarParseTreeListener(PdslTestRunResultsMetaParser.GivenTheSpecifiedGrammarParseTreeListenerContext ctx) {
+    }
 
     @Override
     public void enterThenSingleTestCaseIsProduced(PdslTestRunResultsMetaParser.ThenSingleTestCaseIsProducedContext ctx) {
@@ -255,7 +274,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenSingleTestCaseIsProduced(PdslTestRunResultsMetaParser.ThenSingleTestCaseIsProducedContext ctx) { }
+    public void exitThenSingleTestCaseIsProduced(PdslTestRunResultsMetaParser.ThenSingleTestCaseIsProducedContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestRunResultHasSpecifiedFilteredDuplicateTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedFilteredDuplicateTestsContext ctx) {
@@ -265,7 +285,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestRunResultHasSpecifiedFilteredDuplicateTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedFilteredDuplicateTestsContext ctx) { }
+    public void exitThenTheTestRunResultHasSpecifiedFilteredDuplicateTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedFilteredDuplicateTestsContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestRunResultHasSpecifiedPassingPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedPassingPhrasesContext ctx) {
@@ -275,7 +296,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestRunResultHasSpecifiedPassingPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedPassingPhrasesContext ctx) { }
+    public void exitThenTheTestRunResultHasSpecifiedPassingPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedPassingPhrasesContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestRunResultHasSpecifiedTotalPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedTotalPhrasesContext ctx) {
@@ -285,7 +307,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestRunResultHasSpecifiedTotalPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedTotalPhrasesContext ctx) { }
+    public void exitThenTheTestRunResultHasSpecifiedTotalPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedTotalPhrasesContext ctx) {
+    }
 
     @Override
     public void enterWhenTheTestMetadataIsRetrievedFromTheTestRunResult(PdslTestRunResultsMetaParser.WhenTheTestMetadataIsRetrievedFromTheTestRunResultContext ctx) {
@@ -295,7 +318,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitWhenTheTestMetadataIsRetrievedFromTheTestRunResult(PdslTestRunResultsMetaParser.WhenTheTestMetadataIsRetrievedFromTheTestRunResultContext ctx) { }
+    public void exitWhenTheTestMetadataIsRetrievedFromTheTestRunResult(PdslTestRunResultsMetaParser.WhenTheTestMetadataIsRetrievedFromTheTestRunResultContext ctx) {
+    }
 
     @Override
     public void enterWhenTheOnlyTestMetadataItemIsExamined(PdslTestRunResultsMetaParser.WhenTheOnlyTestMetadataItemIsExaminedContext ctx) {
@@ -305,7 +329,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitWhenTheOnlyTestMetadataItemIsExamined(PdslTestRunResultsMetaParser.WhenTheOnlyTestMetadataItemIsExaminedContext ctx) { }
+    public void exitWhenTheOnlyTestMetadataItemIsExamined(PdslTestRunResultsMetaParser.WhenTheOnlyTestMetadataItemIsExaminedContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestMetadataHasAnExceptionExplainingWhyTheTestFailed(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasAnExceptionExplainingWhyTheTestFailedContext ctx) {
@@ -326,7 +351,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestMetadataHasThePhraseThatFailed(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasThePhraseThatFailedContext ctx) { }
+    public void exitThenTheTestMetadataHasThePhraseThatFailed(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasThePhraseThatFailedContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestMetadataFailingPhraseIsSpecifiedText(PdslTestRunResultsMetaParser.ThenTheTestMetadataFailingPhraseIsSpecifiedTextContext ctx) {
@@ -337,7 +363,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestMetadataFailingPhraseIsSpecifiedText(PdslTestRunResultsMetaParser.ThenTheTestMetadataFailingPhraseIsSpecifiedTextContext ctx) { }
+    public void exitThenTheTestMetadataFailingPhraseIsSpecifiedText(PdslTestRunResultsMetaParser.ThenTheTestMetadataFailingPhraseIsSpecifiedTextContext ctx) {
+    }
 
     @Override
     public void enterThenTheTestMetadataHasOneItemInIt(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasOneItemInItContext ctx) {
@@ -346,17 +373,22 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     }
 
     @Override
-    public void exitThenTheTestMetadataHasOneItemInIt(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasOneItemInItContext ctx) { }
+    public void exitThenTheTestMetadataHasOneItemInIt(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasOneItemInItContext ctx) {
+    }
 
     @Override
-    public void visitTerminal(TerminalNode node) { }
+    public void visitTerminal(TerminalNode node) {
+    }
 
     @Override
-    public void visitErrorNode(ErrorNode node) { }
+    public void visitErrorNode(ErrorNode node) {
+    }
 
     @Override
-    public void enterEveryRule(ParserRuleContext ctx) { }
+    public void enterEveryRule(ParserRuleContext ctx) {
+    }
 
     @Override
-    public void exitEveryRule(ParserRuleContext ctx) { }
+    public void exitEveryRule(ParserRuleContext ctx) {
+    }
 }

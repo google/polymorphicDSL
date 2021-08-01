@@ -1,9 +1,6 @@
 package com.pdsl.specifications;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Iterator;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +22,7 @@ public interface TestSpecification {
      *
      * @return Optional containing an InputStream of shared test information or an empty optional if there is none
      */
-    Optional<ByteArrayOutputStream> getMetaData();
+    Optional<InputStream> getMetaData();
 
     /**
      * Returns a collection of more detailed child TestItems.
@@ -45,7 +42,7 @@ public interface TestSpecification {
     String getId();
 
     /**
-     * Returns a list of {@code ParseTree} "phrases" that will trigger code execution when consumed by a
+     * Returns a list of {@code Phrase}s that may contain a parse tree that will trigger code execution when consumed by a
      * {@PolymorphicDslTestExecutor}.
      * <p>
      * If this TestItem has no child test items then this method <i>must</i> return an optional contiaining a list with
@@ -54,8 +51,6 @@ public interface TestSpecification {
      * @return an Optional containing "test phrases" if this TestItem is a leaf node, or possibly an empty optional if
      * not
      */
-    Optional<Iterator<ParseTree>> getPhraseIterator();
-
-    Optional<List<ParseTree>> getPhrases();
+    Optional<List<FilteredPhrase>> getFilteredPhrases();
 
 }

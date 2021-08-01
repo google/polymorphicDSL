@@ -29,9 +29,8 @@ public class FrameworkSpecificationsTest {
         Set<URL> dslFiles = new HashSet<>();
         Path tmpDir = Files.createTempDirectory(String.format("pdsl_temp_test-%s", UUID.randomUUID()));
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PdslFrameworkSpecificationParser, PdslFrameworkSpecificationLexer,
-                PdslFrameworkSpecificationParser, PdslFrameworkSpecificationLexer>(PdslFrameworkSpecificationParser.class,
-                PdslFrameworkSpecificationLexer.class,
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
+                PdslFrameworkSpecificationParser, PdslFrameworkSpecificationLexer>(
                 PdslFrameworkSpecificationParser.class,
                 PdslFrameworkSpecificationLexer.class
         );
@@ -49,9 +48,8 @@ public class FrameworkSpecificationsTest {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<TestSpecificationFactoryParser, TestSpecificationFactoryLexer,
-                TestSpecificationFactoryParser, TestSpecificationFactoryLexer>(TestSpecificationFactoryParser.class,
-                TestSpecificationFactoryLexer.class,
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
+                TestSpecificationFactoryParser, TestSpecificationFactoryLexer>(
                 TestSpecificationFactoryParser.class,
                 TestSpecificationFactoryLexer.class
         );
@@ -70,9 +68,8 @@ public class FrameworkSpecificationsTest {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PdslTestResourceParser, PdslTestResourceLexer,
-                PdslTestResourceParser, PdslTestResourceLexer>(PdslTestResourceParser.class,
-                PdslTestResourceLexer.class,
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
+                PdslTestResourceParser, PdslTestResourceLexer>(
                 PdslTestResourceParser.class,
                 PdslTestResourceLexer.class
         );
@@ -90,9 +87,8 @@ public class FrameworkSpecificationsTest {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<TestCaseFactoryParser, TestCaseFactoryLexer,
-                TestCaseFactoryParser, TestCaseFactoryLexer>(TestCaseFactoryParser.class,
-                TestCaseFactoryLexer.class,
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
+                TestCaseFactoryParser, TestCaseFactoryLexer>(
                 TestCaseFactoryParser.class,
                 TestCaseFactoryLexer.class
         );
@@ -111,9 +107,8 @@ public class FrameworkSpecificationsTest {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<TestExecutorMetaParser, TestExecutorLexer,
-                TestExecutorMetaParser, TestExecutorLexer>(TestExecutorMetaParser.class,
-                TestExecutorLexer.class,
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
+                TestExecutorMetaParser, TestExecutorLexer>(
                 TestExecutorMetaParser.class,
                 TestExecutorLexer.class
         );
@@ -132,9 +127,8 @@ public class FrameworkSpecificationsTest {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PdslTestRunResultsMetaParser, PdslTestRunResultsMetaLexer,
-                PdslTestRunResultsMetaParser, PdslTestRunResultsMetaLexer>(PdslTestRunResultsMetaParser.class,
-                PdslTestRunResultsMetaLexer.class,
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
+                PdslTestRunResultsMetaParser, PdslTestRunResultsMetaLexer>(
                 PdslTestRunResultsMetaParser.class,
                 PdslTestRunResultsMetaLexer.class
         );

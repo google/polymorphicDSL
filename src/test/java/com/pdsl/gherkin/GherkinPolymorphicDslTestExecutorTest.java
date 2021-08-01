@@ -22,10 +22,10 @@ import static com.google.common.truth.Truth.assertThat;
 public class GherkinPolymorphicDslTestExecutorTest {
 
     private static final TestSpecificationFactory provider =
-            new DefaultGherkinTestSpecificationFactory(new DefaultPolymorphicDslPhraseFilter<AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>(
-                    AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class));
-    private static final GherkinTestExecutor gherkinTestExecutor = new <AllGrammarsParser, AllGrammarsLexer, AllGrammarsParser, AllGrammarsLexer>GherkinTestExecutor
-            (AllGrammarsParser.class, AllGrammarsLexer.class, AllGrammarsParser.class, AllGrammarsLexer.class);
+            new DefaultGherkinTestSpecificationFactory(new DefaultPolymorphicDslPhraseFilter
+                    <AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class));
+    private static final GherkinTestExecutor gherkinTestExecutor = new <AllGrammarsParser, AllGrammarsLexer>GherkinTestExecutor
+            (AllGrammarsParser.class, AllGrammarsLexer.class);
 
     @Test
     public void minimalFeature_runsAllTests() throws MalformedURLException {
@@ -67,7 +67,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         for (TestSpecification specifications : allSpecifications.get()) {
             PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
             // Assert
-            assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getPhrases().isPresent()).isTrue();
+            assertThat(specifications.nestedTestSpecifications().isPresent() || specifications.getFilteredPhrases().isPresent()).isTrue();
             assertThat(results.failingTestTotal()).isEqualTo(0);
             assertThat(results.passingPhraseTotal()).isEqualTo(5);
             assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
@@ -86,7 +86,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         PolymorphicDslTestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@feature_tag3");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
         assertThat(results.passingPhraseTotal()).isEqualTo(5);
         assertThat(results.failingTestTotal()).isEqualTo(0);
@@ -103,7 +103,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "not @feature_tag3");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(0);
     }
 
@@ -118,7 +118,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@scenario_tag1 and @scenario_tag2");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
@@ -134,7 +134,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@ex_tag1");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
@@ -149,7 +149,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@so_tag1");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(2);
     }
 
@@ -165,7 +165,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag3");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
@@ -180,7 +180,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener, "@joined_tag4");
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
@@ -195,7 +195,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(5);
     }
 
@@ -212,7 +212,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(8);
     }
 
@@ -227,7 +227,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 
@@ -242,7 +242,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(3);
     }
 
@@ -257,7 +257,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
         Optional<TestSpecification> specifications = provider.getTestSpecifications(dslFiles).get().stream().findFirst();
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(39);
     }
 
@@ -273,7 +273,7 @@ public class GherkinPolymorphicDslTestExecutorTest {
 
         gherkinTestExecutor.processFilesAndRunTests(dslFiles, stepCounterListener);
         // Assert
-        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getPhrases().isPresent()).isTrue();
+        assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
     }
 }

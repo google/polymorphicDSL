@@ -39,7 +39,7 @@ public class InterpreterBasedPhraseFilterTest {
         Optional<Collection<TestSpecification>> testSpecification = testSpecificationFactory.getTestSpecifications(testResources);
         assertThat(testSpecification.isPresent()).isTrue();
         Collection<TestSpecification> specifications = testSpecification.get();
-        Optional<List<ParseTree>> parseTreeList = phraseTransformer.validateAndFilterPhrases(inputStreams);
+        Optional<List<ParseTree>> parseTreeList = phraseTransformer.filterPhrases(inputStreams);
         assertThat(parseTreeList.isPresent()).isTrue();
         assertThat(parseTreeList.get().size()).isEqualTo(1);
         assertThat(parseTreeList.get().get(0).getText()).contains("Hello, world!");
@@ -72,7 +72,7 @@ public class InterpreterBasedPhraseFilterTest {
                     .map(line -> new ByteArrayInputStream(line.getBytes()))
                     .collect(Collectors.toList()));
         }
-        Optional<List<ParseTree>> parseTreeList = phraseTransformer.validateAndFilterPhrases(inputStreams);
+        Optional<List<ParseTree>> parseTreeList = phraseTransformer.filterPhrases(inputStreams);
         assertThat(parseTreeList.isPresent()).isTrue();
         assertThat(parseTreeList.get().size()).isEqualTo(1);
         assertThat(parseTreeList.get().get(0).getText()).contains("Hello, world!");
