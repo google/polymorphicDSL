@@ -1,6 +1,7 @@
 package com.pdsl.executors;
 
 import com.pdsl.reports.PolymorphicDslTestRunResults;
+import com.pdsl.reports.TestRunResults;
 import com.pdsl.testcases.TestCase;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 
@@ -21,8 +22,8 @@ public interface PolymorphicDslTestExecutor {
      * @param subgrammarListener
      * @return
      */
-    PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases,
-                                          ParseTreeListener subgrammarListener);
+    TestRunResults runTests(Collection<TestCase> testCases,
+                            ParseTreeListener subgrammarListener);
 
     /**
      * Quickly checks to see that all phrases in each test case exist in a parent grammar before executing what will
@@ -37,6 +38,6 @@ public interface PolymorphicDslTestExecutor {
      * @param subgrammarListener
      * @return The results of the test run
      */
-    PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener grammarListener,
+    TestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener grammarListener,
                                           ParseTreeListener subgrammarListener);
 }

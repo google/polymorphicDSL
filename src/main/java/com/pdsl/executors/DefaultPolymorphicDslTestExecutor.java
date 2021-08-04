@@ -1,6 +1,7 @@
 package com.pdsl.executors;
 
 import com.pdsl.logging.PdslThreadSafeOutputStream;
+import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.Phrase;
@@ -17,7 +18,7 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.*;
 
-public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExecutor {
+public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslTestExecutor.class);
     private ParseTreeWalker walker = new ParseTreeWalker();
@@ -28,13 +29,13 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
     public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
         // Walk the phrase registry to make sure all phrases are defined
         logger.info("Running tests...");
-        PolymorphicDslTestRunResults results = walk(testCases, phraseRegistry);
+        MetadataTestRunResults results = walk(testCases, phraseRegistry, "NONE");
         if (results.failingTestTotal() == 0) {
             logger.info("All phrases successfully executed!");
         } else {
             logger.error("There were test failures!");
         }
-        return results;
+        return (PolymorphicDslTestRunResults) results;
     }
 
     @Override
@@ -45,11 +46,11 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
             testCase.getTestSectionIterator().forEachRemaining(testSection -> walker.walk(grammarListener, testSection.getPhrase().getParseTree()));
         }
         logger.debug("Executing subgrammars...");
-        return walk(testCases, subgrammarListener);
+        return (PolymorphicDslTestRunResults) walk(testCases, subgrammarListener, "NONE");
     }
 
-    private PolymorphicDslTestRunResults walk(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
-        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream());
+    private MetadataTestRunResults walk(Collection<TestCase> testCases, ParseTreeListener phraseRegistry, String context) {
+        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
         Set<Long> previouslyExecutedTests = new HashSet<>();
         for (TestCase testCase : testCases) {
             int totalPassingPhrases = 0;
@@ -86,9 +87,8 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                 int phrasesSkippedDueToFailure = testBodySize                                                                                                                                        // All phrases
                         - totalPassingPhrases // Minus successfully executed steps
                         - 1; // minus the failing phrase
-                String errorPhrase = activePhrase != null ? activePhrase.getParseTree().getText() : "phrase was null!";
                 results.addTestResult(TestMetadata.failedTest(testCase.getTestTitle(), totalPassingPhrases,
-                        phrasesSkippedDueToFailure, errorPhrase, e,
+                        phrasesSkippedDueToFailure, activePhrase, e,
                         testCase.getTestCaseId()));
 								logger.error("Phrase failure", e);
                 continue;
@@ -116,5 +116,10 @@ public class DefaultPolymorphicDslTestExecutor implements PolymorphicDslTestExec
                 throw new PolymorphicDslTransformationException("Could not notify streams!", e);
             }
         }
+    }
+
+    @Override
+    public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeListener subgrammarListener, String context) {
+        return (MetadataTestRunResults)runTests(testCases, subgrammarListener);
     }
 }

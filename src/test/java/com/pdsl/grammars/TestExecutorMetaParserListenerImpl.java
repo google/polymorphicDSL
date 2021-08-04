@@ -1,12 +1,10 @@
 package com.pdsl.grammars;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
-import com.pdsl.executors.PolymorphicDslTestExecutor;
+import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
-import com.pdsl.gherkin.GherkinPolymorphicDslTestExecutorTest;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
-import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
-import com.pdsl.reports.PolymorphicDslTestRunResults;
+import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
@@ -16,16 +14,12 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -40,10 +34,10 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     private PdslHelper.ListenerType grammarListener;
     private PdslHelper.ListenerType subgrammarListener;
     private Set<URL> urls = new HashSet<>();
-    private PolymorphicDslTestExecutor executor;
+    private TraceableTestRunExecutor executor;
     private PdslHelper.SupportedGrammars grammar;
     private PdslHelper.SupportedGrammars subgrammar;
-    private Optional<PolymorphicDslTestRunResults> results = Optional.empty();
+    private Optional<MetadataTestRunResults> results = Optional.empty();
     private Optional<Collection<TestSpecification>> testSpecification = Optional.empty();
     private TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private PdslHelper.Factories factoryType;
@@ -96,10 +90,8 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter(subgrammar.getParserClass(), subgrammar.getLexerClass()));
         executor = gherkinTestExecutor;
         String tagExpression = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
-        PolymorphicDslTestRunResults runResults = ((GherkinTestExecutor)executor).processFilesAndRunTests(urls, tagExpression, grammarListener.getListener(), subgrammarListener.getListener());
-
+        MetadataTestRunResults runResults = ((GherkinTestExecutor)executor).runTestsWithMetadata(urls, tagExpression, subgrammarListener.getListener(), "Integration");
         results = Optional.of(runResults);
-
     }
 
     @Override
@@ -293,7 +285,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         if (executor == null) {
             executor = new DefaultPolymorphicDslTestExecutor();
         }
-        results = Optional.of(executor.runTests(testCases, grammarListener.getListener(), subgrammarListener.getListener()));
+        results = Optional.of(executor.runTestsWithMetadata(testCases, subgrammarListener.getListener(), "Integration"));
     }
 
     @Override
@@ -304,7 +296,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedPassingTests(TestExecutorMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
         assertThat(results.isPresent()).isTrue();
-        for (TestMetadata metadata : results.get().getTestResultMetadata()) {
+        for (TestMetadata metadata : results.get().getTestMetadata()) {
             if (metadata.getFailingPhrase().isPresent()) {
                 logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestSuiteId(), metadata.getFailureReason().orElseThrow());
             }

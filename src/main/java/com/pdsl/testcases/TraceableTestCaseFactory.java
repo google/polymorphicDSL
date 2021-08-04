@@ -13,8 +13,7 @@ public interface TraceableTestCaseFactory extends TestCaseFactory {
 
     public static class TraceableTestData {
         private final Map<Integer, List<Phrase>> phraseBodyMap;
-        private final List<TraceableTestCase> testCases;
-        public TraceableTestData(Map<Integer, List<Phrase>> phraseBodyMap, List<TraceableTestCase> testCases) {
+        private final List<TraceableTestCase> testCases;        public TraceableTestData(Map<Integer, List<Phrase>> phraseBodyMap, List<TraceableTestCase> testCases) {
             this.phraseBodyMap = phraseBodyMap;
             this.testCases = testCases;
         }

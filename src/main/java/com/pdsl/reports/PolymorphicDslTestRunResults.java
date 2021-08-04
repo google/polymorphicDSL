@@ -1,13 +1,15 @@
 package com.pdsl.reports;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.exceptions.PolymorphicDslReportException;
+import com.pdsl.logging.PdslThreadSafeOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class PolymorphicDslTestRunResults implements TestRunResults, ReportListener {
+public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTestRunResults, ReportListener {
 
     private final List<OutputStream> dslReports;
     private List<TestMetadata> results = new LinkedList<>();
@@ -16,16 +18,18 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
     private Map<Long, List<TestMetadata>> duplicateIdToTestResult = new HashMap<>();
     // The map cannot hold more than one duplicate
     private List<TestMetadata> duplicateTestResults = new LinkedList<>();
-
-    public PolymorphicDslTestRunResults(OutputStream report) {
+    private final String context;
+    public PolymorphicDslTestRunResults(OutputStream report, String context) {
         Preconditions.checkNotNull(report, "reports cannot be null!");
         dslReports = List.of(report);
+        this.context = context;
     }
 
-    public PolymorphicDslTestRunResults(List<OutputStream> reports) {
+    public PolymorphicDslTestRunResults(List<OutputStream> reports, String context) {
         Preconditions.checkNotNull(reports, "reports cannot be null!");
-        Preconditions.checkArgument(reports.isEmpty(), "report output streams cannot be empty");
+        Preconditions.checkArgument(!reports.isEmpty(), "report output streams cannot be empty");
         dslReports = new LinkedList<>(reports);
+        this.context = context;
     }
 
     public List<TestMetadata> getTestResultMetadata() {
@@ -97,6 +101,11 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
     }
 
     @Override
+    public String getContext() {
+        return context;
+    }
+
+    @Override
     public List<OutputStream> getDslReports() {
         return dslReports;
     }
@@ -104,5 +113,10 @@ public class PolymorphicDslTestRunResults implements TestRunResults, ReportListe
     @Override
     public boolean containsFilteredTest(long postFilteredTestId) {
         return resultIds.contains(postFilteredTestId);
+    }
+
+    @Override
+    public Collection<TestMetadata> getTestMetadata() {
+        return results;
     }
 }

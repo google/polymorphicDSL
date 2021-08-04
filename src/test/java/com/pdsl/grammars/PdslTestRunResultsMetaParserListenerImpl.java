@@ -2,8 +2,11 @@ package com.pdsl.grammars;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
+import com.pdsl.executors.TraceableTestRunExecutor;
+import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestMetadata;
+import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -29,14 +32,14 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResultsMetaParserListener {
 
-    private Optional<PolymorphicDslTestRunResults> testRunResults = Optional.empty();
+    private Optional<MetadataTestRunResults> testRunResults = Optional.empty();
     private Optional<TestMetadata> testMetadata = Optional.empty();
     private Optional<Collection<TestCase>> testCaseCollection = Optional.empty();
     private ParseTreeListener grammarListener = PdslHelper.ListenerType.ARITHMETIC.getListener();
     private Set<URL> urlSet = new HashSet<>();
     private Path path;
 
-    private static final PolymorphicDslTestExecutor testExecutor = new DefaultPolymorphicDslTestExecutor();
+    private static final TraceableTestRunExecutor testExecutor = new DefaultPolymorphicDslTestExecutor();
     private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<SimpleArithmeticParser, SimpleArithmeticLexer>
             ( SimpleArithmeticParser.class,
                     SimpleArithmeticLexer.class);
@@ -119,7 +122,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
         assertThat(testCaseCollection.get()).isNotNull();
         assertThat(testCaseCollection.get()).isNotEmpty();
         assertThat(grammarListener).isNotNull();
-        testRunResults = Optional.of(testExecutor.runTests(testCaseCollection.get(), grammarListener));
+        testRunResults = Optional.of(testExecutor.runTestsWithMetadata(testCaseCollection.get(), grammarListener, "Integration"));
     }
 
     @Override
@@ -313,8 +316,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterWhenTheTestMetadataIsRetrievedFromTheTestRunResult(PdslTestRunResultsMetaParser.WhenTheTestMetadataIsRetrievedFromTheTestRunResultContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        assertThat(testRunResults.get().getTestResultMetadata().size()).isGreaterThan(0);
-        testMetadata = Optional.of(testRunResults.get().getTestResultMetadata().get(0));
+        assertThat(testRunResults.get().getTestMetadata().size()).isGreaterThan(0);
+        testMetadata = Optional.of(testRunResults.get().getTestMetadata().stream().findFirst().orElseThrow());
     }
 
     @Override
@@ -324,8 +327,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterWhenTheOnlyTestMetadataItemIsExamined(PdslTestRunResultsMetaParser.WhenTheOnlyTestMetadataItemIsExaminedContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        assertThat(testRunResults.get().getTestResultMetadata().size()).isGreaterThan(0);
-        testMetadata = Optional.of(testRunResults.get().getTestResultMetadata().get(0));
+        assertThat(testRunResults.get().getTestMetadata().size()).isGreaterThan(0);
+        testMetadata = Optional.of(testRunResults.get().getTestMetadata().stream().findFirst().orElseThrow());
     }
 
     @Override
@@ -359,7 +362,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
         assertThat(testMetadata.isPresent()).isTrue();
         assertThat(testMetadata.get().getFailingPhrase().isPresent()).isTrue();
         String actual = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
-        assertThat(testMetadata.get().getFailingPhrase().get()).contains(actual);
+        assertThat(testMetadata.get().getFailingPhrase().get().getParseTree().getText()).contains(actual);
     }
 
     @Override
@@ -369,7 +372,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTheTestMetadataHasOneItemInIt(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasOneItemInItContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        assertThat(testRunResults.get().getTestResultMetadata().size()).isEqualTo(1);
+        assertThat(testRunResults.get().getTestMetadata().size()).isEqualTo(1);
     }
 
     @Override

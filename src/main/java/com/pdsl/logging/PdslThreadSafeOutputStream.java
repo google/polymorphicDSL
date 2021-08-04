@@ -47,7 +47,7 @@ public final class PdslThreadSafeOutputStream extends OutputStream {
         String message = new String(bytes);
         // Multibyte characters may require us to have an earlier stop point
         //TODO: This is not a clean solution. Find a way to handle character encoding instead of assuming
-        //the caller wants to write the full
+        //the caller wants to write the full array logged
         message = new String(bytes).substring(start, stop <= message.length() ? stop : message.length());
         logger.info(message);
     }

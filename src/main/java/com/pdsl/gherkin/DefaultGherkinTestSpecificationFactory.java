@@ -2,9 +2,9 @@ package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
-import com.pdsl.gherkin.models.GherkinBackground;
-import com.pdsl.gherkin.models.GherkinStep;
-import com.pdsl.gherkin.specifications.GherkinTestCaseSpecification;
+import com.pdsl.component.models.GherkinBackground;
+import com.pdsl.component.models.GherkinStep;
+import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.logging.AnsiTerminalColorHelper;

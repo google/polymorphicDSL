@@ -1,5 +1,7 @@
 package com.pdsl.reports;
 
+import com.pdsl.specifications.Phrase;
+
 import java.util.Optional;
 
 public class TestMetadata {
@@ -9,7 +11,7 @@ public class TestMetadata {
     private boolean isPassed;
     private int phrasesSkippedDueToFailure = 0;
     private int passingPhraseTotal = 0;
-    private Optional<String> failingPhrase = Optional.empty();
+    private Optional<Phrase> failingPhrase = Optional.empty();
     private Optional<Throwable> failureReason = Optional.empty();
 
     public TestMetadata(String testSuiteId, int passingPhraseTotal, long phraseBodyId) {
@@ -19,7 +21,7 @@ public class TestMetadata {
         this.phraseBodyId = phraseBodyId;
     }
 
-    public TestMetadata(String testSuiteId, int passingPhraseTotal, int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason, long phraseBodyId) {
+    public TestMetadata(String testSuiteId, int passingPhraseTotal, int phrasesSkippedDueToFailure, Phrase failingStep, Throwable failureReason, long phraseBodyId) {
         this.isPassed = false;
         this.testSuiteId = testSuiteId;
         this.passingPhraseTotal = passingPhraseTotal;
@@ -30,9 +32,9 @@ public class TestMetadata {
     }
 
     public static TestMetadata failedTest(String testSuiteId, int passingPhraseTotal,
-                                          int phrasesSkippedDueToFailure, String failingStep, Throwable failureReason,
+                                          int phrasesSkippedDueToFailure, Phrase failingPhrase, Throwable failureReason,
                                           long phraseBodyId) {
-        return new TestMetadata(testSuiteId, passingPhraseTotal, phrasesSkippedDueToFailure, failingStep, failureReason, phraseBodyId);
+        return new TestMetadata(testSuiteId, passingPhraseTotal, phrasesSkippedDueToFailure, failingPhrase, failureReason, phraseBodyId);
     }
 
     public static TestMetadata duplicateTest(String testTitle, long testCaseId) {
@@ -63,7 +65,7 @@ public class TestMetadata {
         return passingPhraseTotal;
     }
 
-    public Optional<String> getFailingPhrase() {
+    public Optional<Phrase> getFailingPhrase() {
         return failingPhrase;
     }
 

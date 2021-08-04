@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.gherkin.models.GherkinFeature;
+import com.pdsl.component.models.GherkinFeature;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,19 +1,16 @@
 package com.pdsl;
 
-import com.pdsl.component.TestResourceFinderComponentTest;
-import com.pdsl.framework.FrameworkSpecificationsTest;
-import com.pdsl.gherkin.*;
-import com.pdsl.gherkin.models.GherkinModelSuite;
+import com.pdsl.api.*;
+import com.pdsl.component.ComponentSuiteTest;
+import com.pdsl.component.models.GherkinModelSuite;
+import com.pdsl.unit.GherkinTagFiltererTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({PolymorphicDslTest.class, PolymorphicDslGherkinExecutionTest.class, GherkinTagFiltererTest.class,
-        GherkinPolymorphicDslTestExecutorTest.class, GherkinModelSuite.class,
-        GherkinTestRunWithFailuresTest.class,
+@Suite.SuiteClasses({PolymorphicDsl.class, GherkinTagFiltererTest.class,
         //InterpreterBasedPhraseFilterTest.class, //TODO: finish this feature then enable it
-        FrameworkSpecificationsTest.class,
-        TestResourceFinderComponentTest.class
+        ComponentSuiteTest.class,
+        ApiSuiteTest.class
 })
-public class FullPolymorphicDslTestSuite {
-}
+public class FullPolymorphicDslTestSuite { }
