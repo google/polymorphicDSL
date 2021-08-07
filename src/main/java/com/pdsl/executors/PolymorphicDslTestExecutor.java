@@ -25,19 +25,4 @@ public interface PolymorphicDslTestExecutor {
     TestRunResults runTests(Collection<TestCase> testCases,
                             ParseTreeListener subgrammarListener);
 
-    /**
-     * Quickly checks to see that all phrases in each test case exist in a parent grammar before executing what will
-     * likely be a more lengthy execution of the subgrammar listener.
-     * <p>
-     * This method will likely be unnecessary in the event the test cases were produced by one of the standard
-     * Test Specification Factories and Test Case Factories as they should have filtered out anything unknown
-     * to the subgrammar already
-     *
-     * @param testCases
-     * @param grammarListener
-     * @param subgrammarListener
-     * @return The results of the test run
-     */
-    TestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener grammarListener,
-                                          ParseTreeListener subgrammarListener);
 }

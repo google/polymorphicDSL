@@ -28,7 +28,7 @@ public class GherkinTestRunWithFailures {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new AllGrammarsParserBaseListener(), new AllGrammarsFailListener());
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new AllGrammarsFailListener());
 
         // Assert
         assertThat(results.failingTestTotal()).isEqualTo(1);
@@ -45,7 +45,7 @@ public class GherkinTestRunWithFailures {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new AllGrammarsParserBaseListener(), new AllGrammarsFailListener());
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new AllGrammarsFailListener());
 
         // Assert
         assertThat(results.failingTestTotal()).isEqualTo(3);
@@ -63,7 +63,7 @@ public class GherkinTestRunWithFailures {
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
-        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new AllGrammarsParserBaseListener(), new AllGrammarsFail2ndListener());
+        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles,  new AllGrammarsFail2ndListener());
 
         // Assert
         assertThat(results.failingTestTotal()).isEqualTo(3);

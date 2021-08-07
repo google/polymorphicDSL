@@ -5,16 +5,11 @@ import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.*;
-import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.RuleContext;
-import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.*;
 
@@ -107,7 +102,7 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
     public void enterThenEachTestCaseHasPhrases(TestCaseFactoryParser.ThenEachTestCaseHasPhrasesContext ctx) {
         Preconditions.checkNotNull(testCases, "Test cases were not instantiated!");
         int phraseCount = Integer.parseInt(ctx.integerValue().getText());
-        testCases.stream().forEach(c -> assertThat(getIteratorCount(c.getTestSectionIterator())).isEqualTo(phraseCount));
+        testCases.stream().forEach(c -> assertThat(getIteratorCount(c.getContextFilteredTestSectionIterator())).isEqualTo(phraseCount));
     }
 
     private int getIteratorCount(Iterator<TestSection> iterator) {

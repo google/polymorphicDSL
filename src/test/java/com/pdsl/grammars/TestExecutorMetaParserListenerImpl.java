@@ -1,11 +1,12 @@
 package com.pdsl.grammars;
 
+import com.google.common.base.Preconditions;
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
+import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
-import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -83,9 +84,12 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterWhenTheGherkinTestExecutorRunsWithTagExpression(TestExecutorMetaParser.WhenTheGherkinTestExecutorRunsWithTagExpressionContext ctx) {
-				assertThat(grammarListener).isNotNull();
+        Preconditions.checkNotNull(grammar);
         if (subgrammarListener == null) {
             subgrammarListener = grammarListener;
+        }
+        if (subgrammar == null) {
+            subgrammar = grammar;
         }
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter(subgrammar.getParserClass(), subgrammar.getLexerClass()));
         executor = gherkinTestExecutor;
@@ -209,7 +213,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
             subgrammar = grammar;
         }
         TestSpecificationFactory factory;
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(subgrammar.getParserClass(), subgrammar.getLexerClass());
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.getParserClass(), grammar.getLexerClass());
         switch (factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:
                 factory = new DefaultGherkinTestSpecificationFactory(phraseFilter);
@@ -285,7 +289,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         if (executor == null) {
             executor = new DefaultPolymorphicDslTestExecutor();
         }
-        results = Optional.of(executor.runTestsWithMetadata(testCases, subgrammarListener.getListener(), "Integration"));
+        results = Optional.of(executor.runTestsWithMetadata(testCases, grammarListener.getListener(), "Integration"));
     }
 
     @Override
@@ -296,7 +300,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedPassingTests(TestExecutorMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
         assertThat(results.isPresent()).isTrue();
-        for (TestMetadata metadata : results.get().getTestMetadata()) {
+        for (DefaultTestResult metadata : results.get().getTestMetadata()) {
             if (metadata.getFailingPhrase().isPresent()) {
                 logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestSuiteId(), metadata.getFailureReason().orElseThrow());
             }

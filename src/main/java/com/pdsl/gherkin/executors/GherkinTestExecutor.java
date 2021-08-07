@@ -48,28 +48,6 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         this.phraseFilter = phraseFilter;
         testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
     }
-    public TestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
-                                                  ParseTreeListener grammarListener, ParseTreeListener subgrammarListener) {
-        // Use the file locations and convert the feature files to test specifications
-        Optional<Collection<TestSpecification>> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
-        if (testSpecificationOptional.isEmpty()) {
-            throw new IllegalStateException("None of the test resources could be converted into a test specification!");
-        }
-        // If tag expressions were provided filter the test specification
-        Optional<Collection<TestSpecification>> filteredSpecification =
-                testSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecificationOptional.get(), tagExpression);
-        Collection<TestSpecification> testSpecification;
-        if (filteredSpecification.isEmpty()) {
-            logger.warn("All tests were filtered out! Nothing to execute!");
-            return new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), "DEFAULT");
-        } else {
-            testSpecification = filteredSpecification.get();
-        }
-        // Convert the test specifications into test cases
-        Collection<TestCase> testCases = testCaseFactory.processTestSpecification(testSpecification);
-        //Finally execute the tests
-        return executor.runTests(testCases, grammarListener, subgrammarListener);
-    }
 
     public TestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
                                                                 ParseTreeListener grammarListener) {
@@ -94,12 +72,6 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
     }
 
     public TestRunResults processFilesAndRunTests(Set<URL> testResources,
-                                                                ParseTreeListener grammarListener,
-                                                          ParseTreeListener subgrammarListener) {
-        return processFilesAndRunTests(testResources, "", grammarListener, subgrammarListener);
-    }
-
-    public TestRunResults processFilesAndRunTests(Set<URL> testResources,
                                                                 ParseTreeListener grammarListener, String tagExpression) {
         return processFilesAndRunTests(testResources, tagExpression, grammarListener);
     }
@@ -113,11 +85,6 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         return executor.runTests(testCases, grammarListener);
     }
 
-    @Override
-    public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener grammarListener,
-                                                 ParseTreeListener subgrammarListener) {
-        return executor.runTests(testCases, grammarListener, subgrammarListener);
-    }
 
     @Override
     public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeListener subgrammarListener, String context) {

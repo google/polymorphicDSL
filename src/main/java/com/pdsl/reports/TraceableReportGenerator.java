@@ -1,28 +1,22 @@
 package com.pdsl.reports;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URL;
 import java.util.*;
 
 public interface TraceableReportGenerator {
     URL generateReport(Collection<MetadataTestRunResults> testRunResults) throws IOException;
 
-    public static Map<String, Map<String, List<TestMetadata>>> testResourceToContextHelper(
+    static Map<String, Map<String, List<DefaultTestResult>>> testResourceToContextHelper(
             Collection<MetadataTestRunResults> testRunResults) {
-        // Mock test
-        // Unit
-        // Unit 1
-        // Unit 2
-        //Map<Test Resource, Map<Context, List<TestMetadata>>
-        Map<String, Map<String, List<TestMetadata>>> resourceToRuns = new HashMap<>();
+        Map<String, Map<String, List<DefaultTestResult>>> resourceToRuns = new HashMap<>();
         for (MetadataTestRunResults metadataTestRunResults : testRunResults) {
-            for (TestMetadata metadata : metadataTestRunResults.getTestMetadata()) {
-                Map<String, List<TestMetadata>> contextToMetadata =
+            for (DefaultTestResult metadata : metadataTestRunResults.getTestMetadata()) {
+                Map<String, List<DefaultTestResult>> contextToMetadata =
                         resourceToRuns.computeIfAbsent(metadata.getTestSuiteId(),
-                                (k) -> new HashMap<String, List<TestMetadata>>());
-                List<TestMetadata> metadataList = contextToMetadata.computeIfAbsent(metadataTestRunResults.getContext(),
-                        (k) -> new ArrayList<TestMetadata>());
+                                (k) -> new HashMap<String, List<DefaultTestResult>>());
+                List<DefaultTestResult> metadataList = contextToMetadata.computeIfAbsent(metadataTestRunResults.getContext(),
+                        (k) -> new ArrayList<DefaultTestResult>());
                 metadataList.add(metadata);
             }
         }

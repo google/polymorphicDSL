@@ -17,7 +17,7 @@ public class DefaultPhrase implements Phrase {
     }
 
     @Override
-    public int getIndexId() {
+    public int getPrefilteredIndex() {
         return indexId;
     }
 }

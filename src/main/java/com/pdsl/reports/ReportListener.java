@@ -5,7 +5,7 @@ import java.util.List;
 
 public interface ReportListener {
 
-    void addTestResult(TestMetadata testMetadata);
+    void addTestResult(DefaultTestResult defaultTestResult);
 
     void appendToDslReport(byte[] b);
 

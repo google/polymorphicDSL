@@ -1,12 +1,9 @@
 package com.pdsl.grammars;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
-import com.pdsl.executors.PolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
+import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
-import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.reports.TestMetadata;
-import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -33,7 +30,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResultsMetaParserListener {
 
     private Optional<MetadataTestRunResults> testRunResults = Optional.empty();
-    private Optional<TestMetadata> testMetadata = Optional.empty();
+    private Optional<DefaultTestResult> testMetadata = Optional.empty();
     private Optional<Collection<TestCase>> testCaseCollection = Optional.empty();
     private ParseTreeListener grammarListener = PdslHelper.ListenerType.ARITHMETIC.getListener();
     private Set<URL> urlSet = new HashSet<>();

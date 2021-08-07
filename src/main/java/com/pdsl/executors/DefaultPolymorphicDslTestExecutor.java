@@ -1,9 +1,9 @@
 package com.pdsl.executors;
 
 import com.pdsl.logging.PdslThreadSafeOutputStream;
+import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.reports.TestMetadata;
 import com.pdsl.specifications.Phrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.testcases.TestCase;
@@ -38,58 +38,38 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         return (PolymorphicDslTestRunResults) results;
     }
 
-    @Override
-    public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener grammarListener, ParseTreeListener subgrammarListener) {
-        logger.info("Beginning  Polymorphic DSL test case execution.");
-        logger.debug("Executing grammar");
-        for (TestCase testCase : testCases) {
-            testCase.getTestSectionIterator().forEachRemaining(testSection -> walker.walk(grammarListener, testSection.getPhrase().getParseTree()));
-        }
-        logger.debug("Executing subgrammars...");
-        return (PolymorphicDslTestRunResults) walk(testCases, subgrammarListener, "NONE");
-    }
-
     private MetadataTestRunResults walk(Collection<TestCase> testCases, ParseTreeListener phraseRegistry, String context) {
         PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
-        Set<Long> previouslyExecutedTests = new HashSet<>();
+        Set<List<String>> previouslyExecutedTests = new HashSet<>();
         for (TestCase testCase : testCases) {
             int totalPassingPhrases = 0;
             Phrase activePhrase = null;
-            Iterator<TestSection> testBody = testCase.getTestSectionIterator();
-            int testBodySize = 0;
+            Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
+            int phraseIndex = 0;
             try {
-                if (previouslyExecutedTests.contains(testCase.getTestCaseId())) {
+                if (previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
                     logger.warn("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle());
                     StringBuilder duplicateBody = new StringBuilder();
-                    testCase.getTestSectionIterator().forEachRemaining(duplicateBody::append);
-                    results.addTestResult(TestMetadata.duplicateTest(testCase.getTestTitle(), testCase.getTestCaseId()));
+                    testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
+                    results.addTestResult(DefaultTestResult.duplicateTest(testCase));
                 } else {
-                    previouslyExecutedTests.add(testCase.getTestCaseId());
+                    previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
                     while (testBody.hasNext()) {
                         TestSection section = testBody.next();
                         if (section.getMetaData().isPresent()) {
                             notifyStreams(section.getMetaData().get());
                         }
                         activePhrase = section.getPhrase();
-                        testBodySize++;
                         notifyStreams((activePhrase.getParseTree().getText() + "\n").getBytes(charset));
                         walker.walk(phraseRegistry, activePhrase.getParseTree());
+                        phraseIndex++;
                         totalPassingPhrases++;
                     }
-                    results.addTestResult(TestMetadata.passingTest(testCase.getTestTitle(), totalPassingPhrases, testCase.getTestCaseId()));
+                    results.addTestResult(DefaultTestResult.passingTest(testCase));
                 }
                 continue;
             } catch (Throwable e) {
-                while (testBody.hasNext()) {
-                    testBody.next();
-                    testBodySize++;
-                }
-                int phrasesSkippedDueToFailure = testBodySize                                                                                                                                        // All phrases
-                        - totalPassingPhrases // Minus successfully executed steps
-                        - 1; // minus the failing phrase
-                results.addTestResult(TestMetadata.failedTest(testCase.getTestTitle(), totalPassingPhrases,
-                        phrasesSkippedDueToFailure, activePhrase, e,
-                        testCase.getTestCaseId()));
+                results.addTestResult(DefaultTestResult.failedTest(testCase,activePhrase, e, phraseIndex));
 								logger.error("Phrase failure", e);
                 continue;
             }

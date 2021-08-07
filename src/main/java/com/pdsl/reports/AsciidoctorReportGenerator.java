@@ -2,17 +2,14 @@ package com.pdsl.reports;
 
 import com.google.common.base.Preconditions;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AsciidoctorReportGenerator implements TraceableReportGenerator {
 
@@ -28,13 +25,13 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
     public URL generateReport(Collection<MetadataTestRunResults> testRunResults) throws IOException {
 
         // Resource, Map<Context, List<Metadata>>
-        Map<String, Map<String, List<TestMetadata>>> resourceToRuns =
+        Map<String, Map<String, List<DefaultTestResult>>> resourceToRuns =
                 TraceableReportGenerator.testResourceToContextHelper(testRunResults);
         Path adoc = Files.createFile(fileLocation);
         write(":toc: left%n:icons: font%n:source-highlighter: prettify%n");
         write("= Traceable Report%n%n");
         // For each test resource
-        for (Map.Entry<String, Map<String, List<TestMetadata>>> resourceEntry : resourceToRuns.entrySet()) {
+        for (Map.Entry<String, Map<String, List<DefaultTestResult>>> resourceEntry : resourceToRuns.entrySet()) {
             boolean previousCellFailed = false;
             // Create a header
             write(String.format("== %s%n%n",resourceEntry.getKey()));
@@ -48,34 +45,52 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
             // Fill out table data
             tableData[0][0] = String.format(".%d+| Test Case/Context %s", longestColumn + 1,  getCellMarkup(previousCellFailed));
             int column = 0;
+
+            // Sort the context by the number of tests executed
+            List<Map.Entry<String, List<DefaultTestResult>>> sortedContexts = resourceEntry.getValue().entrySet().stream()
+                    .collect(Collectors.toList());
+            sortedContexts.sort(new Comparator<Map.Entry<String, List<DefaultTestResult>>>() {
+                @Override
+                public int compare(Map.Entry<String, List<DefaultTestResult>> stringListEntry, Map.Entry<String, List<DefaultTestResult>> t1) {
+                    if (stringListEntry.getValue().size() < t1.getValue().size()) {
+                        return -1;
+                    } else if (stringListEntry.getValue().size() == t1.getValue().size()) {
+                        return 0;
+                    } else {
+                        return 1;
+                    }
+                }
+            });
             // For each test context
-            for (Map.Entry<String, List<TestMetadata>> contextToTest : resourceEntry.getValue().entrySet()) {
+            for (Map.Entry<String, List<DefaultTestResult>> contextToTest : sortedContexts) {
+
                 int row = 0;
                 column++;
                 tableData[column][row] = String.format("| %s", contextToTest.getKey());
-                List<TestMetadata> testMetadataList = contextToTest.getValue();
-                for (int r = 0; r < testMetadataList.size(); r++) {
+                List<DefaultTestResult> defaultTestResultList = contextToTest.getValue();
+                for (int r = 0; r < defaultTestResultList.size(); r++) {
                     row++;
-                    TestMetadata metadata = testMetadataList.get(r);
-                    int colspan = longestColumn - testMetadataList.size() + 1;
+                    DefaultTestResult metadata = defaultTestResultList.get(r);
+                    int colspan = longestColumn - defaultTestResultList.size() + 1;
                     StringBuilder cellText = new StringBuilder();
 
                     //If we need a colspan because there will be many empty cells beneath this one
-                    if (testMetadataList.size() < longestColumn && r == testMetadataList.size() - 1) { // A colspan is needed
+                    if (defaultTestResultList.size() < longestColumn && r == defaultTestResultList.size() - 1) { // A colspan is needed
                         cellText.append(String.format(".%d+", colspan));
                     }
                     cellText.append("| ");
-                    cellText.append(metadata.getIsPassed() ? "✅ " : String.format("[%d] %s ",
-                            metadata.getFailingPhrase().get().getIndexId(),
+                    cellText.append(metadata.getStatus().equals(DefaultTestResult.Status.PASSED) ? "✅ " : String.format("[%d] %s ",
+                            metadata.getFailingPhrase().get().getPrefilteredIndex(),
                             metadata.getFailingPhrase().get().getParseTree().getText()));
 
                     // Conditionally change cell coloring and markup
-                    if (previousCellFailed != !metadata.getIsPassed()) {
+                    if (previousCellFailed != !metadata.getStatus().equals(DefaultTestResult.Status.PASSED)) {
                         previousCellFailed = !previousCellFailed;
                         cellText.append(getCellMarkup(previousCellFailed));
                     }
                     tableData[column][row] = cellText.toString();
                 }
+                previousCellFailed = false;
             }
 
             // Convert the table to an asciidoctor table with appropriate formatting

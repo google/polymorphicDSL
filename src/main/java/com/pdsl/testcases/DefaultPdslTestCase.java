@@ -1,34 +1,50 @@
 package com.pdsl.testcases;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.specifications.FilteredPhrase;
+import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class DefaultPdslTestCase implements TestCase {
 
-    private final List<TestSection> testBody;
     private final String testCaseTitle;
-    private int hashCodeId; //TODO: How do we deal with collisions?
+    private final List<TestBodyFragment> testBodyFragments;
+    private final List<String> unfilteredPhraseBody;
+    private final List<String> contextFilteredPhraseBody;
 
-    public DefaultPdslTestCase(String testCaseTitle, List<TestSection> testBody) {
+    public DefaultPdslTestCase(String testCaseTitle, List<TestBodyFragment> testBodyFragments) {
         String errMessage = "Test case title cannot be empty or null!";
         Preconditions.checkNotNull(testCaseTitle, errMessage);
         Preconditions.checkArgument(!testCaseTitle.isEmpty(), errMessage);
-        Preconditions.checkNotNull(testBody);
-        Preconditions.checkArgument(!testBody.isEmpty());
-        this.testBody = testBody;
+        Preconditions.checkNotNull(testBodyFragments, errMessage);
+        Preconditions.checkNotNull(!testBodyFragments.isEmpty(), errMessage);
+        this.testBodyFragments = testBodyFragments;
         this.testCaseTitle = testCaseTitle;
-        this.hashCodeId = testBody.stream()
-                .map(testSection -> testSection.getPhrase().getParseTree().getText())
-                .collect(Collectors.toUnmodifiableList())
-                .hashCode();
+        List<FilteredPhrase> filteredPhrases = testBodyFragments.stream()
+                .map(TestBodyFragment::getTestPhrases)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toUnmodifiableList());
+        this.unfilteredPhraseBody = filteredPhrases.stream()
+                .map(FilteredPhrase::getPhrase)
+                .collect(Collectors.toUnmodifiableList());
+        this.contextFilteredPhraseBody = filteredPhrases.stream()
+                .map(FilteredPhrase::getParseTree)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(ParseTree::getText)
+                .collect(Collectors.toUnmodifiableList());
     }
 
     @Override
-    public long getTestCaseId() {
-        return hashCodeId;
+    public List<String> getUnfilteredPhraseBody() {
+        return unfilteredPhraseBody;
+    }
+
+    @Override
+    public List<String> getContextFilteredPhraseBody() {
+        return contextFilteredPhraseBody;
     }
 
     @Override
@@ -37,7 +53,11 @@ public class DefaultPdslTestCase implements TestCase {
     }
 
     @Override
-    public Iterator<TestSection> getTestSectionIterator() {
-        return testBody.listIterator();
+    public Iterator<TestSection> getContextFilteredTestSectionIterator() {
+        return testBodyFragments.stream()
+                .map(TestSection::convertBodyFragment)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toUnmodifiableList())
+                .iterator();
     }
 }

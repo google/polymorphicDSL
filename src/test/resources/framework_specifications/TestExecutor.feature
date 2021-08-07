@@ -28,7 +28,6 @@ Background:
 	Then a "Test Specification" is produced
 
 	Given the Grammar Parse Tree Listener "All Grammars"
-	And the Subgrammar Parse Tree Listener "All Grammars"
 	And the Test Specification is processed by a "Test Case Factory"
 
 

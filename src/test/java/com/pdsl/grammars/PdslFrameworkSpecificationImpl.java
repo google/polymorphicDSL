@@ -141,7 +141,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     @Override
     public void enterTestCaseHasUniqueId(PdslFrameworkSpecificationParser.TestCaseHasUniqueIdContext ctx) {
         for(TestCase testCase : testCases) {
-            assertThat(testCase.getTestCaseId()).isNotNull();
+            assertThat(testCase.getUnfilteredPhraseBody()).isNotNull();
         }
 
     }
@@ -202,17 +202,13 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
                 AllGrammarsParser.class, AllGrammarsLexer.class);
         // Empty listener that passes everything
         // Check each implementation for run tests (should be side effect free)
-        TestRunResults results1 = gherkinTestExecutor.runTests(testCases, grammarListener, subGrammarListener);
         TestRunResults results2 = gherkinTestExecutor.runTests(testCases, grammarListener);
         TestRunResults results3 = gherkinTestExecutor.processFilesAndRunTests(resourcePaths, grammarListener);
-        TestRunResults results4 = gherkinTestExecutor.processFilesAndRunTests(resourcePaths, grammarListener, subGrammarListener);
         // Reset the URLs
         resourcePaths = new HashSet<>();
         // Results should be identical for all runs
-        compareTestRunResults(results1, results2);
         compareTestRunResults(results2, results3);
-        compareTestRunResults(results3, results4);
-        results = results1;
+        results = results2;
 
     }
 

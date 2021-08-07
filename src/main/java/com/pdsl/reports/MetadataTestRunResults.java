@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface MetadataTestRunResults extends TestRunResults {
-    Collection<TestMetadata> getTestMetadata();
-    Optional<List<TestMetadata>> duplicateTestSpecifications();
+    Collection<DefaultTestResult> getTestMetadata();
+    Optional<List<DefaultTestResult>> duplicateTestSpecifications();
     String getContext();
 }

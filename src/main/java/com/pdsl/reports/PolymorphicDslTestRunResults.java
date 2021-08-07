@@ -2,7 +2,6 @@ package com.pdsl.reports;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.PolymorphicDslReportException;
-import com.pdsl.logging.PdslThreadSafeOutputStream;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,12 +11,12 @@ import java.util.stream.Collectors;
 public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTestRunResults, ReportListener {
 
     private final List<OutputStream> dslReports;
-    private List<TestMetadata> results = new LinkedList<>();
-    private Set<Long> resultIds = new HashSet<>();
+    private List<DefaultTestResult> results = new LinkedList<>();
+    private Set<List<String>> resultIds = new HashSet<>();
     // map for fast lookup
-    private Map<Long, List<TestMetadata>> duplicateIdToTestResult = new HashMap<>();
+    private Map<List<String>, List<DefaultTestResult>> duplicateIdToTestResult = new HashMap<>();
     // The map cannot hold more than one duplicate
-    private List<TestMetadata> duplicateTestResults = new LinkedList<>();
+    private List<DefaultTestResult> duplicateTestResults = new LinkedList<>();
     private final String context;
     public PolymorphicDslTestRunResults(OutputStream report, String context) {
         Preconditions.checkNotNull(report, "reports cannot be null!");
@@ -32,25 +31,25 @@ public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTes
         this.context = context;
     }
 
-    public List<TestMetadata> getTestResultMetadata() {
+    public List<DefaultTestResult> getTestResultMetadata() {
         return results;
     }
 
     @Override
-    public void addTestResult(TestMetadata testMetadata) {
-        Preconditions.checkNotNull(testMetadata, "Test metadata cannot be null!");
-        long id = testMetadata.getPhraseBodyId();
+    public void addTestResult(DefaultTestResult defaultTestResult) {
+        Preconditions.checkNotNull(defaultTestResult, "Test metadata cannot be null!");
+        List<String> id = defaultTestResult.getPhraseBody();
         if (resultIds.contains(id)) {
             if (duplicateIdToTestResult.containsKey(id)) {
-                duplicateIdToTestResult.get(id).add(testMetadata);
+                duplicateIdToTestResult.get(id).add(defaultTestResult);
             } else {
-                List<TestMetadata> duplicates = new LinkedList<>();
-                duplicates.add(testMetadata);
+                List<DefaultTestResult> duplicates = new LinkedList<>();
+                duplicates.add(defaultTestResult);
                 duplicateIdToTestResult.put(id, duplicates);
             }
-            duplicateTestResults.add(testMetadata);
+            duplicateTestResults.add(defaultTestResult);
         } else {
-            results.add(testMetadata);
+            results.add(defaultTestResult);
             resultIds.add(id);
         }
     }
@@ -68,22 +67,23 @@ public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTes
 
     @Override
     public int passingTestTotal() {
-        return results.stream().filter(TestMetadata::getIsPassed).collect(Collectors.toList()).size();
+        return results.stream().filter(metadata -> metadata.getStatus().equals(DefaultTestResult.Status.PASSED))
+                .collect(Collectors.toList()).size();
     }
 
     @Override
     public int failingTestTotal() {
-        return results.stream().filter(t -> !t.getIsPassed()).collect(Collectors.toList()).size();
+        return results.stream().filter(testMetadata -> testMetadata.getStatus().equals(DefaultTestResult.Status.FAILED)).collect(Collectors.toList()).size();
     }
 
     @Override
     public int passingPhraseTotal() {
-        return results.stream().mapToInt(TestMetadata::getPassingPhraseTotal).sum();
+        return results.stream().mapToInt(DefaultTestResult::getPassingPhraseTotal).sum();
     }
 
     @Override
     public int totalPhrases() {
-        return results.stream().mapToInt(TestMetadata::getTotalPhrases).sum();
+        return results.stream().mapToInt(DefaultTestResult::getTotalPhrases).sum();
     }
 
     @Override
@@ -92,7 +92,7 @@ public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTes
     }
 
     @Override
-    public Optional<List<TestMetadata>> duplicateTestSpecifications() {
+    public Optional<List<DefaultTestResult>> duplicateTestSpecifications() {
         if (duplicateTestResults.isEmpty()) {
             return Optional.empty();
         } else {
@@ -116,7 +116,7 @@ public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTes
     }
 
     @Override
-    public Collection<TestMetadata> getTestMetadata() {
+    public Collection<DefaultTestResult> getTestMetadata() {
         return results;
     }
 }
