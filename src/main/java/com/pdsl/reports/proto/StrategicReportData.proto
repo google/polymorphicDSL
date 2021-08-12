@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package com.pdsl.reports.proto;
+
+option java_multiple_files = true;
+
+// System Under Test
+// Applications
+// Test Resources
+// Contexts
+// Test Cases
+message StrategicReportData {
+    repeated OperationalReportData operational_report_data = 1;
+}
+
+message OperationalReportData {
+    string application = 1;
+    repeated TacticalReportData tactical_report_data = 2;
+}
+
+message TacticalReportData {
+    repeated string unfiltered_phrase_body = 1;
+    map<string, TestCaseGroup> context_to_test_cases = 2;
+}
+
+message TestCaseGroup {
+    repeated TechnicalReportData technical_report_data = 1;
+}
+message TechnicalReportData {
+    string test_case_title = 1;
+    Status status = 2;
+    string failing_phrase = 3;
+    string failure_reason = 4;
+    uint32 failing_phrase_index = 5;
+    repeated string filtered_phrase_body = 6;
+    uint32 phrases_skipped_due_to_failure = 7;
+
+    enum Status {
+        STATUS_UNSPECIFIED = 0;
+        PASSED = 1;
+        FAILED = 2;
+        DUPLICATE = 3;
+    }
+}

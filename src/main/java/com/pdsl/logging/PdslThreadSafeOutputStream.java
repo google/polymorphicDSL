@@ -1,6 +1,7 @@
 package com.pdsl.logging;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
@@ -46,8 +47,8 @@ public final class PdslThreadSafeOutputStream extends OutputStream {
     public void write(byte[] bytes, int start, int stop) {
         String message = new String(bytes);
         // Multibyte characters may require us to have an earlier stop point
-        //TODO: This is not a clean solution. Find a way to handle character encoding instead of assuming
-        //the caller wants to write the full
+        //TODO: This is not a bug. Find a way to handle character encoding instead of assuming
+        // the caller wants to write the full array logged
         message = new String(bytes).substring(start, stop <= message.length() ? stop : message.length());
         logger.info(message);
     }

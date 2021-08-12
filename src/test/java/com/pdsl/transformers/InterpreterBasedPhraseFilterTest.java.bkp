@@ -1,0 +1,81 @@
+package com.pdsl.transformers;
+
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
+import com.pdsl.specifications.TestSpecification;
+import com.pdsl.specifications.TestSpecificationFactory;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.junit.Ignore;
+import org.junit.Test;
+
+import java.io.*;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.google.common.truth.Truth.assertThat;
+@Ignore
+public class InterpreterBasedPhraseFilterTest {
+
+    @Test
+    public void interpreterBasedPhraseTransformer_ableToAutomaticallyGenerateListenerForFiltering() throws IOException {
+        PolymorphicDslPhraseFilter phraseTransformer = new InterpreterBasedPhraseFilter.Builder(Path.of(System.getProperty("user.dir") + "/src/test/java/com/pdsl/grammars"),
+                "Omega", "com.pdsl.grammars")
+                .withGrammarLexer("AllGrammarsLexer")
+                .withSubgrammar("Beta")
+                .withSubgrammarLibrary(Path.of(System.getProperty("user.dir") + "/src/test/resources/"))
+                .withGrammarLibrary(Path.of(System.getProperty("user.dir") + "/src/test/resources/"))
+                .build();
+        Set<URL> testResources = Set.of(Path.of(System.getProperty("user.dir") + "/src/test/resources/sentences/valid.pdsl").toUri().toURL());
+        List<InputStream> inputStreams = new ArrayList<>(testResources.size());
+        for (URL url : testResources) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            inputStreams.addAll(reader.lines()
+                    .map(line -> new ByteArrayInputStream(line.getBytes()))
+                    .collect(Collectors.toList()));
+        }
+        TestSpecificationFactory testSpecificationFactory = new LineDelimitedTestSpecificationFactory(phraseTransformer);
+        Optional<Collection<TestSpecification>> testSpecification = testSpecificationFactory.getTestSpecifications(testResources);
+        assertThat(testSpecification.isPresent()).isTrue();
+        Collection<TestSpecification> specifications = testSpecification.get();
+        Optional<List<ParseTree>> parseTreeList = phraseTransformer.filterPhrases(inputStreams);
+        assertThat(parseTreeList.isPresent()).isTrue();
+        assertThat(parseTreeList.get().size()).isEqualTo(1);
+        assertThat(parseTreeList.get().get(0).getText()).contains("Hello, world!");
+    }
+
+    @Test
+    public void interpeterBasedPhraseTransformer_canGenerateCodeInSpecifiedParentDirectory() throws IOException {
+
+        Path tmpDir = Files.createTempDirectory(String.format("pdsl_temp_test-%s", UUID.randomUUID()));
+        File tempCodeLocation = new File(tmpDir.toString());
+        tempCodeLocation.mkdirs();
+        assertThat(tempCodeLocation.list().length).isEqualTo(0);
+
+        PolymorphicDslPhraseFilter phraseTransformer = new InterpreterBasedPhraseFilter.Builder(Path.of(System.getProperty("user.dir") + "/src/test/java/com/pdsl/grammars"),
+                "Omega", "com.pdsl.grammars")
+                .withGrammarLexer("AllGrammarsLexer")
+                .withSubgrammar("Beta")
+                .withSubgrammarLibrary(Path.of(System.getProperty("user.dir") + "/src/test/resources/"))
+                .withGrammarLibrary(Path.of(System.getProperty("user.dir") + "/src/test/resources/"))
+                .withCodeGenerationDirectory(tmpDir)
+                .build();
+        TestSpecificationFactory lineDelimitedFactory = new LineDelimitedTestSpecificationFactory(phraseTransformer);
+        Set<URL> testResources = Set.of(getClass().getClassLoader().getResource("sentences/valid.pdsl"));
+        Optional<Collection<TestSpecification>> testSpecification = lineDelimitedFactory.getTestSpecifications(testResources);
+        assertThat(testSpecification.isPresent()).isTrue();
+        List<InputStream> inputStreams = new ArrayList<>(testResources.size());
+        for (URL url : testResources) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream()));
+            inputStreams.addAll(reader.lines()
+                    .map(line -> new ByteArrayInputStream(line.getBytes()))
+                    .collect(Collectors.toList()));
+        }
+        Optional<List<ParseTree>> parseTreeList = phraseTransformer.filterPhrases(inputStreams);
+        assertThat(parseTreeList.isPresent()).isTrue();
+        assertThat(parseTreeList.get().size()).isEqualTo(1);
+        assertThat(parseTreeList.get().get(0).getText()).contains("Hello, world!");
+        assertThat(tempCodeLocation.list().length).isGreaterThan(0);
+    }
+}

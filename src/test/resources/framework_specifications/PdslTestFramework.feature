@@ -72,39 +72,3 @@ Examples:
 | tagged_feature_with_scenario_outline.feature         | 2                    | 2              | 0          |
 | tags.feature                                         | 5                    | 5              | 1          |
 | very_long.feature                                    | 1                    | 5              | 99         |
-
-
-
-#	Scenario: Grammar Verification
-#		A Test Specification Factory will take a provided Test Resource (such as a gherkin file or any other grammar/protocol you give it) and convert it into a test case. Apart from extracting the executable "phrases" from the Test Resource (such as the step body in a gherkin feature file) the Test Specification Factory also determines whether or not the phrases are:
-#		1) Recognizable in the overall grammar
-#		2) Relevant to the subgrammar
-#If a phrase is encountered that the Grammar does not 
-#
-#Scenario: Test Filtering
-#	Either as a byproduct of filtering it is possible for two tests to become duplicated. For instance, suppose you have a grammar that understands the below phrases:
-#"""
-#I know Alpha
-#I know Beta
-#I know Gamma
-#"""
-#
-#Now suppose you have a SUBgrammar that knows the following phrases:
-#"""
-#I know Alpha
-#I know Gamma
-#"""
-#
-#Finally consider that you have the following test input:
-#"""
-#I know Alpha
-#I know Alpha
-#I know Beta
-#I know Beta
-#I know Gamma
-#I know Gamma
-#"""
-#
-#After this input is processed by the Test Specification factory, the phrases will be checked by the
-#
-#

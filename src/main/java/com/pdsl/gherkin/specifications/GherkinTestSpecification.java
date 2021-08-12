@@ -1,11 +1,15 @@
 package com.pdsl.gherkin.specifications;
 
 import com.pdsl.specifications.DefaultTestSpecification;
+import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
-import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.io.ByteArrayOutputStream;
-import java.util.*;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class GherkinTestSpecification implements TestSpecification {
 
@@ -17,9 +21,9 @@ public class GherkinTestSpecification implements TestSpecification {
         this.testSpecification = testSpecification;
     }
 
-    public GherkinTestSpecification(List<GherkinTestSpecification> gherkinTestSpecifications) {
+    public GherkinTestSpecification(List<GherkinTestSpecification> gherkinTestSpecifications, URL originalSourceUrl) {
         this.tags = Set.of();
-        this.testSpecification = new DefaultTestSpecification.Builder("Gherkin test container")
+        this.testSpecification = new DefaultTestSpecification.Builder("Gherkin test container", originalSourceUrl)
                 .withChildTestSpecifications(new ArrayList<>(gherkinTestSpecifications))
                 .build();
     }
@@ -29,7 +33,7 @@ public class GherkinTestSpecification implements TestSpecification {
     }
 
     @Override
-    public Optional<ByteArrayOutputStream> getMetaData() {
+    public Optional<InputStream> getMetaData() {
         return testSpecification.getMetaData();
     }
 
@@ -39,17 +43,17 @@ public class GherkinTestSpecification implements TestSpecification {
     }
 
     @Override
-    public String getId() {
-        return testSpecification.getId();
+    public String getName() {
+        return testSpecification.getName();
     }
 
     @Override
-    public Optional<Iterator<ParseTree>> getPhraseIterator() {
-        return testSpecification.getPhraseIterator();
+    public Optional<List<FilteredPhrase>> getFilteredPhrases() {
+        return testSpecification.getFilteredPhrases();
     }
 
     @Override
-    public Optional<List<ParseTree>> getPhrases() {
-        return testSpecification.getPhrases();
+    public URL getOriginalTestResource() {
+        return testSpecification.getOriginalTestResource();
     }
 }

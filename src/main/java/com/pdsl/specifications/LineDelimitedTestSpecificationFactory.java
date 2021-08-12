@@ -3,7 +3,6 @@ package com.pdsl.specifications;
 import com.google.common.base.Preconditions;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.io.*;
 import java.net.URL;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class LineDelimitedTestSpecificationFactory implements TestSpecificationFactory {
 
-    private PolymorphicDslPhraseFilter phraseFilter;
+    private final PolymorphicDslPhraseFilter phraseFilter;
     private Charset charset = StandardCharsets.UTF_8;
 
     public LineDelimitedTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
@@ -35,9 +34,9 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
                 List<InputStream> lines = bufferedReader.lines()
                         .map(line -> new ByteArrayInputStream(line.getBytes(charset)))
                         .collect(Collectors.toList());
-                Optional<List<ParseTree>> parseTreesOptional = phraseFilter.validateAndFilterPhrases(lines);
+                Optional<List<FilteredPhrase>> parseTreesOptional = phraseFilter.filterPhrases(lines);
                 if (parseTreesOptional.isPresent()) {
-                    testSpecifications.add(new DefaultTestSpecification.Builder(resource.toString())
+                    testSpecifications.add(new DefaultTestSpecification.Builder(resource.toString(), resource)
                             .withPhrases(parseTreesOptional.get())
                             .build()
                     );

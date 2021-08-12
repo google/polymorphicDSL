@@ -2,7 +2,6 @@ package com.pdsl.grammars;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
-import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -14,12 +13,8 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -136,8 +131,8 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
     }
 
     private int countPhrases(TestSpecification testSpecification, int total) {
-        if (testSpecification.getPhrases().isPresent()) {
-            total += testSpecification.getPhrases().get().size();
+        if (testSpecification.getFilteredPhrases().isPresent()) {
+            total += testSpecification.getFilteredPhrases().get().size();
         }
         if (testSpecification.nestedTestSpecifications().isPresent()) {
             for (TestSpecification child : testSpecification.nestedTestSpecifications().get()) {
@@ -160,7 +155,7 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
         if (parserGrammarClass == null) {
             parserSubgrammarClass = parserGrammarClass;
         }
-        phraseFilter = new DefaultPolymorphicDslPhraseFilter(parserGrammarClass, lexerGrammarClass, parserSubgrammarClass, lexerSubgrammarClass);
+        phraseFilter = new DefaultPolymorphicDslPhraseFilter(parserSubgrammarClass, lexerSubgrammarClass);
         Preconditions.checkNotNull(phraseFilter, "The phrase filter was never instantiated!");
         switch (factoryType) {
             case LINE_DELIMITED_TEST_SPECIFICATION_FACTORY:

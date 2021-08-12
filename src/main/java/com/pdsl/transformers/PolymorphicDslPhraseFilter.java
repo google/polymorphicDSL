@@ -1,6 +1,6 @@
 package com.pdsl.transformers;
 
-import org.antlr.v4.runtime.tree.ParseTree;
+import com.pdsl.specifications.FilteredPhrase;
 
 import java.io.InputStream;
 import java.util.List;
@@ -26,17 +26,6 @@ public interface PolymorphicDslPhraseFilter {
      * @param testInput
      * @return
      */
-    Optional<List<ParseTree>> validateAndFilterPhrases(List<InputStream> testInput);
-
-    /**
-     * Converts the input stream into parse trees understandable by an underlying grammar.
-     * <p>
-     * Every provided input stream will map to a parse tree; if the input stream is NOT recognized by the underlying grammar
-     * a runtime exception will be thrown
-     *
-     * @param testInput
-     * @return
-     */
-    List<ParseTree> validatePhrases(List<InputStream> testInput);
+    Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput);
 
 }

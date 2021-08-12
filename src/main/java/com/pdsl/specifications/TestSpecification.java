@@ -1,9 +1,7 @@
 package com.pdsl.specifications;
 
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Iterator;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,7 +23,7 @@ public interface TestSpecification {
      *
      * @return Optional containing an InputStream of shared test information or an empty optional if there is none
      */
-    Optional<ByteArrayOutputStream> getMetaData();
+    Optional<InputStream> getMetaData();
 
     /**
      * Returns a collection of more detailed child TestItems.
@@ -37,15 +35,15 @@ public interface TestSpecification {
     Optional<List<TestSpecification>> nestedTestSpecifications();
 
     /**
-     * Returns a unique identifier associated with this TestItem.
-     * It is up to the implementer to decide if it will be unique or not
+     * Returns an identifier associated with this TestItem.
+     * It is not guaranteed to be unique
      *
-     * @return a (possibly unique) string identifier
+     * @return an arbitrary name for the test specification
      */
-    String getId();
+    String getName();
 
     /**
-     * Returns a list of {@code ParseTree} "phrases" that will trigger code execution when consumed by a
+     * Returns a list of {@code Phrase}s that may contain a parse tree that will trigger code execution when consumed by a
      * {@PolymorphicDslTestExecutor}.
      * <p>
      * If this TestItem has no child test items then this method <i>must</i> return an optional contiaining a list with
@@ -54,8 +52,13 @@ public interface TestSpecification {
      * @return an Optional containing "test phrases" if this TestItem is a leaf node, or possibly an empty optional if
      * not
      */
-    Optional<Iterator<ParseTree>> getPhraseIterator();
+    Optional<List<FilteredPhrase>> getFilteredPhrases();
 
-    Optional<List<ParseTree>> getPhrases();
+    /**
+     * The location from which this test specification was created.
+     *
+     * @return the test resource that this test specification was created from
+     */
+    URL getOriginalTestResource();
 
 }

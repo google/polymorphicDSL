@@ -4,9 +4,9 @@ import java.util.Set;
 
 public interface GherkinTagFilterer {
 
-    public static boolean pickleHasAllTags(Set<String> allTags, Set<String> pickleTags) {
+    static boolean pickleHasAllTags(Set<String> allTags, Set<String> pickleTags) {
         return allTags.containsAll(pickleTags);
     }
 
-    public boolean tagExpressionMatchesPickle(Set<String> pickleTags, String tagExpression);
+    boolean tagExpressionMatchesPickle(Set<String> pickleTags, String tagExpression);
 }

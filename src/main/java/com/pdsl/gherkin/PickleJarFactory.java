@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.gherkin.models.*;
+import com.pdsl.component.models.*;
 import com.pdsl.transformers.PolymorphicDslFileException;
 
 import java.io.ByteArrayOutputStream;
@@ -15,8 +15,8 @@ public class PickleJarFactory {
 
     public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     private final Charset charset;
-    private PdslGherkinRecognizer pdslGherkinRecognizer;
-    private PdslGherkinListener listener;
+    private final PdslGherkinRecognizer pdslGherkinRecognizer;
+    private final PdslGherkinListener listener;
 
     public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset) {
         this.pdslGherkinRecognizer = pdslGherkinRecognizer;

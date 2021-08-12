@@ -13,7 +13,7 @@ import java.util.BitSet;
 
 public class TagExpressionErrorListener implements ANTLRErrorListener {
 
-    private String tagExpression;
+    private final String tagExpression;
     private  static final Logger logger = LoggerFactory.getLogger(TagExpressionErrorListener.class);
     public TagExpressionErrorListener(String tagExpression) {
         this.tagExpression = tagExpression;
