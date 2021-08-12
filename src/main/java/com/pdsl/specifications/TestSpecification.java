@@ -1,6 +1,7 @@
 package com.pdsl.specifications;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,12 +35,12 @@ public interface TestSpecification {
     Optional<List<TestSpecification>> nestedTestSpecifications();
 
     /**
-     * Returns a unique identifier associated with this TestItem.
-     * It is up to the implementer to decide if it will be unique or not
+     * Returns an identifier associated with this TestItem.
+     * It is not guaranteed to be unique
      *
-     * @return a (possibly unique) string identifier
+     * @return an arbitrary name for the test specification
      */
-    String getId();
+    String getName();
 
     /**
      * Returns a list of {@code Phrase}s that may contain a parse tree that will trigger code execution when consumed by a
@@ -52,5 +53,12 @@ public interface TestSpecification {
      * not
      */
     Optional<List<FilteredPhrase>> getFilteredPhrases();
+
+    /**
+     * The location from which this test specification was created.
+     *
+     * @return the test resource that this test specification was created from
+     */
+    URL getOriginalTestResource();
 
 }

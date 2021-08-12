@@ -7,6 +7,7 @@ import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
+import com.pdsl.reports.TestResult;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -300,9 +301,9 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedPassingTests(TestExecutorMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
         assertThat(results.isPresent()).isTrue();
-        for (DefaultTestResult metadata : results.get().getTestMetadata()) {
+        for (TestResult metadata : results.get().getTestResults()) {
             if (metadata.getFailingPhrase().isPresent()) {
-                logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestSuiteId(), metadata.getFailureReason().orElseThrow());
+                logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestCaseTitle(), metadata.getFailureReason().orElseThrow());
             }
         }
         assertThat(results.get().passingTestTotal()).isEqualTo(Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText())));

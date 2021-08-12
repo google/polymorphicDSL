@@ -5,7 +5,6 @@ import com.pdsl.grammars.PdslFrameworkSpecificationImpl;
 import com.pdsl.grammars.PdslTestResourceLexer;
 import com.pdsl.grammars.PdslTestResourceParser;
 import com.pdsl.reports.MetadataTestRunResults;
-import com.pdsl.reports.TestRunResults;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.junit.Test;
@@ -35,6 +34,6 @@ public class DefaultPolymorphicDslPhraseFilterTest {
         MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(dslFiles, new PdslFrameworkSpecificationImpl(), "Component");
         assertThat(results.failingTestTotal()).isEqualTo(0);
         assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
-        assertThat(results.passingTestTotal()).isEqualTo(results.getTestMetadata().size());
+        assertThat(results.passingTestTotal()).isEqualTo(results.getTestResults().size());
     }
 }

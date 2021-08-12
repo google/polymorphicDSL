@@ -107,8 +107,8 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
 
     @Override
     public void enterTestSpecificationHasAnId(PdslFrameworkSpecificationParser.TestSpecificationHasAnIdContext ctx) {
-        assertThat(testSpecification.getId()).isNotNull();
-        assertThat(testSpecification.getId()).isNotEmpty();
+        assertThat(testSpecification.getName()).isNotNull();
+        assertThat(testSpecification.getName()).isNotEmpty();
     }
 
     @Override

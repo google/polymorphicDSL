@@ -1,8 +1,6 @@
 package com.pdsl.testcases;
 
-import com.pdsl.specifications.DefaultPhrase;
 import com.pdsl.specifications.FilteredPhrase;
-import com.pdsl.specifications.Phrase;
 import com.pdsl.specifications.TestSpecification;
 
 import java.util.ArrayList;
@@ -20,7 +18,7 @@ public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory 
         Collection<TestCase> testCases = new ArrayList<>(testCaseSpecifications.size());
         for (TestSpecification testCaseSpecification : testCaseSpecifications) {
             List<TestCase> result = new ArrayList<>(1);
-            result.add(new DefaultPdslTestCase(testCaseSpecification.getId(), List.of(new TestBodyFragment(
+            result.add(new DefaultPdslTestCase(testCaseSpecification.getName(), List.of(new TestBodyFragment(
                     recursivelyWalkSpecification(testCaseSpecification, new ArrayList<>())))));
             testCases.addAll(result);
         }

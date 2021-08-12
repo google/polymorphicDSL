@@ -21,9 +21,9 @@ import java.util.*;
 public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslTestExecutor.class);
-    private ParseTreeWalker walker = new ParseTreeWalker();
-    private Optional<MultiOutputStream> outputStreams = Optional.of(new MultiOutputStream(new PdslThreadSafeOutputStream()));
-    private Charset charset = Charset.defaultCharset();
+    private final ParseTreeWalker walker = new ParseTreeWalker();
+    private final Optional<MultiOutputStream> outputStreams = Optional.of(new MultiOutputStream(new PdslThreadSafeOutputStream()));
+    private final Charset charset = Charset.defaultCharset();
 
     @Override
     public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
@@ -42,7 +42,6 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
         Set<List<String>> previouslyExecutedTests = new HashSet<>();
         for (TestCase testCase : testCases) {
-            int totalPassingPhrases = 0;
             Phrase activePhrase = null;
             Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
             int phraseIndex = 0;
@@ -63,13 +62,17 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                         notifyStreams((activePhrase.getParseTree().getText() + "\n").getBytes(charset));
                         walker.walk(phraseRegistry, activePhrase.getParseTree());
                         phraseIndex++;
-                        totalPassingPhrases++;
                     }
                     results.addTestResult(DefaultTestResult.passingTest(testCase));
                 }
                 continue;
             } catch (Throwable e) {
-                results.addTestResult(DefaultTestResult.failedTest(testCase,activePhrase, e, phraseIndex));
+                int phrasesSkippedDueToFailure = 0;
+                while (testBody.hasNext()) {
+                    testBody.next();
+                    phrasesSkippedDueToFailure++;
+                }
+                results.addTestResult(DefaultTestResult.failedTest(testCase,activePhrase, e, phraseIndex, phrasesSkippedDueToFailure));
 								logger.error("Phrase failure", e);
                 continue;
             }
@@ -100,6 +103,6 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
 
     @Override
     public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeListener subgrammarListener, String context) {
-        return (MetadataTestRunResults)runTests(testCases, subgrammarListener);
+        return runTests(testCases, subgrammarListener);
     }
 }

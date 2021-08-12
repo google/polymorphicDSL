@@ -4,6 +4,7 @@ import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
+import com.pdsl.reports.TestResult;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -30,7 +31,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResultsMetaParserListener {
 
     private Optional<MetadataTestRunResults> testRunResults = Optional.empty();
-    private Optional<DefaultTestResult> testMetadata = Optional.empty();
+    private Optional<TestResult> testMetadata = Optional.empty();
     private Optional<Collection<TestCase>> testCaseCollection = Optional.empty();
     private ParseTreeListener grammarListener = PdslHelper.ListenerType.ARITHMETIC.getListener();
     private Set<URL> urlSet = new HashSet<>();
@@ -313,8 +314,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterWhenTheTestMetadataIsRetrievedFromTheTestRunResult(PdslTestRunResultsMetaParser.WhenTheTestMetadataIsRetrievedFromTheTestRunResultContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        assertThat(testRunResults.get().getTestMetadata().size()).isGreaterThan(0);
-        testMetadata = Optional.of(testRunResults.get().getTestMetadata().stream().findFirst().orElseThrow());
+        assertThat(testRunResults.get().getTestResults().size()).isGreaterThan(0);
+        testMetadata = Optional.of(testRunResults.get().getTestResults().stream().findFirst().orElseThrow());
     }
 
     @Override
@@ -324,8 +325,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterWhenTheOnlyTestMetadataItemIsExamined(PdslTestRunResultsMetaParser.WhenTheOnlyTestMetadataItemIsExaminedContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        assertThat(testRunResults.get().getTestMetadata().size()).isGreaterThan(0);
-        testMetadata = Optional.of(testRunResults.get().getTestMetadata().stream().findFirst().orElseThrow());
+        assertThat(testRunResults.get().getTestResults().size()).isGreaterThan(0);
+        testMetadata = Optional.of(testRunResults.get().getTestResults().stream().findFirst().orElseThrow());
     }
 
     @Override
@@ -369,7 +370,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTheTestMetadataHasOneItemInIt(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasOneItemInItContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        assertThat(testRunResults.get().getTestMetadata().size()).isEqualTo(1);
+        assertThat(testRunResults.get().getTestResults().size()).isEqualTo(1);
     }
 
     @Override

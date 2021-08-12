@@ -1,6 +1,5 @@
 package com.pdsl.testcases;
 
-import com.google.auto.value.AutoValue;
 import com.pdsl.specifications.FilteredPhrase;
 
 import java.io.InputStream;

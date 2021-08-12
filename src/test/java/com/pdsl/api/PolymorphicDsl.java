@@ -137,13 +137,18 @@ public class PolymorphicDsl {
         }
 
         @Override
-        public String getId() {
+        public String getName() {
             return null;
         }
 
         @Override
         public Optional<List<FilteredPhrase>> getFilteredPhrases() {
             return Optional.empty();
+        }
+
+        @Override
+        public URL getOriginalTestResource() {
+            return null;
         }
 
 

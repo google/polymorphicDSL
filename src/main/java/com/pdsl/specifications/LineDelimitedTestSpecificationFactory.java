@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class LineDelimitedTestSpecificationFactory implements TestSpecificationFactory {
 
-    private PolymorphicDslPhraseFilter phraseFilter;
+    private final PolymorphicDslPhraseFilter phraseFilter;
     private Charset charset = StandardCharsets.UTF_8;
 
     public LineDelimitedTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
@@ -36,7 +36,7 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
                         .collect(Collectors.toList());
                 Optional<List<FilteredPhrase>> parseTreesOptional = phraseFilter.filterPhrases(lines);
                 if (parseTreesOptional.isPresent()) {
-                    testSpecifications.add(new DefaultTestSpecification.Builder(resource.toString())
+                    testSpecifications.add(new DefaultTestSpecification.Builder(resource.toString(), resource)
                             .withPhrases(parseTreesOptional.get())
                             .build()
                     );

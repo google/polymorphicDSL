@@ -4,7 +4,10 @@ import com.google.common.base.Preconditions;
 import com.pdsl.specifications.FilteredPhrase;
 import org.antlr.v4.runtime.tree.ParseTree;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DefaultPdslTestCase implements TestCase {

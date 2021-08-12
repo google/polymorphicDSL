@@ -1,8 +1,9 @@
 package com.pdsl.reports;
 
+import com.pdsl.reports.proto.TechnicalReportData;
 import com.pdsl.specifications.Phrase;
+import com.pdsl.testcases.TestCase;
 
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -11,18 +12,12 @@ import java.util.Optional;
  */
 public interface TestResult {
 
-    enum Status {
-        PASSED,
-        FAILED,
-        DUPLICATE;
-    }
-
-    DefaultTestResult.Status getStatus();
-    String getTestSuiteId();
+    TechnicalReportData.Status getStatus();
+    String getTestCaseTitle();
     int getPhrasesSkippedDueToFailure();
     int getPassingPhraseTotal();
     Optional<Phrase> getFailingPhrase();
     int getTotalPhrases();
     Optional<Throwable> getFailureReason();
-    List<String> getPhraseBody();
+    TestCase getTestCase();
 }

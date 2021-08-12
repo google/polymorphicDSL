@@ -1,6 +1,5 @@
 package com.pdsl.executors;
 
-import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.testcases.TestCase;
 import org.antlr.v4.runtime.tree.ParseTreeListener;

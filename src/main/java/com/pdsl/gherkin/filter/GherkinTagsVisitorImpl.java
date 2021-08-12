@@ -17,11 +17,11 @@ import java.util.Set;
 
 public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, GherkinTagFilterer {
 
-    private ThreadLocal<Set<String>> tags = new ThreadLocal<>();
+    private final ThreadLocal<Set<String>> tags = new ThreadLocal<>();
     private final Logger logger = LoggerFactory.getLogger(GherkinTagsVisitorImpl.class);
     @Override
     public Boolean visitNot(GherkinTagsParser.NotContext ctx) {
-        return ctx.NOT() != null ? !visitExpr(ctx.expr()) : visitExpr(ctx.expr());
+        return (ctx.NOT() != null) != visitExpr(ctx.expr());
     }
 
     @Override

@@ -11,6 +11,7 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -23,7 +24,7 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
 
     @Override
     public void enterGivenAnArbitraryTestSpecification(TestCaseFactoryParser.GivenAnArbitraryTestSpecificationContext ctx) {
-        builder = new DefaultTestSpecification.Builder("stub test specification");
+        builder = new DefaultTestSpecification.Builder("stub test specification", null);
     }
 
     @Override
@@ -74,13 +75,18 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
                 }
 
                 @Override
-                public String getId() {
+                public String getName() {
                     return null;
                 }
 
                 @Override
                 public Optional<List<FilteredPhrase>> getFilteredPhrases() {
                     return Optional.empty();
+                }
+
+                @Override
+                public URL getOriginalTestResource() {
+                    return null;
                 }
             });
         }

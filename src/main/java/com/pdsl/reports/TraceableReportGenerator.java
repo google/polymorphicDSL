@@ -5,18 +5,18 @@ import java.net.URL;
 import java.util.*;
 
 public interface TraceableReportGenerator {
-    URL generateReport(Collection<MetadataTestRunResults> testRunResults) throws IOException;
+    URL generateReport(Map<String, Map<String, Collection<MetadataTestRunResults>>> testRunResults) throws IOException;
 
-    static Map<String, Map<String, List<DefaultTestResult>>> testResourceToContextHelper(
+    static Map<String, Map<String, List<TestResult>>> testResourceToContextHelper(
             Collection<MetadataTestRunResults> testRunResults) {
-        Map<String, Map<String, List<DefaultTestResult>>> resourceToRuns = new HashMap<>();
+        Map<String, Map<String, List<TestResult>>> resourceToRuns = new HashMap<>();
         for (MetadataTestRunResults metadataTestRunResults : testRunResults) {
-            for (DefaultTestResult metadata : metadataTestRunResults.getTestMetadata()) {
-                Map<String, List<DefaultTestResult>> contextToMetadata =
-                        resourceToRuns.computeIfAbsent(metadata.getTestSuiteId(),
-                                (k) -> new HashMap<String, List<DefaultTestResult>>());
-                List<DefaultTestResult> metadataList = contextToMetadata.computeIfAbsent(metadataTestRunResults.getContext(),
-                        (k) -> new ArrayList<DefaultTestResult>());
+            for (TestResult metadata : metadataTestRunResults.getTestResults()) {
+                Map<String, List<TestResult>> contextToMetadata =
+                        resourceToRuns.computeIfAbsent(metadata.getTestCaseTitle(),
+                                k -> new HashMap<String, List<TestResult>>());
+                List<TestResult> metadataList = contextToMetadata.computeIfAbsent(metadataTestRunResults.getContext(),
+                        k -> new ArrayList<TestResult>());
                 metadataList.add(metadata);
             }
         }

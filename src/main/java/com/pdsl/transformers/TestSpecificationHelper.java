@@ -55,19 +55,19 @@ public interface TestSpecificationHelper {
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
             if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.isEmpty() || errorListener.isErrorFound())) {
-                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:%n<START>%s<END>%n%nCommon errors include:%n\tNot having this sentence in the lexer%n\tForgetting to create a parser rule for this sentence%n\tLeading and trailing whitespace or newlines%n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens%n%nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", new String(baos.toByteArray())));
+                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:%n<START>%s<END>%n%nCommon errors include:%n\tNot having this sentence in the lexer%n\tForgetting to create a parser rule for this sentence%n\tLeading and trailing whitespace or newlines%n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens%n%nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", baos.toString()));
             } else {
                 if (allTokens.isEmpty()) {
                     if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
                         if (logger.isWarnEnabled()) {
-                            logger.warn("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, new String(baos.toByteArray()), AnsiTerminalColorHelper.RESET);
+                            logger.warn("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, baos.toString(), AnsiTerminalColorHelper.RESET);
                         }
                         return Optional.empty();
                     }
                 } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                     if (logger.isWarnEnabled()) {
                         logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
-                        logger.warn("%sFiltering out phrase:%n\t%s%s",AnsiTerminalColorHelper.BRIGHT_RED, new String((baos.toByteArray())), AnsiTerminalColorHelper.RESET);
+                        logger.warn("%sFiltering out phrase:%n\t%s%s",AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), AnsiTerminalColorHelper.RESET);
                     }
                     return Optional.empty();
                 } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file
@@ -82,8 +82,8 @@ public interface TestSpecificationHelper {
         }
     }
 
-    public enum ErrorListenerStrategy {
+    enum ErrorListenerStrategy {
         GRAMMAR,
-        SUBGRAMMAR;
+        SUBGRAMMAR
     }
 }

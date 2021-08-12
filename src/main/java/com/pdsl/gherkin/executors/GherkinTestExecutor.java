@@ -26,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 

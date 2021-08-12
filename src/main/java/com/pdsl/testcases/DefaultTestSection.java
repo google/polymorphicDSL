@@ -7,8 +7,8 @@ import java.util.Optional;
 
 public class DefaultTestSection implements TestSection {
 
-    private Optional<InputStream> metaData;
-    private Phrase phrase;
+    private final Optional<InputStream> metaData;
+    private final Phrase phrase;
 
     public DefaultTestSection(InputStream metaData, Phrase phrase) {
         this.metaData = Optional.ofNullable(metaData);

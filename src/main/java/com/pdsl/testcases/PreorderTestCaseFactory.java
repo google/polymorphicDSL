@@ -1,13 +1,12 @@
 package com.pdsl.testcases;
 
-import com.pdsl.specifications.*;
+import com.pdsl.specifications.PolymorphicDslTransformationException;
+import com.pdsl.specifications.TestSpecification;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A factory that processes Test Specifications doing a Preorder traversal
@@ -19,7 +18,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         Collection<TestCase> testCases = new ArrayList<>(testSpecifications.size()); // Will likely need to be resized regardless
         for (TestSpecification testSpecification : testSpecifications) {
             testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, new ArrayList<>(), Optional.empty(),
-                    testSpecification.getId(), new Accumulator()));
+                    testSpecification.getName(), new Accumulator()));
         }
         return testCases;
     }

@@ -1,12 +1,12 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.component.models.GherkinBackground;
 import com.pdsl.component.models.GherkinStep;
-import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
+import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
@@ -27,8 +27,8 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
     private final int DESCRIPTION_MAX_LENGTH;
     private final PolymorphicDslPhraseFilter phraseFilter;
-    private PickleJarFactory pickleJarFactory;
-    private Charset charset = Charset.defaultCharset();
+    private final PickleJarFactory pickleJarFactory;
+    private final Charset charset = Charset.defaultCharset();
 
     public DefaultGherkinTestSpecificationFactory(PickleJarFactory pickleJarFactory,
                                                   PolymorphicDslPhraseFilter phraseFilter) {
@@ -50,7 +50,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         List<PickleJar> pickleJars = pickleJarFactory.getPickleJars(testContent);
         for (PickleJar pickleJar : pickleJars) {
             Set<String> allTagsForTestCase = new HashSet<>();
-            DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation().toString());
+            DefaultTestSpecification.Builder featureBuilder = new DefaultTestSpecification.Builder(pickleJar.getLocation().toString(), pickleJar.getLocation());
             // Create feature metadata
             ByteArrayOutputStream featureMetaData = new ByteArrayOutputStream();
             addBytesWithCorrectEncoding(featureMetaData, String.format("#language:%s%n", pickleJar.getLanguageCode()));
@@ -76,11 +76,11 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             }
             featureBuilder.withMetaData(new ByteArrayInputStream(featureMetaData.toByteArray()));
             List<TestSpecification> pickles = getGherkinStepSpecificationScenarios(pickleJar.getScenarios(),
-                    allTagsForTestCase);
+                    allTagsForTestCase, pickleJar.getLocation());
 
             // Process all rules
             if (!pickleJar.getRules().isEmpty()) {
-                pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules()));
+                pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules(), pickleJar.getLocation()));
             }
             featureBuilder.withChildTestSpecifications(pickles);
             featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
@@ -88,15 +88,15 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return Optional.of(featureTestSpecifications);
     }
 
-    private List<GherkinTestSpecification> transformScenariosToTestSpecifications(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags) {
+    private List<GherkinTestSpecification> transformScenariosToTestSpecifications(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags, URL originalSourceLocation) {
         List<GherkinTestSpecification> gherkinTestSpecifications = new LinkedList<>();
         for (PickleJar.PickleJarScenario pickleJarScenario : scenarios) {
-            DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(pickleJarScenario.getTitleWithSubstitutions());
+            DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(pickleJarScenario.getTitleWithSubstitutions(), originalSourceLocation);
             // Provide metadata
             topLevelScenario.withMetaData(new ByteArrayInputStream(extractMetaData(pickleJarScenario).toByteArray()));
             // Process step body
             // transform step body into list of InputStreams
-            Optional<TestSpecification> stepBodyAsTestSpecification = processStepBody(pickleJarScenario.getTitleWithSubstitutions(), pickleJarScenario.getStepsWithSubstitutions());
+            Optional<TestSpecification> stepBodyAsTestSpecification = processStepBody(pickleJarScenario.getTitleWithSubstitutions(), pickleJarScenario.getStepsWithSubstitutions(), originalSourceLocation);
             if (stepBodyAsTestSpecification.isPresent()) {
                 topLevelScenario.withTestPhrases(stepBodyAsTestSpecification.get().getFilteredPhrases().get());
             } else { // Failure to parse step body
@@ -122,22 +122,22 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return phraseFilter.filterPhrases(stepBodyAsStrings);
     }
 
-    private Optional<TestSpecification> processStepBody(String title, List<String> stepBody) {
+    private Optional<TestSpecification> processStepBody(String title, List<String> stepBody, URL originalResourceLocation) {
         List<InputStream> stepBodyAsInputStream = stepBody.stream()
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
         Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream);
         if (phrases.isPresent()) {
-            return Optional.of(new DefaultTestSpecification.Builder(title).withPhrases(phrases.get()).build());
+            return Optional.of(new DefaultTestSpecification.Builder(title, originalResourceLocation).withPhrases(phrases.get()).build());
         } else {
             return Optional.empty();
         }
     }
 
-    private List<TestSpecification> transformRulesToTestSpecifications(List<PickleJar.PickleJarRule> rules) {
+    private List<TestSpecification> transformRulesToTestSpecifications(List<PickleJar.PickleJarRule> rules, URL originalSourceLocation) {
         List<TestSpecification> testSpecifications = new LinkedList<>();
         for (PickleJar.PickleJarRule rule : rules) {
-            DefaultTestSpecification.Builder ruleBuilder = new DefaultTestSpecification.Builder(rule.getTitle());
+            DefaultTestSpecification.Builder ruleBuilder = new DefaultTestSpecification.Builder(rule.getTitle(),originalSourceLocation);
             ByteArrayOutputStream ruleMetaData = new ByteArrayOutputStream();
             if (rule.getLongDescription().isPresent()) {
                 addBytesWithCorrectEncoding(ruleMetaData, rule.getLongDescription().get());
@@ -153,7 +153,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                     ruleBuilder.withTestPhrases(filteredBackgroundStepBody.get());
                 }
             }
-            List<TestSpecification> filteredScenarios = getGherkinStepSpecificationScenarios(rule.getScenarios(), new HashSet<>());
+            List<TestSpecification> filteredScenarios = getGherkinStepSpecificationScenarios(rule.getScenarios(), new HashSet<>(), originalSourceLocation);
             if (!filteredScenarios.isEmpty()) {
                 ruleBuilder.withMetaData(new ByteArrayInputStream(ruleMetaData.toByteArray()));
                 ruleBuilder.withChildTestSpecifications(filteredScenarios);
@@ -163,9 +163,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return testSpecifications;
     }
 
-    private List<TestSpecification> getGherkinStepSpecificationScenarios(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags) {
+    private List<TestSpecification> getGherkinStepSpecificationScenarios(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags, URL originalSourceLocation) {
         List<GherkinTestSpecification> gherkinTestSpecifications = new LinkedList<>();
-        gherkinTestSpecifications.addAll(transformScenariosToTestSpecifications(scenarios, parentTags));
+        gherkinTestSpecifications.addAll(transformScenariosToTestSpecifications(scenarios, parentTags, originalSourceLocation));
         // Generics are not covarient. Cast to TestSpecification
         return gherkinTestSpecifications.stream()
                 .map(TestSpecification.class::cast)
@@ -221,7 +221,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         Set<String> allPickleTags = new HashSet<>();
         List<TestSpecification> filteredSpecifications = new ArrayList<>(testSpecification.size());
         for (TestSpecification specification : testSpecification) {
-            Optional<TestSpecification> filteredValue = recursivelyGetTagsAndFilterPickles(specification, allPickleTags, tagExpression);
+            Optional<TestSpecification> filteredValue = recursivelyGetTagsAndFilterPickles(specification, allPickleTags, tagExpression, specification.getOriginalTestResource());
             if (filteredValue.isPresent()) {
                 filteredSpecifications.add(filteredValue.get());
             }
@@ -229,9 +229,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return !filteredSpecifications.isEmpty() ? Optional.of(filteredSpecifications) : Optional.empty();
     }
 
-    private Optional<TestSpecification> recursivelyGetTagsAndFilterPickles(TestSpecification testSpecification, Set<String> allParentTags, String tagExpression) {
+    private Optional<TestSpecification> recursivelyGetTagsAndFilterPickles(TestSpecification testSpecification, Set<String> allParentTags, String tagExpression, URL originalSourceLocation) {
         Set<String> allGherkinItemTags = new HashSet<>(allParentTags);
-        DefaultTestSpecification.Builder builder = new DefaultTestSpecification.Builder(testSpecification.getId());
+        DefaultTestSpecification.Builder builder = new DefaultTestSpecification.Builder(testSpecification.getName(), originalSourceLocation);
         // See if this is a gherkin test specification we can get tags from
         if (testSpecification instanceof GherkinTestSpecification) {
             allGherkinItemTags.addAll(((GherkinTestSpecification) testSpecification).getTags());
@@ -242,7 +242,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             for (TestSpecification childTestSpecification : testSpecification.nestedTestSpecifications().get()) {
                 Optional<TestSpecification> filteredChildTestOptional =
                         recursivelyGetTagsAndFilterPickles(childTestSpecification,
-                                allGherkinItemTags, tagExpression);
+                                allGherkinItemTags, tagExpression, originalSourceLocation);
                 if (filteredChildTestOptional.isPresent()) {
                     filteredChildren.add(filteredChildTestOptional.get());
                 }
