@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.component.models.GherkinFeature;
+import com.pdsl.gherkin.models.GherkinFeature;
 import com.pdsl.gherkin.parser.GherkinLexer;
 import com.pdsl.gherkin.parser.GherkinParser;
 import org.antlr.v4.runtime.CharStreams;
@@ -17,7 +17,7 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
 
     private PdslGherkinListener listener;
 
-    public Optional<com.pdsl.component.models.GherkinFeature> interpretGherkinFile(URL testResource, PdslGherkinListener listener) throws IOException {
+    public Optional<GherkinFeature> interpretGherkinFile(URL testResource, PdslGherkinListener listener) throws IOException {
         GherkinLexer lexer = new GherkinLexer(CharStreams.fromStream(testResource.openStream()));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GherkinParser parser = new GherkinParser(tokens);

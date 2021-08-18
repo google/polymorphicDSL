@@ -2,7 +2,6 @@ package com.pdsl;
 
 import com.pdsl.api.*;
 import com.pdsl.component.ComponentSuiteTest;
-import com.pdsl.component.models.GherkinModelSuite;
 import com.pdsl.unit.GherkinTagFiltererTest;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

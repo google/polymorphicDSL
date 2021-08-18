@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.component.models.*;
+import com.pdsl.gherkin.models.*;
 import com.pdsl.transformers.PolymorphicDslFileException;
 
 import java.io.ByteArrayOutputStream;

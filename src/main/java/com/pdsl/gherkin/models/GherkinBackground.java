@@ -1,4 +1,4 @@
-package com.pdsl.component.models;
+package com.pdsl.gherkin.models;
 
 import java.util.ArrayList;
 import java.util.List;
