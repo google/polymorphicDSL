@@ -1,3 +1,8 @@
+:toc: left
+:icons: font
+:source-highlighter: prettify
+:project_id: PDSL Pattern
+
 = Powerful Testing: The Polymorphic DSL Pattern
 
 == Modern "unsolved" problems:
@@ -26,7 +31,7 @@ much larger Development team.
 The culture of the company is such that the developers arrogantly refuse to even write unit
 tests, participate in the QA process and occasionally express contempt towards the testers.
 
-The QA team needs to decides they can't cover the full testing pyramid and compromise by focusing exclusively on end-to-end testing.
+The QA team decides they can't cover the full testing pyramid and compromise by focusing exclusively on end-to-end testing.
 They remain painfully aware that tests are badly needed on lower tiers of the application.
 
 === I didn't even know it did that!
@@ -43,7 +48,10 @@ source code of that service, so the team accepts that deploys must be done throu
 === Where could I even find somebody?
 
 A manager sighs after the top candidate rejects a job offer. Months have been spent trying to fill the position.
-The last hire quit in less than a year. The technical skill set is scarce and the barrier to entry is just too high.
+The last hire quit in less than a year. The technical skill set is scarce and the barrier to entry is just too high. 
+
+Even if the candidate _had_ accepted the job offer the ramp up time would be 3-6 months before they could truly start making an impact and would take 1-2 years before they understood the ecosystem. There would be a reasonable chance that the candidate would quit for a better job just as they began to understand how the business logic works.
+
 
 === I can only do one thing at a time!
 
