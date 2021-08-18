@@ -1,4 +1,4 @@
-package com.pdsl.component.models;
+package com.pdsl.gherkin.models;
 
 import com.google.common.base.Preconditions;
 

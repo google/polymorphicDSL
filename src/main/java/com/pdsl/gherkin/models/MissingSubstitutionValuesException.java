@@ -1,4 +1,4 @@
-package com.pdsl.component.models;
+package com.pdsl.gherkin.models;
 
 public class MissingSubstitutionValuesException extends RuntimeException {
     public MissingSubstitutionValuesException(String message) {

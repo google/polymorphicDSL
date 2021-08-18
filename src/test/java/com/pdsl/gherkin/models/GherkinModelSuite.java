@@ -1,4 +1,4 @@
-package com.pdsl.component.models;
+package com.pdsl.gherkin.models;
 
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;

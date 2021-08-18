@@ -9,10 +9,8 @@ import java.util.logging.SimpleFormatter;
 /**
  * A default, Thread-Safe OutputStream used for TestExecutors to write output to.
  *
- * Using System.out directly is a security vulnerability that has lead to several exploits in Java
- * This class is backed by a logger to avoid the security issue
- *
- * Due to the class being thread safe it is not particularly efficient
+ * <p>Using System.out directly is a security vulnerability that has lead to several exploits in Java.
+ * This class is backed by a logger to avoid the security issue.
  */
 public final class PdslThreadSafeOutputStream extends OutputStream {
 
@@ -47,7 +45,7 @@ public final class PdslThreadSafeOutputStream extends OutputStream {
     public void write(byte[] bytes, int start, int stop) {
         String message = new String(bytes);
         // Multibyte characters may require us to have an earlier stop point
-        //TODO: This is not a bug. Find a way to handle character encoding instead of assuming
+        //TODO: This is a bug. Find a way to handle character encoding instead of assuming
         // the caller wants to write the full array logged
         message = new String(bytes).substring(start, stop <= message.length() ? stop : message.length());
         logger.info(message);

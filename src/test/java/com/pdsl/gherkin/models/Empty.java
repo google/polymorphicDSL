@@ -1,4 +1,4 @@
-package com.pdsl.component.models;
+package com.pdsl.gherkin.models;
 
 import com.pdsl.gherkin.PdslGherkinInterpreterImpl;
 import com.pdsl.gherkin.PdslGherkinListenerImpl;
