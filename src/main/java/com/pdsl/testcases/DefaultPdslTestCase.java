@@ -22,7 +22,7 @@ public class DefaultPdslTestCase implements TestCase {
         Preconditions.checkNotNull(testCaseTitle, errMessage);
         Preconditions.checkArgument(!testCaseTitle.isEmpty(), errMessage);
         Preconditions.checkNotNull(testBodyFragments, errMessage);
-        Preconditions.checkNotNull(!testBodyFragments.isEmpty(), errMessage);
+        Preconditions.checkArgument(!testBodyFragments.isEmpty(), errMessage);
         this.testBodyFragments = testBodyFragments;
         this.testCaseTitle = testCaseTitle;
         List<FilteredPhrase> filteredPhrases = testBodyFragments.stream()
