@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.gherkin.models.*;
+import com.pdsl.component.gherkin.models.*;
 import com.pdsl.gherkin.parser.GherkinParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 

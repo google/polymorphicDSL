@@ -6,6 +6,8 @@ import com.pdsl.reports.PdslReportData;
 import com.pdsl.reports.TestResult;
 import com.pdsl.reports.TraceableReportGenerator;
 import org.asciidoctor.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,7 +24,7 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
     private final Charset charset;
     private final AsciidoctorStrategicReportGenerator asciidoctorStrategicReportGenerator;
     private final Options options;
-
+    private final Logger logger = LoggerFactory.getLogger(AsciidoctorReportGenerator.class);
     public AsciidoctorReportGenerator(Path fileLocation, String reportTitle) {
         Preconditions.checkNotNull(fileLocation);
         Preconditions.checkArgument(!Files.isDirectory(fileLocation));
@@ -68,7 +70,7 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
         }
         String processedPath = options.map().get("destination_dir") != null ? (String)options.map().get("destination_dir")
                 : adocURL.toString().replace(".adoc", ".html").replaceFirst("file:", "");
-
+        logger.info(String.format("Wrote report to %s",processedPath));
         return Paths.get(processedPath).toUri().toURL();
     }
 }

@@ -1,7 +1,7 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.gherkin.models.GherkinBackground;
+import com.pdsl.component.gherkin.models.GherkinBackground;
 
 import java.net.URL;
 import java.util.*;

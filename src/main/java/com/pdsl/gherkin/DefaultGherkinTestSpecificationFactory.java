@@ -1,8 +1,8 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.gherkin.models.GherkinBackground;
-import com.pdsl.gherkin.models.GherkinStep;
+import com.pdsl.component.gherkin.models.GherkinBackground;
+import com.pdsl.component.gherkin.models.GherkinStep;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
