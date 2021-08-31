@@ -1,4 +1,4 @@
-package com.pdsl.gherkin.models;
+package com.pdsl.component.gherkin.models;
 
 import java.util.LinkedList;
 import java.util.List;

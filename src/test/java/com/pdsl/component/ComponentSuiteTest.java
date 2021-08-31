@@ -1,6 +1,6 @@
 package com.pdsl.component;
 
-import com.pdsl.gherkin.models.GherkinModelSuite;
+import com.pdsl.component.gherkin.models.GherkinModelSuite;
 import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 
