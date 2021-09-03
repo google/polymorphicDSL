@@ -6,6 +6,7 @@ import com.pdsl.grammars.PdslFrameworkSpecificationParser;
 import com.pdsl.junit.PdslGherkinApplication;
 import com.pdsl.junit.PdslGherkinJUnit4Runner;
 import com.pdsl.junit.PdslTest;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 @RunWith(PdslGherkinJUnit4Runner.class)
@@ -22,4 +23,11 @@ public class GherkinJUnit4Test {
             listener = PdslFrameworkSpecificationImpl.class
     )
     public void frameworkSpecifications(){}
+
+    @Test
+    public void someTest() {}
+
+    @Test
+    @Ignore
+    public void ignoreThis(){}
 }

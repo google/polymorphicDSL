@@ -30,5 +30,8 @@ class PdslStatement extends Statement {
     @Override
     public void evaluate() throws Throwable {
         results = executor.runTestsWithMetadata(testCases, parseTreeListener, context);
+        if (results.failingTestTotal() > 0) {
+            throw results.getTestResults().stream().findFirst().get().getFailureReason().orElseThrow();
+        }
     }
 }
