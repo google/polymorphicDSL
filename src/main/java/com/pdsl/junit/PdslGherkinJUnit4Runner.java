@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
-    private final Map<String, Collection<MetadataTestRunResults>> metaDataTestRunResults = new HashMap<>();
+
     private final String context;
     private final String applicationName;
     private final String resourceRoot;

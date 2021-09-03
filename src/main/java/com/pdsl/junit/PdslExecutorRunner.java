@@ -36,8 +36,6 @@ public class PdslExecutorRunner extends ParentRunner<TestCase> {
     private final ParseTreeListener parseTreeListener;
     private final List<TestCase> testCases;
     private final String context;
-    private final String applicationName;
-    private final String resourceRoot;
     private final List<MetadataTestRunResults> metadataTestRunResults;
 
     private int accumulator = 1;
@@ -52,8 +50,6 @@ public class PdslExecutorRunner extends ParentRunner<TestCase> {
         Preconditions.checkArgument(!annotation.context().isBlank(), "Context cannot be blank!");
         Preconditions.checkArgument(!annotation.applicationName().isBlank());
         context = annotation.context();
-        applicationName = annotation.applicationName();
-        this.resourceRoot = annotation.resourceRoot();
         this.executor = executor;
         this.parseTreeListener = parseTreeListener;
         this.testCases = new ArrayList<>(testCases);
