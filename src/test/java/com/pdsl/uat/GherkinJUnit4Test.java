@@ -25,9 +25,9 @@ public class GherkinJUnit4Test {
     public void frameworkSpecifications(){}
 
     @Test
-    public void someTest() {}
+    public void normalJUnitTests_stillRunWithPdslRunner() {}
 
     @Test
-    @Ignore
+    @Ignore("Make sure ignore tests render correctly by runner")
     public void ignoreThis(){}
 }
