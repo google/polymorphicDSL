@@ -269,7 +269,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             return Optional.empty();
         }
         try {
-            return Optional.of(builder.build());
+            return Optional.of(new GherkinTestSpecification(builder.build(), allGherkinItemTags));
         } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
