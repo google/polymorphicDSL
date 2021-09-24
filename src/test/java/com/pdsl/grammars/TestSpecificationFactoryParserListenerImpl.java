@@ -6,6 +6,8 @@ import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -135,7 +137,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
         if (subgrammar.isEmpty()) {
             subgrammar = grammar;
         }
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(subgrammar.get().getParserClass(), subgrammar.get().getLexerClass());
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter((Class<? extends Parser>)subgrammar.get().getParserClass(), (Class<? extends Lexer>)subgrammar.get().getLexerClass());
 
         switch(factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:

@@ -32,7 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 public class PolymorphicDslGherkinExecution {
 
     private static final PickleJarFactory pickleJarFactory = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
-    private static final PolymorphicDslPhraseFilter allGrammarsPhraseFilter = new DefaultPolymorphicDslPhraseFilter<AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class
+    private static final PolymorphicDslPhraseFilter allGrammarsPhraseFilter = new DefaultPolymorphicDslPhraseFilter(AllGrammarsParser.class, AllGrammarsLexer.class
     );
 
     private static final DefaultGherkinTestSpecificationFactory provider =

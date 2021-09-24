@@ -28,8 +28,7 @@ public class FrameworkSpecifications {
         Set<URL> dslFiles = new HashSet<>();
         Path tmpDir = Files.createTempDirectory(String.format("pdsl_temp_test-%s", UUID.randomUUID()));
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
-                PdslFrameworkSpecificationParser, PdslFrameworkSpecificationLexer>(
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
                 PdslFrameworkSpecificationParser.class,
                 PdslFrameworkSpecificationLexer.class
         );

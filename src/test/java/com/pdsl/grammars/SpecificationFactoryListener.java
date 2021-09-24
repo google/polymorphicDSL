@@ -26,10 +26,10 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
     private Set<URL> urls = new HashSet<>();
     private TestSpecificationFactory factory;
     private PolymorphicDslPhraseFilter phraseFilter;
-    private Class<?> parserGrammarClass;
-    private Class<?> lexerGrammarClass;
-    private Class<?> parserSubgrammarClass;
-    private Class<?> lexerSubgrammarClass;
+    private Class<? extends Parser> parserGrammarClass;
+    private Class<? extends Lexer> lexerGrammarClass;
+    private Class<? extends Parser> parserSubgrammarClass;
+    private Class<? extends Lexer> lexerSubgrammarClass;
     private Optional<TestSpecification> specification;
     private TestSpecificationFactoryType factoryType;
     private enum TestSpecificationFactoryType {

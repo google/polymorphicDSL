@@ -24,8 +24,7 @@ public class FrameworkTestCase {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
-                TestCaseFactoryParser, TestCaseFactoryLexer>(
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
                 TestCaseFactoryParser.class,
                 TestCaseFactoryLexer.class
         );

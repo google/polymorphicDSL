@@ -27,12 +27,12 @@ public class PdslHelper {
     public enum SupportedGrammars {
         ALL_GRAMMARS(AllGrammarsLexer.class, AllGrammarsParser.class);
 
-        private Class<?> parser;
-        private Class<?> lexer;
+        private Class<? extends Parser> parser;
+        private Class<? extends Lexer> lexer;
         private Parser grammarParser;
         private Lexer grammarLexer;
 
-        private SupportedGrammars(Class<?> lexer, Class<?> parser) {
+        private SupportedGrammars(Class<? extends Lexer> lexer, Class<? extends Parser> parser) {
             this.parser = parser;
             this.lexer = lexer;
         }

@@ -15,20 +15,20 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
 
-public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lexer>
+public class DefaultPolymorphicDslPhraseFilter
         implements PolymorphicDslPhraseFilter {
     private static final String BOLD = "\033[1m";
     private static final String RESET_ANSI = "\033[0m";
     private final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslPhraseFilter.class);
-    private final Constructor<SP> subgrammarParserConstructor;
-    private final Constructor<SL> subgrammarLexerConstructor;
+    private final Constructor<? extends Parser> subgrammarParserConstructor;
+    private final Constructor<? extends Lexer> subgrammarLexerConstructor;
+    private final Optional<Class<? extends Parser>> recognizerParser;
+    private final Optional<Class<? extends Lexer>> recognizerLexer;
     private final Method subgrammarActivePhraseRule;
-    private final Optional<? extends Class<? extends Parser>> recognizerParser;
-    private final Optional<? extends Class<? extends Lexer>> recognizerLexer;
     private final Optional<String> syntaxRuleName;
     public static String DEFAULT_ALL_RULES_METHOD_NAME = "polymorphicDslAllRules";
 
-    public DefaultPolymorphicDslPhraseFilter(Class<SP> subgrammarParser, Class<SL> subgrammarLexer) {
+    public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer) {
         Optional<Method> syntaxRuleOptional1;
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
@@ -38,36 +38,38 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
             throw new IllegalArgumentException(
                     String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
         }
-        recognizerParser = Optional.empty();
         recognizerLexer = Optional.empty();
+        recognizerParser = Optional.empty();
         syntaxRuleName = Optional.empty();
+
     }
 
-    public DefaultPolymorphicDslPhraseFilter(Class<SP> subgrammarParser, Class<SL> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer)  {
+    public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer)  {
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
             this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
             this.subgrammarActivePhraseRule = subgrammarParser.getMethod(DEFAULT_ALL_RULES_METHOD_NAME);
+            this.recognizerLexer = Optional.of(lexerRecognizer);
+            this.recognizerParser = Optional.of(parserRecognizer);
+
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
                     String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
         }
-        recognizerParser = Optional.of(parserRecognizer);
-        recognizerLexer = Optional.of(lexerRecognizer);
         syntaxRuleName = Optional.of(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
     }
 
-    public DefaultPolymorphicDslPhraseFilter(Class<SP> subgrammarParser, Class<SL> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer, String recognizerRuleName)  {
+    public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer, String recognizerRuleName)  {
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
             this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
             this.subgrammarActivePhraseRule = subgrammarParser.getMethod(DEFAULT_ALL_RULES_METHOD_NAME);
+            this.recognizerLexer = Optional.of(lexerRecognizer);
+            this.recognizerParser = Optional.of(parserRecognizer);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
                     String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
         }
-        recognizerParser = Optional.of(parserRecognizer);
-        recognizerLexer = Optional.of(lexerRecognizer);
         syntaxRuleName = Optional.of(recognizerRuleName);
     }
 
@@ -88,7 +90,7 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
             } catch (IOException e) {
                 throw new PolymorphicDslTransformationException("Could not read from the stream while filtering phrases!", e);
             }
-            Optional<SP> parser = subgrammarParserOf(new ByteArrayInputStream(bais.readAllBytes()));
+            Optional<Parser> parser = subgrammarParserOf(new ByteArrayInputStream(bais.readAllBytes()));
             if (parser.isPresent()) {
                 parser.get().setBuildParseTree(true); // A parse tree creates a child object, causing the tree walker to traverse the rule twice
                 ParseTree parseTree = subgrammarParseTreeOf(parser.get());
@@ -129,7 +131,7 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
         return Optional.of(filteredPhrases);
     }
 
-    private Optional<SL> createSublexer(InputStream inputStream) {
+    private Optional<? extends Lexer> createSublexer(InputStream inputStream) {
         try {
             // We need to see if the lexer will recognize any of the tokens in the input stream
             // However checking this will consume the tokens in the lexer, making it useless for future processing,
@@ -137,7 +139,8 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             inputStream.transferTo(baos);
             CharStream charStream = CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray()));
-            SL pdslLexer = subgrammarLexerConstructor.newInstance(charStream);
+            Lexer pdslLexer = subgrammarLexerConstructor.newInstance(charStream);
+            pdslLexer.removeErrorListeners();
             PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
@@ -149,7 +152,7 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                 if (logger.isWarnEnabled()) {
                     logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!", AnsiTerminalColorHelper.BRIGHT_YELLOW));
-                    logger.warn(String.format("The match was: %s", allTokens));
+                    logger.warn(String.format("The match was:%n\t%s", allTokens));
                     logger.warn(String.format("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), RESET_ANSI));
                 }
                 return Optional.empty();
@@ -165,22 +168,22 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
         }
     }
 
-    private Optional<SP> subgrammarParserOf(InputStream inputStream) {
-        Optional<SL> lexer = createSublexer(inputStream);
+    private Optional<Parser> subgrammarParserOf(InputStream inputStream) {
+        Optional<? extends Lexer> lexer = createSublexer(inputStream);
         if (lexer.isEmpty()) {
             return Optional.empty();
         }
         try {
             // Create a parser-grammar file
             // Convert the grammar file to an actual parser
-            SP dslParser = subgrammarParserConstructor.newInstance(new CommonTokenStream(lexer.get()));
+            Parser dslParser = subgrammarParserConstructor.newInstance(new CommonTokenStream(lexer.get()));
             return Optional.of(dslParser);
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
             throw new PolymorphicDslTransformationException("Could not create parser from lexer!", e);
         }
     }
 
-    private ParseTree subgrammarParseTreeOf(SP parser) {
+    private ParseTree subgrammarParseTreeOf(Parser parser) {
         try {
             // Remove error messages. These are provided in check grammar.
             parser.removeErrorListeners();

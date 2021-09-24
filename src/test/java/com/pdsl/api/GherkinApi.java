@@ -30,7 +30,7 @@ import static com.google.common.truth.Truth.assertThat;
 @RunWith(JUnit4.class)
 public class GherkinApi {
     private static final PickleJarFactory pickleJarFactory = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
-    private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslMinimalParser, AllGrammarsLexer>(
+    private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
            PolymorphicDslMinimalParser.class, AllGrammarsLexer.class);
     private static final TestSpecificationFactory provider =
             new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).withPickleJarFactory(pickleJarFactory).build();
