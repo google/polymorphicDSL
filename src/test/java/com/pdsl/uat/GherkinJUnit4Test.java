@@ -13,16 +13,9 @@ import org.junit.runner.RunWith;
 @PdslGherkinApplication(
         applicationName = "Polymorphic DSL Test Framework",
         context = "User Acceptance Testing",
-        resourceRoot = "src/test/resources/framework_specifications"
+        resourceRoot = "src/test/resources/framework_specifications/features"
 )
 public class GherkinJUnit4Test {
-    @PdslTest(
-            includesResources = "PdslTestFramework.feature",
-            parser = PdslFrameworkSpecificationParser.class,
-            lexer = PdslFrameworkSpecificationLexer.class,
-            listener = PdslFrameworkSpecificationImpl.class
-    )
-    public void frameworkSpecifications(){}
 
     @Test
     public void normalJUnitTests_stillRunWithPdslRunner() {}

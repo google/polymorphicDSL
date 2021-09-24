@@ -1,7 +1,7 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.component.gherkin.models.GherkinBackground;
+import com.pdsl.gherkin.models.GherkinBackground;
 
 import java.net.URL;
 import java.util.*;
@@ -75,8 +75,8 @@ class PickleJar {
     public static class Builder {
         private final String featureTitle;
         private final URL location;
-        private final List<PickleJarScenario> scenarios = new LinkedList<>();
-        private final List<PickleJarRule> rules = new LinkedList<>();
+        private final List<PickleJarScenario> scenarios = new ArrayList<>();
+        private final List<PickleJarRule> rules = new ArrayList<>();
         private final String languageCode;
         private Set<String> featureTags = new HashSet<>();
         private Optional<GherkinBackground> background = Optional.empty();

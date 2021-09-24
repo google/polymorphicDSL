@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.component.gherkin.models.GherkinFeature;
+import com.pdsl.gherkin.models.GherkinFeature;
 import com.pdsl.gherkin.parser.GherkinLexer;
 import com.pdsl.gherkin.parser.GherkinParser;
 import org.antlr.v4.runtime.CharStreams;

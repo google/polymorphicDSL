@@ -23,7 +23,7 @@ public class FrameworkSpecifications {
     public void gherkinPdslTestFramework_meetsTestSpecifications() throws IOException {
 
         final URL testResources = getClass().getClassLoader()
-                .getResource("framework_specifications/PdslTestFramework.feature");
+                .getResource("framework_specifications/features/PdslTestFramework.feature");
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         Path tmpDir = Files.createTempDirectory(String.format("pdsl_temp_test-%s", UUID.randomUUID()));

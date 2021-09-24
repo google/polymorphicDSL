@@ -5,17 +5,12 @@ import com.pdsl.grammars.TestSpecificationFactoryLexer;
 import com.pdsl.grammars.TestSpecificationFactoryParser;
 import com.pdsl.grammars.TestSpecificationFactoryParserListenerImpl;
 import com.pdsl.reports.TestRunResults;
-import com.pdsl.specifications.FilteredPhrase;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
-import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
-import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
@@ -28,7 +23,7 @@ public class FrameworkTestSpecification {
     @Test
     public void testSpecificationFactory_meetsSpecifications() {
         final URL testResources = getClass().getClassLoader()
-                .getResource("framework_specifications/TestSpecificationFactory.feature");
+                .getResource("framework_specifications/features/TestSpecificationFactory.feature");
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);

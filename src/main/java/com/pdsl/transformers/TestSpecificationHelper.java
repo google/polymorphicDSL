@@ -7,15 +7,17 @@ import org.antlr.v4.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public interface TestSpecificationHelper {
+
     static Optional<Parser> parserOf(InputStream inputStream, ErrorListenerStrategy strategy, Class<?> parserClass, Class<?> lexerClass) {
 
         Optional<? extends Lexer> lexer = lexerOf(lexerClass, inputStream, strategy);
@@ -40,7 +42,6 @@ public interface TestSpecificationHelper {
 
     private static Optional<Lexer> lexerOf(Class<?> lexerClass, InputStream inputStream, ErrorListenerStrategy strategy) {
         try {
-
             final Logger logger = LoggerFactory.getLogger(TestSpecificationHelper.class);
             // We need to see if the lexer will recognize any of the tokens in the input stream
             // However checking this will consume the tokens in the lexer, making it useless for future processing,
@@ -60,18 +61,19 @@ public interface TestSpecificationHelper {
                 if (allTokens.isEmpty()) {
                     if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
                         if (logger.isWarnEnabled()) {
-                            logger.warn("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, baos.toString(), AnsiTerminalColorHelper.RESET);
+                            logger.warn(String.format("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, baos.toString(), AnsiTerminalColorHelper.RESET));
                         }
                         return Optional.empty();
                     }
                 } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                     if (logger.isWarnEnabled()) {
                         logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
-                        logger.warn("%sFiltering out phrase:%n\t%s%s",AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), AnsiTerminalColorHelper.RESET);
+                        logger.warn(String.format("%sFiltering out phrase:%n%s%nLexed as:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), allTokens.stream().map(Object::toString).collect(Collectors.joining(String.format("%n\t"))), AnsiTerminalColorHelper.RESET));
                     }
                     return Optional.empty();
                 } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file
-                    logger.warn("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s", AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(), AnsiTerminalColorHelper.RESET);
+                    logger.warn("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s",
+                            AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(), AnsiTerminalColorHelper.RESET);
                     return Optional.empty();
                 }
             }
@@ -85,5 +87,78 @@ public interface TestSpecificationHelper {
     enum ErrorListenerStrategy {
         GRAMMAR,
         SUBGRAMMAR
+    }
+
+    static List<InputStream> checkGrammarValidity(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass,
+                                     List<InputStream> inputStreams, String syntaxRuleName) {
+        // Combine the input streams into a single stream
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        List<InputStream> inputStreamCopy = new ArrayList<>(inputStreams.size());
+        try {
+            for (InputStream inputStream : inputStreams) {
+                byte[] bytes = inputStream.readAllBytes();
+                baos.write(bytes);
+                inputStreamCopy.add(new ByteArrayInputStream(bytes));
+            }
+            checkGrammarValidity(parserClass, lexerClass, new ByteArrayInputStream(baos.toByteArray()), syntaxRuleName);
+        } catch (IOException e) {
+            throw new PolymorphicDslTransformationException("Error while reading input produced from test resource", e);
+        }
+        return inputStreamCopy;
+    }
+
+    static void checkGrammarValidity(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, InputStream inputStream, String syntaxRuleName) {
+        Method syntaxRule;
+        InputStream bufferdInputStream = new BufferedInputStream(inputStream);
+        bufferdInputStream.mark(0);
+        try {
+             syntaxRule = parserClass.getMethod(syntaxRuleName);
+        } catch (NoSuchMethodException e) {
+            throw new PolymorphicDslTransformationException(String.format(
+                    "There was no production rule named '%s' in parser %s",
+                    syntaxRuleName, parserClass.getName()));
+        }
+        Optional<Parser> parser = parserOf(bufferdInputStream, ErrorListenerStrategy.SUBGRAMMAR, parserClass, lexerClass);
+        if (parser.isPresent()) {
+            try {
+                Parser syntaxParser = parser.get();
+                // Get any helpful error messages using ANTLR4s default error correcting strategy
+                syntaxRule.invoke(parserClass.cast(syntaxParser), null);
+                bufferdInputStream.reset();
+                // Run again and crash with a runtime exception if anything is incorrect
+                Optional<Parser> strictParser = parserOf(bufferdInputStream, ErrorListenerStrategy.GRAMMAR, parserClass, lexerClass);
+                syntaxRule.invoke(parserClass.cast(strictParser.get()), null);
+            } catch (IllegalAccessException | IOException e) {
+                throw new PolymorphicDslTransformationException("Unable to check the syntax of the test resource!",
+                        e);
+            } catch (InvocationTargetException e) {
+                try {
+                    bufferdInputStream.reset();
+                throw new PolymorphicDslTransformationException(
+                        String.format("There was an error while checking the syntax of the test resource!%nResource Text:%n%s%n",
+                                new String(bufferdInputStream.readAllBytes()),
+                        e));
+                } catch (IOException io) {
+                    throw new PolymorphicDslTransformationException(
+                            String.format("There was an error while checking the syntax of the test resource!%nWas unable to get the source text that caused the error",
+                                    e));
+                }
+            }
+        } else {
+            try {
+                bufferdInputStream.reset();
+                throw new PolymorphicDslTransformationException(String.format(
+                        "Syntax check on grammar failed!%n\tParser: %s%n\tLexer: %s%n\tInput:%n%s",
+                        parserClass.getName(), lexerClass.getName(),
+                        new String(bufferdInputStream.readAllBytes())
+                ));
+            } catch (IOException e) {
+                throw new PolymorphicDslTransformationException(String.format(
+                        "Syntax check on grammar failed!%n\tParser: %s%n\tLexer: %s%n\tInput: " +
+                                "<Could not get input. See stack trace for further details.>",
+                        parserClass.getName(), lexerClass.getName()), e);
+            }
+        }
+
     }
 }

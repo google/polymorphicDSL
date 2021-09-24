@@ -139,7 +139,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
         switch(factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:
-                factory = Optional.of(new DefaultGherkinTestSpecificationFactory(phraseFilter));
+                factory = Optional.of(new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build());
                 break;
             case LINE_DELIMITED_TEST_SPECIFICATION_FACTORY:
                 factory = Optional.of(new LineDelimitedTestSpecificationFactory(phraseFilter));

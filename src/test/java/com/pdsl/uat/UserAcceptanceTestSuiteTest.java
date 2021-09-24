@@ -8,7 +8,8 @@ import org.junit.runners.JUnit4;
 import org.junit.runners.Suite;
 
 @RunWith(PdslTestSuite.class)
-@Suite.SuiteClasses(value = {GherkinJUnit4Test.class})
+@Suite.SuiteClasses(value = {GherkinJUnit4Test.class, SyntaxCheckTest.class,
+SkipUnrecognizedTest.class, GherkinJunitRecognizerTest.class, ClassLevelRecognizerTest.class})
 @PdslTestSuite.PdslSuiteClasses(
         systemUnderTest = "Polymorphic DSL Test Framework"
         //,reportGenerator = DefaultAsciidoctorReportGeneratorProvider.class

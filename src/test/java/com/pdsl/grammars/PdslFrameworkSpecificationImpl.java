@@ -86,7 +86,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     @Override
     public void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) {
 
-        TestSpecificationFactory testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(allPhrases);
+        TestSpecificationFactory testSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(allPhrases).build();
         Optional<Collection<TestSpecification>> specification  = testSpecificationFactory.getTestSpecifications(resourcePaths);
         assertThat(specification.isPresent()).isTrue();
         Optional<TestSpecification> onlySpecification = specification.get().stream().findFirst();

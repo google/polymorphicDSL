@@ -40,12 +40,15 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
 
     public <SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
         phraseFilter = new DefaultPolymorphicDslPhraseFilter<SG, SL>(subgrammarParser, subgrammarLexer);
-        testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
+        testSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter)
+            .withPickleJarFactory(pickleJarFactory)
+            .build();
     }
 
     public GherkinTestExecutor(PolymorphicDslPhraseFilter phraseFilter) {
         this.phraseFilter = phraseFilter;
-        testSpecificationFactory = new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
+        testSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter)
+                .withPickleJarFactory(pickleJarFactory).build();
     }
 
     public TestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,

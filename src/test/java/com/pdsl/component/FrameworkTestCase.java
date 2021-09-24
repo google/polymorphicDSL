@@ -20,7 +20,7 @@ public class FrameworkTestCase {
     @Test
     public void testCaseFactory_meetsSpecifications() {
         final URL testResources = getClass().getClassLoader()
-                .getResource("framework_specifications/TestCaseFactory.feature");
+                .getResource("framework_specifications/features/TestCaseFactory.feature");
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);

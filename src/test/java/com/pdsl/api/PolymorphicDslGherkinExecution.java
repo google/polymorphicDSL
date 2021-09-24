@@ -36,7 +36,8 @@ public class PolymorphicDslGherkinExecution {
     );
 
     private static final DefaultGherkinTestSpecificationFactory provider =
-            new DefaultGherkinTestSpecificationFactory(pickleJarFactory, allGrammarsPhraseFilter);
+            new DefaultGherkinTestSpecificationFactory.Builder(allGrammarsPhraseFilter)
+                    .withPickleJarFactory(pickleJarFactory).build();
 
     private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private static final GherkinTestExecutor executor =

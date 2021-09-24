@@ -1,5 +1,6 @@
 package com.pdsl.transformers;
 
+import com.pdsl.junit.RecognizedBy;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
@@ -8,47 +9,86 @@ import org.antlr.v4.runtime.tree.ParseTree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lexer>
         implements PolymorphicDslPhraseFilter {
-
     private static final String BOLD = "\033[1m";
     private static final String RESET_ANSI = "\033[0m";
     private final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslPhraseFilter.class);
     private final Constructor<SP> subgrammarParserConstructor;
     private final Constructor<SL> subgrammarLexerConstructor;
     private final Method subgrammarActivePhraseRule;
-    private final ErrorListenerStrategy strategy;
+    private final Optional<? extends Class<? extends Parser>> recognizerParser;
+    private final Optional<? extends Class<? extends Lexer>> recognizerLexer;
+    private final Optional<String> syntaxRuleName;
+    public static String DEFAULT_ALL_RULES_METHOD_NAME = "polymorphicDslAllRules";
 
     public DefaultPolymorphicDslPhraseFilter(Class<SP> subgrammarParser, Class<SL> subgrammarLexer) {
-        final String allRulesMethodName = "polymorphicDslAllRules";
+        Optional<Method> syntaxRuleOptional1;
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
             this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
-            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(allRulesMethodName, (Class<?>[]) null);
-            this.strategy = ErrorListenerStrategy.GRAMMAR;
+            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(DEFAULT_ALL_RULES_METHOD_NAME);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
-                    String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", allRulesMethodName), e);
+                    String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
         }
+        recognizerParser = Optional.empty();
+        recognizerLexer = Optional.empty();
+        syntaxRuleName = Optional.empty();
+    }
+
+    public DefaultPolymorphicDslPhraseFilter(Class<SP> subgrammarParser, Class<SL> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer)  {
+        try {
+            this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
+            this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
+            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(DEFAULT_ALL_RULES_METHOD_NAME);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException(
+                    String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
+        }
+        recognizerParser = Optional.of(parserRecognizer);
+        recognizerLexer = Optional.of(lexerRecognizer);
+        syntaxRuleName = Optional.of(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
+    }
+
+    public DefaultPolymorphicDslPhraseFilter(Class<SP> subgrammarParser, Class<SL> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer, String recognizerRuleName)  {
+        try {
+            this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
+            this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
+            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(DEFAULT_ALL_RULES_METHOD_NAME);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException(
+                    String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
+        }
+        recognizerParser = Optional.of(parserRecognizer);
+        recognizerLexer = Optional.of(lexerRecognizer);
+        syntaxRuleName = Optional.of(recognizerRuleName);
     }
 
     @Override
     public Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testContent) {
-        List<FilteredPhrase> filteredPhrases = new LinkedList<>();
+        // Avoid changing the reference of the above variable to the streams we create here
+        List<InputStream> testContextForfiltering = testContent;
+        if (recognizerParser.isPresent() && recognizerLexer.isPresent()) {
+            testContextForfiltering = TestSpecificationHelper.checkGrammarValidity(recognizerParser.get(), recognizerLexer.get(), testContent,
+                    syntaxRuleName.isPresent() ? syntaxRuleName.get() : RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
+        }
+        List<FilteredPhrase> filteredPhrases = new ArrayList<>();
         int phrasesFilteredOut = 0;
-        for (InputStream inputStream : testContent) {
-            Optional<SP> parser = subgrammarParserOf(inputStream);
+        for (InputStream inputStream : testContextForfiltering) {
+            ByteArrayInputStream bais;
+            try {
+                bais = new ByteArrayInputStream(inputStream.readAllBytes());
+            } catch (IOException e) {
+                throw new PolymorphicDslTransformationException("Could not read from the stream while filtering phrases!", e);
+            }
+            Optional<SP> parser = subgrammarParserOf(new ByteArrayInputStream(bais.readAllBytes()));
             if (parser.isPresent()) {
                 parser.get().setBuildParseTree(true); // A parse tree creates a child object, causing the tree walker to traverse the rule twice
                 ParseTree parseTree = subgrammarParseTreeOf(parser.get());
@@ -67,11 +107,7 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
                 filteredPhrases.add(new FilteredPhrase() {
                     @Override
                     public String getPhrase() {
-                        try {
-                            return new String(inputStream.readAllBytes());
-                        } catch (IOException e) {
-                            throw new PolymorphicDslTransformationException("Problem when filtering phrases!", e);
-                        }
+                            return new String(bais.readAllBytes());
                     }
 
                     @Override
@@ -85,8 +121,7 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
         if (filteredPhrases.isEmpty() || filteredPhrases.stream().noneMatch(filteredPhrase -> filteredPhrase.getParseTree().isPresent())) { // Let the user know we couldn't parse
             String errorType = phrasesFilteredOut == testContent.size() ? "All phrases were filtered out of a test!" : "A test entirely failed to be parsed!";
             StringBuilder errorMessage = new StringBuilder(AnsiTerminalColorHelper.BRIGHT_YELLOW + errorType + RESET_ANSI);
-            errorMessage.append(BOLD + "\n\tParser Context: " + RESET_ANSI + subgrammarParserConstructor.getName() + "\n\t" +
-                    BOLD + "Strategy: " + RESET_ANSI + strategy.name());
+            errorMessage.append(BOLD + "\n\tParser Context: " + RESET_ANSI + subgrammarParserConstructor.getName());
             String message = errorMessage.toString();
             logger.warn(message);
             return Optional.empty();
@@ -113,9 +148,9 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
                 return Optional.empty();
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                 if (logger.isWarnEnabled()) {
-                    logger.warn("%sA line was partially matched! This may indicate an error in the grammar!", AnsiTerminalColorHelper.BRIGHT_YELLOW);
-                    logger.warn("The match was: %s", allTokens);
-                    logger.warn("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), RESET_ANSI);
+                    logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!", AnsiTerminalColorHelper.BRIGHT_YELLOW));
+                    logger.warn(String.format("The match was: %s", allTokens));
+                    logger.warn(String.format("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), RESET_ANSI));
                 }
                 return Optional.empty();
             } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file
@@ -147,15 +182,11 @@ public class DefaultPolymorphicDslPhraseFilter<SP extends Parser, SL extends Lex
 
     private ParseTree subgrammarParseTreeOf(SP parser) {
         try {
+            // Remove error messages. These are provided in check grammar.
+            parser.removeErrorListeners();
             return (ParseTree) subgrammarActivePhraseRule.invoke(parser, null);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new PolymorphicDslTransformationException("Could not make parse tree from phrase!", e);
         }
     }
-
-    public enum ErrorListenerStrategy {
-        SUBGRAMMAR, // Ignore token recognition errors
-        GRAMMAR // Report any errors detected
-    }
-
 }

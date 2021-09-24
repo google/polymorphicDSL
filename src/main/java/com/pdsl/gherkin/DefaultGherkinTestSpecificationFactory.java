@@ -1,18 +1,24 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.component.gherkin.models.GherkinBackground;
-import com.pdsl.component.gherkin.models.GherkinStep;
+import com.pdsl.gherkin.models.GherkinBackground;
+import com.pdsl.gherkin.models.GherkinStep;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
+import com.pdsl.junit.PdslTest;
+import com.pdsl.junit.RecognizedBy;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
+import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import com.pdsl.transformers.TestSpecificationHelper;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,25 +34,81 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private final int DESCRIPTION_MAX_LENGTH;
     private final PolymorphicDslPhraseFilter phraseFilter;
     private final PickleJarFactory pickleJarFactory;
-    private final Charset charset = Charset.defaultCharset();
+    private final Charset charset;
+    private final Optional<? extends Class<? extends Parser>> recognizerParser;
+    private final Optional<? extends Class<? extends Lexer>> recognizerLexer;
+    private final Optional<String> recognizerRule;
 
-    public DefaultGherkinTestSpecificationFactory(PickleJarFactory pickleJarFactory,
-                                                  PolymorphicDslPhraseFilter phraseFilter) {
-        this.pickleJarFactory = pickleJarFactory;
-        DESCRIPTION_MAX_LENGTH = 1024;
-        this.phraseFilter = phraseFilter;
+    private DefaultGherkinTestSpecificationFactory(Builder builder) {
+        if (builder.recognizerParser.isPresent() ^ builder.recognizerLexer.isPresent()) {
+            throw new IllegalArgumentException("If a recognizer is used then BOTH the recognizerParser and recognizerLexer must be set!");
+        }
+        this.DESCRIPTION_MAX_LENGTH = builder.maxDescriptionLength;
+        this.phraseFilter = builder.phraseFilter;
+        this.pickleJarFactory = builder.pickleJarFactory;
+        this.charset = builder.charset;
+        this.recognizerParser = builder.recognizerParser;
+        this.recognizerLexer = builder.recognizerLexer;
+        this.recognizerRule = builder.recognizerRule;
     }
+    public static class Builder {
+        private int maxDescriptionLength = 1024;
+        private final PolymorphicDslPhraseFilter phraseFilter;
+        private PickleJarFactory pickleJarFactory = PickleJarFactory.DEFAULT;
+        private Charset charset = Charset.defaultCharset();
+        private Optional<? extends Class<? extends Parser>> recognizerParser = Optional.empty();
+        private Optional<? extends Class<? extends Lexer>> recognizerLexer = Optional.empty();
+        private Optional<String> recognizerRule = Optional.of(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
 
-    public DefaultGherkinTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
-        this.pickleJarFactory = PickleJarFactory.DEFAULT;
-        DESCRIPTION_MAX_LENGTH = 1024;
-        this.phraseFilter = phraseFilter;
+        public Builder(PolymorphicDslPhraseFilter polymorphicDslPhrasefilter) {
+            Preconditions.checkNotNull(polymorphicDslPhrasefilter);
+            phraseFilter = polymorphicDslPhrasefilter;
+        }
+
+        public Builder withMaxDescriptionLength(int maxDescriptionLength) {
+            this.maxDescriptionLength = maxDescriptionLength;
+            return this;
+        }
+
+        public Builder withPickleJarFactory(PickleJarFactory pickleJarFactory) {
+            Preconditions.checkNotNull(pickleJarFactory);
+            this.pickleJarFactory = pickleJarFactory;
+            return this;
+        }
+
+        public Builder withCharset(Charset charset) {
+            Preconditions.checkNotNull(charset);
+            this.charset = charset;
+            return this;
+        }
+
+        public Builder withRecognizerParser(Class<? extends Parser> parserClass) {
+            Preconditions.checkNotNull(parserClass);
+            recognizerParser = Optional.of(parserClass);
+            return this;
+        }
+
+        public Builder withRecognizerLexer(Class<? extends Lexer> lexerClass) {
+            Preconditions.checkNotNull(lexerClass);
+            recognizerLexer = Optional.of(lexerClass);
+            return this;
+        }
+
+        public Builder withRecognizerRule(String rule) {
+            Preconditions.checkNotNull(rule);
+            recognizerRule = Optional.of(rule);
+            return this;
+        }
+
+        public DefaultGherkinTestSpecificationFactory build() {
+            return new DefaultGherkinTestSpecificationFactory(this);
+        }
     }
 
     @Override
     public Optional<Collection<TestSpecification>> getTestSpecifications(Set<URL> testContent) {
         Preconditions.checkArgument(testContent != null && !testContent.isEmpty(), "filepaths cannot be null or empty!");
-        List<TestSpecification> featureTestSpecifications = new LinkedList<>();
+        List<TestSpecification> featureTestSpecifications = new ArrayList<>();
         List<PickleJar> pickleJars = pickleJarFactory.getPickleJars(testContent);
         for (PickleJar pickleJar : pickleJars) {
             Set<String> allTagsForTestCase = new HashSet<>();
@@ -89,7 +151,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     }
 
     private List<GherkinTestSpecification> transformScenariosToTestSpecifications(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags, URL originalSourceLocation) {
-        List<GherkinTestSpecification> gherkinTestSpecifications = new LinkedList<>();
+        List<GherkinTestSpecification> gherkinTestSpecifications = new ArrayList<>();
         for (PickleJar.PickleJarScenario pickleJarScenario : scenarios) {
             DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(pickleJarScenario.getTitleWithSubstitutions(), originalSourceLocation);
             // Provide metadata
@@ -113,12 +175,20 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return gherkinTestSpecifications;
     }
 
+    private void checkGrammar(List<InputStream> stepBodyAsStrings) {
+        if (recognizerParser.isPresent() && recognizerLexer.isPresent()) {
+            stepBodyAsStrings = TestSpecificationHelper.checkGrammarValidity(recognizerParser.get(), recognizerLexer.get(), stepBodyAsStrings,
+                    recognizerRule.isPresent() ? recognizerRule.get() : PdslTest.DEFAULT_ALL_RULE);
+        }
+    }
+
     private Optional<List<FilteredPhrase>> processStepBodyContent(List<GherkinStep> stepBody) {
         List<InputStream> stepBodyAsStrings = stepBody.stream()
                 .map(GherkinStep::getFullRawStepText)
                 //.map(GherkinString::getRawString) //No substitutions are done on background steps
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
+        checkGrammar(stepBodyAsStrings);
         return phraseFilter.filterPhrases(stepBodyAsStrings);
     }
 
@@ -126,6 +196,14 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         List<InputStream> stepBodyAsInputStream = stepBody.stream()
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
+        checkGrammar(stepBodyAsInputStream);
+        stepBodyAsInputStream.forEach(i -> {
+            try {
+                i.reset();
+            } catch (IOException e) {
+                throw new PolymorphicDslTransformationException("Could not reset input streams to prepare for filtering", e);
+            }
+        });
         Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream);
         if (phrases.isPresent()) {
             return Optional.of(new DefaultTestSpecification.Builder(title, originalResourceLocation).withPhrases(phrases.get()).build());
@@ -135,7 +213,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     }
 
     private List<TestSpecification> transformRulesToTestSpecifications(List<PickleJar.PickleJarRule> rules, URL originalSourceLocation) {
-        List<TestSpecification> testSpecifications = new LinkedList<>();
+        List<TestSpecification> testSpecifications = new ArrayList<>();
         for (PickleJar.PickleJarRule rule : rules) {
             DefaultTestSpecification.Builder ruleBuilder = new DefaultTestSpecification.Builder(rule.getTitle(),originalSourceLocation);
             ByteArrayOutputStream ruleMetaData = new ByteArrayOutputStream();
@@ -164,7 +242,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     }
 
     private List<TestSpecification> getGherkinStepSpecificationScenarios(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags, URL originalSourceLocation) {
-        List<GherkinTestSpecification> gherkinTestSpecifications = new LinkedList<>();
+        List<GherkinTestSpecification> gherkinTestSpecifications = new ArrayList<>();
         gherkinTestSpecifications.addAll(transformScenariosToTestSpecifications(scenarios, parentTags, originalSourceLocation));
         // Generics are not covarient. Cast to TestSpecification
         return gherkinTestSpecifications.stream()
@@ -238,7 +316,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         }
         // If there are child nodes then this is a container, feature, scenario outline or rule
         if (testSpecification.nestedTestSpecifications().isPresent()) {
-            List<TestSpecification> filteredChildren = new LinkedList<>();
+            List<TestSpecification> filteredChildren = new ArrayList<>();
             for (TestSpecification childTestSpecification : testSpecification.nestedTestSpecifications().get()) {
                 Optional<TestSpecification> filteredChildTestOptional =
                         recursivelyGetTagsAndFilterPickles(childTestSpecification,
