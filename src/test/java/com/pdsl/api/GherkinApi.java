@@ -33,7 +33,7 @@ public class GherkinApi {
     private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslMinimalParser, AllGrammarsLexer>(
            PolymorphicDslMinimalParser.class, AllGrammarsLexer.class);
     private static final TestSpecificationFactory provider =
-            new DefaultGherkinTestSpecificationFactory(pickleJarFactory, phraseFilter);
+            new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).withPickleJarFactory(pickleJarFactory).build();
     private static final GherkinTestExecutor minimalExecutor = new GherkinTestExecutor(PolymorphicDslMinimalParser.class, MinimalLexer.class);
     private static final GherkinTestExecutor executor = new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class);
     // Only reads the text "Given the minimalism"

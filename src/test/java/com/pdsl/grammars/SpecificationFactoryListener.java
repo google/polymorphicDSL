@@ -162,7 +162,7 @@ public class SpecificationFactoryListener implements TestSpecificationFactoryPar
                 factory = new LineDelimitedTestSpecificationFactory(phraseFilter);
                 break;
             case GHERKIN_TEST_SPECIFICATION_FACTORY:
-                factory = new DefaultGherkinTestSpecificationFactory(phraseFilter);
+                factory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();
                 break;
             default:
                 throw new IllegalArgumentException("Do not have any implementation for factory " + factoryType.name());

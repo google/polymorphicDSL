@@ -20,7 +20,7 @@ public class FrameworkTestRunResults {
     @Test
     public void testRunResults_meetsSpecifications() {
         final URL testResources = getClass().getClassLoader()
-                .getResource("framework_specifications/TestRunResults.feature");
+                .getResource("framework_specifications/features/TestRunResults.feature");
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);

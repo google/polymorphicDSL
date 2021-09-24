@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.component.gherkin.models.GherkinFeature;
+import com.pdsl.gherkin.models.GherkinFeature;
 
 import java.net.URL;
 import java.util.Optional;

@@ -217,7 +217,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.getParserClass(), grammar.getLexerClass());
         switch (factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:
-                factory = new DefaultGherkinTestSpecificationFactory(phraseFilter);
+                factory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();
                 break;
             case LINE_DELIMITED_TEST_SPECIFICATION_FACTORY:
                 factory = new LineDelimitedTestSpecificationFactory(phraseFilter);

@@ -23,8 +23,8 @@ import static com.google.common.truth.Truth.assertThat;
 public class GherkinPolymorphicDslTestExecutor {
 
     private static final TestSpecificationFactory provider =
-            new DefaultGherkinTestSpecificationFactory(new DefaultPolymorphicDslPhraseFilter
-                    <AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class));
+            new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter
+                    <AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class)).build();
     private static final GherkinTestExecutor gherkinTestExecutor = new <AllGrammarsParser, AllGrammarsLexer>
             GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class);
 

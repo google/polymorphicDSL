@@ -28,7 +28,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
                                                         Optional<InputStream> parentMetaData,
                                                         String rootId,
                                                         Accumulator accumulator) {
-        List<TestBodyFragment> childTestBodyFragments = new LinkedList<>(parentTestBodyFragments);
+        List<TestBodyFragment> childTestBodyFragments = new ArrayList<>(parentTestBodyFragments);
         Optional<InputStream> childMetaData = testSpecification.getMetaData();
         List<TestCase> testCases = new ArrayList<>();
         // Get Metadata

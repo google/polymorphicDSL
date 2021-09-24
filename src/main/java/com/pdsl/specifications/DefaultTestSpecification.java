@@ -74,7 +74,7 @@ public final class DefaultTestSpecification implements TestSpecification {
         }
 
         public Builder withChildTestSpecifications(List<TestSpecification> specifications) {
-            Preconditions.checkArgument(!specifications.isEmpty(), "Phrases cannot be empty!");
+            Preconditions.checkArgument(!specifications.isEmpty(), "Test Specifications cannot be empty!");
             this.childItems = Optional.of(specifications);
             return this;
         }

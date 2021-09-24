@@ -1,6 +1,6 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.component.gherkin.models.*;
+import com.pdsl.gherkin.models.*;
 import com.pdsl.transformers.PolymorphicDslFileException;
 
 import java.io.ByteArrayOutputStream;
@@ -34,7 +34,7 @@ public class PickleJarFactory {
      * @return A List of PickleJars, where each pickle jar represents a processed feature
      */
     public List<PickleJar> getPickleJars(Set<URL> testResources) {
-        List<GherkinFeature> features = new LinkedList<>();
+        List<GherkinFeature> features = new ArrayList<>();
         // Parse each gherkin file
         try {
             for (URL url : testResources) {
@@ -43,7 +43,7 @@ public class PickleJarFactory {
         } catch (IOException e) {
             throw new PolymorphicDslFileException("Could not open file!", e);
         }
-        List<PickleJar> pickleJars = new LinkedList<>();
+        List<PickleJar> pickleJars = new ArrayList<>();
         // Process each gherkin feature into a test specification
         for (GherkinFeature feature : features) {
             PickleJar.Builder pickleJarBuilder = new PickleJar.Builder(feature.getLocation(), feature.getTitle().orElseThrow(), feature.getLanguageCode());
@@ -76,7 +76,7 @@ public class PickleJarFactory {
 
 
     private List<PickleJar.PickleJarScenario> convertScenariosToPickleJarScenarios(List<GherkinScenario> scenarios) {
-        List<PickleJar.PickleJarScenario> pickleJarScenarios = new LinkedList<>();
+        List<PickleJar.PickleJarScenario> pickleJarScenarios = new ArrayList<>();
         for (GherkinScenario scenario : scenarios) {
             // If the scenario has an examples table the tags will need to be combined with the scenario level
             Set<String> tags = new HashSet<>();
@@ -127,7 +127,7 @@ public class PickleJarFactory {
     }
 
     private List<PickleJar.PickleJarRule> convertRulesToPickles(List<GherkinRule> rules) {
-        List<PickleJar.PickleJarRule> pickleJarRules = new LinkedList<>();
+        List<PickleJar.PickleJarRule> pickleJarRules = new ArrayList<>();
         for (GherkinRule rule : rules) {
 
             List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().orElseThrow());
@@ -144,7 +144,7 @@ public class PickleJarFactory {
     }
 
     private List<String> getTextSubstitutionsForStepBody(List<GherkinStep> stepBody, Map<String, String> substitutions) {
-        List<String> substitutedStepBody = new LinkedList<>();
+        List<String> substitutedStepBody = new ArrayList<>();
         for (GherkinStep step : stepBody) {
             StringBuilder substitutedStep = new StringBuilder();
             GherkinString stepContent = step.getStepContent();
@@ -168,7 +168,7 @@ public class PickleJarFactory {
     }
 
     private List<String> getTextFromStepBody(List<GherkinStep> stepBody) {
-        List<String> substitutedStepBody = new LinkedList<>();
+        List<String> substitutedStepBody = new ArrayList<>();
         for (GherkinStep step : stepBody) {
             StringBuilder stepText = new StringBuilder();
             GherkinString stepContent = step.getStepContent();

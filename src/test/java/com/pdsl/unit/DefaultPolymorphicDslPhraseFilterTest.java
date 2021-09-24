@@ -22,7 +22,7 @@ public class DefaultPolymorphicDslPhraseFilterTest {
     @Test
     public void testResources_meetsSpecifications() {
         final URL testResources = getClass().getClassLoader()
-                .getResource("framework_specifications/TestResource.feature");
+                .getResource("framework_specifications/features/TestResource.feature");
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
