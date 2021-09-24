@@ -27,8 +27,7 @@ public class FrameworkTestSpecification {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
-                TestSpecificationFactoryParser, TestSpecificationFactoryLexer>(
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
                 TestSpecificationFactoryParser.class,
                 TestSpecificationFactoryLexer.class
         );

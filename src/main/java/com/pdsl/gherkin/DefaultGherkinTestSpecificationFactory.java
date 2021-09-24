@@ -185,7 +185,6 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private Optional<List<FilteredPhrase>> processStepBodyContent(List<GherkinStep> stepBody) {
         List<InputStream> stepBodyAsStrings = stepBody.stream()
                 .map(GherkinStep::getFullRawStepText)
-                //.map(GherkinString::getRawString) //No substitutions are done on background steps
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
         checkGrammar(stepBodyAsStrings);

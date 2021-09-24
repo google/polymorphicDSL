@@ -35,7 +35,7 @@ public class PolymorphicDsl {
 
     private static final PolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
     private static final TestCaseFactory testCaseFactory = new SingleTestOutputPreorderTestCaseFactory();
-    private final PolymorphicDslPhraseFilter betaPhraseFilter = new DefaultPolymorphicDslPhraseFilter<PolymorphicDslBetaParser, BetaLexer>(
+    private final PolymorphicDslPhraseFilter betaPhraseFilter = new DefaultPolymorphicDslPhraseFilter(
           PolymorphicDslBetaParser.class, BetaLexer.class
     );
     private final TestSpecificationFactory betaTestFactory = new LineDelimitedTestSpecificationFactory(betaPhraseFilter);

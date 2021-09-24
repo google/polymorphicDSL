@@ -24,7 +24,7 @@ public class FrameworkTestResource {
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
         PolymorphicDslPhraseFilter phraseFilter =
-                new DefaultPolymorphicDslPhraseFilter<PdslTestResourceParser, PdslTestResourceLexer> (
+                new DefaultPolymorphicDslPhraseFilter(
                         PdslTestResourceParser.class, PdslTestResourceLexer.class);
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act

@@ -16,6 +16,8 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -92,7 +94,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         if (subgrammar == null) {
             subgrammar = grammar;
         }
-        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter(subgrammar.getParserClass(), subgrammar.getLexerClass()));
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter((Class<? extends Parser>)subgrammar.getParserClass(), (Class<? extends Lexer>)subgrammar.getLexerClass()));
         executor = gherkinTestExecutor;
         String tagExpression = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
         MetadataTestRunResults runResults = ((GherkinTestExecutor)executor).runTestsWithMetadata(urls, tagExpression, subgrammarListener.getListener(), "Integration");
@@ -214,7 +216,9 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
             subgrammar = grammar;
         }
         TestSpecificationFactory factory;
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(grammar.getParserClass(), grammar.getLexerClass());
+        PolymorphicDslPhraseFilter phraseFilter =
+                new DefaultPolymorphicDslPhraseFilter((Class<? extends Parser>)grammar.getParserClass(),
+                        (Class<? extends Lexer>)grammar.getLexerClass());
         switch (factoryType) {
             case GHERKIN_TEST_SPECIFICATION_FACTORY:
                 factory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();

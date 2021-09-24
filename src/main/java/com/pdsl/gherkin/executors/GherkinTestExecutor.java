@@ -39,7 +39,7 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
     private final TraceableTestRunExecutor executor = new DefaultPolymorphicDslTestExecutor();
 
     public <SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
-        phraseFilter = new DefaultPolymorphicDslPhraseFilter<SG, SL>(subgrammarParser, subgrammarLexer);
+        phraseFilter = new DefaultPolymorphicDslPhraseFilter(subgrammarParser, subgrammarLexer);
         testSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter)
             .withPickleJarFactory(pickleJarFactory)
             .build();

@@ -35,10 +35,9 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     private Optional<Collection<TestCase>> testCaseCollection = Optional.empty();
     private ParseTreeListener grammarListener = PdslHelper.ListenerType.ARITHMETIC.getListener();
     private Set<URL> urlSet = new HashSet<>();
-    private Path path;
 
     private static final TraceableTestRunExecutor testExecutor = new DefaultPolymorphicDslTestExecutor();
-    private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<SimpleArithmeticParser, SimpleArithmeticLexer>
+    private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter
             ( SimpleArithmeticParser.class,
                     SimpleArithmeticLexer.class);
     private static final TestSpecificationFactory testSpecificationFactory = new LineDelimitedTestSpecificationFactory(phraseFilter);

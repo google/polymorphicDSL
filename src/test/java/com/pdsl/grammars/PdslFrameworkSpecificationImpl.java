@@ -29,7 +29,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     private ParseTreeListener subGrammarListener;
 
     private static final PolymorphicDslPhraseFilter allPhrases = new DefaultPolymorphicDslPhraseFilter
-            < AllGrammarsParser, AllGrammarsLexer>(AllGrammarsParser.class, AllGrammarsLexer.class);
+            (AllGrammarsParser.class, AllGrammarsLexer.class);
 
     @Override
     public void enterGivenTheTestResource(PdslFrameworkSpecificationParser.GivenTheTestResourceContext ctx) {

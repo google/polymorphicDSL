@@ -24,8 +24,7 @@ public class FrameworkTestRunResults {
         // Arrange
         Set<URL> dslFiles = new HashSet<>();
         dslFiles.add(testResources);
-        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter<
-                PdslTestRunResultsMetaParser, PdslTestRunResultsMetaLexer>(
+        PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
                 PdslTestRunResultsMetaParser.class,
                 PdslTestRunResultsMetaLexer.class
         );
