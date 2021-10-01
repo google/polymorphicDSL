@@ -45,17 +45,21 @@ import java.util.stream.Collectors;
 
 public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
 
-    private final String context;
-    private final String applicationName;
-    private final String resourceRoot;
-    private final Optional<? extends Class<? extends Parser>> classWideRecognizerParser;
-    private final Optional<? extends Class<? extends Lexer>> classWideRecognizerLexer;
-    private final String classWideRecognizerRule;
-    private final Collection<MetadataTestRunResults> results = new ArrayList<>();
-    private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
+    protected final String context;
+    protected final String applicationName;
+    protected final String resourceRoot;
+    protected final Optional<? extends Class<? extends Parser>> classWideRecognizerParser;
+    protected final Optional<? extends Class<? extends Lexer>> classWideRecognizerLexer;
+    protected final String classWideRecognizerRule;
+    protected final Collection<MetadataTestRunResults> results = new ArrayList<>();
+    protected static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
 
     public Map<String, Collection<MetadataTestRunResults>> getMetaDataTestRunResults() {
         return Map.of(context, results);
+    }
+
+    protected TestCaseFactory getTestCaseFactory() {
+        return testCaseFactory;
     }
 
     /**
@@ -88,7 +92,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         return List.copyOf(frameworkMethods);
     }
 
-    private Collection<TestCase> getTestCases(PdslTest pdslTest, RecognizedBy recognizedBy) {
+    protected Collection<TestCase> getTestCases(PdslTest pdslTest, RecognizedBy recognizedBy) {
         Preconditions.checkNotNull(recognizedBy);
         Set<URL> testResources = getTestResources(pdslTest);
         // Create the phrase filter that will determine the grammar we use
@@ -103,7 +107,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         return getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest);
     }
 
-    private Collection<TestCase> getTestCases(PdslTest pdslTest) {
+    protected Collection<TestCase> getTestCases(PdslTest pdslTest) {
         Set<URL> testResources = getTestResources(pdslTest);
         // Create the phrase filter that will determine the grammar we use
         PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer());
@@ -132,7 +136,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         return testCaseFactory.processTestSpecification(gherkinTestSpecifications.get());
     }
 
-    private Set<URL> getTestResources(PdslTest pdslTest) {
+    protected Set<URL> getTestResources(PdslTest pdslTest) {
         Set<URL> testResources = new HashSet<>();
         // Find the files we will be testing
         PathMatcher pathMatcher = new GlobPathMatcher(getGlobResourcePaths(pdslTest.includesResources()),
@@ -215,7 +219,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         }
     }
 
-    private ParseTreeListener getParseTreeListener(PdslTest pdslTest) {
+    protected ParseTreeListener getParseTreeListener(PdslTest pdslTest) {
         try {
             Constructor<?> providerConstructor = pdslTest.listener().getDeclaredConstructor();
             return ((Provider<ParseTreeListener>) providerConstructor.newInstance()).get();

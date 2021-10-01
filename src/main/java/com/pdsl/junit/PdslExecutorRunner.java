@@ -32,11 +32,11 @@ import java.util.stream.Collectors;
 public class PdslExecutorRunner extends ParentRunner<TestCase> {
 
 
-    private final TraceableTestRunExecutor executor;
-    private final ParseTreeListener parseTreeListener;
-    private final List<TestCase> testCases;
-    private final String context;
-    private final List<MetadataTestRunResults> metadataTestRunResults;
+    protected final TraceableTestRunExecutor executor;
+    protected final ParseTreeListener parseTreeListener;
+    protected final List<TestCase> testCases;
+    protected final String context;
+    protected final List<MetadataTestRunResults> metadataTestRunResults;
 
     private int accumulator = 1;
 
