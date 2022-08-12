@@ -1,0 +1,12 @@
+parser grammar TestExecutorParser ;
+
+import TestResourceParser, PdslCommonParser, TestRunResultCommonParser, GherkinCommonParser ;
+options {tokenVocab=TestExecutorLexer ; }
+
+givenTheTestExecutorIsSpecified : GIVEN_THE_TEST_EXECUTOR_IS ;
+givenTheGrammarListener : GIVEN_THE_GRAMMAR_PARSE_TREE_LISTENER ;
+givenTheSubgrammarListener : GIVEN_THE_SUBGRAMMAR_PARSE_TREE_LISTENER  ;
+whenTheGherkinTestExecutorRunsWithTagExpression : WHEN_THE_GHERKIN_TEST_EXECUTOR_RUNS_WITH_TAG_EXPRESSION ;
+givenTheGrammarPhraseFilter : GIVEN_GRAMMAR_PHRASE_FILTER_IS  ;
+givenTheSubgrammarPhraseFilter : GIVEN_SUBGRAMMAR_PHRASE_FILTER_IS  ;
+givenTheFollowingTestResource: GIVEN_THE_FOLLOWING_TEST_RESOURCE ;

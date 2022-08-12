@@ -1,5 +1,6 @@
 package com.pdsl.transformers;
 
+import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.exceptions.SentenceNotFoundException;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
@@ -50,7 +51,7 @@ public interface TestSpecificationHelper {
             inputStream.transferTo(baos);
             Lexer pdslLexer = (Lexer) lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray())));
             if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
-                pdslLexer.removeErrorListeners();
+                //pdslLexer.removeErrorListeners();
             }
             PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
@@ -68,12 +69,15 @@ public interface TestSpecificationHelper {
                 } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                     if (logger.isWarnEnabled()) {
                         logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
-                        logger.warn(String.format("%sFiltering out phrase:%n%s%nLexed as:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), allTokens.stream().map(Object::toString).collect(Collectors.joining(String.format("%n\t"))), AnsiTerminalColorHelper.RESET));
+                        logger.warn(String.format("%sFiltering out phrase:%n%s%nLexed as:%n\t%s%s%n",
+                                AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), allTokens.stream().map(token -> {
+                                    return String.format("%s,\t%s", token, pdslLexer.getVocabulary().getSymbolicName(token.getType()));
+                                }).collect(Collectors.joining(String.format("%n\t"))), AnsiTerminalColorHelper.RESET));
                     }
                     return Optional.empty();
                 } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file
-                    logger.warn("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s",
-                            AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(), AnsiTerminalColorHelper.RESET);
+                    logger.warn(String.format("%sOnly the End of File was left. Treating as though everything has been filtered out of this phrase:%n%s%s",
+                            AnsiTerminalColorHelper.YELLOW, pdslLexer.getText(), AnsiTerminalColorHelper.RESET));
                     return Optional.empty();
                 }
             }
@@ -134,14 +138,24 @@ public interface TestSpecificationHelper {
             } catch (InvocationTargetException e) {
                 try {
                     bufferdInputStream.reset();
+                    StringBuilder parsedTokens = new StringBuilder();
+                    for (int i=0; i < parser.get().getTokenStream().size(); i++) {
+                        Token token = parser.get().getTokenStream().get(i);
+                        Lexer lexer = (Lexer) lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(new byte[0])));
+                        String tokenType = lexer.getVocabulary().getSymbolicName(token.getType());
+                        parsedTokens.append(String.format("%sType: %s%s%n%s%n%n%s", AnsiTerminalColorHelper.BRIGHT_RED, tokenType, AnsiTerminalColorHelper.RED,  token,AnsiTerminalColorHelper.RESET));
+                    }
+
                 throw new PolymorphicDslTransformationException(
-                        String.format("There was an error while checking the syntax of the test resource!%nResource Text:%n%s%n",
-                                new String(bufferdInputStream.readAllBytes()),
-                        e));
+
+                        String.format("There was an error while checking the syntax of the test resource!%nResource Text:%n%s%n%nParsed as:%n%s%n",
+                                new String(bufferdInputStream.readAllBytes()), parsedTokens), e);
                 } catch (IOException io) {
                     throw new PolymorphicDslTransformationException(
-                            String.format("There was an error while checking the syntax of the test resource!%nWas unable to get the source text that caused the error",
-                                    e));
+                            "There was an error while checking the syntax of the test resource!%nWas unable to get the source text that caused the error"
+                                    , e);
+                } catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException   ex) {
+                    throw new PolymorphicDslFrameworkException("An error occurred while trying to get the vocabulary of a lexer. This may be due to an API change in the ANTLR4 library.", ex);
                 }
             }
         } else {

@@ -1,0 +1,3 @@
+lexer grammar PdslTestSpecificationFactoryLexer;
+
+import GherkinCommonLexer, TestSpecificationFactoryDetailsLexer, PdslCommonLexer, TestSpecificationFactoryLexer ;

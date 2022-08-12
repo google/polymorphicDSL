@@ -1,0 +1,41 @@
+# Polymorphic Domain Specific Language Framework
+
+An incredibly powerful framework for scaling testing across multiple
+applications and platforms.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
+
+## License
+
+Apache 2.0; see [`LICENSE`](LICENSE) for details.
+
+## Disclaimer
+
+This project is not an official Google project. It is not supported by
+Google and Google specifically disclaims all warranties as to its quality,
+merchantability, or fitness for a particular purpose.
+
+## Getting Started
+
+The documentation directory of this project has a "Getting Started" guide as well as other information we expect you'll find helpful!
+
+## Running
+
+Many ANTLR4 .g4 files are used to  generate code used at runtime. There is separate code for both the Gherkin Parser used in the library and the grammars used for the tests. To make this all work an additional maven *test* profile is used in the project.
+
+`mvn clean install` will probably fail during the test phase because it is expecting this code to be generated. This can be solved by first running 
+	`mvn clean antlr4:antlr4 -P test`
+to generate the test classes.
+
+
+Running `mvn clean` at this point will destroy all of the generated code, so to *install* do the following operations:
+
+```
+mvn clean antlr4:antlr4 -P test
+mvn antlr4:antlr4 install
+```
+
+At this point you can use `mvn anltr4:antlr4 <some lifecycle>` up until you run `mvn clean` again. If you do that you will need to regenerate the source code using the `-P test` profile as shown above.
+

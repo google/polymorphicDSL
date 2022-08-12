@@ -1,6 +1,8 @@
 package com.pdsl.grammars;
 
+import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
+import com.pdsl.gherkin.parser.GherkinCommonContextHelper;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -13,6 +15,8 @@ import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,10 +25,12 @@ import java.util.*;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestSpecificationFactoryParserListenerImpl implements TestSpecificationFactoryParserListener {
+
+    private static final GherkinCommonContextHelper ctxHelper = new GherkinCommonContextHelper(TestSpecificationFactoryParser.VOCABULARY);
     private Optional<Path> lastFile = Optional.empty();
     private Optional<Collection<TestSpecification>>  lastTestSpecification = Optional.empty();
     private Optional<TestSpecificationFactory> factory = Optional.empty();
-    private Set<URL> testResources = new HashSet<>();
+    private Set<URI> testResources = new HashSet<>();
     private Optional<Exception> exception = Optional.empty();
     private Optional<PdslHelper.SupportedGrammars> grammar = Optional.empty();
     private Optional<PdslHelper.SupportedGrammars> subgrammar = Optional.empty();
@@ -32,7 +38,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificTestSpecificationFactory(TestSpecificationFactoryParser.GivenSpecificTestSpecificationFactoryContext ctx) {
-        factoryType = PdslHelper.Factories.valueOf(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()).replaceAll(" ", "_").toUpperCase());
+        factoryType = PdslHelper.Factories.valueOf(ctxHelper.extractTextInQuotes(ctx).replaceAll(" ", "_").toUpperCase());
     }
 
     @Override
@@ -40,7 +46,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificGrammar(TestSpecificationFactoryParser.GivenSpecificGrammarContext ctx) {
-        grammar = Optional.of(PdslHelper.SupportedGrammars.valueOf(PdslHelper.convertToEnumCase(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()))));
+        grammar = Optional.of(PdslHelper.SupportedGrammars.valueOf(PdslHelper.convertToEnumCase(ctxHelper.extractTextInQuotes(ctx))));
     }
 
     @Override
@@ -48,8 +54,8 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
 
     @Override
     public void enterGivenSpecificSubgrammar(TestSpecificationFactoryParser.GivenSpecificSubgrammarContext ctx) {
-        subgrammar = Optional.of(PdslHelper.SupportedGrammars.valueOf(PdslHelper.convertToEnumCase(PdslHelper.extractStringInQuotes(textInDoubleQuotes(ctx.textInDoubleQuotesEnd().getText()))
-                )));
+        subgrammar = Optional.of(PdslHelper.SupportedGrammars.valueOf(PdslHelper.convertToEnumCase(
+                ctxHelper.extractTextInQuotes(ctx))));
     }
 
     private String textInDoubleQuotes(String txt) {
@@ -95,7 +101,7 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
     public void enterThenTestSpecificationHasTotalPhrases(TestSpecificationFactoryParser.ThenTestSpecificationHasTotalPhrasesContext ctx) {
         assertThat(lastTestSpecification.isPresent()).isTrue();
         int actual = totalPhrasesInTestSpecification(lastTestSpecification.get().stream().findFirst().get(), 0);
-        assertThat(actual).isEqualTo(Integer.parseInt(ctx.integerValue().getText()));
+        assertThat(actual).isEqualTo(ctxHelper.extractInt(ctx));
     }
 
     private int totalPhrasesInTestSpecification(TestSpecification specification, Integer total) {
@@ -168,60 +174,36 @@ public class TestSpecificationFactoryParserListenerImpl implements TestSpecifica
     public void exitPolymorphicDslAllRules(TestSpecificationFactoryParser.PolymorphicDslAllRulesContext ctx) { }
 
     @Override
-    public void enterGherkinStepKeyword(TestSpecificationFactoryParser.GherkinStepKeywordContext ctx) { }
-
-    @Override
-    public void exitGherkinStepKeyword(TestSpecificationFactoryParser.GherkinStepKeywordContext ctx) { }
-
-    @Override
-    public void enterIntegerValue(TestSpecificationFactoryParser.IntegerValueContext ctx) { }
-
-    @Override
-    public void exitIntegerValue(TestSpecificationFactoryParser.IntegerValueContext ctx) { }
-
-    @Override
-    public void enterTextInDoubleQuotes(TestSpecificationFactoryParser.TextInDoubleQuotesContext ctx) { }
-
-    @Override
-    public void exitTextInDoubleQuotes(TestSpecificationFactoryParser.TextInDoubleQuotesContext ctx) { }
-
-    @Override
     public void enterDocstring(TestSpecificationFactoryParser.DocstringContext ctx) { }
 
     @Override
     public void exitDocstring(TestSpecificationFactoryParser.DocstringContext ctx) { }
 
     @Override
-    public void enterTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) {
-
-    }
-
-    @Override
-    public void exitTextInDoubleQuotesEnd(TestSpecificationFactoryParser.TextInDoubleQuotesEndContext ctx) {
-
-    }
-
-    @Override
     public void enterGivenTheTestResource(TestSpecificationFactoryParser.GivenTheTestResourceContext ctx) {
-        String resource = ctx.textInDoubleQuotes().getText();
+        String resource = ctxHelper.extractTextInQuotes(ctx);
         URL url = getClass().getClassLoader().getResource(resource);
         lastFile = Optional.of(Path.of(url.getPath()));
     }
 
     @Override
     public void exitGivenTheTestResource(TestSpecificationFactoryParser.GivenTheTestResourceContext ctx) {
-        testResources.add(getClass().getClassLoader().getResource(ctx.textInDoubleQuotes().getText()));
+        try {
+            testResources.add(getClass().getClassLoader().getResource(ctxHelper.extractTextInQuotes(ctx)).toURI());
+        } catch (URISyntaxException e) {
+            throw new PolymorphicDslFrameworkException("Could not add URI to test resources!", e);
+        }
     }
 
     @Override
     public void enterGivenTheRawResource(TestSpecificationFactoryParser.GivenTheRawResourceContext ctx) {
-        String resourceBody = ctx.docstring().getText().strip().replaceAll("\"\"\"", "");
+        String resourceBody = ctxHelper.extractDocstring(ctx);
         // Create a temporary file
         try {
             lastFile = Optional.of(Files.createTempFile("pdsl" + UUID.randomUUID(), ".tmp.txt"));
             Files.writeString(lastFile.get(), resourceBody);
             testResources = new HashSet<>();
-            testResources.add(lastFile.get().toUri().toURL());
+            testResources.add(lastFile.get().toUri());
         } catch (IOException e) {
             throw new IllegalStateException("Could not create a temporary directory", e);
         }

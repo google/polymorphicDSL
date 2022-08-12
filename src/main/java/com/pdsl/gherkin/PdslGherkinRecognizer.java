@@ -4,12 +4,13 @@ import com.pdsl.gherkin.models.GherkinFeature;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
 public interface PdslGherkinRecognizer {
 
-    Optional<GherkinFeature> interpretGherkinFile(URL filepath, PdslGherkinListener listener) throws IOException;
+    Optional<GherkinFeature> interpretGherkinFile(URI filepath, PdslGherkinListener listener) throws IOException;
 
     /**
      * Reads a gherkin file and transforms it into an object if and only if it has scenarios AND all those scenarios have at least one step.
@@ -21,7 +22,7 @@ public interface PdslGherkinRecognizer {
      * @return a GherkinFeature matching the contents of the file
      * @throws IOException
      */
-    GherkinFeature interpretGherkinFileStrictly(URL gherkinLocation, PdslGherkinListener listener) throws IOException;
+    GherkinFeature interpretGherkinFileStrictly(URI gherkinLocation, PdslGherkinListener listener) throws IOException;
 
-    Optional<GherkinFeature> interpretGherkinFileStrictly(InputStream featureFileContent, URL featurePathOrId) throws IOException;
+    Optional<GherkinFeature> interpretGherkinFileStrictly(InputStream featureFileContent, URI featurePathOrId) throws IOException;
 }

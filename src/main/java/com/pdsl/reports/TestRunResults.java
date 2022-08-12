@@ -25,7 +25,7 @@ public interface TestRunResults {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .findFirst().orElseThrow());
-            Preconditions.checkArgument(failedResults.stream().anyMatch(r -> r.getStatus().equals(TechnicalReportData.Status.PASSED)),
+            Preconditions.checkArgument(!failedResults.stream().anyMatch(r -> r.getStatus().equals(TechnicalReportData.Status.PASSED)),
                     "A passing test was included with the test results");
 
         }

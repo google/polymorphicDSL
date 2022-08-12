@@ -5,9 +5,9 @@ import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
-import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestResult;
+import com.pdsl.gherkin.parser.GherkinCommonContextHelper;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -25,7 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URL;
+import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -34,10 +34,11 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParserListener {
 
+    private static final GherkinCommonContextHelper ctxHelper = new GherkinCommonContextHelper(TestExecutorMetaParser.VOCABULARY);
     private PdslHelper.ExecutorType executorType;
     private PdslHelper.ListenerType grammarListener;
     private PdslHelper.ListenerType subgrammarListener;
-    private Set<URL> urls = new HashSet<>();
+    private Set<URI> urls = new HashSet<>();
     private TraceableTestRunExecutor executor;
     private PdslHelper.SupportedGrammars grammar;
     private PdslHelper.SupportedGrammars subgrammar;
@@ -53,6 +54,10 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     }
 
     @Override
+    public void exitGivenTheFollowingTestResource(TestExecutorMetaParser.GivenTheFollowingTestResourceContext ctx) {}
+    @Override
+    public void enterGivenTheFollowingTestResource(TestExecutorMetaParser.GivenTheFollowingTestResourceContext ctx) {}
+    @Override
     public void enterPolymorphicDslAllRules(TestExecutorMetaParser.PolymorphicDslAllRulesContext ctx) { }
 
     @Override
@@ -60,7 +65,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterGivenTheTestExecutorIsSpecified(TestExecutorMetaParser.GivenTheTestExecutorIsSpecifiedContext ctx) {
-        String testExecutor = extractQuotedText(ctx.textInDoubleQuotesEnd().getText());
+        String testExecutor = ctxHelper.extractTextInQuotes(ctx);
         executorType = PdslHelper.ExecutorType.valueOf(PdslHelper.convertToEnumCase(testExecutor));
     }
 
@@ -69,7 +74,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterGivenTheGrammarListener(TestExecutorMetaParser.GivenTheGrammarListenerContext ctx) {
-        String listener = extractQuotedText(ctx.textInDoubleQuotesEnd().getText());
+        String listener = ctxHelper.extractTextInQuotes(ctx);
         grammarListener = PdslHelper.ListenerType.valueOf(PdslHelper.convertToEnumCase(listener));
     }
 
@@ -78,7 +83,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterGivenTheSubgrammarListener(TestExecutorMetaParser.GivenTheSubgrammarListenerContext ctx) {
-        String listener = extractQuotedText(ctx.textInDoubleQuotesEnd().getText());
+        String listener = ctxHelper.extractTextInQuotes(ctx);
         subgrammarListener = PdslHelper.ListenerType.valueOf(PdslHelper.convertToEnumCase(listener));
     }
 
@@ -96,7 +101,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         }
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(new DefaultPolymorphicDslPhraseFilter((Class<? extends Parser>)subgrammar.getParserClass(), (Class<? extends Lexer>)subgrammar.getLexerClass()));
         executor = gherkinTestExecutor;
-        String tagExpression = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
+        String tagExpression = ctxHelper.extractTextInQuotes(ctx);
         MetadataTestRunResults runResults = ((GherkinTestExecutor)executor).runTestsWithMetadata(urls, tagExpression, subgrammarListener.getListener(), "Integration");
         results = Optional.of(runResults);
     }
@@ -106,7 +111,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterGivenTheGrammarPhraseFilter(TestExecutorMetaParser.GivenTheGrammarPhraseFilterContext ctx) {
-        String phraseFilter = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
+        String phraseFilter = ctxHelper.extractTextInQuotes(ctx);
         String enumName = PdslHelper.convertToEnumCase(phraseFilter);
         grammar = PdslHelper.SupportedGrammars.valueOf(enumName);
 
@@ -119,7 +124,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterGivenTheSubgrammarPhraseFilter(TestExecutorMetaParser.GivenTheSubgrammarPhraseFilterContext ctx) {
-        String phraseFilter = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
+        String phraseFilter = ctxHelper.extractTextInQuotes(ctx);
         String enumName = PdslHelper.convertToEnumCase(phraseFilter);
         subgrammar = PdslHelper.SupportedGrammars.valueOf(enumName);
     }
@@ -142,51 +147,18 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterGivenTheRawResource(TestExecutorMetaParser.GivenTheRawResourceContext ctx) {
-        String resourceBody = ctx.docstring().getText().strip().replaceAll("\"\"\"", "");
+        String resourceBody = ctxHelper.extractDocstring(ctx);
         // Create a temporary file
         try {
             Path tempFile = Files.createTempFile("pdsl" + UUID.randomUUID(), ".tmp.txt");
             Files.writeString(tempFile, resourceBody);
-            urls.add(tempFile.toUri().toURL());
+            urls.add(tempFile.toUri());
         } catch (IOException e) {
             throw new TestFrameworkException("Could not create a temporary file to process raw input!", e);
         }
     }
-
     @Override
-    public void exitGivenTheRawResource(TestExecutorMetaParser.GivenTheRawResourceContext ctx) {
-
-    }
-
-    @Override
-    public void enterGherkinStepKeyword(TestExecutorMetaParser.GherkinStepKeywordContext ctx) {
-
-    }
-
-    @Override
-    public void exitGherkinStepKeyword(TestExecutorMetaParser.GherkinStepKeywordContext ctx) {
-
-    }
-
-    @Override
-    public void enterIntegerValue(TestExecutorMetaParser.IntegerValueContext ctx) {
-
-    }
-
-    @Override
-    public void exitIntegerValue(TestExecutorMetaParser.IntegerValueContext ctx) {
-
-    }
-
-    @Override
-    public void enterTextInDoubleQuotes(TestExecutorMetaParser.TextInDoubleQuotesContext ctx) {
-
-    }
-
-    @Override
-    public void exitTextInDoubleQuotes(TestExecutorMetaParser.TextInDoubleQuotesContext ctx) {
-
-    }
+    public void exitGivenTheRawResource(TestExecutorMetaParser.GivenTheRawResourceContext ctx) {}
 
     @Override
     public void enterDocstring(TestExecutorMetaParser.DocstringContext ctx) {
@@ -197,17 +169,6 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     public void exitDocstring(TestExecutorMetaParser.DocstringContext ctx) {
 
     }
-
-    @Override
-    public void enterTextInDoubleQuotesEnd(TestExecutorMetaParser.TextInDoubleQuotesEndContext ctx) {
-
-    }
-
-    @Override
-    public void exitTextInDoubleQuotesEnd(TestExecutorMetaParser.TextInDoubleQuotesEndContext ctx) {
-
-    }
-
 
     @Override
     public void enterWhenTheTestResourceIsProcessedByFactory(TestExecutorMetaParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) {
@@ -310,7 +271,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
                 logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestCaseTitle(), metadata.getFailureReason().orElseThrow());
             }
         }
-        assertThat(results.get().passingTestTotal()).isEqualTo(Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText())));
+        assertThat(results.get().passingTestTotal()).isEqualTo(ctxHelper.extractInt(ctx));
 
     }
 
@@ -322,7 +283,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedFailingTests(TestExecutorMetaParser.ThenTheTestRunResultsHaveSpecifiedFailingTestsContext ctx) {
         assertThat(results.isPresent()).isTrue();
-        assertThat(results.get().failingTestTotal()).isEqualTo(Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.getText())));
+        assertThat(results.get().failingTestTotal()).isEqualTo(ctxHelper.extractInt(ctx));
     }
 
     @Override
@@ -333,7 +294,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     @Override
     public void enterGivenSpecificTestSpecificationFactory(TestExecutorMetaParser.GivenSpecificTestSpecificationFactoryContext ctx) {
         factoryType = PdslHelper.Factories.valueOf(
-                PdslHelper.convertToEnumCase(PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText())));
+                PdslHelper.convertToEnumCase(ctxHelper.extractTextInQuotes(ctx)));
     }
 
     @Override
@@ -360,6 +321,8 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
     public void exitEveryRule(ParserRuleContext ctx) {
 
     }
+
+
 
     private enum ExecutorType {
         DEFAULT_PDSL_TEST_EXECUTOR,

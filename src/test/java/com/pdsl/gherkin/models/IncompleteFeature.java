@@ -19,7 +19,7 @@ public class IncompleteFeature {
 
     @Test
     public void backgroundWithNoSTeps_notPresent() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_background_1.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_background_1.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         // Background should be present, but have no steps
         assertThat(featureOptional.get().getBackground().isPresent()).isTrue();
@@ -31,7 +31,7 @@ public class IncompleteFeature {
 
     @Test
     public void backgroundWithNoStepsAndLongDescription_notPresent() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_background_2.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_background_2.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         // Background should be present, but have no steps
         assertThat(featureOptional.get().getBackground().isPresent()).isTrue();
@@ -45,7 +45,7 @@ public class IncompleteFeature {
     // TODO: Determine if we want to allow empty scenarios
     @Test
     public void featureWithOnlyDescription_stillParses() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_1.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_1.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         assertThat(feature.getTitle().isPresent()).isTrue();
@@ -58,7 +58,7 @@ public class IncompleteFeature {
     // TODO: Determine if we want to allow empty features
     @Test
     public void featureContainingOnlyTitle_stillParses() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_2.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_2.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         assertThat(feature.getTitle().isPresent()).isTrue();
@@ -71,7 +71,7 @@ public class IncompleteFeature {
     // TODO: Do we really want to allow gherkin features that only contain a comment?
     @Test
     public void featureContainingOnlyAComment_stillParses() throws IOException {
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_3.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "incomplete_feature_3.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
     }
 }

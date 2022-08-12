@@ -21,7 +21,7 @@ public class EscapedPipes {
     @Test
     public void escapedPipes_preservedInTableCells() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "escaped_pipes.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "escaped_pipes.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
 
         // Assert

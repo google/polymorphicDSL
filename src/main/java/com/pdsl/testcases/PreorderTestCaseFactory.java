@@ -9,7 +9,9 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * A factory that processes Test Specifications doing a Preorder traversal
+ * A factory that processes Test Specifications doing a Preorder traversal.
+ *
+ * It is capable of producing multiple test cases from a single test specification.
  */
 public class PreorderTestCaseFactory implements TestCaseFactory {
 

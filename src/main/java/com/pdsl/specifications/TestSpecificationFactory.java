@@ -1,6 +1,6 @@
 package com.pdsl.specifications;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -22,7 +22,7 @@ public interface TestSpecificationFactory {
      * @param testContent The data to be processed into a Test Specification
      * @return TestSpecification if the test content could be processed, empty if not
      */
-    Optional<Collection<TestSpecification>> getTestSpecifications(Set<URL> testContent);
+    Optional<Collection<TestSpecification>> getTestSpecifications(Set<URI> testContent);
 
 
 }

@@ -20,7 +20,7 @@ public class DataTablesTest {
     @Test
     public void stepDataTables_constructedCorrectly() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "datatables.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "datatables.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         // Get the steps of the single scenario
@@ -82,7 +82,7 @@ public class DataTablesTest {
     @Test
     public void dataTableWithNewlines_preservedIfEscaped() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "datatables_with_new_lines.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "datatables_with_new_lines.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         // Get steps from single scenario
@@ -100,7 +100,7 @@ public class DataTablesTest {
     @Test
     public void dataTableWithNewlines_preservedNegativeSpace() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "datatables_with_new_lines.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "datatables_with_new_lines.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         // Get steps from single scenario
@@ -117,7 +117,7 @@ public class DataTablesTest {
     @Test
     public void dataTableWithEscapedPipes_preserveEscapedPipes() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "escaped_pipes.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "escaped_pipes.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
         // Get steps from single scenario

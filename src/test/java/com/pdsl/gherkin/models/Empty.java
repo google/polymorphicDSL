@@ -19,7 +19,7 @@ public class Empty {
     @Test
     public void parseEmptyFile_returnsEmptyResult() throws IOException {
         // Arrange, Act
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "empty.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "empty.feature").toUri(), listener);
         // Assert
         assertThat(featureOptional.isPresent()).isFalse();
     }

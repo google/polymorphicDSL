@@ -1,10 +1,9 @@
 package com.pdsl.uat;
 
 import com.pdsl.grammars.*;
-import com.pdsl.junit.PdslGherkinApplication;
-import com.pdsl.junit.PdslGherkinJUnit4Runner;
-import com.pdsl.junit.PdslTest;
-import com.pdsl.junit.RecognizedBy;
+import com.pdsl.runners.PdslGherkinApplication;
+import com.pdsl.runners.junit.PdslGherkinJUnit4Runner;
+import com.pdsl.runners.PdslTest;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.runner.RunWith;
 

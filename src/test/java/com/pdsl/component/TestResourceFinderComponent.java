@@ -4,7 +4,8 @@ import com.pdsl.specifications.FileSystemTestResourceFinder;
 import com.pdsl.specifications.GlobPathMatcher;
 import org.junit.Test;
 
-import java.net.URL;
+import java.net.URI;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Collection;
@@ -21,7 +22,7 @@ public class TestResourceFinderComponent {
     public void resourceFinder_canRecursivelyMatchFiles() {
         PathMatcher pathMatcher = new GlobPathMatcher("glob:**/*\\.txt");
         FileSystemTestResourceFinder fileSystemTestResourceFinder = new FileSystemTestResourceFinder(pathMatcher);
-        Collection<URL> allTextFiles = fileSystemTestResourceFinder.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> allTextFiles = fileSystemTestResourceFinder.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(allTextFiles.size()).isEqualTo(4);
     }
 
@@ -29,7 +30,7 @@ public class TestResourceFinderComponent {
     public void resourceFinder_exclusionsWork() {
         PathMatcher matcher = new GlobPathMatcher("glob:**/*\\.txt", "glob:**/b\\.txt");
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Collection<URL> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(noBResources.size()).isEqualTo(2);
     }
 
@@ -37,7 +38,7 @@ public class TestResourceFinderComponent {
     public void resourceFinderWithoutGlobKeywords_exclusionsWork() {
         PathMatcher matcher = new GlobPathMatcher("**/*\\.txt", "**/a\\.txt");
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Collection<URL> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(noBResources.size()).isEqualTo(2);
     }
 
@@ -45,7 +46,7 @@ public class TestResourceFinderComponent {
     public void optionalOperator_matches() {
         PathMatcher matcher = new GlobPathMatcher("**/?\\.txt");
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Collection<URL> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(noBResources.size()).isEqualTo(4);
     }
 
@@ -53,7 +54,7 @@ public class TestResourceFinderComponent {
     public void directorySearch_matchesOnlySubdirectory() {
         PathMatcher matcher = new GlobPathMatcher("**/subdirectory/*");
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Collection<URL> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(noBResources.size()).isEqualTo(2);
     }
 
@@ -61,7 +62,7 @@ public class TestResourceFinderComponent {
     public void characterClass_matches() {
         PathMatcher matcher = new GlobPathMatcher("**/[a-b]\\.txt");
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Collection<URL> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(noBResources.size()).isEqualTo(4);
     }
 
@@ -69,7 +70,7 @@ public class TestResourceFinderComponent {
     public void multipleMatchExpressions_matchesAllFiles() {
         PathMatcher matcher = new GlobPathMatcher(List.of("**/a\\.txt", "**/b\\.txt"));
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Collection<URL> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
+        Collection<URI> noBResources = noBFiles.scanForTestResources(resourcesDirectory).orElseThrow();
         assertThat(noBResources.size()).isEqualTo(4);
     }
 
@@ -77,7 +78,7 @@ public class TestResourceFinderComponent {
     public void allItemsExcluded_returnsEmptyCollection() {
         PathMatcher matcher = new GlobPathMatcher("**/a\\.txt", "**/*.txt");
         FileSystemTestResourceFinder noBFiles = new FileSystemTestResourceFinder(matcher);
-        Optional<Collection<URL>> noBResources = noBFiles.scanForTestResources(resourcesDirectory);
+        Optional<Collection<URI>> noBResources = noBFiles.scanForTestResources(resourcesDirectory);
         assertThat(noBResources.isEmpty()).isTrue();
     }
 }

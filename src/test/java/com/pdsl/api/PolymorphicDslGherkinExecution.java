@@ -19,6 +19,8 @@ import org.junit.runners.JUnit4;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -47,10 +49,10 @@ public class PolymorphicDslGherkinExecution {
 
     @Test
     public void minimalFeature_executesProperly() throws MalformedURLException {
-        final URL absolutePathValid = new File(getClass().getClassLoader()
-                .getResource("testdata/good/minimal.feature").getFile()).toURI().toURL();
+        final URI absolutePathValid = new File(getClass().getClassLoader()
+                .getResource("testdata/good/minimal.feature").getFile()).toURI();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
+        Set<URI> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
 
         StepCounterListener stepCounterListener = new StepCounterListener();
@@ -70,11 +72,11 @@ public class PolymorphicDslGherkinExecution {
     }
 
     @Test
-    public void gherkinTestSpecification_executesVeryLongFeatureProperly() throws MalformedURLException {
+    public void gherkinTestSpecification_executesVeryLongFeatureProperly() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/very_long.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
@@ -91,11 +93,11 @@ public class PolymorphicDslGherkinExecution {
     }
 
     @Test
-    public void gherkinTestSpecification_executesReadmeExampleFeatureProperly() throws MalformedURLException {
+    public void gherkinTestSpecification_executesReadmeExampleFeatureProperly() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/readme_example.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
         Optional<Collection<TestSpecification>> testSpecification = provider.getTestSpecifications(dslFiles);
@@ -108,11 +110,11 @@ public class PolymorphicDslGherkinExecution {
     }
 
     @Test
-    public void gherkinTestSpecification_executesRuleFeatureProperly() throws MalformedURLException {
+    public void gherkinTestSpecification_executesRuleFeatureProperly() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/rule.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
         // Act
         Optional<Collection<TestSpecification>> testSpecificatons = provider.getTestSpecifications(dslFiles);
@@ -130,11 +132,11 @@ public class PolymorphicDslGherkinExecution {
     }
 
     @Test
-    public void gherkinTestSpecification_executesBackgroundFeatureProperly() throws MalformedURLException {
+    public void gherkinTestSpecification_executesBackgroundFeatureProperly() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/background.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
@@ -152,11 +154,11 @@ public class PolymorphicDslGherkinExecution {
     }
 
     @Test
-    public void gherkinTestSpecification_executesComplexBackgroundFeatureProperly() throws MalformedURLException {
+    public void gherkinTestSpecification_executesComplexBackgroundFeatureProperly() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = new File(getClass().getClassLoader().getResource("testdata/good/complex_background.feature").getFile()).toURI().toURL();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act

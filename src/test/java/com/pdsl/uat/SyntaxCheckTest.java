@@ -1,13 +1,10 @@
 package com.pdsl.uat;
 
 import com.pdsl.grammars.*;
-import com.pdsl.junit.PdslGherkinApplication;
-import com.pdsl.junit.PdslGherkinJUnit4Runner;
-import com.pdsl.junit.PdslTest;
-import com.pdsl.junit.RecognizedBy;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
+import com.pdsl.runners.PdslGherkinApplication;
+import com.pdsl.runners.junit.PdslGherkinJUnit4Runner;
+import com.pdsl.runners.PdslTest;
+import com.pdsl.runners.RecognizedBy;
 import org.junit.runner.RunWith;
 
 import javax.inject.Provider;

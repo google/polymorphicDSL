@@ -5,7 +5,7 @@ import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
         this.tags = tags;
     }
 
-    public GherkinTestCaseSpecification(List<GherkinTestCaseSpecification> childFeatures, URL originalTestResource) {
+    public GherkinTestCaseSpecification(List<GherkinTestCaseSpecification> childFeatures, URI originalTestResource) {
         this.testSpecification = new DefaultTestSpecification.Builder("Gherkin Test Container", originalTestResource)
                 .withChildTestSpecifications(new ArrayList<>(childFeatures))
                 .build();
@@ -53,7 +53,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
     }
 
     @Override
-    public URL getOriginalTestResource() {
+    public URI getOriginalTestResource() {
         return testSpecification.getOriginalTestResource();
     }
 }

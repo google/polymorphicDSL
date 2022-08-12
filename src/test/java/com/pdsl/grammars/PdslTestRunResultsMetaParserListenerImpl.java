@@ -1,10 +1,11 @@
 package com.pdsl.grammars;
 
+import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
-import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestResult;
+import com.pdsl.gherkin.parser.GherkinCommonContextHelper;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
@@ -17,24 +18,23 @@ import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import com.pdsl.grammars.PdslTestRunResultsMetaParser;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
 
 public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResultsMetaParserListener {
 
+    private final GherkinCommonContextHelper ctxHelper = new GherkinCommonContextHelper(PdslTestRunResultsMetaParser.VOCABULARY);
     private Optional<MetadataTestRunResults> testRunResults = Optional.empty();
     private Optional<TestResult> testMetadata = Optional.empty();
     private Optional<Collection<TestCase>> testCaseCollection = Optional.empty();
     private ParseTreeListener grammarListener = PdslHelper.ListenerType.ARITHMETIC.getListener();
-    private Set<URL> urlSet = new HashSet<>();
+    private Set<URI> urlSet = new HashSet<>();
 
     private static final TraceableTestRunExecutor testExecutor = new DefaultPolymorphicDslTestExecutor();
     private static final PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter
@@ -126,18 +126,11 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     public void exitWhenTheTestCaseIsProcessedByAnyPdslTestExecutor(PdslTestRunResultsMetaParser.WhenTheTestCaseIsProcessedByAnyPdslTestExecutorContext ctx) {
     }
 
-    @Override
-    public void enterIntegerValue(PdslTestRunResultsMetaParser.IntegerValueContext ctx) {
-    }
-
-    @Override
-    public void exitIntegerValue(PdslTestRunResultsMetaParser.IntegerValueContext ctx) {
-    }
 
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedPassingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedPassingTestsContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        int actual = Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText()));
+        int actual = ctxHelper.extractInt(ctx);
         assertThat(testRunResults.get().passingTestTotal()).isGreaterThan(actual);
     }
 
@@ -148,7 +141,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTheTestRunResultsHaveSpecifiedFailingTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultsHaveSpecifiedFailingTestsContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        int actual = Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText()));
+        int actual = ctxHelper.extractInt(ctx);
         assertThat(testRunResults.get().failingTestTotal()).isGreaterThan(actual);
     }
 
@@ -158,7 +151,11 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
 
     @Override
     public void enterGivenTheTestResource(PdslTestRunResultsMetaParser.GivenTheTestResourceContext ctx) {
-        urlSet.add(getClass().getClassLoader().getResource(PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotes().getText())));
+        try {
+            urlSet.add(getClass().getClassLoader().getResource(ctxHelper.extractTextInQuotes(ctx)).toURI());
+        } catch (URISyntaxException e) {
+            throw new PolymorphicDslFrameworkException("Could not add resource due to issue with URI",e);
+        }
     }
 
     @Override
@@ -168,33 +165,14 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterGivenTheRawResource(PdslTestRunResultsMetaParser.GivenTheRawResourceContext ctx) {
         urlSet = new HashSet<>();
-        Path path = PdslHelper.processRawResourceFromDocstring(ctx.docstring().getText().replaceAll("\"\"\"", "").strip());
-        try {
-            urlSet.add(path.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new TestFrameworkException("Could not make a temporary file for testing", e);
-        }
+        Path path = PdslHelper.processRawResourceFromDocstring(ctxHelper.extractDocstring(ctx));
+        urlSet.add(path.toUri());
     }
 
     @Override
     public void exitGivenTheRawResource(PdslTestRunResultsMetaParser.GivenTheRawResourceContext ctx) {
     }
 
-    @Override
-    public void enterGherkinStepKeyword(PdslTestRunResultsMetaParser.GherkinStepKeywordContext ctx) {
-    }
-
-    @Override
-    public void exitGherkinStepKeyword(PdslTestRunResultsMetaParser.GherkinStepKeywordContext ctx) {
-    }
-
-    @Override
-    public void enterTextInDoubleQuotes(PdslTestRunResultsMetaParser.TextInDoubleQuotesContext ctx) {
-    }
-
-    @Override
-    public void exitTextInDoubleQuotes(PdslTestRunResultsMetaParser.TextInDoubleQuotesContext ctx) {
-    }
 
     @Override
     public void enterDocstring(PdslTestRunResultsMetaParser.DocstringContext ctx) {
@@ -203,23 +181,10 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void exitDocstring(PdslTestRunResultsMetaParser.DocstringContext ctx) {
     }
-
-    @Override
-    public void enterTextInDoubleQuotesEnd(PdslTestRunResultsMetaParser.TextInDoubleQuotesEndContext ctx) {
-    }
-
-    @Override
-    public void exitTextInDoubleQuotesEnd(PdslTestRunResultsMetaParser.TextInDoubleQuotesEndContext ctx) {
-    }
-
     @Override
     public void enterGivenAnotherTestResource(PdslTestRunResultsMetaParser.GivenAnotherTestResourceContext ctx) {
-        Path path = PdslHelper.processRawResourceFromDocstring(ctx.docstring().getText().replaceAll("\"\"\"", "").strip());
-        try {
-            urlSet.add(path.toUri().toURL());
-        } catch (MalformedURLException e) {
-            throw new TestFrameworkException("Could not create a temporary test resource!", e);
-        }
+        Path path = PdslHelper.processRawResourceFromDocstring(ctxHelper.extractDocstring(ctx));
+        urlSet.add(path.toUri());
     }
 
     @Override
@@ -229,15 +194,16 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
 
     @Override
     public void enterConvertTestResourcesToCollectionWithSingleTestCase(PdslTestRunResultsMetaParser.ConvertTestResourcesToCollectionWithSingleTestCaseContext ctx) {
-        assertThat(urlSet).isNotNull();
-        ;
-        assertThat(urlSet).isNotEmpty();
 
-        SingleTestOutputPreorderTestCaseFactory factory = new SingleTestOutputPreorderTestCaseFactory();
-        Optional<Collection<TestSpecification>> testSpecification = testSpecificationFactory.getTestSpecifications(urlSet);
-        assertThat(testSpecification.isPresent()).isTrue();
-        Collection<TestCase> testCases = factory.processTestSpecification(testSpecification.get());
-        testCaseCollection = Optional.of(testCases);
+            assertThat(urlSet).isNotNull();
+            assertThat(urlSet).isNotEmpty();
+
+            SingleTestOutputPreorderTestCaseFactory factory = new SingleTestOutputPreorderTestCaseFactory();
+            Optional<Collection<TestSpecification>> testSpecification = testSpecificationFactory.getTestSpecifications(urlSet);
+            assertThat(testSpecification.isPresent()).isTrue();
+            Collection<TestCase> testCases = factory.processTestSpecification(testSpecification.get());
+            testCaseCollection = Optional.of(testCases);
+
     }
 
     @Override
@@ -247,8 +213,8 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTestCaseCollectionHasSpecifiedTestCases(PdslTestRunResultsMetaParser.ThenTestCaseCollectionHasSpecifiedTestCasesContext ctx) {
         assertThat(testCaseCollection.isPresent()).isTrue();
-        int expectedValue = Integer.parseInt(ctx.integerValue().getText());
-        assertThat(testCaseCollection.get().size()).isEqualTo(expectedValue);
+        int expectedValue = ctxHelper.extractInt(ctx);
+        assertThat(testCaseCollection.get().size()).isEqualTo(-1);
     }
 
     @Override
@@ -257,7 +223,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
 
     @Override
     public void enterGivenTheSpecifiedGrammarParseTreeListener(PdslTestRunResultsMetaParser.GivenTheSpecifiedGrammarParseTreeListenerContext ctx) {
-        String grammarName = PdslHelper.convertToEnumCase(PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText()));
+        String grammarName = PdslHelper.convertToEnumCase(ctxHelper.extractTextInQuotes(ctx));
         PdslHelper.ListenerType listenerType = PdslHelper.ListenerType.valueOf(grammarName);
         grammarListener = listenerType.getListener();
     }
@@ -280,7 +246,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTheTestRunResultHasSpecifiedFilteredDuplicateTests(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedFilteredDuplicateTestsContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        int expected = Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText()));
+        int expected = ctxHelper.extractInt(ctx);
         assertThat(testRunResults.get().totalFilteredDuplicateTests()).isGreaterThan(expected);
     }
 
@@ -291,7 +257,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTheTestRunResultHasSpecifiedPassingPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedPassingPhrasesContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        int actual = Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText()));
+        int actual = ctxHelper.extractInt(ctx);
         assertThat(testRunResults.get().passingPhraseTotal()).isGreaterThan(actual);
     }
 
@@ -302,7 +268,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void enterThenTheTestRunResultHasSpecifiedTotalPhrases(PdslTestRunResultsMetaParser.ThenTheTestRunResultHasSpecifiedTotalPhrasesContext ctx) {
         assertThat(testRunResults.isPresent()).isTrue();
-        int actual = Integer.parseInt(PdslHelper.extractStringInQuotes(ctx.integerValue().getText().split(" ")[0])); //TODO: Why does the rule match non-ints
+        int actual = ctxHelper.extractInt(ctx);
         assertThat(testRunResults.get().totalPhrases()).isAtLeast(actual);
     }
 
@@ -358,7 +324,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     public void enterThenTheTestMetadataFailingPhraseIsSpecifiedText(PdslTestRunResultsMetaParser.ThenTheTestMetadataFailingPhraseIsSpecifiedTextContext ctx) {
         assertThat(testMetadata.isPresent()).isTrue();
         assertThat(testMetadata.get().getFailingPhrase().isPresent()).isTrue();
-        String actual = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotesEnd().getText());
+        String actual = ctxHelper.extractTextInQuotes(ctx);
         assertThat(testMetadata.get().getFailingPhrase().get().getParseTree().getText()).contains(actual);
     }
 
@@ -375,6 +341,7 @@ public class PdslTestRunResultsMetaParserListenerImpl implements PdslTestRunResu
     @Override
     public void exitThenTheTestMetadataHasOneItemInIt(PdslTestRunResultsMetaParser.ThenTheTestMetadataHasOneItemInItContext ctx) {
     }
+
 
     @Override
     public void visitTerminal(TerminalNode node) {

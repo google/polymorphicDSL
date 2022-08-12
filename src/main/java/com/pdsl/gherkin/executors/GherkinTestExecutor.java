@@ -23,6 +23,7 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -51,7 +52,7 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
                 .withPickleJarFactory(pickleJarFactory).build();
     }
 
-    public TestRunResults processFilesAndRunTests(Set<URL> testResources, String tagExpression,
+    public TestRunResults processFilesAndRunTests(Set<URI> testResources, String tagExpression,
                                                                 ParseTreeListener grammarListener) {
         // Use the file locations and convert the feature files to test specifications
         Optional<Collection<TestSpecification>> testSpecificationOptional = testSpecificationFactory.getTestSpecifications(testResources);
@@ -73,12 +74,12 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         }
     }
 
-    public TestRunResults processFilesAndRunTests(Set<URL> testResources,
-                                                                ParseTreeListener grammarListener, String tagExpression) {
+    public TestRunResults processFilesAndRunTests(Set<URI> testResources,
+                                                  ParseTreeListener grammarListener, String tagExpression) {
         return processFilesAndRunTests(testResources, tagExpression, grammarListener);
     }
 
-    public TestRunResults processFilesAndRunTests(Set<URL> testResources, ParseTreeListener grammarListener) {
+    public TestRunResults processFilesAndRunTests(Set<URI> testResources, ParseTreeListener grammarListener) {
         return processFilesAndRunTests(testResources, grammarListener, "");
     }
 
@@ -93,7 +94,7 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         return executor.runTestsWithMetadata(testCases, subgrammarListener, context);
     }
 
-    public MetadataTestRunResults runTestsWithMetadata(Set<URL> resources, ParseTreeListener subgrammarListener, String context) {
+    public MetadataTestRunResults runTestsWithMetadata(Set<URI> resources, ParseTreeListener subgrammarListener, String context) {
         Optional<Collection<TestSpecification>> specification = testSpecificationFactory.getTestSpecifications(resources);
         if (specification.isEmpty()) {
             logger.warn("No resources could be converted to a test specification!");
@@ -103,7 +104,7 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         return executor.runTestsWithMetadata(testCases, subgrammarListener, context);
     }
 
-    public MetadataTestRunResults runTestsWithMetadata(Set<URL> resources, String tagExpression, ParseTreeListener subgrammarListener, String context) {
+    public MetadataTestRunResults runTestsWithMetadata(Set<URI> resources, String tagExpression, ParseTreeListener subgrammarListener, String context) {
         Optional<Collection<TestSpecification>> specification = testSpecificationFactory.getTestSpecifications(resources);
         if (specification.isEmpty()) {
             logger.warn("No resources could be converted to a test specification!");

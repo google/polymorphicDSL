@@ -3,7 +3,7 @@ package com.pdsl.specifications;
 import com.google.common.base.Preconditions;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +13,7 @@ public final class DefaultTestSpecification implements TestSpecification {
     private final Optional<List<FilteredPhrase>> phrases;
     private final Optional<InputStream> metaData;
     private final Optional<List<TestSpecification>> childItems;
-    private final URL originalTestResource;
+    private final URI originalTestResource;
 
     private DefaultTestSpecification(Builder builder) {
         this.id = builder.id;
@@ -44,7 +44,7 @@ public final class DefaultTestSpecification implements TestSpecification {
     }
 
     @Override
-    public URL getOriginalTestResource() {
+    public URI getOriginalTestResource() {
         return originalTestResource;
     }
 
@@ -53,9 +53,9 @@ public final class DefaultTestSpecification implements TestSpecification {
         private Optional<List<FilteredPhrase>> phrases = Optional.empty();
         private Optional<InputStream> metaData = Optional.empty();
         private Optional<List<TestSpecification>> childItems = Optional.empty();
-        private final URL originalTestResource;
+        private final URI originalTestResource;
 
-        public Builder(String id, URL originalTestResource) {
+        public Builder(String id, URI originalTestResource) {
             Preconditions.checkArgument(id != null && !id.isEmpty(), "Test Specification ID cannot be mepty or null!");
             this.id = id;
             this.originalTestResource = originalTestResource;

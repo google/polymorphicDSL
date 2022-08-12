@@ -1,5 +1,6 @@
 package com.pdsl.grammars;
 
+import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.reports.TestRunResults;
@@ -16,12 +17,14 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import static com.google.common.truth.Truth.assertThat;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
 public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificationParserListener {
 
-    private Set<URL> resourcePaths = new HashSet<>();
+    private Set<URI> resourcePaths = new HashSet<>();
     private TestSpecification testSpecification;
     private Collection<TestCase> testCases;
     private TestRunResults results;
@@ -37,7 +40,11 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
             String resourcePath = "testdata/good/" + fileName;
             URL resource = getClass().getClassLoader().getResource(resourcePath);
             assertThat(resource).isNotNull();
-            resourcePaths.add(resource);
+        try {
+            resourcePaths.add(resource.toURI());
+        } catch (URISyntaxException e) {
+            throw new PolymorphicDslFrameworkException("Could not create URI from resource! " + resource,e);
+        }
     }
 
     @Override
@@ -54,36 +61,6 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     }
 
     @Override
-    public void enterGherkinStepKeyword(PdslFrameworkSpecificationParser.GherkinStepKeywordContext ctx) {
-
-    }
-
-    @Override
-    public void exitGherkinStepKeyword(PdslFrameworkSpecificationParser.GherkinStepKeywordContext ctx) {
-
-    }
-
-    @Override
-    public void enterIntegerValue(PdslFrameworkSpecificationParser.IntegerValueContext ctx) {
-
-    }
-
-    @Override
-    public void exitIntegerValue(PdslFrameworkSpecificationParser.IntegerValueContext ctx) {
-
-    }
-
-    @Override
-    public void enterTextInDoubleQuotes(PdslFrameworkSpecificationParser.TextInDoubleQuotesContext ctx) {
-
-    }
-
-    @Override
-    public void exitTextInDoubleQuotes(PdslFrameworkSpecificationParser.TextInDoubleQuotesContext ctx) {
-
-    }
-
-    @Override
     public void enterWhenTheTestResourceIsProcessedByFactory(PdslFrameworkSpecificationParser.WhenTheTestResourceIsProcessedByFactoryContext ctx) {
 
         TestSpecificationFactory testSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(allPhrases).build();
@@ -92,6 +69,15 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
         Optional<TestSpecification> onlySpecification = specification.get().stream().findFirst();
         assertThat(onlySpecification.isPresent()).isTrue();
         testSpecification = onlySpecification.get();
+    }
+
+    @Override
+    public void exitWhenTheTestCaseIsProcessedByAnyPdslTestExecutor(PdslFrameworkSpecificationParser.WhenTheTestCaseIsProcessedByAnyPdslTestExecutorContext ctx) {
+
+    }
+    @Override
+    public void enterWhenTheTestCaseIsProcessedByAnyPdslTestExecutor(PdslFrameworkSpecificationParser.WhenTheTestCaseIsProcessedByAnyPdslTestExecutorContext ctx) {
+
     }
 
     @Override

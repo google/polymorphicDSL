@@ -1,0 +1,61 @@
+parser grammar JavaTestRunnerParser;
+
+options {tokenVocab=JavaTestRunnerLexer; }
+
+givenPdslTest: GIVEN_A_PDSL_TEST ;
+givenAllPdslTestsAreValid: GIVEN_ALL_PDSL_TESTS_ARE_VALID docstring? ;
+
+givenPdslConfigurationSpecifiesProperty: GIVEN_THE_PDSL_CONFIGURATION_SPECIFIES_THE textInDoubleQuotes PARAMETER ;
+givenThePdslTestUsesFactoriesThatFilterBasedOnTags: GIVEN_THE_PDSL_TEST_USES_FACTORIES_THAT_FILTER_BASED_ON_TAGS ;
+givenThePdslTestHasATagSpecified: GIVEN_THE_PDSL_TEST_HAS_A_TAG_SPECIFIED ;
+givenTestResourceMarkWithSpecifiedTag: GIVEN_A_TEST_RESOURCE_IS_MARKED_WITH_TAG ;
+givenPdslRecognizedBy: GIVEN_PDSL_RECOGNIZED_BY ;
+givenPslTestHasPhrasesNotInRecognizer: BUT_THE_PDSL_TEST_HAS_PHRASES_THAT_ARE_NOT_IN_RECOGNIZER ;
+givenPdslTestHasResourcesThatMightBeRecognizedByConfiguration: GIVEN_THE_PDSL_TEST_HAS_RESOURCES_THAT_MAY_BE_RECOGNIZED_BY_PDSL_CONFIGURATION docstring?;
+givenPdslTestHasResources: GIVEN_THE_PDSL_TEST_HAS_RESOURCES_THAT_MAY_BE_RECOGNIZED_BY_PDSL_TEST ;
+givenPdslConfigurationDoesNotSpecifyDefaultRule: GIVEN_THE_PDSL_CONFIGURATION_DOES_NOT_SPECIFY_DEFAULT_RULE docstring?;
+//givenPdslTestSpecifiesParameter: GIVEN_PDSL_TEST_SPECIFIES docstring?;
+givenRecognizedBySpecifiesParameter: GIVEN_RECOGNIZED_BY_TEST_SPECIFIES  textInDoubleQuotes PARAMETER docstring?;
+
+whenTestRunnerExecutes: WHEN_THE_TEST_RUNNER_EXECUTES ;
+
+thenAllTestsPass: THEN_ALL_TESTS_PASS ;
+thenSpecifiedTestExecutorWasUsed: THEN_THE_SPECIFIED_TEST_EXECUTOR_WAS_USED ;
+thenSpecifiedResourceProviderWasUsed: THEN_THE_SPECIFIED_RESOURCE_PROVIDER_WAS_USED ;
+thenTestIsSkipped: THEN_THE_TEST_IS_SKIPPED ;
+
+
+thenPdslFrameworkThrowsAnException: THEN_THE_PDSL_FRAMEWORK_THROWS_AN_EXCEPTION ;
+thenExceptionCommunicatesResourceCouldNotBeInterpreted: THEN_THE_EXCEPTION_COMMUNICATES_RESOURCE_COULD_NOT_BE_INTERPRETED ;
+thenExceptionStatesBothRecognizerParserAndLexerNeeded: THEN_EXCEPTION_REQUIRES_RECOGNIZER_PARSER_AND_LEXER_BOTH_BE_USED ;
+thenExceptionStatesMissingRequiredSyntaxCheckRule: THEN_EXCEPTION_STATES_MISSING_REQUIRED_SYNTAX_CHECK_RULE ;
+textInDoubleQuotes: QUOTED_TEXT ;
+docstring: DOCSTRING ;
+
+polymorphicDslAllRules: (
+	givenPdslTest |
+	givenAllPdslTestsAreValid |
+	givenPdslConfigurationSpecifiesProperty |
+	givenThePdslTestUsesFactoriesThatFilterBasedOnTags |
+	givenThePdslTestHasATagSpecified |
+	givenTestResourceMarkWithSpecifiedTag |
+	givenPdslRecognizedBy |
+	givenPslTestHasPhrasesNotInRecognizer |
+	givenPdslTestHasResourcesThatMightBeRecognizedByConfiguration |
+	givenPdslTestHasResources |
+	givenPdslConfigurationDoesNotSpecifyDefaultRule |
+	givenRecognizedBySpecifiesParameter |
+	whenTestRunnerExecutes |
+
+	thenAllTestsPass |
+	thenSpecifiedTestExecutorWasUsed |
+	thenSpecifiedResourceProviderWasUsed |
+	thenTestIsSkipped |
+
+	thenPdslFrameworkThrowsAnException |
+	thenExceptionCommunicatesResourceCouldNotBeInterpreted |
+
+	thenExceptionStatesBothRecognizerParserAndLexerNeeded |
+	thenExceptionStatesMissingRequiredSyntaxCheckRule 
+	)+
+	;
