@@ -7,11 +7,11 @@ Ability: Test Case Factory
 	A Test Specification is essentially a tree in which each node is a collection of phrases. The Test Case Factory essentially is a way of traversing the tree and chaining all the phrases together.
 
 Background:
-	Given a "Test Specification"	
+	Given a "Test Specification"
 	And the Test Specification has 3 phrases
 	And the Test Specification has a child Test Specification with 2 phrases
 
-	Rule: "Parent For Each Child" Test Case Factory
+	Rule: "Preorder" Test Case Factory
 
 	This factory will recursively stack its phrases on top of each child phrase.
 	NOTE: Meta data is duplicated for each test case!
@@ -24,7 +24,7 @@ Background:
 
 
 	Scenario: Preorder: Converting the Test Specification
-			Given the "Parent for Each Child" test case factory is used
+			Given the "Preorder" test case factory is used
 			When the Test Specification is processed by the Test Case Factory
 			Then 2 test cases are produced
 			And each test case has 5 phrases
@@ -34,8 +34,8 @@ Background:
 
 	This factory also does a preorder traversal, but it will only produce 1 test case as output
 
-	Scenario: Top Down, Depth First: Converting the Test Specification
-			Given the "Top Down Depth First" test case factory is used
+	Scenario: Creating a single test from a specification using preorder
+			Given the "Single Test Output Preorder" test case factory is used
 			When the Test Specification is processed by the Test Case Factory
 			Then 1 test case is produced
-			And each test case has 5 phrases
+			And each test case has 8 phrases

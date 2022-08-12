@@ -5,6 +5,7 @@ import com.pdsl.transformers.PolymorphicDslFileException;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -40,30 +41,19 @@ public class FileSystemTestResourceFinder implements TestResourceFinder {
         }
     }
 
-    public Optional<Collection<URL>> scanForTestResources(Path path) {
-        try {
-            return scanForTestResources(path.toUri().toURL());
-        } catch(MalformedURLException e) {
-            throw new PolymorphicDslFileException("Could not find directory to scan for test resources!", e);
-        }
+    public Optional<Collection<URI>> scanForTestResources(Path path) {
+        return scanForTestResources(path.toUri());
     }
 
     @Override
-    public Optional<Collection<URL>> scanForTestResources(URL url) {
+    public Optional<Collection<URI>> scanForTestResources(URI url) {
         Path sourceDirectory = Paths.get(url.getPath());
         Preconditions.checkArgument(Files.exists(sourceDirectory), String.format("File did not exist at at this location! %s", url));
         Preconditions.checkArgument(Files.isDirectory(sourceDirectory), String.format("URL must be a directory! %s", url));
         try {
             Collection<Path> matches = findMatchingFiles(sourceDirectory, pathMatcher);
-            Collection<URL> resources = matches.stream()
+            Collection<URI> resources = matches.stream()
                     .map(Path::toUri)
-                    .map(uri -> {
-                        try {
-                            return uri.toURL();
-                        } catch (MalformedURLException e) {
-                            throw new PolymorphicDslFileException("Could not find directory to scan for test resources!", e);
-                        }
-                    })
                     .collect(Collectors.toList());
             return resources.isEmpty() ? Optional.empty() : Optional.of(resources);
         } catch (IOException e) {

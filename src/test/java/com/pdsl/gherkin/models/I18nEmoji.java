@@ -20,7 +20,7 @@ public class I18nEmoji {
 
     public I18nEmoji() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "i18n_emoji.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "i18n_emoji.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();

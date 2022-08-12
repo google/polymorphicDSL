@@ -1,0 +1,575 @@
+Feature: Java PDSL Runner
+Polymorphic DSL provides a test runner that is built on JUnit 4. Test classes can execute with it by adding the
+annotations shown in the example below:
+
+#	@RunWith(PdslJUnit4ConfigurableRunner.class)
+#	@PdslConfiguration(
+	specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+	testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+	)
+	public class YourTestClass {
+#	@PdslTest(
+	includedResources = {"resource1", "resource2" },
+	parser = SomeParser.class,
+	lexer = SomeLexer.class,
+	listener = FrameworkSpecificationListenerProvider.class
+	)
+	public void someTest(){}
+	}
+	=====
+	Note there are many other optional fields you can pass to the @PdslConfiguration annotation.
+	However most of the important information is in the @PdslConfiguration and @PdslTest annotations.
+	These annotations are framework agnostic and can be used to implement other frameworks.
+	As such the scenarios described here can be a source of truth for anyone extending the PDSL framework.
+
+Rule: Positive Scenarios
+These are ways in which the framework is intended to be used and work propery
+
+	Scenario: Default use of Pdsl runner
+
+		At a minimum, the runner requires the @PdslConfiguration annotaiton on the class.
+		The runner will recognize methods annoted with @PdslTest as tests.
+
+		A @PdslTest specifies the test resources to parse, the grammar and the listener that will fire off methods after
+		the resources have been parsed and turned into test cases.
+
+		Given a PDSL test
+		And all @PdslTests are valid:
+		"""
+		@RunWith(PdslJUnit4ConfigurableRunner.class)
+		@PdslConfiguration(
+			specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+			testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+	    )
+		public class YourTestClass {
+
+			@PdslTest(
+				includedResources = {"*.txt", "*.md" },
+				excludesResources = {"ignore.txt", "ignore*.md"},
+				parser = SomeParser.class,
+				lexer = SomeLexer.class,
+				listener = FrameworkSpecificationListenerProvider.class
+			)
+			public void someTest(){}
+
+			@PdslTest(
+				includedResources = "resource3", // <-- you can also specify a single resource instead of an array
+				parser = SomeOtherParser.class,
+				lexer = SomeOtherLexer.class,
+				listener = FrameworkSpecificationListenerProvider.class
+			)
+			public void someTest(){}
+
+		}
+		"""
+		When the test runner executes
+		Then all tests pass
+
+	Scenario: Resource Root
+		To prevent the need to provide long URIs for every path it is possible to specify a "resourceRoot"
+		parameter in the @PdslConfiguration
+
+		All resources used by every @PdslTest will then append its own resources to this value.
+
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "resourceRoot":
+		"""
+		@RunWith(PdslJUnit4ConfigurableRunner.class)
+		@PdslConfiguration(
+		resourceRoot = "path/to/root/",
+			specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+			testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+	    )
+		public class YourTestClass {
+
+			@PdslTest(
+				includedResources = "resource3", // <-- expands to path/to/root/resource3
+				parser = SomeOtherParser.class,
+				lexer = SomeOtherLexer.class,
+				listener = FrameworkSpecificationListenerProvider.class
+			)
+			public void someTest(){}
+		}
+		"""
+		And all @PdslTests are valid
+		When the test runner executes
+		Then all tests pass
+
+	Scenario: Test Run Executor
+		The Default executor used by PDSL should be sufficient for most users. However if you need to
+		perform specific actions between phrases or other special actions you can provide your own
+		executor. You will need to implement Provider<TraceableTestRunExecutor> and make sure it
+		has a default, public constructor.
+
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "testRunExecutor":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				testRunExecutor  = MyTestRunExecutorProvider.class,
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
+
+				public static class MyTestRunExecutorProvider implements Provider<TraceableTestRunExecutor> {
+					public testRunExecutor() {
+						// Implementation
+					}
+
+					// Override methods
+				}
+		"""
+		And all @PdslTests are valid
+		When the test runner executes
+		Then all tests pass
+		And the specified Test Executor was used
+
+	Scenario: Resource Provider
+		By default PDSL assumes that your resources are files located on the local file system. However
+		it is possible to take resources of all kinds, including web URLs, streams and other sources
+		of input. You may specify your own provider if needed.
+
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "resourceFinder":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				resourceFinder = MyResourceProvider.class,
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
+
+				public static class MyResourceProvider implements Provider<TestResourceFinderGenerator> {
+					public MyResourceProvider() {
+						// Implementation
+					}
+
+					// Override methods
+				}
+			"""
+		And all @PdslTests are valid
+		When the test runner executes
+		Then all tests pass
+		And the specified resource provider was used
+
+	@Ignore
+	Scenario: Tags
+		It is possible only run specific tests that match certain tags. The syntax of the tags
+		and what they do is left to the underlying framework. 
+
+		For example, the PdslGherkinJUnit4Runner uses this with its own
+		TestSpecificationFactory to ignore feature files that do not have these tags.
+	
+		Given a PDSL test
+		And the PDSL test uses factories that filter based on tags
+		And the @PdslTest has a tag specified
+		And a test resource is marked with that tag
+		When the test runner executes
+		Then the test is skipped
+
+	Scenario: Class Wide Recognizer with @PdslConfiguration
+	
+	If you specify a recognizer in the @PdslConfiguration then all @PdslTest methods will use it to recognize their resources (unless overridden by a @RecognizeBy on the test method).
+
+	If no "recognizerRule" is specified then the framework will assume a rule named "polymorphicDslSyntaxCheck" is present. 
+	If no such rule exists and one isn't specified a runtime exception will be thrown.
+	Note that if you specify the 'dslRecognizerLexer' or 'dslRecognizerParser' you must specify both otherwise there will be a runtime exception.
+
+		# Valid resource
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "dslRecognizerLexer"
+		And the @PdslConfiguration specifies the "dslRecognizerParser":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				dslRecognizerLexer = SomeRecognizerLexer.class,
+				dslRecognizerParser = SomeRecognizerParser.class,
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
+
+				@PdslTest(
+					includedResources = "resource1", // <-- All resources will be checked by the dslRecognizerParser specified in the @PdslConfiguration
+					parser = SomeParser.class,
+					lexer = SomeLexer.class,
+					listener = FrameworkSpecificationListenerProvider.class
+				)
+				public void someTest(){}
+			}
+			"""
+		And all @PdslTests are valid
+		When the test runner executes
+		Then all tests pass
+		
+		# Invalid resource
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "dslRecognizerLexer"
+		And the @PdslConfiguration specifies the "dslRecognizerParser"
+		But the @PdslTest has phrases that are not in the @PdslConfiguration recognizer
+		When the test runner executes
+		Then the PDSL framework throws an exception
+		And the exception communicates that the resource could not be interpreted by the recognizer
+
+	Scenario: Class Wide Recognizer with custom Parser Rule
+
+		@PdslConfiguration can specify which recognizer rule to use for the test resources it uses.
+		This is done by specifing the "recognizerRule" field in the @PdslConfiguration.
+
+		The default recognizer parser rule "polymorphicDslSyntaxCheck" can be replaced by the rule specified as "recognizerRule".
+		If the specified rule does not exist in the @PdslTest parser a runtime exception will be thrown.
+
+		NOTE: If a @PdslTest specified a recognizer via @RecognizedBy it will always be used, even if there is a different one specified in the @PdslConfiguration.
+		
+		# Valid resource
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "dslRecognizerLexer"
+		And the @PdslConfiguration specifies the "dslRecognizerParser"
+		And the @PdslConfiguration specifies the "recognizerRule":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				recognizerRule = "myCustomRule", // <-- By default this rule will check all test resources
+				dslRecognizerLexer = SomeRecognizerLexer.class,
+				dslRecognizerParser = SomeRecognizerParser.class,
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
+
+
+				@PdslTest(
+					includedResources = "resource1", // <-- All resources will be checked by "myCustomRule" specified in the @PdslConfiguration
+					parser = SomeParser.class,
+					lexer = SomeLexer.class,
+					listener = FrameworkSpecificationListenerProvider.class
+				)
+				public void someTest(){}
+			}
+			"""
+		Given the @PdslTest DOES NOT have a @RecognizedBy
+		And all @PdslTests are valid
+		When the test runner executes
+		Then all tests pass
+
+		# Invalid resource
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "dslRecognizerLexer"
+		And the @PdslConfiguration specifies the "dslRecognizerParser"
+		And the @PdslConfiguration specifies the "recognizerRule"
+		And the @PdslTest has resources that NOT are recognized by the @PdslConfiguration recognizer
+
+		Given the @PdslTest DOES NOT have a @RecognizedBy
+		But a test resource has phrases that are not recognized by the @PdslConfiguration recognizer
+		When the test runner executes
+		Then the PDSL framework throws an exception
+		And the exception communicates that the resource could not be interpreted by the recognizer
+
+
+		
+
+	Scenario: Test Method Recognizer with @RecognizedBy and custom rule
+		@PdslTest can have a @RecognizedBy annotation that specifies which recognizer to use for the test resources it uses.
+		The specified recognizer in @RecognizedBy will always be used, even if there is a different one specified in the @PdslConfiguration.
+		The default recognizer parser rule "polymorphicDslSyntaxCheck" can be replaced by the rule specified as "recognizerRule".
+		If the specified rule does not exist in the @PdslTest parser a runtime exception will be thrown.
+
+		A recognizer can be specifeid on a specific method annotated with @PdslTest. 
+
+		# Valid resource
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "dslRecognizerLexer"
+		And the @PdslConfiguration specifies the "dslRecognizerParser"
+		And the @PdslConfiguration specifies the "recognizerRule"
+
+		Given the @PdslTest does have a @RecognizedBy
+		And the @PdslTest specifies the "dslRecognizerLexer"
+		And the @PdslTest specifies the "dslRecognizerParser"
+		And the @PdslTest specifies the "recognizerRule"
+
+		Given a test resource has phrases that are NOT recognized by the @PdslConfiguration recognizer
+		But the test resource has phrases that ARE recognized by the @PdslTest recognizer:
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				recognizerRule = "myCustomRule", // <-- Overridden by the default in @RecognizedBy
+				dslRecognizerLexer = SomeRecognizerLexer.class,
+				dslRecognizerParser = SomeRecognizerParser.class,
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
+
+
+				@RecognizedBy( 
+					recognizerRule = "myOtherCustomRule", // <-- The resources my match "myOtherCustomRule". "myCustomRule" in @PdslConfiguration ignored. 
+					dlsRecognizerLexer = "DifferentRecognizerLexer.class",
+					dlsRecognizerParser = "DifferentRecognizerParser.class"
+				)
+				@PdslTest(
+					includedResources = "resource1", // <-- All resources will be checked by the dslRecognizerParser specified in the @PdslTest
+					parser = SomeParser.class,
+					lexer = SomeLexer.class,
+					listener = FrameworkSpecificationListenerProvider.class
+				)
+				public void someTest(){}
+			}
+			"""
+		When the test runner executes
+		Then all tests pass
+
+		# Invalid resource
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "dslRecognizerLexer"
+		And the @PdslConfiguration specifies the "dslRecognizerParser"
+		And the @PdslConfiguration specifies the "recognizerRule"
+
+		Given the @PdslTest does have a @RecognizedBy
+		And the @PdslTest specifies the "dslRecognizerLexer"
+		And the @PdslTest specifies the "dslRecognizerParser"
+		And the @PdslTest specifies the "recognizerRule"
+
+		Given a test resource has phrases that ARE recognized by the @PdslConfiguration recognizer
+		But the test resource has phrases that ARE NOT recognized by the @PdslTest recognizer
+		When the test runner executes
+		Then the PDSL framework throws an exception
+		And the exception communicates that the resource could not be interpreted by the recognizer
+
+Rule: Reporting
+Reports generated by the Test Runner provide traceability for test scenarios. For example, if a test
+is run for the API as well as a Unit test a report will show in which contexts the test passes or fails.
+
+	Scenario: Standard Reporting
+
+		Given a PDSL test
+		And the @PdslConfiguration specifies the "context" as "Unit"
+		And the @PdslConfiguration specifies the "applicationName" as "MyApp"
+		And all @PdslTests are valid:
+		"""
+		@RunWith(PdslJUnit4ConfigurableRunner.class)
+		@PdslConfiguration(
+			context = "Unit",
+			applicationName = "MyApp",
+			specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+			testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+	  )
+		public class YourTestClass {
+		"""
+		When the test runner executes
+		Then all tests pass
+
+
+	Scenario: Traceable Reporting
+		If PDSL tests are run as part of a @PdslTestSuite then very powerful diagnostic reports will be created.
+		Because a test resource can be executed in separate test runners in different contexts it is possible for the test to pass in one context and fail in another. For example, "Unit" tests may pass for that feature but "API" tests might fail. It is useful to trace failures to _where in the application stack it failed_. 
+
+		This is also useful because an application may be deployed on multiple platforms. Knowing whether or not a specific capability is possible by platform and being able to compare it to the others lets you know if the issue is widespread or local to that specific app at a glance.
+
+		Given a PDSL test suite:
+		"""
+		@RunWith(PdslTestSuite.class)
+		@Suite.SuiteClasses(value = {UnitTests.class, ApiTests.class})
+		@PdslTestSuite.PdslSuiteClasses(
+						systemUnderTest = "Polymorphic DSL Test Framework"
+		)
+		public class UserAcceptanceTestSuiteTest {}
+
+		"""
+		And the PDSL test suite contains a test with for application "MyApp" and context "Unit"
+		And the PDSL test suite contains a test with for application "MyApp" and context "API"
+		And the "Unit" test will pass
+		But the "API" test will fail
+		When the test runner executes
+		Then a report is generated
+		And the report shows that the test passes in "Unit"
+		And the report shows that the test fails in "API"
+
+	Scenario: Traceable Reporting with custom report Generator
+		Given a PDSL test suite
+		And the PDSL test suite specifies a "reportGenerator":
+			"""
+			@RunWith(PdslTestSuite.class)
+			@Suite.SuiteClasses(value = {UnitTests.class, ApiTests.class})
+			@PdslTestSuite.PdslSuiteClasses(
+							systemUnderTest = "Polymorphic DSL Test Framework",
+							reportGenerator = DefaultAsciidoctorReportGeneratorProvider.class
+			)
+			public class UserAcceptanceTestSuiteTest {}
+			"""
+		And the PDSL test suite contains a test with for application "MyApp" and context "Unit"
+		And the PDSL test suite contains a test with for application "MyApp" and context "API"
+		And the "Unit" test will pass
+		But the "API" test will fail
+		When the test runner executes
+		Then a report is generated
+		And the report shows that the test passes in "Unit"
+		And the report shows that the test fails in "API"
+
+Rule: Negative Scenarios
+These are ways you should NOT use the framework
+
+    Scenario: User Error - Lexer recognizer is defined but the parser rule is not in @PdslConfiguration
+        Both the dslRecognizerParser and dslRecognizerLexer need to be defined. If they are not then the test suite
+        will not compile.
+
+        Given a PDSL JUnit test
+        And the @PdslConfiguration specifies the "dslRecognizerLexer"
+        But the @PdslConfiguration DOES NOT specify the "dslRecognizerParser":
+        """
+        @RunWith(PdslJUnit4ConfigurableRunner.class)
+        @PdslConfiguration(
+                dslRecognizerLexer = AllGrammarsLexer.class,
+                specificationFactoryProvider = SomeProvider.class,
+                testCaseFactoryProvider =  SomeOtherProvider.class
+        )
+        """
+        When the test runner executes
+        Then the PDSL framework throws an exception
+        And the exception communicates that both the dslRecognizerParser and dslRecognizerLexer must be used together if they are used at all
+
+    Scenario: User Error - Parser recognizer defined but lexer is not
+    Both the dslRecognizerParser and dslRecognizerLexer need to be defined. If they are not then the test suite
+    will not compile.
+
+			Given a PDSL JUnit test
+			And the @PdslConfiguration specifies the "dslRecognizerParser"
+			But the @PdslConfiguration DOES NOT specify the "dslRecognizerLexer":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+						 dslRecognizerParser = AllGrammarsParser.class,
+						 specificationFactoryProvider = SomeProvider.class,
+						 testCaseFactoryProvider =  SomeOtherProvider.class
+			)
+			public class MalformedPdslJUnitMissingLexerTest {
+			"""
+			When the test runner executes
+			Then the PDSL framework throws an exception
+			And the exception communicates that both the dslRecognizerParser and dslRecognizerLexer must be used together if they are used at all
+
+        
+    Scenario: Class level, custom recognizer rule fails to recognize resource
+        In the event that the class-level parser uses a custom 'recognizerRule' it will be used to check the syntax of the
+        test resources. Should the rule fail to recognize the test resource the test suite will fail to compile.
+
+				A test method with @PdslTest can also have a @RecognizedBy annotation that will override the value of the @PdslConfiguration.
+				However if this is not specified then the @PdslTest will default to the @PdslConfiguration rule, which by default is
+				"polymorphicDslSyntaxCheck"
+
+			Given a PDSL JUnit test
+			But the @PdslTest has phrases that are not in the @PdslConfiguration recognizer:
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+						 dslRecognizerParser = SomeRecognizerParser.class,
+						 dslRecognizerLexer = SomeRecognizerLexer.class,
+						 specificationFactoryProvider = SomeProvider.class,
+						 testCaseFactoryProvider =  SomeOtherProvider.class
+			)
+			public class RecognizerMissingConventionalSyntaxCheckRule {
+          @PdslTest(
+                        includesResources = "someResource.txt", // <-- Assume this test resource can not be parsed by the "polymorphicDslSyntaxCheck" rule
+                        parser = SomeParser.class,
+                        lexer = SomeLexer.class,
+                        listener = FrameworkSpecificationListenerProvider.class
+                )
+                public void testMissingSyntaxRuleInParentRecognizer_shouldFailToCompile(){}
+
+			}
+			"""
+			When the test runner executes
+			Then the PDSL framework throws an exception
+			And the exception communicates that the parser does not have the required syntax check rule
+
+    Scenario: Class wide parser missing default recognizer rule
+			Given a PDSL JUnit test
+			And the @PdslConfiguration DOES NOT specify the "recognizerRule"
+			And the @PdslTest DOES NOT have a @RecognizedBy
+			But the @PdslConfiguration recognizer does not specify the default rule "polymorphicDslSyntaxCheck":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+						 dslRecognizerParser = SomeRecognizerParser.class, // <-- Assume this parser does not have the rule "polymorphicDslSyntaxCheck"
+						 dslRecognizerLexer = SomeRecognizerLexer.class,
+						 specificationFactoryProvider = SomeProvider.class,
+						 testCaseFactoryProvider =  SomeOtherProvider.class
+			)
+			public class RecognizerMissingConventionalSyntaxCheckRule {
+			"""
+			When the test runner executes
+			Then the PDSL framework throws an exception
+			And the exception communicates that the parser does not have the required syntax check rule
+
+    Scenario: RecognizedBy uses custom recognizerRule but does not parse test resource
+    In the event that the test-level parser uses a custom 'recognizerRule' it will be used to check the syntax of the
+    test resources. Should the rule fail to recognize the test resource the test suite will fail to compile.
+
+      Given a PDSL JUnit test
+			And the @PdslConfiguration specifies the "recognizerRule"
+			And the @PdslTest test method also has the @RecognizedBy annotation
+			And a custom recognizer rule is specified in the @RecognizedBy annotation
+			But the @PdslTest parser does not specify the default rule "polymorphicDslSyntaxCheck":
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+						 specificationFactoryProvider = SomeProvider.class,
+						 testCaseFactoryProvider =  SomeOtherProvider.class
+			)
+			public class RecognizerMissingConventionalSyntaxCheckRule {
+				@PdslTest(
+                        includesResources = "someResource.txt", 
+                        parser = SomeParser.class,
+                        lexer = SomeLexer.class,
+                        listener = FrameworkSpecificationListenerProvider.class
+                )
+				
+				@RecognizedBy(
+						 dslRecognizerParser = SomeRecognizerParser.class, // <-- Assume this parser does not have the rule "myCustomRecognizerRule"
+						 dslRecognizerLexer = SomeRecognizerLexer.class,
+						 recognizerRule = "myCustomRecognizerRule" // <-- Custom rule specified here
+
+				)	
+				public void parserMissingSyntaxCheckRule_shouldFailToCompile(){}
+
+			}
+			"""
+			When the test runner executes
+			Then the PDSL framework throws an exception
+			And the exception communicates that the parser does not have the required syntax check rule
+
+    Scenario: Parser missing default recognizer rule specified in @RecognizedBy
+        By default the parser uses a parser rule called "polymorphicDslSyntaxCheck" to inspect the syntax of test resources.
+        If the parser does NOT have this rule then the application will fail to compile.
+
+        Given a PDSL JUnit test
+				And the @PdslConfiguration specifies the "recognizerRule"
+				And the @PdslTest test method also has the @RecognizedBy annotation
+				But the @PdslTest parser does not specify the default rule "polymorphicDslSyntaxCheck":
+				"""
+				@RunWith(PdslJUnit4ConfigurableRunner.class)
+				@PdslConfiguration(
+							 specificationFactoryProvider = SomeProvider.class,
+							 testCaseFactoryProvider =  SomeOtherProvider.class
+				)
+				public class RecognizerMissingConventionalSyntaxCheckRule {
+					@PdslTest(
+													includesResources = "someResource.txt", 
+													parser = SomeParser.class, // <-- Assume this parser does not have the rule "polymorphicDslSyntaxCheck"
+													lexer = SomeLexer.class,
+													listener = FrameworkSpecificationListenerProvider.class
+									)
+					
+					@RecognizedBy( // <-- Note that "recognizerRule" is not defined by this annotation, so we use the default "polymorphicDslSyntaxCheck"
+							 dslRecognizerParser = SomeRecognizerParser.class,
+							 dslRecognizerLexer = SomeRecognizerLexer.class,
+
+					)	
+					public void parserMissingSyntaxCheckRule_shouldFailToCompile(){}
+
+				}
+				"""
+				When the test runner executes
+				Then the PDSL framework throws an exception
+				And the exception communicates that the parser does not have the required syntax check rule

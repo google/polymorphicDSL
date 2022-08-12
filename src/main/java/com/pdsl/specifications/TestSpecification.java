@@ -1,6 +1,7 @@
 package com.pdsl.specifications;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
@@ -59,6 +60,6 @@ public interface TestSpecification {
      *
      * @return the test resource that this test specification was created from
      */
-    URL getOriginalTestResource();
+    URI getOriginalTestResource();
 
 }

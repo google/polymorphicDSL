@@ -21,7 +21,7 @@ public class Docstring {
 
     public Docstring() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "docstrings.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "docstrings.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();

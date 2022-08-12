@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * This test case factory treats test specifications as a single script where the parents are read before the children.
+ * A test case factory where parent phrases are processed before child phrases in the test specification using preorder traversal.
+ *
+ * This factory will only produce one test case per test resource.
  */
 public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory {
 
@@ -24,7 +26,6 @@ public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory 
         }
         return testCases;
     }
-
     private List<FilteredPhrase> recursivelyWalkSpecification(TestSpecification testSpecification, List<FilteredPhrase> parentTestSections) {
         List<FilteredPhrase> filteredPhrases = new ArrayList<>(parentTestSections);
         if (testSpecification.getFilteredPhrases().isPresent()) {

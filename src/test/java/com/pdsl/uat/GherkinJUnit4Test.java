@@ -1,11 +1,7 @@
 package com.pdsl.uat;
 
-import com.pdsl.grammars.PdslFrameworkSpecificationImpl;
-import com.pdsl.grammars.PdslFrameworkSpecificationLexer;
-import com.pdsl.grammars.PdslFrameworkSpecificationParser;
-import com.pdsl.junit.PdslGherkinApplication;
-import com.pdsl.junit.PdslGherkinJUnit4Runner;
-import com.pdsl.junit.PdslTest;
+import com.pdsl.runners.PdslGherkinApplication;
+import com.pdsl.runners.junit.PdslGherkinJUnit4Runner;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

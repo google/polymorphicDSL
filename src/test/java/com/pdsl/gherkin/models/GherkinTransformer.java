@@ -25,7 +25,7 @@ public class GherkinTransformer {
     @Test
     public void minimalFeature_hasSingleScenario() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -49,7 +49,7 @@ public class GherkinTransformer {
     @Test
     public void minimalExample_exampleKeywordValid() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal-example.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "minimal-example.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -61,7 +61,7 @@ public class GherkinTransformer {
     @Test
     public void background_interpretsBackgroundAndScenarios() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "background.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "background.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();
@@ -92,7 +92,7 @@ public class GherkinTransformer {
     @Test
     public void complexBackground_interpretsBackgroundAndScenarios() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "complex_background.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "complex_background.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();

@@ -4,6 +4,7 @@ import com.pdsl.gherkin.models.*;
 import com.pdsl.gherkin.parser.GherkinParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,7 +14,7 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
     private static final Set<Character> escapeCharacters = Set.of('\\', '|', 'n');
     private Optional<GherkinFeature.Builder> builderOptional = Optional.empty();
 
-    public Optional<GherkinFeature> getGherkinFeature(URL featurePathOrId) {
+    public Optional<GherkinFeature> getGherkinFeature(URI featurePathOrId) {
         return builderOptional.isEmpty() ? Optional.empty() : Optional.of(builderOptional.get().withLocation(featurePathOrId).build());
     }
 

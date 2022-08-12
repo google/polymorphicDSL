@@ -3,7 +3,7 @@ package com.pdsl.gherkin;
 import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.models.GherkinBackground;
 
-import java.net.URL;
+import java.net.URI;
 import java.util.*;
 
 /**
@@ -20,7 +20,7 @@ import java.util.*;
 class PickleJar {
 
     private final String featureTitle;
-    private final URL location;
+    private final URI location;
     // Gherkin does not support substitutions on backgrounds, so we can recycle the regular GherkinBackground
     private final String languageCode;
     private final Set<String> featureTags;
@@ -64,7 +64,7 @@ class PickleJar {
         return featureTitle;
     }
 
-    public URL getLocation() {
+    public URI getLocation() {
         return location;
     }
 
@@ -74,7 +74,7 @@ class PickleJar {
 
     public static class Builder {
         private final String featureTitle;
-        private final URL location;
+        private final URI location;
         private final List<PickleJarScenario> scenarios = new ArrayList<>();
         private final List<PickleJarRule> rules = new ArrayList<>();
         private final String languageCode;
@@ -82,7 +82,7 @@ class PickleJar {
         private Optional<GherkinBackground> background = Optional.empty();
         private Optional<String> longDescription = Optional.empty();
 
-        public Builder(URL location, String featureTitle, String languageCode) {
+        public Builder(URI location, String featureTitle, String languageCode) {
             Preconditions.checkNotNull(location, "Gherkin location cannot be null!");
             this.location = location;
             this.featureTitle = featureTitle;

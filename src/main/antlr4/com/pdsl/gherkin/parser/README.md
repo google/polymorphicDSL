@@ -1,6 +1,6 @@
 # Updating the Gherkin Lexer and Parser
 
-Antlr does not have an elegant way of making a cross platform parser concisely. As a result the lexer is quite large with "island grammars" in order to support multiple dialects.
+Antlr does not have an elegant way of defining certain grammars concisely. As a result the lexer is quite large with "island grammars" in order to support multiple dialects.
 
 In order to allow the lexer to be maintained a python helper script was developed to take json as input and regenerate the lexer
 

@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
@@ -17,8 +18,8 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
 
     private PdslGherkinListener listener;
 
-    public Optional<GherkinFeature> interpretGherkinFile(URL testResource, PdslGherkinListener listener) throws IOException {
-        GherkinLexer lexer = new GherkinLexer(CharStreams.fromStream(testResource.openStream()));
+    public Optional<GherkinFeature> interpretGherkinFile(URI testResource, PdslGherkinListener listener) throws IOException {
+        GherkinLexer lexer = new GherkinLexer(CharStreams.fromStream(testResource.toURL().openStream()));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GherkinParser parser = new GherkinParser(tokens);
         parser.setBuildParseTree(true); // tell ANTLR to build a parse tree
@@ -38,7 +39,7 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
      * @return
      * @throws IOException
      */
-    public GherkinFeature interpretGherkinFileStrictly(URL gherkinLocation, PdslGherkinListener listener)
+    public GherkinFeature interpretGherkinFileStrictly(URI gherkinLocation, PdslGherkinListener listener)
             throws IOException {
         Optional<GherkinFeature> gherkinFeatureOptional = interpretGherkinFile(gherkinLocation, listener);
         if (gherkinFeatureOptional.isEmpty()) {
@@ -48,8 +49,8 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
         if (feature.getOptionalGherkinScenarios().isEmpty() && feature.getRules().isEmpty()) {
             throw new MalformedGherkinException("Gherkin file had no scenarios or rules!\n\tLocation: " + feature.getLocation());
         } else if ((feature.getOptionalGherkinScenarios().isPresent() && feature.getOptionalGherkinScenarios().get().stream().anyMatch(s -> s.getStepsList().isEmpty() ||
-                s.getStepsList().get().isEmpty())) ||
-                (feature.getRules().isPresent() &&
+                s.getStepsList().get().isEmpty()))
+                || (feature.getRules().isPresent() &&
                         feature.getRules().get().stream().anyMatch(r -> r.getScenarios().isEmpty() || r.getScenarios().get().isEmpty()))) {
             throw new MalformedGherkinException("Gherkin contained either no scenarios or at least one scenario with no steps!\n\tLocation: " + feature.getLocation());
         }
@@ -57,7 +58,7 @@ public class PdslGherkinInterpreterImpl implements PdslGherkinRecognizer {
     }
 
     @Override
-    public Optional<GherkinFeature> interpretGherkinFileStrictly(InputStream featureFileContent, URL featurePathOrId) throws IOException {
+    public Optional<GherkinFeature> interpretGherkinFileStrictly(InputStream featureFileContent, URI featurePathOrId) throws IOException {
         GherkinLexer lexer = new GherkinLexer(CharStreams.fromStream(featureFileContent));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         GherkinParser parser = new GherkinParser(tokens);

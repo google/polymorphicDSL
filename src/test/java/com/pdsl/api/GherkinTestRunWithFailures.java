@@ -7,6 +7,8 @@ import com.pdsl.reports.TestRunResults;
 import org.junit.Test;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,11 +22,11 @@ public class GherkinTestRunWithFailures {
             (AllGrammarsParser.class, AllGrammarsLexer.class);
 
     @Test
-    public void failedMinimal_logsFailedStepResults() throws MalformedURLException {
+    public void failedMinimal_logsFailedStepResults() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/minimal.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
@@ -37,11 +39,11 @@ public class GherkinTestRunWithFailures {
     }
 
     @Test
-    public void failedComplexFeature_logsFailedAndSkippedStepResults() throws MalformedURLException {
+    public void failedComplexFeature_logsFailedAndSkippedStepResults() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/complex_background.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act
@@ -55,11 +57,11 @@ public class GherkinTestRunWithFailures {
     }
 
     @Test
-    public void partiallySuccessfulComplexFeature_logsFailedAndSkippedStepResults() throws MalformedURLException {
+    public void partiallySuccessfulComplexFeature_logsFailedAndSkippedStepResults() throws MalformedURLException, URISyntaxException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/complex_background.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         // Act

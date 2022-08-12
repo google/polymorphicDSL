@@ -1,6 +1,6 @@
 package com.pdsl.transformers;
 
-import com.pdsl.junit.RecognizedBy;
+import com.pdsl.runners.RecognizedBy;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
@@ -14,6 +14,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DefaultPolymorphicDslPhraseFilter
         implements PolymorphicDslPhraseFilter {
@@ -41,7 +42,21 @@ public class DefaultPolymorphicDslPhraseFilter
         recognizerLexer = Optional.empty();
         recognizerParser = Optional.empty();
         syntaxRuleName = Optional.empty();
+    }
 
+    public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, String recognizerRule) {
+        Optional<Method> syntaxRuleOptional1;
+        try {
+            this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
+            this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
+            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(recognizerRule);
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException(
+                    String.format("Trouble creating either the lexer or parser!%nNote the parser was expected to have a rule in the grammar called '%s'", recognizerRule), e);
+        }
+        recognizerLexer = Optional.empty();
+        recognizerParser = Optional.empty();
+        syntaxRuleName = Optional.empty();
     }
 
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer)  {
@@ -59,18 +74,22 @@ public class DefaultPolymorphicDslPhraseFilter
         syntaxRuleName = Optional.of(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
     }
 
-    public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer, String recognizerRuleName)  {
+
+
+    public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer, String startRule, String syntaxCheckRuleName)  {
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
             this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
-            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(DEFAULT_ALL_RULES_METHOD_NAME);
+            this.subgrammarActivePhraseRule = subgrammarParser.getMethod(startRule);
             this.recognizerLexer = Optional.of(lexerRecognizer);
             this.recognizerParser = Optional.of(parserRecognizer);
         } catch (NoSuchMethodException e) {
             throw new IllegalArgumentException(
-                    String.format("Trouble creating either the lexer or parser!%nNote the parser MUST Have a rule in the grammar called '%s'", DEFAULT_ALL_RULES_METHOD_NAME), e);
+                    String.format("Trouble creating either the lexer or parser!%nNote the parser was expected to have a rule in the grammar called '%s'%n"
+                            +"\tRecognizer Parser: %s%n\tRecognizer Lexer: %s%n\tSubgrammar Parser: %s%n\tSubgrammer Lexer: %s%n\tRule: %s%n",
+                            syntaxCheckRuleName, parserRecognizer, lexerRecognizer, subgrammarParser, subgrammarLexer, startRule), e);
         }
-        syntaxRuleName = Optional.of(recognizerRuleName);
+        syntaxRuleName = Optional.of(syntaxCheckRuleName);
     }
 
     @Override
@@ -151,9 +170,14 @@ public class DefaultPolymorphicDslPhraseFilter
                 return Optional.empty();
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                 if (logger.isWarnEnabled()) {
-                    logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!", AnsiTerminalColorHelper.BRIGHT_YELLOW));
-                    logger.warn(String.format("The match was:%n\t%s", allTokens));
-                    logger.warn(String.format("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), RESET_ANSI));
+                    String filteredTokens = allTokens.stream()
+                                    .map(token -> {
+                                        return String.format("\t%s: %s", pdslLexer.getVocabulary().getSymbolicName(token.getType()), token);
+                                    })
+                                    .collect(Collectors.joining(String.format("%n")));
+                    logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!%n", AnsiTerminalColorHelper.YELLOW, pdslLexer.getClass()));
+                    logger.warn(String.format("The match was:%n%s%s%s", AnsiTerminalColorHelper.BRIGHT_YELLOW, filteredTokens, AnsiTerminalColorHelper.RESET));
+                    logger.warn(String.format("%sFiltering out phrase:%n%s%n\tLexer:\t%s%s%n", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), pdslLexer.getClass(), RESET_ANSI));
                 }
                 return Optional.empty();
             } else if (allTokens.get(0).getType() == Token.EOF) {  // We know the size of the list is at least 1 from the check above. See if the only token is the end of file

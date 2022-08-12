@@ -80,6 +80,7 @@ public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, Gher
     public boolean tagExpressionMatchesPickle(Set<String> pickleTags, String tagExpression) {
         Preconditions.checkNotNull(pickleTags);
         Preconditions.checkNotNull(tagExpression);
+        if (pickleTags.isEmpty() && !tagExpression.isEmpty()) { return false; }
         Preconditions.checkArgument(!pickleTags.isEmpty());
         tags.set(pickleTags);
         if (tagExpression.isEmpty()) { return true; }

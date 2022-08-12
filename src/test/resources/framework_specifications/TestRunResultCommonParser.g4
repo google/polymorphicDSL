@@ -1,8 +1,0 @@
-parser grammar TestRunResultCommonParser ;
-
-options {tokenVocab=TestRunResultCommonLexer ;}
-
-integerValue : INTEGER_VALUE ;
-thenTheTestRunResultsHaveSpecifiedPassingTests : THEN_THE_TEST_RUN_RESULTS_HAVE_N_TESTS_START integerValue PASSING_TESTS_END ;
-thenTheTestRunResultsHaveSpecifiedFailingTests : THEN_THE_TEST_RUN_RESULTS_HAVE_N_TESTS_START integerValue PASSING_TESTS_END ;
-

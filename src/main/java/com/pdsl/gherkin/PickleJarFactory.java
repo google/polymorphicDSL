@@ -5,6 +5,7 @@ import com.pdsl.transformers.PolymorphicDslFileException;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -30,15 +31,15 @@ public class PickleJarFactory {
      * The primary purpose of this is to both  read all of the feature files (and making sure they exist) and
      * parameter substitutions on the text if needed
      *
-     * @param testResources List of URLs to feature files
+     * @param testResources List of URIs to feature files
      * @return A List of PickleJars, where each pickle jar represents a processed feature
      */
-    public List<PickleJar> getPickleJars(Set<URL> testResources) {
+    public List<PickleJar> getPickleJars(Set<URI> testResources) {
         List<GherkinFeature> features = new ArrayList<>();
         // Parse each gherkin file
         try {
-            for (URL url : testResources) {
-                features.add(pdslGherkinRecognizer.interpretGherkinFileStrictly(url, listener));
+            for (URI uri : testResources) {
+                features.add(pdslGherkinRecognizer.interpretGherkinFileStrictly(uri, listener));
             }
         } catch (IOException e) {
             throw new PolymorphicDslFileException("Could not open file!", e);
@@ -175,7 +176,7 @@ public class PickleJarFactory {
             stepText.append(stepContent.getRawString());
             if (step.getDocString().isPresent()) {
                 GherkinString docString = step.getDocString().get().getGherkinString();
-                stepText.append("\n" + docString.getRawString());
+                stepText.append(docString.getRawString());
             } else if (step.getDataTable().isPresent()) { //TODO: Maybe we should be storing the raw text of the data table as well to simplify this?
                 // Perform all substitutions
                 List<List<String>> substitutedDataTable =

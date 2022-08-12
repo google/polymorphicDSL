@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -44,8 +45,8 @@ public class GherkinApi {
     public void complexBackgroundWithRuleFilteredOut_runsSuccessfully() throws URISyntaxException, MalformedURLException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/complex_background.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         MinimalImpl minimalListener = new MinimalImpl();
@@ -62,8 +63,8 @@ public class GherkinApi {
     public void minimalContextExecutor_executesSuccessfully() throws URISyntaxException, MalformedURLException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/minimal.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         MinimalImpl minimalListener = new MinimalImpl();
@@ -76,12 +77,12 @@ public class GherkinApi {
     }
 
     @Test
-    public void minimalContextExecutor_filtersOutUnknownSteps() throws URISyntaxException, MalformedURLException {
+    public void minimalContextExecutor_filtersOutUnknownSteps() throws URISyntaxException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/background.feature");
         // Arrange
 
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(absolutePathValid);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid.toURI());
         StepCounterListener stepCounterListener = new StepCounterListener();
 
         MinimalImpl minimalListener = new MinimalImpl();

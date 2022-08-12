@@ -21,7 +21,7 @@ public class Descriptions {
     @Test
     public void titleAndLongDescriptions_foundAndMatchInputText() throws IOException {
         // Arrange
-        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "descriptions.feature").toUri().toURL(), listener);
+        Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "descriptions.feature").toUri(), listener);
         // Act
         assertThat(featureOptional.isPresent()).isTrue();
         GherkinFeature feature = featureOptional.get();

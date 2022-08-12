@@ -2,6 +2,7 @@ package com.pdsl.gherkin.models;
 
 import com.google.common.base.Preconditions;
 
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +16,7 @@ public class GherkinFeature {
     private final Optional<List<GherkinScenario>> optionalGherkinScenarios;
     private final Optional<List<GherkinRule>> rules;
     private final Optional<List<String>> tags;
-    private final URL location;
+    private final URI location;
 
     private GherkinFeature(Builder builder) {
         this.languageCode = builder.languageCode;
@@ -58,12 +59,12 @@ public class GherkinFeature {
         return tags;
     }
 
-    public URL getLocation() {
+    public URI getLocation() {
         return location;
     }
 
     public static class Builder {
-        private URL location;
+        private URI location;
         private String languageCode = "en";
         private String title = "";
         private String longDescription = "";
@@ -72,7 +73,7 @@ public class GherkinFeature {
         private List<GherkinRule> rules = new ArrayList<>();
         private Optional<List<String>> tags = Optional.empty();
 				private static final String LOCATION_ERROR = "Location cannot be null!";
-        public Builder(URL location) {
+        public Builder(URI location) {
 					
             Preconditions.checkArgument(location == null, LOCATION_ERROR);
             // preconditions on argument delayed until building
@@ -82,7 +83,7 @@ public class GherkinFeature {
         public Builder() {
         }
 
-        public Builder withLocation(URL location) {
+        public Builder withLocation(URI location) {
             Preconditions.checkArgument(location != null,
                     LOCATION_ERROR);
             this.location = location;

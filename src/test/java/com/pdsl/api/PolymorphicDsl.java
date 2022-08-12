@@ -21,8 +21,9 @@ import org.junit.Test;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -41,10 +42,10 @@ public class PolymorphicDsl {
     private final TestSpecificationFactory betaTestFactory = new LineDelimitedTestSpecificationFactory(betaPhraseFilter);
 
     @Test
-    public void validGrammarWalkThroughRegistryAllStepsInContext_shouldSucceed() throws MalformedURLException {
-        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).toURI().toURL();
+    public void validGrammarWalkThroughRegistryAllStepsInContext_shouldSucceed() {
+        final URI absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid.pdsl").getFile()).toURI();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
+        Set<URI> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
         Optional<Collection<TestSpecification>> testSpecification = betaTestFactory.getTestSpecifications(dslFiles);
@@ -63,10 +64,10 @@ public class PolymorphicDsl {
     }
 
     @Test
-    public void validGrammarWalkThroughContext_notAllStepsShouldRun() throws MalformedURLException {
-        final URL absolutePathValid = getClass().getClassLoader().getResource("sentences/valid.pdsl");
+    public void validGrammarWalkThroughContext_notAllStepsShouldRun() throws URISyntaxException {
+        final URI absolutePathValid = getClass().getClassLoader().getResource("sentences/valid.pdsl").toURI();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
+        Set<URI> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
         Optional<Collection<TestSpecification>> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
@@ -86,20 +87,20 @@ public class PolymorphicDsl {
 
     // NOTE: token recognition errors in the console are expected and indicate that the below test is working
     @Test
-    public void contextWalkMatchesNoSteps_noStepsShouldRunAndWarningIssued() throws MalformedURLException {
-        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/math.pdsl").getFile()).toURI().toURL();
+    public void contextWalkMatchesNoSteps_noStepsShouldRunAndWarningIssued()  {
+        final URI absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/math.pdsl").getFile()).toURI();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
+        Set<URI> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         Optional<Collection<TestSpecification>>  specification = betaTestFactory.getTestSpecifications(dslFiles);
         assertThat(specification.isEmpty()).isTrue();
     }
 
     @Test
-    public void simpleParser_successfullyWalks() throws MalformedURLException {
-        final URL absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid_beta.pdsl").getFile()).toURI().toURL();
+    public void simpleParser_successfullyWalks()  {
+        final URI absolutePathValid = new File(getClass().getClassLoader().getResource("sentences/valid_beta.pdsl").getFile()).toURI();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
+        Set<URI> dslFiles = new HashSet<>();
         dslFiles.add(absolutePathValid);
         // Act
         Optional<Collection<TestSpecification>> testSpecifications = betaTestFactory.getTestSpecifications(dslFiles);
@@ -147,7 +148,7 @@ public class PolymorphicDsl {
         }
 
         @Override
-        public URL getOriginalTestResource() {
+        public URI getOriginalTestResource() {
             return null;
         }
 

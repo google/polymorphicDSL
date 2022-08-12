@@ -9,6 +9,8 @@ import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.junit.Test;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.HashSet;
 import java.util.Set;
@@ -17,15 +19,16 @@ import static com.google.common.truth.Truth.assertThat;
 
 public class FrameworkTestResource {
     @Test
-    public void testResources_meetsSpecifications() {
+    public void testResources_meetsSpecifications() throws URISyntaxException {
         final URL testResources = getClass().getClassLoader()
                 .getResource("framework_specifications/features/TestResource.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(testResources);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(testResources.toURI());
         PolymorphicDslPhraseFilter phraseFilter =
                 new DefaultPolymorphicDslPhraseFilter(
-                        PdslTestResourceParser.class, PdslTestResourceLexer.class);
+                        PdslTestResourceParser.class, PdslTestResourceLexer.class,
+                        "polymorphicDslAllRules");
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act
         TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());

@@ -1,7 +1,7 @@
 package com.pdsl.component;
 
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
-import com.pdsl.grammars.TestSpecificationFactoryLexer;
+import com.pdsl.grammars.PdslTestSpecificationFactoryLexer;
 import com.pdsl.grammars.TestSpecificationFactoryParser;
 import com.pdsl.grammars.TestSpecificationFactoryParserListenerImpl;
 import com.pdsl.reports.TestRunResults;
@@ -11,6 +11,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.*;
 
@@ -21,15 +23,16 @@ import static org.junit.Assert.fail;
 public class FrameworkTestSpecification {
 
     @Test
-    public void testSpecificationFactory_meetsSpecifications() {
+    public void testSpecificationFactory_meetsSpecifications() throws URISyntaxException {
         final URL testResources = getClass().getClassLoader()
                 .getResource("framework_specifications/features/TestSpecificationFactory.feature");
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
-        dslFiles.add(testResources);
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(testResources.toURI());
         PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
-                TestSpecificationFactoryParser.class,
-                TestSpecificationFactoryLexer.class
+                TestSpecificationFactoryParser.class, PdslTestSpecificationFactoryLexer.class,
+                TestSpecificationFactoryParser.class, PdslTestSpecificationFactoryLexer.class,
+                "polymorphicDslAllRules", "polymorphicDslAllRules"
         );
         GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act

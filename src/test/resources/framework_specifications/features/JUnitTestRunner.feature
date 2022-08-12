@@ -1,222 +1,87 @@
-Feature: PDSL JUnit Runner
+Feature: JUnit Runner
+
+	This document tracks highly specific JUnit specific features. For more general, broadly useful information about the Java Test Runner see "JavaTestRunner.feature"
+
+	Scenario: Ignoring tests
+		Tests with an @Ignore annotation will not be executed by the framework
 
 
-Rule: Negative Scenarios
-These are ways you should NOT use the framework
+		Given a PDSL test
+		But the @PdslTest is marked with @Ignore:
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
 
-    Scenario: Lexer recognizer is defined but the parser rule is not
-        Both the dslRecognizerParser and dslRecognizerLexer need to be defined. If they are not then the test suite
-        will not compile.
 
-        Given the following test runner:
-        """
-        package com.pdsl.uat;
+				@Ignore
+				@PdslTest(
+					includedResources = "resource1",
+					parser = SomeParser.class,
+					lexer = SomeLexer.class,
+					listener = FrameworkSpecificationListenerProvider.class
+				)
+				public void someTest(){}
+			}
+			"""
 
-        import com.pdsl.grammars.AllGrammarsLexer;
-        import com.pdsl.junit.PdslGherkinApplication;
-        import com.pdsl.junit.PdslGherkinJUnit4Runner;
-        import org.junit.Test;
-        import org.junit.runner.RunWith;
+		When the test runner executes
+		Then the test is ignored
 
-        @RunWith(PdslGherkinJUnit4Runner.class)
-        @PdslGherkinApplication(
-                dslRecognizerLexer = AllGrammarsLexer.class,
-                resourceRoot = "src/test/resources/framework_specifications"
-        )
-        public class MalformedPdslJUnitMissingLexerTest {
+	Scenario: Compatibility with JUnit @Test
+		PDSL can mix @PdslTest test methods with regular JUnit @Test methods. 
+		Technically PDSL could be used instead of JUnit4 for testing classes that
+		ONLY have @Test methods, although it is unclear why someone would want to do this.
 
-            @Test
-            public void malformedTestMissingLexer_shouldFailToCompile() {}
-        }
-        """
-        When the test runner is compiled
-        Then it does NOT compile successfully
-        And the runner failed to compile because the dslRecognizerParser is missing when the dslRecognizerLexer was provided
+		Given a PDSL test
+		But a @Test is specified:
+			"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
 
-    Scenario: Parser recognizer defined but lexer is not
-    Both the dslRecognizerParser and dslRecognizerLexer need to be defined. If they are not then the test suite
-    will not compile.
+				@Test(timeout=400)
+				public void someTest(){}
+			}
+			"""
+		When the test runner executes
+		Then the test executes
 
-        Given the following test runner:
-        """
-        package com.pdsl.uat;
+	Scenario: Hooks
+		PDSL supports standard JUnit4 hooks, such as @Before, @After, etc.
 
-        import com.pdsl.grammars.AllGrammarsParser;
-        import com.pdsl.junit.PdslGherkinApplication;
-        import com.pdsl.junit.PdslGherkinJUnit4Runner;
-        import org.junit.Test;
-        import org.junit.runner.RunWith;
+		Given a PDSL test
+		And the PDSL test has hooks:
+		"""
+			@RunWith(PdslJUnit4ConfigurableRunner.class)
+			@PdslConfiguration(
+				specificationFactoryProvider = SomeSpecificationFactoryProvider.class,
+				testCaseFactoryProvider = SomeTestCaseFactoryProvider.class
+			)
+			public class YourTestClass {
 
-        @RunWith(PdslGherkinJUnit4Runner.class)
-        @PdslGherkinApplication(
-                dslRecognizerParser = AllGrammarsParser.class,
-                resourceRoot = "src/test/resources/framework_specifications"
-        )
-        public class MalformedPdslJUnitMissingLexerTest {
+				@BeforeClass
+				public static void beforeAll(){/*...*/}
+				@Before
+				public static void before(){/*...*/}
+				@AfterClass
+				public static void afterAll(){/*...*/}
+				@After
+				public static void after(){/*...*/}
 
-            @Test
-            public void malformedTestMissingParser_shouldFailToCompile() {}
-        }
-        """
-        When the test runner is compiled
-        Then it does NOT compile successfully
-        And the runner failed to compile because the dslRecognizerLexer is missing when the dslRecognizerParser was provided
+				@Rule
+				public ExpectedException thrown = ExpectedException.none();	
 
-    Scenario: Class level, custom recognizer rule fails to recognize resource
-        In the event that the class-level parser uses a custom 'recognizerRule' it will be used to check the syntax of the
-        test resources. Should the rule fail to recognize the test resource the test suite will fail to compile.
-
-     Given the following test runner:
-            """
-             package com.pdsl.uat;
-
-            import com.pdsl.grammars.AllGrammarsParser;
-            import com.pdsl.junit.PdslGherkinApplication;
-            import com.pdsl.junit.PdslGherkinJUnit4Runner;
-            import org.junit.Test;
-            import org.junit.runner.RunWith;
-
-            @RunWith(PdslGherkinJUnit4Runner.class)
-            @PdslGherkinApplication(
-                    resourceRoot = "src/test/resources/framework_specifications",
-                    dslRecognizerParser = MinimalParser.class,
-                    dslRecognizerLexer = MinimalLexer.class,
-                    recognizerRule = "minimal"
-            )
-            public class ClassLevelRecognizerTest {
-
-                @PdslTest(
-                        includesResources = "PdslTestFramework.feature",
-                        parser = PdslTestResourceParser.class,
-                        lexer = PdslTestResourceLexer.class,
-                        listener = FrameworkSpecificationListenerProvider.class
-                )
-                public void testThatIsNotRecognizedByParentRecognizer_shouldFailToCompile(){}
-            }
-            """
-        When the test runner is compiled
-        Then it does NOT compile successfully
-        And the runner failed to compile because the recognizerRule could not recognizer the test resource
-
-    Scenario: Class wide parser missing default recognizer rule
-      By default the parser uses a parser rule called "polymorphicDslSyntaxCheck" to inspect the syntax of test resources.
-        If the parser does NOT have this rule then the application will fail to compile.
-
-        Given the following test runner:
-            """
-             package com.pdsl.uat;
-
-            import com.pdsl.grammars.AllGrammarsParser;
-            import com.pdsl.junit.PdslGherkinApplication;
-            import com.pdsl.junit.PdslGherkinJUnit4Runner;
-            import org.junit.Test;
-            import org.junit.runner.RunWith;
-
-            @RunWith(PdslGherkinJUnit4Runner.class)
-            @PdslGherkinApplication(
-                    resourceRoot = "src/test/resources/framework_specifications",
-                    dslRecognizerParser = MinimalParser.class,
-                    dslRecognizerLexer = MinimalLexer.class,
-                    // This parser does not have the rule 'polymorphicDslSyntaxCheck', so it will not compile
-            )
-            public class ClassLevelRecognizerTest {
-
-                @PdslTest(
-                        includesResources = "PdslTestFramework.feature",
-                        parser = PdslTestResourceParser.class,
-                        lexer = PdslTestResourceLexer.class,
-                        listener = FrameworkSpecificationListenerProvider.class
-                )
-                public void testThatIsNotRecognizedByParentRecognizer_shouldFailToCompile(){}
-            }
-            """
-        When the test runner is compiled
-        Then it does NOT compile successfully
-        And the runner failed to compile because the default rule is missing from the recognizer
-
-    Scenario: RecognizedBy uses custom recognizerRule but does not parse test resource
-    In the event that the test-level parser uses a custom 'recognizerRule' it will be used to check the syntax of the
-    test resources. Should the rule fail to recognize the test resource the test suite will fail to compile.
-
-        Given the following test runner:
-        """
-        package com.pdsl.uat;
-
-        import com.pdsl.grammars.*;
-        import com.pdsl.junit.PdslGherkinApplication;
-        import com.pdsl.junit.PdslGherkinJUnit4Runner;
-        import com.pdsl.junit.PdslTest;
-        import com.pdsl.junit.RecognizedBy;
-        import org.junit.runner.RunWith;
-
-        @RunWith(PdslGherkinJUnit4Runner.class)
-        @PdslGherkinApplication(
-                resourceRoot = "src/test/resources/framework_specifications"
-        )
-        public class SyntaxCheckTest {
-
-            @PdslTest(
-                    includesResources = "PdslTestFramework.feature",
-                    parser = PdslFrameworkSpecificationParser.class,
-                    lexer = PdslFrameworkSpecificationLexer.class,
-                    listener = FrameworkSpecificationListenerProvider.class
-            )
-            @RecognizedBy(
-                    dslRecognizerParser = MinimalParser.class,
-                    dslRecognizerLexer = MinimalLexer.class,
-                    recognizerRule = "minimal"
-            )
-            public void testResouceUnrecognizedByRule_failsToCompile(){}
-        }
-        """
-        When the test runner is compiled
-        Then it does NOT compile successfully
-        And the runner failed to compile because the recognizerRule could not recognizer the test resource
-
-    Scenario: @RecognizedBy missing default recognizer rule
-        By default the parser uses a parser rule called "polymorphicDslSyntaxCheck" to inspect the syntax of test resources.
-        If the parser does NOT have this rule then the application will fail to compile.
-
-        Given the following test runner:
-        """
-        package com.pdsl.uat;
-
-        import com.pdsl.grammars.*;
-        import com.pdsl.junit.PdslGherkinApplication;
-        import com.pdsl.junit.PdslGherkinJUnit4Runner;
-        import com.pdsl.junit.PdslTest;
-        import com.pdsl.junit.RecognizedBy;
-        import org.junit.runner.RunWith;
-
-        @RunWith(PdslGherkinJUnit4Runner.class)
-        @PdslGherkinApplication(
-                resourceRoot = "src/test/resources/framework_specifications"
-        )
-        public class SyntaxCheckTest {
-
-            @PdslTest(
-                    includesResources = "PdslTestFramework.feature",
-                    parser = PdslFrameworkSpecificationParser.class,
-                    lexer = PdslFrameworkSpecificationLexer.class,
-                    listener = FrameworkSpecificationListenerProvider.class
-            )
-            @RecognizedBy(
-                    dslRecognizerParser = MinimalParser.class,
-                    dslRecognizerLexer = MinimalLexer.class,
-                    recognizerRule = "thisRuleDoesNotExist"
-            )
-            public void parserWithMissingRecognizerRule_failsToCompile(){}
-        }
-        """
-        When the test runner is compiled
-        Then it does NOT compile successfully
-        And the runner failed to compile because the default rule is missing from the recognizer
-
-    // PENDING
-    // Test custom stream provider
-    // Test general recognizer TestHelper method
-
-    // Class uses default rule and passes
-
-    // PdslgherkinApplication uses recognizer AND method does too
-    // Keep method body empty
+				public void someTest(){}
+			}
+		"""
+		When the test runner executes
+		Then all tests pass
+		And all hooks triggered
+		And all rules executed as necessary

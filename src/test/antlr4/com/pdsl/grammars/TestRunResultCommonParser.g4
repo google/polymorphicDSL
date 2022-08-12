@@ -1,0 +1,7 @@
+parser grammar TestRunResultCommonParser ;
+
+options {tokenVocab=TestRunResultCommonLexer ;}
+
+thenTheTestRunResultsHaveSpecifiedPassingTests : THEN_THE_TEST_RUN_RESULTS_HAVE_N_TESTS_START  PASSING_TESTS_END ;
+thenTheTestRunResultsHaveSpecifiedFailingTests : THEN_THE_TEST_RUN_RESULTS_HAVE_N_TESTS_START  FAILING_TESTS_END ;
+

@@ -8,6 +8,8 @@ import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,12 +22,12 @@ import static com.google.common.truth.Truth.assertThat;
 public class FrameworkSpecifications {
 
     @Test
-    public void gherkinPdslTestFramework_meetsTestSpecifications() throws IOException {
+    public void gherkinPdslTestFramework_meetsTestSpecifications() throws IOException, URISyntaxException {
 
-        final URL testResources = getClass().getClassLoader()
-                .getResource("framework_specifications/features/PdslTestFramework.feature");
+        final URI testResources = getClass().getClassLoader()
+                .getResource("framework_specifications/features/PdslTestFramework.feature").toURI();
         // Arrange
-        Set<URL> dslFiles = new HashSet<>();
+        Set<URI> dslFiles = new HashSet<>();
         Path tmpDir = Files.createTempDirectory(String.format("pdsl_temp_test-%s", UUID.randomUUID()));
         dslFiles.add(testResources);
         PolymorphicDslPhraseFilter phraseFilter = new DefaultPolymorphicDslPhraseFilter(
