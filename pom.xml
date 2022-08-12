@@ -6,7 +6,7 @@
 
     <groupId>com.google</groupId>
     <artifactId>pdsl</artifactId>
-    <version>0.6.1-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>
@@ -19,12 +19,6 @@
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.11</version>
-            <scope>test</scope>
-        </dependency>
         <!-- code coverage -->
         <dependency>
             <groupId>org.jacoco</groupId>
@@ -103,8 +97,36 @@
         </dependency>
     </dependencies>
 
+    <profiles> <!-- enable antlr plugin to generate grammars for tests and main -->
+        <profile>
+            <id>test</id> <!-- needed to allow generation of ANTLR grammars used by test code -->
+               <build>
+                   <plugins>
+                        <plugin>
+                            <groupId>org.antlr</groupId>
+                            <artifactId>antlr4-maven-plugin</artifactId>
+                            <version>4.9.1</version>
+                            <configuration>
+                                <sourceDirectory>${basedir}/src/test/antlr4</sourceDirectory>
+                                <libDirectory>${basedir}/src/test/antlr4/com/pdsl/grammars</libDirectory>
+                            </configuration>
+                            <executions>
+                                <execution>
+                                    <goals>
+                                        <goal>antlr4</goal>
+                                    </goals>
+                                </execution>
+                            </executions>
+                        </plugin>
+                   </plugins>
+               </build>
+        </profile>
+    </profiles>
+
     <build>
+
         <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+
             <plugins>
                 <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
                 <plugin>
@@ -150,9 +172,6 @@
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
                     <version>4.9.1</version>
-                    <configuration>
-                        <libDirectory>${basedir}/src/main/antlr4/com/google/pdsl/gherkin</libDirectory>
-                    </configuration>
                     <executions>
                         <execution>
                             <goals>
