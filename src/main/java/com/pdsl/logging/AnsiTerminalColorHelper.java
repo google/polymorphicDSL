@@ -1,5 +1,6 @@
 package com.pdsl.logging;
 
+/** Utility class for colorizing terminal output. */
 public class AnsiTerminalColorHelper {
 
 		private AnsiTerminalColorHelper() {}

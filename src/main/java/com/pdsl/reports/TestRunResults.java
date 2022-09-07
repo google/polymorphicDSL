@@ -9,6 +9,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A report of the test results from an arbitrary test run.
+ *
+ * This could be for a single test case that is part of a larger suite or an entire test plan itself.
+ */
 public interface TestRunResults {
 
     int passingTestTotal();

@@ -39,3 +39,9 @@ mvn antlr4:antlr4 install
 
 At this point you can use `mvn anltr4:antlr4 <some lifecycle>` up until you run `mvn clean` again. If you do that you will need to regenerate the source code using the `-P test` profile as shown above.
 
+## Deployment
+
+A fat JAR with all the dependencies is made with the shade plugin, but currently it won't work unless the `shade:shade` lifecycle is explicitly called:
+
+`mvn clean antlr4:antlr4 -P test && mvn antlr4:antlr4 package shade:shade`
+

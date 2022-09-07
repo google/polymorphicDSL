@@ -4,12 +4,18 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.google</groupId>
+    <groupId>com.google.pdsl</groupId>
     <artifactId>pdsl</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.1.4-SNAPSHOT</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>
+
+		<parent>
+			<groupId>org.sonatype.oss</groupId>
+			<artifactId>oss-parent</artifactId>
+			<version>7</version>
+		</parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -100,78 +106,44 @@
     <profiles> <!-- enable antlr plugin to generate grammars for tests and main -->
         <profile>
             <id>test</id> <!-- needed to allow generation of ANTLR grammars used by test code -->
-               <build>
-                   <plugins>
-                        <plugin>
-                            <groupId>org.antlr</groupId>
-                            <artifactId>antlr4-maven-plugin</artifactId>
-                            <version>4.9.1</version>
-                            <configuration>
-                                <sourceDirectory>${basedir}/src/test/antlr4</sourceDirectory>
-                                <libDirectory>${basedir}/src/test/antlr4/com/pdsl/grammars</libDirectory>
-                            </configuration>
-                            <executions>
-                                <execution>
-                                    <goals>
-                                        <goal>antlr4</goal>
-                                    </goals>
-                                </execution>
-                            </executions>
-                        </plugin>
-                   </plugins>
-               </build>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.antlr</groupId>
+                        <artifactId>antlr4-maven-plugin</artifactId>
+                        <version>4.9.1</version>
+                        <configuration>
+                            <sourceDirectory>${basedir}/src/test/antlr4</sourceDirectory>
+                            <libDirectory>${basedir}/src/test/antlr4/com/pdsl/grammars</libDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>antlr4</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 
     <build>
 
-        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <pluginManagement>
 
             <plugins>
-                <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
-                <plugin>
-                    <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.1.0</version>
-                </plugin>
-                <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
-                <plugin>
-                    <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.0.2</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.8.0</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.22.1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.0.2</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8.2</version>
-                </plugin>
-                <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
-                <plugin>
-                    <artifactId>maven-site-plugin</artifactId>
-                    <version>3.7.1</version>
-                </plugin>
-                <plugin>
-                    <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.0.0</version>
-                </plugin>
 
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
                     <version>4.9.1</version>
+                    <configuration>
+                        <arguments>
+                            <argumenent>-visitor</argumenent>
+                        </arguments>
+                    </configuration>
                     <executions>
                         <execution>
                             <goals>
@@ -180,6 +152,34 @@
                         </execution>
                     </executions>
                 </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.2</version>
+                    <configuration>
+                        <excludes>
+                            <exclude>com/pdsl/grammars/</exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.3.0</version>
+                    <configuration>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>shade</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
@@ -200,6 +200,20 @@
                         </execution>
                     </executions>
                 </plugin>
+
+								<plugin>
+									<groupId>org.apache.maven.plugins</groupId>
+									<artifactId>maven-gpg-plugin</artifactId>
+									<executions>
+										<execution>
+											<id>sign-artifacts</id>
+											<phase>verify</phase>
+											<goals>
+												<goal>sign</goal>
+											</goals>
+										</execution>
+									</executions>
+								</plugin>
             </plugins>
         </pluginManagement>
     </build>

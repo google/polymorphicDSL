@@ -147,7 +147,7 @@ public class PdslTestSuite extends Suite {
             // Run the tests
             super.run(runNotifier);
             // Generate a report
-            if (reportGenerator.isPresent() && !reportGenerator.get().getClass().equals(EmptyReportGenerator.class)) {
+            if (reportGenerator.isPresent() && !(reportGenerator.get().equals(EmptyReportGenerator.class))) {
                 Class<? extends TraceableReportGenerator> reportGeneratorClass = reportGenerator.get();
                 try {
                     TraceableReportGenerator traceableReportGenerator = reportGeneratorClass.getDeclaredConstructor().newInstance();

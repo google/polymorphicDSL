@@ -4,7 +4,9 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * An executable
+ * An executable test for PDSL to process with a test case executor of some kind.
+ *
+ * @see {com.pdsl.executors.TraceableTestRunExecutor}
  */
 public interface TestCase {
 

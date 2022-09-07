@@ -3,6 +3,7 @@ package com.pdsl.executors;
 import java.io.IOException;
 import java.io.OutputStream;
 
+/**  A container of output streams that delegates all write actions to the underlying output streams. */
 public class MultiOutputStream extends OutputStream {
 
     private final OutputStream[] streams;
