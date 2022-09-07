@@ -3,6 +3,9 @@ package com.pdsl.reports;
 import java.io.OutputStream;
 import java.util.List;
 
+/**
+ * A listener that is used to process a test result into a presentable format when generating reports.
+ */
 public interface ReportListener {
 
     void addTestResult(DefaultTestResult defaultTestResult);

@@ -11,6 +11,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A fraction of a full test as a result of a Test Specification being processed by a Test Case Factory.
+ *
+ * TestSections are useful when a test specification has logic for shared behavior across tests (such as before all or
+ * after all hooks with a main body).
+ */
 public interface TestSection {
 
     Optional<InputStream> getMetaData();

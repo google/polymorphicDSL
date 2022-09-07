@@ -4,6 +4,13 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.*;
 
+/**
+ * A generator of test run results that is able to compare how test cases written in a shared DSL performed across
+ * multiple contexts.
+ *
+ * i.e., an identical test specification can be executed in two separate applications/platforms, but it is useful to
+ * see if it passed in both of them or not.
+ */
 public interface TraceableReportGenerator {
     URL generateReport(Map<String, Map<String, Collection<MetadataTestRunResults>>> testRunResults) throws IOException;
 

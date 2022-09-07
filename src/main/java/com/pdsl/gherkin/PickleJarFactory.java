@@ -12,6 +12,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A factory for producing PickleJars from Test Resources.
+ *
+ * @see com.pdsl.gherkin.PickleJar
+ */
 public class PickleJarFactory {
 
     public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);

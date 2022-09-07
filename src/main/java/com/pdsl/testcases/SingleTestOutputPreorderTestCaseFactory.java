@@ -3,6 +3,7 @@ package com.pdsl.testcases;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,6 +14,14 @@ import java.util.List;
  * This factory will only produce one test case per test resource.
  */
 public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory {
+
+    public static final class DefaultProvider implements Provider<TestCaseFactory> {
+        private static final SingleTestOutputPreorderTestCaseFactory INSTANCE = new SingleTestOutputPreorderTestCaseFactory();
+        @Override
+        public SingleTestOutputPreorderTestCaseFactory get() {
+            return INSTANCE;
+        }
+    }
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testCaseSpecifications) {

@@ -1,8 +1,11 @@
 package com.pdsl.testcases;
 
+import com.pdsl.runners.TestSpecificationFactoryGenerator;
+import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.specifications.TestSpecification;
 
+import javax.inject.Provider;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,6 +17,14 @@ import java.util.*;
  * It is capable of producing multiple test cases from a single test specification.
  */
 public class PreorderTestCaseFactory implements TestCaseFactory {
+
+    public static final class DefaultProvider implements Provider<TestCaseFactory> {
+        private static final PreorderTestCaseFactory INSTANCE = new PreorderTestCaseFactory();
+        @Override
+        public PreorderTestCaseFactory get() {
+            return INSTANCE;
+        }
+    }
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {

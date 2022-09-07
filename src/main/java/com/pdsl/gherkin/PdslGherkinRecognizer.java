@@ -8,6 +8,11 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
+/**
+ * A recognizer of the Gherkin protocol.
+ *
+ * This is able to take a URI of a Gherkin resource and turn it into an underlying object that represents the text.
+ */
 public interface PdslGherkinRecognizer {
 
     Optional<GherkinFeature> interpretGherkinFile(URI filepath, PdslGherkinListener listener) throws IOException;

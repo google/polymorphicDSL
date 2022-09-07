@@ -5,6 +5,7 @@ import com.pdsl.runners.TestSpecificationFactoryGenerator;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 
+import javax.inject.Provider;
 import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -19,6 +20,13 @@ public class LineDelimitedTestSpecificationFactory implements TestSpecificationF
     private final PolymorphicDslPhraseFilter phraseFilter;
     private Charset charset = StandardCharsets.UTF_8;
 
+    public static final class DefaultProvider implements Provider<TestSpecificationFactoryGenerator> {
+        private static final TestSpecificationFactoryGenerator INSTANCE = new Generator();
+        @Override
+        public TestSpecificationFactoryGenerator get() {
+            return INSTANCE;
+        }
+    }
     public static final class Generator implements TestSpecificationFactoryGenerator {
 
         @Override

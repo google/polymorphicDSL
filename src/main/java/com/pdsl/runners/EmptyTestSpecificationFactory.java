@@ -29,4 +29,15 @@ class EmptyTestSpecificationFactory implements TestSpecificationFactory, Annotat
             }
         };
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        return o.getClass().equals(EmptyTestSpecificationFactory.class);
+    }
+
+    @Override
+    public int hashCode() {
+        return 7;
+    }
 }

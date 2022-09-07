@@ -6,9 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 import java.util.Collection;
 
-/**
- * A test executor that can record the results of the test run at a granular level.
- */
+/** A test executor that can record the results of the test run at a granular level. */
 public interface TraceableTestRunExecutor extends PolymorphicDslTestExecutor {
 
     /**

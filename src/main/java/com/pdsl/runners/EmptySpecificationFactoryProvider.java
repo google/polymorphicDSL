@@ -15,4 +15,16 @@ class EmptySpecificationFactoryProvider implements Annotation, Provider {
     public Object get() {
         return INSTANCE;
     }
+
+    @Override
+    public int hashCode() {
+        return INSTANCE.hashCode();
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) { return false; }
+        return o.equals(INSTANCE);
+    }
+
+
 }

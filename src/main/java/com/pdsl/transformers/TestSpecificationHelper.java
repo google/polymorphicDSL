@@ -17,8 +17,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A utility class that provides common functionality for processing an arbitrary PDSL test.
+ */
 public interface TestSpecificationHelper {
 
+    /**
+     *  Generates the parse trees for arbitrary input using the specified ANTLR lexers and parsers.
+     *
+     * @param inputStream the input to parse
+     * @param strategy whether or not errors should be printed or hidden when parsing
+     * @param parserClass the ANTLR parser grammar for the input
+     * @param lexerClass the ANTLR lexer grammar for tokenizing the input
+     * @return
+     */
     static Optional<Parser> parserOf(InputStream inputStream, ErrorListenerStrategy strategy, Class<?> parserClass, Class<?> lexerClass) {
 
         Optional<? extends Lexer> lexer = lexerOf(lexerClass, inputStream, strategy);
@@ -93,6 +105,18 @@ public interface TestSpecificationHelper {
         SUBGRAMMAR
     }
 
+    /**
+     * Determines whether the input as a whole conforms to a specified syntactic rule.
+     *
+     * Note that calling this method will consume the provided input streams! This method will
+     * return a copy of the provided inputs for future use if needed.
+     *
+     * @param parserClass the ANTLR parser to use for the input
+     * @param lexerClass the ANTLR lexer for tokenizing the input
+     * @param inputStreams the input to parse
+     * @param syntaxRuleName the ANTLR rule in the provided parser to use for checking hte input
+     * @return a new copy of the provided InputStreams
+     */
     static List<InputStream> checkGrammarValidity(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass,
                                      List<InputStream> inputStreams, String syntaxRuleName) {
         // Combine the input streams into a single stream
@@ -111,6 +135,18 @@ public interface TestSpecificationHelper {
         return inputStreamCopy;
     }
 
+    /**
+     * Determines whether the input as a whole conforms to a specified syntactic rule.
+     *
+     * Note that calling this method will consume the provided input stream! This method will
+     * return a copy of the provided input for future use if needed.
+     *
+     * @param parserClass the ANTLR parser to use for the input
+     * @param lexerClass the ANTLR lexer for tokenizing the input
+     * @param inputStream the input to parse
+     * @param syntaxRuleName the ANTLR rule in the provided parser to use for checking hte input
+     * @return a new copy of the provided InputStream
+     */
     static void checkGrammarValidity(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, InputStream inputStream, String syntaxRuleName) {
         Method syntaxRule;
         InputStream bufferdInputStream = new BufferedInputStream(inputStream);

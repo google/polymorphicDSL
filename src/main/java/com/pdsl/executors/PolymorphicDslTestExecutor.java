@@ -6,9 +6,7 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 
 import java.util.Collection;
 
-/**
- * A test runner that is used to perform test case execution.
- */
+/** A test runner that is used to perform test case execution. */
 public interface PolymorphicDslTestExecutor {
 
     /**
