@@ -6,22 +6,25 @@
 
     <groupId>com.google.pdsl</groupId>
     <artifactId>pdsl</artifactId>
-    <version>1.2.0-SNAPSHOT</version>
+    <version>1.2.1-SNAPSHOT</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>
 
-		<parent>
-			<groupId>org.sonatype.oss</groupId>
-			<artifactId>oss-parent</artifactId>
-			<version>7</version>
-		</parent>
+    <parent>
+        <groupId>org.sonatype.oss</groupId>
+        <artifactId>oss-parent</artifactId>
+        <version>7</version>
+    </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <jacoco.version>0.8.7</jacoco.version>
+        <shade.version>3.3.0</shade.version>
+        <antlr.version>4.9.1</antlr.version>
+        <mvn.jar.version>3.2.2</mvn.jar.version>
     </properties>
 
     <dependencies>
@@ -34,12 +37,12 @@
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4-runtime</artifactId>
-            <version>4.9.1</version>
+            <version>${antlr.version}</version>
         </dependency>
         <dependency>
             <groupId>org.antlr</groupId>
             <artifactId>antlr4</artifactId>
-            <version>4.9.1</version>
+            <version>${antlr.version}</version>
         </dependency>
 
         <dependency>
@@ -111,7 +114,7 @@
                     <plugin>
                         <groupId>org.antlr</groupId>
                         <artifactId>antlr4-maven-plugin</artifactId>
-                        <version>4.9.1</version>
+                        <version>${antlr.version}</version>
                         <configuration>
                             <sourceDirectory>${basedir}/src/test/antlr4</sourceDirectory>
                             <libDirectory>${basedir}/src/test/antlr4/com/pdsl/grammars</libDirectory>
@@ -127,10 +130,120 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.antlr</groupId>
+                        <artifactId>antlr4-maven-plugin</artifactId>
+                        <version>${antlr.version}</version>
+                        <configuration>
+                            <sourceDirectory>${basedir}/src/test/antlr4</sourceDirectory>
+                            <libDirectory>${basedir}/src/test/antlr4/com/pdsl/grammars</libDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>antlr4</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-gpg-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>sign-artifacts</id>
+                                <phase>verify</phase>
+                                <goals>
+                                    <goal>sign</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.sonatype.plugins</groupId>
+                        <artifactId>nexus-staging-maven-plugin</artifactId>
+                        <version>1.6.7</version>
+                        <extensions>true</extensions>
+                        <configuration>
+                            <serverId>ossrh</serverId>
+                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-source-plugin</artifactId>
+                        <version>2.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-sources</id>
+                                <goals>
+                                    <goal>jar-no-fork</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jar-plugin</artifactId>
+                        <version>${mvn.jar.version}</version>
+                        <configuration>
+                            <excludes>
+                                <exclude>com/pdsl/grammars/</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-shade-plugin</artifactId>
+                        <version>${shade.version}</version>
+                        <configuration>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>shade</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
     <build>
-
         <pluginManagement>
 
             <plugins>
@@ -138,7 +251,7 @@
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
-                    <version>4.9.1</version>
+                    <version>${antlr.version}</version>
                     <configuration>
                         <arguments>
                             <argumenent>-visitor</argumenent>
@@ -156,7 +269,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <version>${mvn.jar.version}</version>
                     <configuration>
                         <excludes>
                             <exclude>com/pdsl/grammars/</exclude>
@@ -167,7 +280,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>${shade.version}</version>
                     <configuration>
                     </configuration>
                     <executions>
@@ -179,7 +292,7 @@
                         </execution>
                     </executions>
                 </plugin>
-                
+
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
@@ -200,20 +313,6 @@
                         </execution>
                     </executions>
                 </plugin>
-
-								<plugin>
-									<groupId>org.apache.maven.plugins</groupId>
-									<artifactId>maven-gpg-plugin</artifactId>
-									<executions>
-										<execution>
-											<id>sign-artifacts</id>
-											<phase>verify</phase>
-											<goals>
-												<goal>sign</goal>
-											</goals>
-										</execution>
-									</executions>
-								</plugin>
             </plugins>
         </pluginManagement>
     </build>
