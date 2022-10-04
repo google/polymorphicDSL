@@ -1,0 +1,95 @@
+= Using the Interpreter Pattern for Software Testing
+
+.Interpreter Pattern
+[[Interpreters]]
+[quote, Design Patterns, Elements of Reusable Object-Oriented Software]
+____
+
+If a particular kind of problem occurs often enough, then it might be worthwhile to express instances of the problem as sentences in a simple language. Then you can build an interpreter that solves the problem by interpreting these sentences.
+____
+
+== Background
+
+Modern systems can get big. Multiple teams tend to work on different parts and go out of sync rapidly. Domain knowledge tends to be in a silo (often unintentionally) to the point that even Product Managers have no idea what the system really does.
+
+Development tends to be stifled because a team will release code that harms another team without realizing it. This tends to be discovered after the fact because it is just flat out difficult to coordinate when building distributed systems.
+
+With testing it gets worse. A feature change that takes development a single unit of work may require exponential or factorial time from the testers. Even when all teams have sufficiently staffed testers (which they don't) and even when they effectively coordinate (which they won't) it is incredibly expensive to provide adequate coverage with each change.
+
+An irony here is that this problem has been solved on the development front and is a fundamental feature of many tools they use. Despite this, most developers and testers probably don't even realize it. 
+
+Languages like Java or C# are cross platform: code written in these languages can run on many different operating systems without changes to the source. This is made possible because the languages _don't_ compile to machine code, they compile to an _Intermediary Representation_ of the source code (i.e., Java's bytecode). This abstract code is then *interpreted* by a virtual machine for that specific operating system. 
+
+In short, rather than hard coding _how_ to do something in machine code the languages instead describe _what_ to do. The implementation details are then left to the client. It's like saying "Open a file" and everything works because Linux, Windows and Mac all know how to open files even though they do so in very different ways.
+
+
+== Distributed Systems
+
+Much of modern architecture is designed as a distributed system. This means that there are a lot of separate, independent parts. Imagine if you had a car and when the tire needed to be changed you had to throw the entire car away and buy a new one. That would be silly. You should just replace or repair the tire. This is why you usually see microservices put together in a distributed system.
+
+Despite each service being independent and solving unique problems, they often have _shared concerns_. An e-commerce site might have multiple ways to sell products. A user could use the companies website, but larger, wholesale clients might upload a spreadsheet of the products they want to buy instead. Even though in this example different applications are being used, _they are doing the same thing._
+
+This kind of dynamic is practically ubiquitous in modern software development.
+
+== Domain Specific Languages 
+
+A related concept here are *Domain Specific Languages*, or DSLs. A DSL is a formal, restricted way to talk about a particular thing. It is contrasted with a General Purpose Language (GPL). 
+
+An analogy of a GPL would be the word "fish". If you think of a fish you probably imagine something like this:
+
+image:goldfish.jpg[Fish]
+
+But fish could also be used to describe a starfish:
+
+image:starfish.jpg[Fish?]
+
+The problem with GPLs is that they're so generic that they sometimes can mean practically anything. This is why Latin names were developed. They're essentially a DSL for taxonomists. For example, _Carassius auratus_ gives a very, very clear idea that I'm talking about a goldfish whereas _Austerius rubens_ means I'm talking about not just a starfish, but a particular type of starfish.
+
+Software testing becomes remarkably more achievable when the tests are written with DSLs.
+
+== DSLs for Testing
+
+Imagine you have a distributed system with 100 services of varying complexity. In the real world it is unlikely any single person can tell you how they all fit together or even what they are. Traditionally testing might require multiple teams to write their own tests for each service and cover all the use cases. When there is a new requirement, some, many or all of them might need to update. In practice this regularly doesn't happen because coordinating is hard. This is true when there are only 2-3 teams, let alone numbers in the double digits!
+
+Even if all the teams coordinate, it is expensive. The time complexity for testing in this situation is O(FU), where F is the number of frameworks and U is the number of use cases. The business might need to consider all services and determine if they are affected and implement all relevant use cases for them.
+
+Using a DSL can bring this down to O(1) in a best case scenario. Rather than writing hard coded tests into each separate system, you instead write simple sentences that describe the application:
+
+"The customer purchases X product"
+
+"Our warehouse receives the customer's order"
+
+"The warehouse is given a deadline to ship the order within 5 days"
+
+"The customer gets a tracking number"
+
+and so on.
+
+Every service
+The value here is that when there is a change in business requirements it is plausible some large subset of the 100 services now may need to update an unknown, but large number of tests.
+
+With the interpreter pattern we might just change one sentence in a shared document:
+
+"The warehouse is given a deadline to ship the order within *3* days"
+
+...and up to 100 services will update their own tests with a single unit of effort.
+
+
+=== Worst Case
+
+O(1) is absolutely amazing, but we aren't guaranteed it. In the worst case we will be back to O(FU) time. However in practice, this doesn't happen as much as often as you might think. The good news is many tests are permutations of a common theme, so a one line code change not only can update dozens of tests, it's sort of unavoidable.
+
+But then again, the worst case can and will happen, especially when adding new features that never existed in any form before. But at least it isn't happening to us every time.
+
+=== We are not talking about BDD
+
+Some users of Behavioral Driven Development (such as the Cucumber framework) may assume that the Interpreter pattern is the same thing.
+
+They are not.
+
+You can _also_ use the Interpreter pattern as a form of BDD, but its primary purpose is not to close the gap between business people and technical people. For one, it isn't always appropriate to write your DSL using natural language. Graphical software that requires you to _draw_ something on a screen quickly makes you realize the shortcomings of describing everything in natural language. "Given, when, then" isn't particularly clear in that situation.
+
+BDD focuses on solving _understandability_. What the interpreter pattern does is provide _scalability_.  
+
+BDD tools like Cucumber are admirable, but they weren't designed to make tests scalable and they tend implode when used for the Interpreter Pattern. To better understand this, see link:why_not_cucumber.adoc[why not just use cucumber?]
+
