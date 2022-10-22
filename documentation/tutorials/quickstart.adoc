@@ -1,3 +1,4 @@
+:toc:
 = PDSL Gherkin Quickstart
 
 If you want to make your own grammar instead of using gherkin, follow link:custom_grammar.adoc[this guide instead.]

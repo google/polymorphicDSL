@@ -1,0 +1,22 @@
+digraph website {
+
+    "Sign In" -> Home -> "Order History" -> "Shopping Cart"
+    Home -> "Shopping Cart"
+    "Shopping Cart" -> Home
+    Home -> Products -> "Shopping Cart"
+    Products -> Home
+    Products -> "Shopping Cart"
+    "Shopping Cart" -> "Order History"
+    "Order History" -> Home
+    "Shopping Cart" -> Checkout -> Shipping -> Payment -> "Order Confirmation" -> Home
+    Home -> Admin [label="admin only" color="red"]
+    Shipping -> Checkout
+    Payment -> Shipping
+    Checkout -> "Shopping Cart"
+    Admin -> "Payment Data" [color="red"]
+    "Payment Data" -> Admin [color="red"]
+    Admin -> "Refund Form" [color="red"]
+    "Refund Form" -> Admin [color="red"]
+    Admin -> "Product Editor" [color="red"]
+    "Product Editor" -> Admin [color="red"]
+}

@@ -1,0 +1,125 @@
+:toc:
+= Built in Specification Factories
+
+Test Specifications have two important jobs:
+
+. Describe how to organize the phrases your DSL has.
+. Filter phrases based off of context so that you only execute what you care about.
+
+For example,
+you may wish to run certain phrases every time before a group of other phrases:
+
+The below is an example of a made up DSL where this might matter:
+
+----
+Before Each:
+  Do Gralt
+
+Test:
+  Do Foo
+  Do Bar
+  Do Bizz
+
+Test:
+  Do Bazz
+
+After Each:
+  Do Buzz
+----
+
+In a DSL like this you would have the intention of the test cases ultimately being
+this:
+
+----
+Test #1
+  Do Gralt
+  Do Foo
+  Do Bar
+  Do Bizz
+  Do Buzz
+
+Test #2
+  Do Gralt
+  Do Bazz
+  Do Buzz
+----
+
+Test specifications are what make this possible. Hopefully one of the provided
+factories in the framework will meet your needs. If not you will be able to make your
+own.
+
+=== File Delimited Factory
+
+The link:../src/main/java/com/pdsl/specifications/FileDelimitedTestSpecificationFactory.java[FileDelimitedTestSpecificationFactory]
+ treats each file as a single test case *and the entire content* as a single phrase.
+
+This is useful if there is no other metadata in your DSL you need to care about
+(like the _@tags_ in gherkin, or looping content with things like _Examples_ tables).
+
+A real world use case for this would be the DOT example in link:tutorials/custom_grammar.adoc[the custom grammar example].
+
+The authors of the framework also created tests using SVG files.
+
+In both these cases it was appropriate to have one test case per file and to consume
+the entire file as input because there was no additional noise to worry about.
+
+For example, if this factory had this input:
+----
+Line one
+Line two
+Line three
+----
+it would produce *1* phrase.
+
+
+=== Line Delimited Factory
+
+The link:../src/main/java/com/pdsl/specifications/LineDelimitedTestSpecificationFactory.java[LineDelimitedTestSpecificationFactory]
+creates a single specification from each input. Sentences are deliminated by line breaks.
+
+For example, if this factory had this input:
+----
+Line one
+Line two
+Line three
+----
+it would produce *3* phrases.
+
+=== Default Gherkin Test Specification Factory
+
+This is what PDSL uses to convert Gherkin files into test cases, although it is
+unlikely most users would ever need to directly use it. As a convenience to the user
+this is automatically set up by the `@PdslGherkinApplication annotation`:
+
+[source,java]
+----
+@RunWith(PdslGherkinJUnit4Runner.class)
+@PdslGherkinApplication(
+        resourceRoot = "src/test/resources/framework_specifications/features"
+)
+----
+
+This is actually more or less equivalent to the following:
+[source,java]
+----
+@RunWith(PdslJUnit4ConfigurableRunner.class)
+@PdslConfiguration(
+        testCaseFactoryProvider = PreorderTestCaseFactory.DefaultProvider.class,
+        specificationFactoryProvider = DefaultGherkinTestSpecificationFactory.DefaultProvider.class,
+        resourceRoot = "src/test/resources/framework_specifications/features",
+        )
+----
+
+Because gherkin is supported as a 1st class DSL in PDSL, the API was set up so
+you don't need to repeatedly provide the specification and test case factories.
+
+
+==  Specification BDD for PDSL
+
+PDSL actually uses itself to test itself (after all low level tests complete,
+of course). It has gherkin describing Test Specifications and tests all of it's
+own provided factories, making a _Rule:_ for each one. If you are curious you can
+view the specification for that below:
+
+
+link:../src/test/resources/framework_specifications/features/TestSpecificationFactory.feature[Test Specification Factory Feature]
