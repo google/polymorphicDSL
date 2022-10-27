@@ -9,28 +9,28 @@ Information about the PDSL framework and why you would want to take this approac
 
 === Why
 
-* link:why_use_a_dsl_for_testing.adoc[Why use a DSL for testing?]
-* link:why_not_cucumber.adoc[Why not use Cucumber?]
+* <<why_use_a_dsl_for_testing.adoc#, Why use a DSL for testing?>>
+* <<why_not_cucumber.adoc#, Why not use Cucumber?>>
 
 
 === What
 
-* link:interpreter_pattern.adoc[The Interpreter Pattern]
-* link:common_misconceptions.adoc[Common Misconceptions]
-* link:client_server_test_pyramid.adoc[The Client Server Test Pyramid]
+* <<interpreter_pattern.adoc# ,The Interpreter Pattern>>
+* <<common_misconceptions.adoc#, Common Misconceptions>>
+* <<client_server_test_pyramid.adoc#, The Client Server Test Pyramid>>
 
 == Tutorials
 
 Hands-on experience and example projects for using PDSL
 
-* link:tutorials/quickstart.adoc[Gherkin Quickstart]
-* link:tutorials/custom_grammar.adoc[Custom Grammars]
-* link:tutorials/parameters.adoc[Handling Parameters]
+* <<tutorials/quickstart.adoc#, Gherkin Quickstart>>
+* <<tutorials/custom_grammar.adoc#, Custom Grammars>>
+* <<tutorials/parameters.adoc#, Handling Parameters>>
 
 == Framework Documentation
 
 Information about the framework itself and the built-in features it has.
 
-* link:specification_factories.adoc[Specification Factories]
-* link:test_case_factories.adoc[Test Case Factories]
+* <<specification_factories.adoc#, Specification Factories>>
+* <<test_case_factories.adoc#, Test Case Factories>>
 

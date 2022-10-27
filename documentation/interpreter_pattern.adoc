@@ -90,5 +90,5 @@ You can _also_ use the Interpreter pattern as a form of BDD, but its primary pur
 
 BDD focuses on solving _understandability_. What the interpreter pattern does is provide _scalability_.  
 
-BDD tools like Cucumber are admirable, but they weren't designed to make tests scalable and they tend to implode when used for the Interpreter Pattern. To better understand this, see link:why_not_cucumber.adoc[why not just use cucumber?]
+BDD tools like Cucumber are admirable, but they weren't designed to make tests scalable and they tend to implode when used for the Interpreter Pattern. To better understand this, see <<why_not_cucumber.adoc#, why not just use cucumber?>>
 
