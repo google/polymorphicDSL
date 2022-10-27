@@ -4,7 +4,7 @@
 
 Some specifications (such as gherkin) can be relatively elaborate and have a single
 input that represents many outputs. Test case factories determine how many test
-cases to turn a link:specification_factories.adoc[specification] into, as well
+cases to turn a <<specification_factories.adoc#, specification>> into, as well
 as making sure that the relevant phrases are executed in the proper order for each
 one.
 

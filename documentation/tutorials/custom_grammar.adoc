@@ -2,7 +2,7 @@
 = PDSL Custom Grammars
 
 Sometimes the best way to represent how your application behaves is through some
-format that no one has natively supported yet. PDSL natively supports gherkin. See link:quickstart.adoc[the quickstart] if you think gherkin can meet your use case.
+format that no one has natively supported yet. PDSL natively supports gherkin. See <<quickstart.adoc#, the gherkin quickstart>> if you think gherkin can meet your use case.
 
 == A custom grammar
 
@@ -145,7 +145,7 @@ built in feature of PDSL: the _FileDelimitedTestSpecificationFactory_.
 
 What this does is produce one specification for each file PDSL reads (as opposed to
 many). To learn about specification factories in general or the other factories PDSL
-provides out of the box, see link:../specification_factories.adoc[Specification Factories].
+provides out of the box, see <<../specification_factories.adoc#, Specification Factories>>.
 
 === Determine how to produce Test Cases from the Specification
 
@@ -156,7 +156,7 @@ PDSL has a standard factory for this called _SingleTestOutputPreorderTestCaseFac
 a group of other sentences). We don't actually need any of that, but it will work
 just fine for our purposes.
 
-To lear more about Test Case Factories in general see link:../test_case_factories.adoc[Test Case Factories].
+To lear more about Test Case Factories in general see <<../test_case_factories.adoc#, Test Case Factories>>.
 
 === How to find the Test Resources
 

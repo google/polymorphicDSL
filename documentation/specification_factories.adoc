@@ -48,7 +48,7 @@ Test specifications are what make this possible. Hopefully one of the provided
 factories in the framework will meet your needs. If not you will be able to make your
 own.
 
-=== File Delimited Factory
+== File Delimited Factory
 
 The link:../src/main/java/com/pdsl/specifications/FileDelimitedTestSpecificationFactory.java[FileDelimitedTestSpecificationFactory]
  treats each file as a single test case *and the entire content* as a single phrase.
@@ -56,7 +56,7 @@ The link:../src/main/java/com/pdsl/specifications/FileDelimitedTestSpecification
 This is useful if there is no other metadata in your DSL you need to care about
 (like the _@tags_ in gherkin, or looping content with things like _Examples_ tables).
 
-A real world use case for this would be the DOT example in link:tutorials/custom_grammar.adoc[the custom grammar example].
+A real world use case for this would be the DOT example in <<tutorials/custom_grammar.adoc#, the custom grammar example>>.
 
 The authors of the framework also created tests using SVG files.
 
@@ -72,7 +72,7 @@ Line three
 it would produce *1* phrase.
 
 
-=== Line Delimited Factory
+== Line Delimited Factory
 
 The link:../src/main/java/com/pdsl/specifications/LineDelimitedTestSpecificationFactory.java[LineDelimitedTestSpecificationFactory]
 creates a single specification from each input. Sentences are deliminated by line breaks.
@@ -85,7 +85,7 @@ Line three
 ----
 it would produce *3* phrases.
 
-=== Default Gherkin Test Specification Factory
+== Default Gherkin Test Specification Factory
 
 This is what PDSL uses to convert Gherkin files into test cases, although it is
 unlikely most users would ever need to directly use it. As a convenience to the user

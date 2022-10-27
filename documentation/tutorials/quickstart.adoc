@@ -1,7 +1,7 @@
 :toc:
 = PDSL Gherkin Quickstart
 
-If you want to make your own grammar instead of using gherkin, follow link:custom_grammar.adoc[this guide instead.]
+If you want to make your own grammar instead of using gherkin, follow <<custom_grammar.adoc#, this guide instead>>.
 
 Gherkin is a protocol developed by the Cucumber framework. It can be very powerful for clearly and concisely specifying tests in natural language. PDSL supports Gherkin natively.
 
@@ -225,5 +225,5 @@ NOTE: If you noticed you made a mistake in your parser, make sure to run mvn ant
 
 == Next Steps
 
-PDSL was designed to solve problems for more complicated than we've seen in this tutorial. If you want to create your own language for testing instead of using Gherkin like we did here, see link:custom_grammar.adoc[this guide.] Otherwise proceed to link:gherkin_scalability_tutorial.adoc[the gherkin scalability tutorial.]
+PDSL was designed to solve problems for more complicated than we've seen in this tutorial. If you want to create your own language for testing instead of using Gherkin like we did here, see <<custom_grammar.adoc#, this guide>>. Otherwise proceed to <<gherkin_scalability_tutorial.adoc#, the gherkin scalability tutorial>>.
 
