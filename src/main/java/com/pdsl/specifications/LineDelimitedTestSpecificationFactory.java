@@ -15,6 +15,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A Test Specification Factory that demarcates phrases by newlines.
+ */
 public class LineDelimitedTestSpecificationFactory implements TestSpecificationFactory {
 
     private final PolymorphicDslPhraseFilter phraseFilter;

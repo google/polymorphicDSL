@@ -1,0 +1,13 @@
+digraph test_specification {
+    "Parent" [shape=record label="1|2|3"]
+    "Beta_1" [shape=record label="4|5|6"]
+    "Gamma_1" [shape=record label="7|8|9"]
+
+    "Parent" -> "Beta_1" -> "Gamma_1"
+
+    subgraph result {
+        "Result_1" [shape=record label="1|2|3|4|5|6|7|8|9"]
+        "Preorder" -> "Result_1"
+        "Single Test Output Preorder" -> "Result_1"
+    }
+}

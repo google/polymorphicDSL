@@ -1,0 +1,115 @@
+= Why not just use cucumber?
+
+PDSL is powerful, but with that power comes complexity. Cucumber is a better fit for monolithic software that runs on one operating system or platform (or a group of very similar ones). It is also might better to use if you have a single target language for all platforms (such as Jave Appium/Webdriver for all mobile/web platforms) and you have no intention of writing anything other than User Acceptance Tests. 
+
+PDSL was created because other BDD tools couldn't scale and were limited in how the grammars were made.
+
+== Cucumber pain points
+
+=== Maintenance
+
+PDSL was designed so that a single test specification could generate tests in multiple layers of the test pyramid. In order to accomplish that gracefully PDSL was designed to follow the _Interface Segregation Principle_. Cucumber struggles with this when the tests start to scale to different applications.
+
+For example, consider this grammar:
+
+[source,cucumber]
+----
+Given a user logs in
+And the user explores the product catalog
+And a user adds a frobinator to their shopping cart
+When the customer goes to check out
+Then the frobinator costs $9.99
+----
+
+This grammar is perfectly suitable when you're doing an integration test on Android, iOS and web. You can modify this grammar and it is unlikely to have a negative impact on any of the platforms.
+
+However what happens when you're doing an API test instead of an integration test?
+
+----
+Given a user logs in # Huh? We don't care about authentication in this context
+And the user explores the product catalog
+And a user adds a frobinator to their shopping cart 
+When the customer goes to check out # There is also no concept of checking out here either
+Then the frobinator costs $9.99
+----
+
+What ends up happening is an empty implementation is provided for these other tests. When the grammar is changed, _all_ of the other test frameworks need to be updated even if it adds no value whatsoever! This becomes unmanageable for even a trivial amount of services, let alone 20 or more. This particular pain point is what originally lead to the creation of PDSL.
+
+
+=== Given I need a different grammar
+
+Cucumber created a great protocol called Gherkin. It is a great way to represent tests most of the time. However there are plenty of situations where the "Given-When-Then" format just isn't suitable for the task at hand. Graphical applications are better defined by SVG files than natural language. A test for all navigation flows in an app is better represented by a graph. APIs are better represented with Sequence Diagrams and so on.
+
+Cucumber is at its best for User Acceptance tests because it was built to be a BDD tool. When you try to shift outside this paradigm it starts to break down.
+
+=== Compile time checking
+
+If you mix up steps in Cucumber and they run in the wrong order you won't know until runtime. For end-to-end tests this can be very time consuming because each step may take a significant amount of time.
+
+Cucumber has the language capacity of a regular grammar (or in other words, whatever you can match with regular expressions). This is delightful, but it is also the weakest type of grammar that you can create.
+
+For example, suppose you have this test:
+
+----
+Given the door is shut
+When I open the door
+Then I can walk through the door
+----
+
+Suppose you make this obvious mistake:
+
+----
+Given the door is shut
+Then I can walk through the door # Walking through a shut door?
+When I open the door
+----
+
+This is admittedly a simplified example, but real world mistakes analogous to it happen all the time. PDSL can catch these kind of mistakes before your tests even run.
+
+This becomes particularly salient when coordinating with other team members. PDSL can _require_ you to make sure some steps follow others. In a real world example, there was a conflict in a team where a new tester wanted to rewrite an existing test by omitting some steps. The PDSL framework wouldn't let him. It was preventing him from submitting his code.
+
+When it got escalated, it was discovered that the tester wanted to omit these steps because the test would fail if they were present. It was explained to the tester that he had found a bug and that he should keep the steps. Had the check not been in place, the test would have been released and provided a false positive, perhaps for a very long time. It's worth pointing out that this coordination issue all happened within a single team; how much harder is it to coordinate across _many_ teams?
+
+Cucumber doesn't have a way to enforce these kinds of rules because it only allows regex and even then only for single steps (not for their combinations). It isn't realistic to have a person who knows everything check every feature file and have enough domain knowledge to catch subtle issues. Even if you could, that person will one day leave the team and you'll be stuck.
+
+Another power granted by PDSL is the ability to write context sensitive grammars. The checks and balances you can create with this are beyond what can ever be done with regular expressions.
+
+For example, consider this grammar:
+
+----
+Given some candy is in a box
+When the box is opened
+Then I can get the candy!
+----
+
+Pretty simple. But a context free grammar allows you do arbitrary nesting:
+----
+Scenario: Open all the boxes
+	Given some candy is in a box
+	And that box is in a box
+	And that box is in a box
+	When the box is opened
+	And another box is opened
+	And another box is opened
+	Then I can get the candy!
+
+Scenario: Not all boxes opened
+	Given some candy is in a box
+	And that box is in a box
+	And that box is in a box
+	When the box is opened
+	Then I CANNOT get the candy
+----
+
+A single rule is all that is needed to allow nesting of any depth. Because of this PDSL can put very strong guardrails. As a result, you can actually preserve business rules better than you could otherwise.
+
+=== Language Barrier
+
+Cucumber has implementations in multiple languages. It isn't uncommon to have a team writing in Swift, Typescript and another backend language. When you need to make even a trivial change to the grammar (such as modifing "Given a user" to "Given _the_ user") the regular expressions need to be updated in all frameworks. After all, they're all in different target languages.
+
+Because PDSL uses ANTLR grammars as an intermediate representation. In short, it is possible to update a regex in one place and ensure that _everyone_ gets the update with no extra work.
+
+However at the time of this writing this is a somewhat weak argument because the only, actual PDSL test runner currently available is just in Java (we're hoping that will change soon). 
+
+This can sort of be worked around in Cucumber by using ANTLR instead and wrapping Cucumber around it somehow (make a single @Given(".*") step that delegates every sentence matched to the underlying ANTLR interpreter). However at that point it isn't entirely clear why you would use Cucumber at all and it is going to be error prone regardless.
+

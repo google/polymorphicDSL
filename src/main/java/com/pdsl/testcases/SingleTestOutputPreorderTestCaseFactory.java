@@ -25,7 +25,6 @@ public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory 
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testCaseSpecifications) {
-        // Capacity does not necessarily match expected value
         Collection<TestCase> testCases = new ArrayList<>(testCaseSpecifications.size());
         for (TestSpecification testCaseSpecification : testCaseSpecifications) {
             List<TestCase> result = new ArrayList<>(1);
@@ -36,7 +35,7 @@ public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory 
         return testCases;
     }
     private List<FilteredPhrase> recursivelyWalkSpecification(TestSpecification testSpecification, List<FilteredPhrase> parentTestSections) {
-        List<FilteredPhrase> filteredPhrases = new ArrayList<>(parentTestSections);
+        List<FilteredPhrase> filteredPhrases = new ArrayList<>();
         if (testSpecification.getFilteredPhrases().isPresent()) {
             filteredPhrases.addAll(testSpecification.getFilteredPhrases().get());
         }

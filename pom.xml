@@ -181,7 +181,6 @@
 															<goal>antlr4</goal>
 														</goals>
 													</execution>
-
 													<execution>
 														<id>default_deploy</id>
 														<phase>deploy</phase>

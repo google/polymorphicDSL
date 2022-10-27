@@ -38,4 +38,4 @@ Background:
 			Given the "Single Test Output Preorder" test case factory is used
 			When the Test Specification is processed by the Test Case Factory
 			Then 1 test case is produced
-			And each test case has 8 phrases
+			And each test case has 5 phrases
