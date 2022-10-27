@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- *
+ * A Test Specification Factory that demarcates phrases by newlines.
  */
 public class LineDelimitedTestSpecificationFactory implements TestSpecificationFactory {
 

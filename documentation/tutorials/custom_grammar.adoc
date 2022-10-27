@@ -102,13 +102,13 @@ First we create a lexer (which is essentially a dictionary that specifies what a
 the words in our language can be).
 
 ----
-include::../../examples/quickstart/src/test/antlr4/com/example/DotNavigationLexer.g4[]
+include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[]
 ----
 
 After that we make a parser (which specifies how we're allowed to combine the words).
 
 ----
-include::../../examples/quickstart/src/test/antlr4/com/example/DotNavigationParser.g4[]
+include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationParser.g4[]
 ----
 
 The most important rule in our parser is _dotFile_, which says we have a _HEADER_ token, followed by 1 or more _linkedPages_, followed by the _END_GRAPH_.
@@ -128,7 +128,7 @@ care about one, the _linkedPages_ rule which specifies all the possible navigati
 paths.
 [source,Java]
 ----
-include::../../examples/quickstart/src/test/java/com/pdsl/custom/CustomDotNavigationListener.java[]
+include::../../examples/tutorial/src/test/java/com/pdsl/custom/CustomDotNavigationListener.java[]
 ----
 
 === Interpret the Specifications
@@ -170,7 +170,7 @@ All we need to do is be able to tell PDSL _where_ the files are.
 Since we now know everything we need, we can make the PDSL test runner:
 [source,Java]
 ----
-include::../../examples/quickstart/src/test/java/com/pdsl/custom/CustomGrammarTest.java[]
+include::../../examples/tutorial/src/test/java/com/pdsl/custom/CustomGrammarTest.java[]
 ----
 
 At this point we're done! We've made a custom grammar out of thin air and gave PDSL
