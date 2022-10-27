@@ -13,7 +13,7 @@ specifications. This ultimately creates a tree of nodes to traverse.
 
 While many DSLs users create will be quite simple and can thus be handled properly
 by multiple factories due to their simplicity, more complex grammars (notably gherkin)
-require more care.
+require you to be careful about which one you pick.
 
 An obvious use case for this would be a DSL where you have a group of phrases that
 run before subsequent groups of phrases. The specification will represent this via a parent/child
@@ -22,7 +22,7 @@ specification to create the correct test(s).
 
 == Preorder Factories
 
-These factories will always run their parent phrases before each child phrase.
+The built-in preorder factories will always run their parent phrases before each child phrase.
 
 image::../src/test/resources/testcase_factories/complex_specification.png[]
 
@@ -38,7 +38,7 @@ left of the image.
 As a side note, this image is derived from a DOT file that is used
 as a test case to make sure these factories (and any future factories implemented)
 work properly. PDSL uses itself to test itself after all the lower level tests run.
-This serves as yet another example of how to use the interpreter patter to make
+This serves as yet another example of how to use the interpreter pattern to make
 application behavior more understandable than source code can allow.
 
 The DOT file was much easier to create test cases in because we could see what we

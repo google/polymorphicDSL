@@ -7,11 +7,12 @@ format that no one has natively supported yet. PDSL natively supports gherkin. S
 == A custom grammar
 
 Suppose you made a website. Certain pages can only be accessed by priviledged user.
-But to complicate matters it is your job to make sure that it is possible to
+Assume it is your job to make sure that it is possible to
 navigate from one page to all others a user has permission to visit.
 
 Technically you can do something like this in gherkin:
 
+[source,cucumber]
 ----
 Feature: A Website
 
@@ -23,6 +24,7 @@ Feature: A Website
 
 But it can quickly become huge and difficult to reason with.
 
+[source,cucumber]
 ----
     Given a user is on the sign in page
     Then the user can navigate to the home page after they sign in
@@ -79,9 +81,8 @@ For our example we're going to use a graph as a test case. The graph above was m
 === Create a Test with the DSL
 
 The image above was made using the following DOT code:
-----
-include::../images/graphviz/website.dot[]
-----
+
+include::../images/graphviz/website.dot[Source file]
 
 There really isn't much we need here. We define the links between web pages using
 `->` tokens, and we indicate a page is admin only using `[color="red"]`.

@@ -37,11 +37,11 @@ A related concept here are *Domain Specific Languages*, or DSLs. A DSL is a form
 
 An analogy of a GPL would be the word "fish". If you think of a fish you probably imagine something like this:
 
-image:goldfish.jpg[Fish]
+image:images/goldfish.jpg[Fish]
 
 But fish could also be used to describe a starfish:
 
-image:starfish.jpg[Fish?]
+image:images/starfish.jpg[Fish?]
 
 The problem with GPLs is that they're so generic that they sometimes can mean practically anything. This is why Latin names were developed. They're essentially a DSL for taxonomists. For example, _Carassius auratus_ gives a very, very clear idea that I'm talking about a goldfish whereas _Austerius rubens_ means I'm talking about not just a starfish, but a particular type of starfish.
 
@@ -65,8 +65,7 @@ Using a DSL can bring this down to O(1) in a best case scenario. Rather than wri
 
 and so on.
 
-Every service
-The value here is that when there is a change in business requirements it is plausible some large subset of the 100 services now may need to update an unknown, but large number of tests.
+The value here is that when there is a change in business requirements it is plausible some large subset of the 100 services now may need to update an unknown, but large number of tests. However, _because we used a grammar to describe the problem_ all of these tests can remain in sync.
 
 With the interpreter pattern we might just change one sentence in a shared document:
 
@@ -77,19 +76,19 @@ With the interpreter pattern we might just change one sentence in a shared docum
 
 === Worst Case
 
-O(1) is absolutely amazing, but we aren't guaranteed it. In the worst case we will be back to O(FU) time. However in practice, this doesn't happen as much as often as you might think. The good news is many tests are permutations of a common theme, so a one line code change not only can update dozens of tests, it's sort of unavoidable.
+O(1) is absolutely amazing, but we aren't guaranteed it. In the worst case we will be back to O(FU) time. However in practice, this doesn't happen as much as often as you might think. The good news is many tests are permutations of a common theme, so not only is it plausible that a one line code change can update dozens of tests, it's sort of unavoidable in practice.
 
-But then again, the worst case can and will happen, especially when adding new features that never existed in any form before. But at least it isn't happening to us every time.
+But then again, the worst case can and will happen, especially when adding new features that never existed in any form before. But at least it isn't happening to us every time. And arguably more importantly, at least you will know _who else needs to care about that update_.
 
 === We are not talking about BDD
 
-Some users of Behavioral Driven Development (such as the Cucumber framework) may assume that the Interpreter pattern is the same thing.
+Some users of Behavioral Driven Development (such as the Cucumber framework) may assume that the Interpreter pattern is the same thing as BDD.
 
-They are not.
+It is not.
 
 You can _also_ use the Interpreter pattern as a form of BDD, but its primary purpose is not to close the gap between business people and technical people. For one, it isn't always appropriate to write your DSL using natural language. Graphical software that requires you to _draw_ something on a screen quickly makes you realize the shortcomings of describing everything in natural language. "Given, when, then" isn't particularly clear in that situation.
 
 BDD focuses on solving _understandability_. What the interpreter pattern does is provide _scalability_.  
 
-BDD tools like Cucumber are admirable, but they weren't designed to make tests scalable and they tend implode when used for the Interpreter Pattern. To better understand this, see link:why_not_cucumber.adoc[why not just use cucumber?]
+BDD tools like Cucumber are admirable, but they weren't designed to make tests scalable and they tend to implode when used for the Interpreter Pattern. To better understand this, see link:why_not_cucumber.adoc[why not just use cucumber?]
 
