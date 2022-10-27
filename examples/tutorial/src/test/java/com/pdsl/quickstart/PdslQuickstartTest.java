@@ -18,6 +18,7 @@ import javax.inject.Provider;
 public class PdslQuickstartTest {
 
     @PdslTest(
+            includesResources = "PdslQuickstart.feature",
             parser = MyFirstParser.class,
             lexer = MyFirstLexer.class,
             listener = PdslQuickstartTest.MyFirstPdslProvider.class)
