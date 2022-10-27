@@ -2,7 +2,7 @@
 
 PDSL is powerful, but with that power comes complexity. Cucumber is a better fit for monolithic software that runs on one operating system or platform (or a group of very similar ones). It is also might better to use if you have a single target language for all platforms (such as Jave Appium/Webdriver for all mobile/web platforms) and you have no intention of writing anything other than User Acceptance Tests. 
 
-PDSL was created because other BDD tools couldn't scale and were limited in how the grammars were made.
+PDSL was created because other tools couldn't scale and were limited in how the grammars were made. It also needed to solve problems a BDD framework is too limited to solve.
 
 == Cucumber pain points
 

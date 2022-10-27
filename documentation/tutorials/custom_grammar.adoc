@@ -141,7 +141,7 @@ we read it.
 
 In our case we just have a single DOT file that can be read top to bottom. It has no
 nested tests within it or any fancy features. Because of that we can just use a
-build in feature of PDSL: the _FileDelimitedTestSpecificationFactory_.
+built in feature of PDSL: the _FileDelimitedTestSpecificationFactory_.
 
 What this does is produce one specification for each file PDSL reads (as opposed to
 many). To learn about specification factories in general or the other factories PDSL
