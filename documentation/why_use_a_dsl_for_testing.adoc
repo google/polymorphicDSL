@@ -23,23 +23,22 @@ it is too late to do anything about them.
 
 === My team is too small!
 
-A business has a bias against software testing and views it as a liability that distracts from
+The new startup _RushToMarket Co._ has a bias against software testing and views it as a liability that distracts from
 creating new features. After several releases go extremely poorly from a complete absence of testing
 it reluctantly hires a small number of Software Testers to support the
 much larger Development team.
 
 The culture of the company is such that the developers arrogantly refuse to even write unit
-tests, participate in the QA process and occasionally express contempt towards the testers.
+tests. They also refuse to participate in the QA process and occasionally express contempt towards the testers.
 
-The QA team decides they can't cover the full testing pyramid and compromise by focusing exclusively on end-to-end testing.
+Unsupported, the QA team decides they can't cover the full testing pyramid and compromise by focusing exclusively on end-to-end testing.
 They remain painfully aware that tests are badly needed on lower tiers of the application.
 
 === I didn't even know it did that!
 
 The original developers have long since left. A new developer tries to find out how adding a new
 feature might impact the application, but there was no business requirement documents, issues or other
-artifacts explaining what the application even does. Even if there was, the developer decided they wouldn't even
-have known where to have looked!
+artifacts explaining what the application even does. Even if there was, it isn't clear to the developer where to even look!
 
 After being forced to spend a massive amount of time reading the source code, the developer creates and
 releases a new feature only to learn that it broke a microservice. It turns out that the developer didn't even have access to the
@@ -100,7 +99,7 @@ While some highly skilled labor is required to build and maintain the DSL, it do
 === Eureka!
 
 The DSL becomes a source of truth that clearly describes what the application does. It can become
-a form of living documentation (this is different from conventional _Business Driven Development_ tools).
+a form of living documentation (although PDSL can be used for _Business Driven Development_ its primary purpose is not to be yet another BDD tool).
 
 === You almost forgot!
 
