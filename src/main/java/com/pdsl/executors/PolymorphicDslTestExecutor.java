@@ -18,11 +18,21 @@ public interface PolymorphicDslTestExecutor {
      *
      * @param testCases
      * @param subgrammarListener
-     * @return
+     * @return the results of the test run
      */
     TestRunResults runTests(Collection<TestCase> testCases,
-                            ParseTreeListener subgrammarListener);
 
+                            ParseTreeListener subgrammarListener);
+    /**
+     * Walks each of the ParseTrees in each test case triggering a method in the provided parse tree visitor.
+     * <p>
+     * This is the preferred method of running the tests if you are using standard mechanisms to create your test cases
+     * and assumes that the parse tree visitor is aware of any possible phrases that would be in the test cases
+     *
+     * @param testCases
+     * @param subgrammarVisitor
+     * @return the results of the test run
+     */
     TestRunResults runTests(Collection<TestCase> testCases,
                             ParseTreeVisitor subgrammarVisitor);
 

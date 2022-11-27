@@ -136,7 +136,7 @@ public class ConfigurableExecutorRunner {
 
         @Override
         public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, String context) {
-            return null;
+            throw new UnsupportedOperationException("Not implemented for this test case!");
         }
     }
 }

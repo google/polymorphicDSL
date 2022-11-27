@@ -65,6 +65,16 @@ public final class ExecutorHelper {
         }
     }
 
+    /**
+     * Obtains either a visitor or listener provider instance from metadata in the supplied @PdslTest annotation.
+     *
+     * <p>If both a visitor and listener are provided the visitor instance will be created and the listener ignored.
+     *
+     * If neither are provided a runtime exception will be thrown.
+     *
+     * @param pdslTest
+     * @return a ParseTreeTraversal containing either a visitor or listener instance.
+     */
     public ParseTreeTraversal getParseTreeTraversal(PdslTest pdslTest) {
         try {
             if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
@@ -107,23 +117,6 @@ public final class ExecutorHelper {
             throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
         } catch (InstantiationException | InvocationTargetException e) {
             throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", pdslTest.listener().getSimpleName()), e);
-        }
-    }
-
-    public ParseTreeVisitor<?> getParseTreeVisitor(PdslTest pdslTest) {
-        try {
-            if (pdslTest.parser().equals(EmptyParseTreeVisitorProvider.class)) {
-                throw new IllegalStateException("No visitor was provided in the @PdslTest (Perhaps a listener was provided instead?");
-            }
-            Constructor<?> providerConstructor = pdslTest.visitor().getDeclaredConstructor();
-            return ((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get();
-        } catch (NoSuchMethodException e) {
-            throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeVisitor> %s%n"
-                    + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", pdslTest.listener().getSimpleName()), e);
-        } catch (IllegalAccessException e) {
-            throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
-        } catch (InstantiationException | InvocationTargetException e) {
-            throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Visitor %s.%n", pdslTest.listener().getSimpleName()), e);
         }
     }
 

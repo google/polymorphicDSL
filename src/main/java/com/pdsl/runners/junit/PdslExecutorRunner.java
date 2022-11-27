@@ -13,7 +13,6 @@ import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
 
-import javax.swing.text.html.Option;
 import java.util.*;
 
 public class PdslExecutorRunner extends ParentRunner<TestCase> {
