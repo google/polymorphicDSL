@@ -31,6 +31,7 @@ public class ClassLevelRecognizerTest {
     )
     public void testThatIsNotRecognizedByParentRecognizer_shouldFailToCompile(){}
 
+
     public static class FrameworkSpecificationListenerProvider implements Provider<ParseTreeListener> {
         @Override
         public ParseTreeListener get() {

@@ -3,6 +3,7 @@ package com.pdsl.executors;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.testcases.TestCase;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 import java.util.Collection;
 
@@ -21,5 +22,8 @@ public interface PolymorphicDslTestExecutor {
      */
     TestRunResults runTests(Collection<TestCase> testCases,
                             ParseTreeListener subgrammarListener);
+
+    TestRunResults runTests(Collection<TestCase> testCases,
+                            ParseTreeVisitor subgrammarVisitor);
 
 }

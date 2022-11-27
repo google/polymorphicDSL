@@ -13,6 +13,7 @@ import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 
@@ -38,8 +39,65 @@ public final class ExecutorHelper {
         }
     }
 
+    /**
+     * A mutually exclusive container for a parse tree listener or visitor.
+     */
+    public static class ParseTreeTraversal {
+        private final Optional<ParseTreeVisitor<?>> visitor;
+        private final Optional<ParseTreeListener> listener;
+
+        public ParseTreeTraversal(ParseTreeVisitor<?> visitor) {
+            this.visitor = Optional.of(visitor);
+            this.listener = Optional.empty();
+        }
+
+        public ParseTreeTraversal(ParseTreeListener listener) {
+            this.visitor = Optional.empty();
+            this.listener = Optional.of(listener);
+        }
+
+        public Optional<ParseTreeListener> getListener() {
+            return  listener;
+        }
+
+        public Optional<ParseTreeVisitor<?>> getVisitor() {
+            return visitor;
+        }
+    }
+
+    public ParseTreeTraversal getParseTreeTraversal(PdslTest pdslTest) {
+        try {
+            if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
+                throw new IllegalArgumentException("Either a listener or listener needs to be provided to the @PdslTest annotation!");
+            }
+            if (!pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
+                Constructor<?> providerConstructor = pdslTest.visitor().getDeclaredConstructor();
+                return new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get());
+            } else {
+                Constructor<?> providerConstructor = pdslTest.listener().getDeclaredConstructor();
+                return new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get());
+            }
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
+                    + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", pdslTest.listener().getSimpleName()), e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
+        } catch (InstantiationException | InvocationTargetException e) {
+            throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", pdslTest.listener().getSimpleName()), e);
+        }
+    }
+
+    /**
+     * @deprecated use getParseTreeTraversal instead. This will be removed in a future major release.
+     * @param pdslTest
+     * @return the ParseTreeListener made from the listenerProvider in the pdslTest
+     */
+    @Deprecated
     public ParseTreeListener getParseTreeListener(PdslTest pdslTest) {
         try {
+            if (pdslTest.parser().equals(EmptyParseTreeListenerProvider.class)) {
+                throw new IllegalStateException("No listener was provided in the @PdslTest (Perhaps a visitor was provided instead?");
+            }
             Constructor<?> providerConstructor = pdslTest.listener().getDeclaredConstructor();
             return ((Provider<ParseTreeListener>) providerConstructor.newInstance()).get();
         } catch (NoSuchMethodException e) {
@@ -49,6 +107,23 @@ public final class ExecutorHelper {
             throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
         } catch (InstantiationException | InvocationTargetException e) {
             throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", pdslTest.listener().getSimpleName()), e);
+        }
+    }
+
+    public ParseTreeVisitor<?> getParseTreeVisitor(PdslTest pdslTest) {
+        try {
+            if (pdslTest.parser().equals(EmptyParseTreeVisitorProvider.class)) {
+                throw new IllegalStateException("No visitor was provided in the @PdslTest (Perhaps a listener was provided instead?");
+            }
+            Constructor<?> providerConstructor = pdslTest.visitor().getDeclaredConstructor();
+            return ((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get();
+        } catch (NoSuchMethodException e) {
+            throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeVisitor> %s%n"
+                    + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", pdslTest.listener().getSimpleName()), e);
+        } catch (IllegalAccessException e) {
+            throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
+        } catch (InstantiationException | InvocationTargetException e) {
+            throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Visitor %s.%n", pdslTest.listener().getSimpleName()), e);
         }
     }
 

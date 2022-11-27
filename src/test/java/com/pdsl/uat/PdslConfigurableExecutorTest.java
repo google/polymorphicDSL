@@ -9,6 +9,7 @@ import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.testcases.SingleTestOutputPreorderTestCaseFactory;
 import com.pdsl.testcases.TestCaseFactory;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.junit.runner.RunWith;
 
 import javax.inject.Provider;
@@ -32,6 +33,20 @@ public class PdslConfigurableExecutorTest {
     )
     public void  skipUnrecognizedWithMissingSentences_shouldFail(){}
 
+    @PdslTest(
+            includesResources = "PdslTestFramework.feature",
+            parser = PdslTestResourceParser.class,
+            lexer = PdslTestResourceLexer.class,
+            visitor = PdslConfigurableExecutorTest.FrameworkSpecificationVisitorProvider.class
+    )
+    public void  visitorSkipUnrecognizedWithMissingSentences_shouldFail(){}
+
+    public static class FrameworkSpecificationVisitorProvider implements Provider<ParseTreeVisitor<Void>> {
+        @Override
+        public ParseTreeVisitor<Void> get() {
+            return new PdslTestResourceParserBaseVisitor<>();
+        }
+    }
     public static class FrameworkSpecificationListenerProvider implements Provider<ParseTreeListener> {
         @Override
         public ParseTreeListener get() {
