@@ -213,8 +213,15 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                 Preconditions.checkArgument(!testCases.isEmpty(),
                     "Somehow no test cases were produced from the features! This is likely an error with the PDSL framework");
 
-                PdslExecutorRunner pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(),
-                        parseTreeListener, testCases, executor, context);
+                ExecutorHelper.ParseTreeTraversal traversal = executorHelper.getParseTreeTraversal(pdslTest);
+                PdslExecutorRunner pdslExecutorRunner;
+                if (traversal.getVisitor().isPresent()) {
+                    pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(),
+                    traversal.getVisitor().get(), testCases, executor, context);
+                } else {
+                    pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(),
+                            traversal.getListener().orElseThrow(), testCases, executor, context);
+                }
                 pdslExecutorRunner.run(notifier);
                 List<MetadataTestRunResults> methodResults = pdslExecutorRunner.getMetadataTestRunResults();
                 if (!methodResults.stream().anyMatch(r -> r.failingTestTotal() > 0)) {

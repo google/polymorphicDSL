@@ -1,9 +1,9 @@
 package com.pdsl.runners;
 
-import com.pdsl.executors.TraceableTestRunExecutor;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 import javax.inject.Provider;
 import java.lang.annotation.ElementType;
@@ -16,7 +16,8 @@ import java.lang.annotation.Target;
 public @interface PdslTest {
     Class<? extends Parser> parser();
     Class<? extends Lexer> lexer();
-    Class<? extends Provider<? extends ParseTreeListener>> listener();
+    Class<? extends Provider<? extends ParseTreeListener>> listener() default EmptyParseTreeListenerProvider.class;
+    Class<? extends Provider<? extends ParseTreeVisitor<?>>> visitor() default EmptyParseTreeVisitorProvider.class;
     String tags() default "";
     String[] includesResources() default {"*.feature"};
     String[] excludesResources() default "";

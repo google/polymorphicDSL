@@ -116,7 +116,7 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 throw new PolymorphicDslTestResourceException(String.format("No test resources found!%n\tResource Finder Generator:%s%n\tResource Root:%s",
                         resourceFinderGenerator.getClass(), pdslConfiguration.resourceRoot()));
             }
-            ParseTreeListener parseTreeListener = executorHelper.getParseTreeListener(pdslTest);
+            ExecutorHelper.ParseTreeTraversal traversal = executorHelper.getParseTreeTraversal(pdslTest);
             RecognizedBy recognizedBy = method.getAnnotation(RecognizedBy.class);
             Collection<TestCase> testCases = null;
             try {
@@ -143,8 +143,11 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 return;
             }
             try {
-                PdslExecutorRunner pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(),
-                        parseTreeListener, testCases, testRunExecutor.get(), pdslConfiguration.context());
+                PdslExecutorRunner pdslExecutorRunner = traversal.getVisitor().isPresent()
+                        ? new PdslExecutorRunner(getTestClass().getJavaClass(),
+                        traversal.getVisitor().get(), testCases, testRunExecutor.get(), pdslConfiguration.context())
+                        : new PdslExecutorRunner(getTestClass().getJavaClass(),
+                        traversal.getListener().orElseThrow(), testCases, testRunExecutor.get(), pdslConfiguration.context());
                 pdslExecutorRunner.run(notifier);
                 List<MetadataTestRunResults> methodResults = pdslExecutorRunner.getMetadataTestRunResults();
                 if (!methodResults.stream().anyMatch(r -> r.failingTestTotal() > 0)) {

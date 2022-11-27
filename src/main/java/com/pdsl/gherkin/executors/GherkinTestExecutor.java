@@ -20,6 +20,7 @@ import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -88,10 +89,20 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         return executor.runTests(testCases, grammarListener);
     }
 
+    @Override
+    public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor) {
+        return executor.runTests(testCases, subgrammarVisitor);
+    }
+
 
     @Override
     public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeListener subgrammarListener, String context) {
         return executor.runTestsWithMetadata(testCases, subgrammarListener, context);
+    }
+
+    @Override
+    public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, String context) {
+        return executor.runTestsWithMetadata(testCases, visitor, context);
     }
 
     public MetadataTestRunResults runTestsWithMetadata(Set<URI> resources, ParseTreeListener subgrammarListener, String context) {

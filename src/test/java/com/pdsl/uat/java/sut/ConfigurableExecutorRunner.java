@@ -11,6 +11,7 @@ import com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.uat.PdslConfigurableExecutorTest;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.junit.runner.RunWith;
 
 import javax.inject.Provider;
@@ -84,6 +85,11 @@ public class ConfigurableExecutorRunner {
         }
 
         @Override
+        public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor) {
+            throw new UnsupportedOperationException("Not implemented for this test case!");
+        }
+
+        @Override
         public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeListener grammarListener, String context) {
             return new MetadataTestRunResults() {
                 @Override
@@ -126,6 +132,11 @@ public class ConfigurableExecutorRunner {
                     return 0;
                 }
             };
+        }
+
+        @Override
+        public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, String context) {
+            throw new UnsupportedOperationException("Not implemented for this test case!");
         }
     }
 }

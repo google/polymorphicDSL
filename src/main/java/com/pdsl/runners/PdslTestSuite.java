@@ -154,6 +154,7 @@ public class PdslTestSuite extends Suite {
                     if (traceableReportGenerator == null)  {
                         throw new InstantiationException("The TraceableReportGenerator Provider returned a null value!");
                     }
+										logger.info("Generating report");
                     traceableReportGenerator.generateReport(pdslResults);
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
                     logger.error("Could not generate the report! Error while getting TraceableReportProvider!", e);
