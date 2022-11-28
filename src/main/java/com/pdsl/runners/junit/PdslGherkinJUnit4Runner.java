@@ -17,7 +17,6 @@ import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.Test;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
@@ -198,7 +197,6 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         PdslTest pdslTest = method.getAnnotation(PdslTest.class);
         if (pdslTest != null) {
             notifier.fireTestStarted(describeChild(method));
-            ParseTreeListener parseTreeListener = executorHelper.getParseTreeListener(pdslTest);
             RecognizedBy recognizedBy = method.getAnnotation(RecognizedBy.class);
             Collection<TestCase> testCases = null;
             try {

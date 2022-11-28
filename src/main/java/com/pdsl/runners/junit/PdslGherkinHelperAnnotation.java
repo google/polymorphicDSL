@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.Parser;
 
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
+import java.util.Objects;
 
 class PdslGherkinHelperAnnotation implements Annotation, PdslConfiguration {
     private final PdslGherkinApplication annotation;
@@ -63,6 +64,19 @@ class PdslGherkinHelperAnnotation implements Annotation, PdslConfiguration {
         return PdslGherkinHelperAnnotation.EmptyFactoryGenerator.class;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof PdslGherkinHelperAnnotation)) return false;
+        PdslGherkinHelperAnnotation that = (PdslGherkinHelperAnnotation) o;
+        return annotation.equals(that.annotation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(annotation);
+    }
+
     public static final class EmptyFactoryGenerator implements Provider<TestSpecificationFactoryGenerator> {
         @Override
         public TestSpecificationFactoryGenerator get() {
@@ -87,4 +101,5 @@ class PdslGherkinHelperAnnotation implements Annotation, PdslConfiguration {
     public Class<? extends Annotation> annotationType() {
         return PdslConfiguration.class;
     }
+
 }

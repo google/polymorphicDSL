@@ -175,7 +175,7 @@ public class DefaultPolymorphicDslPhraseFilter
                                         return String.format("\t%s: %s", pdslLexer.getVocabulary().getSymbolicName(token.getType()), token);
                                     })
                                     .collect(Collectors.joining(String.format("%n")));
-                    logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!%n", AnsiTerminalColorHelper.YELLOW, pdslLexer.getClass()));
+                    logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!%n", AnsiTerminalColorHelper.YELLOW));
                     logger.warn(String.format("The match was:%n%s%s%s", AnsiTerminalColorHelper.BRIGHT_YELLOW, filteredTokens, AnsiTerminalColorHelper.RESET));
                     logger.warn(String.format("%sFiltering out phrase:%n%s%n\tLexer:\t%s%s%n", AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), pdslLexer.getClass(), RESET_ANSI));
                 }
