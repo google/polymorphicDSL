@@ -105,8 +105,8 @@ public final class ExecutorHelper {
     @Deprecated
     public ParseTreeListener getParseTreeListener(PdslTest pdslTest) {
         try {
-            if (pdslTest.parser().equals(EmptyParseTreeListenerProvider.class)) {
-                throw new IllegalStateException("No listener was provided in the @PdslTest (Perhaps a visitor was provided instead?");
+            if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class)) {
+                throw new IllegalStateException("No listener or visitor was provided in the @PdslTest. ");
             }
             Constructor<?> providerConstructor = pdslTest.listener().getDeclaredConstructor();
             return ((Provider<ParseTreeListener>) providerConstructor.newInstance()).get();
