@@ -1,5 +1,6 @@
 package com.pdsl.executors;
 
+import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
@@ -30,24 +31,24 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     @Override
     public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
         // Walk the phrase registry to make sure all phrases are defined
-        logger.info("Running tests...");
+        logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
         MetadataTestRunResults results = walk(testCases, new PhraseRegistry(phraseRegistry), "NONE");
         if (results.failingTestTotal() == 0) {
-            logger.info("All phrases successfully executed!");
+            logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
         } else {
-            logger.error("There were test failures!");
+            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
         }
         return (PolymorphicDslTestRunResults) results;
     }
 
     @Override
     public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor) {
-        logger.info("Running tests...");
+        logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
         MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarVisitor), "NONE");
         if (results.failingTestTotal() == 0) {
-            logger.info("All phrases successfully executed!");
+            logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
         } else {
-            logger.error("There were test failures!");
+            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
         }
         return (PolymorphicDslTestRunResults) results;
     }
@@ -87,20 +88,23 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                     while (testBody.hasNext()) {
                         TestSection section = testBody.next();
                         if (section.getMetaData().isPresent()) {
+                            notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
                             notifyStreams(section.getMetaData().get());
+                            notifyStreams(AnsiTerminalColorHelper.RESET.getBytes(charset));
                         }
                         activePhrase = section.getPhrase();
-                        notifyStreams((activePhrase.getParseTree().getText() + "\n").getBytes(charset));
                         if (phraseRegistry.listener.isPresent()) {
                             walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
                         } else {
                             phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
                         }
                         phraseIndex++;
+                        notifyStreams((AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n" + AnsiTerminalColorHelper.RESET).getBytes(charset));
                     }
                     results.addTestResult(DefaultTestResult.passingTest(testCase));
                 }
             } catch (Throwable e) {
+                notifyStreams((AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n" + AnsiTerminalColorHelper.RESET).getBytes(charset));
                 int phrasesSkippedDueToFailure = 0;
                 while (testBody.hasNext()) {
                     testBody.next();
@@ -139,9 +143,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         logger.info("Running tests...");
         MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarListener), context);
         if (results.failingTestTotal() == 0) {
-            logger.info("All phrases successfully executed!");
+            logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
         } else {
-            logger.error("There were test failures!");
+            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
         }
         return (PolymorphicDslTestRunResults) results;
     }
@@ -151,9 +155,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         logger.info("Running tests...");
         MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
         if (results.failingTestTotal() == 0) {
-            logger.info("All phrases successfully executed!");
+            logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
         } else {
-            logger.error("There were test failures!");
+            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
         }
         return (PolymorphicDslTestRunResults) results;
     }
