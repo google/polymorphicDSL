@@ -40,9 +40,25 @@ At this point you can use `mvn anltr4:antlr4 <some lifecycle>` up until you run 
 
 ### Deployment
 
+#### Deploying to Remote Repository
+
+Google has a nexus repository. Only Google employees are able to access it.
+
+A release can be staged at the repository using the following command:
+
+`mvn clean antlr4:antlr4 && mvn antlr4:antlr4 -Ptest && mvn antlr4:antlr4 deploy -Prelease`
+
+This command generates the Gherkin parser, then the parsers needed for testing and finally runs the deploy (which is also when the tests will execute).
+
+Deploying to staging will require removing the `-SNAPSHOT` postfix from the POM as well as having a cryptographic signature available to sign the application.
+
+#### Making a local JAR
+
 A fat JAR with all the dependencies is made with the shade plugin, but currently it won't work unless the `shade:shade` lifecycle is explicitly called:
 
 `mvn clean antlr4:antlr4 -P test && mvn antlr4:antlr4 package shade:shade`
+
+#### Deploy to Google's Nexus Repository
 
 
 ## Disclaimer
