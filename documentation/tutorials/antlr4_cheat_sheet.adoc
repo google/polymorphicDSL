@@ -1,0 +1,88 @@
+# ANTLR Cheat Sheet
+
+The tokens or lexemes you make in an ANTLR lexer are matched using regular expressions. This is an overview of some of the most useful ones
+
+## Character Classes
+
+_Which characters to match_
+
+
+[cols=2*]
+|===
+| Regex
+| Matching Example
+
+| 'My cat has ' [0-9] ' lives left'
+| My cat has 9 lives left
+
+| 'Hello, ' [a-zA-Z]+
+| Hello, world
+
+| 'My password is ' [0-9a-zA-Z]+
+| My password is S3cr3tP4ssw0rd
+
+|===
+## Quantifier Cheat Sheet
+
+_How many characters to match_
+
+[cols=5*]
+|===
+|Quantifier
+|Semantics
+|Regex
+|Matching example 1
+|Matching example 2
+
+| ?
+| Zero or One (Optional)
+| 'I love the kitten' 's'?
+| I love the kitten
+| I love the kittens
+
+| *
+| Zero or More
+| 'I love ' [0-9]* 'kittens'
+| I love kittens
+| I love 437 kittens
+
+| +
+| One or More
+| 'I love ' [0-9]+ ' kittens'
+| I love 2 kittens
+| I love 437 kittens
+|===
+
+## Logical Operators
+
+_Logical and/or/not_
+
+### And
+
+There is no visible operator for AND. Concatenating is done implicitly.
+Any phrases separated by whitespaces are joined together:
+
+*'Hello, ' 'how ' 'are ' 'you?'*
+
+-> Hello, how are you?
+
+### OR
+
+Logical or is used with the *|* operator.
+
+
+*'I like ' ('cats' | 'dogs')*
+
+-> I like dogs
+
+-> I like cats
+
+### NOT
+
+Logical not is used with the *~* operator.
+
+*'My parameter is "'  ~'"'+  '"'*
+
+-> My parameter is "awesome!"
+
+-> My parameter is "The number 4"
