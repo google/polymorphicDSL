@@ -26,6 +26,7 @@ Hands-on experience and example projects for using PDSL
 * <<tutorials/quickstart.adoc#, Gherkin Quickstart>>
 * <<tutorials/custom_grammar.adoc#, Custom Grammars>>
 * <<tutorials/parameters.adoc#, Handling Parameters>>
+* <<tutorials/antlr4_cheat_sheet.adoc#, ANTLR4 Regular Expression Cheat Sheet>>
 
 == Framework Documentation
 
