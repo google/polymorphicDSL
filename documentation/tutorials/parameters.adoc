@@ -46,7 +46,7 @@ BAR: 'bar';
 NESTED_TOKENS: FOO BAR;
 ----
 
-== Avoiding Ambiguity: Island Grammars
+== Avoiding Ambiguity: Island Grammars [[island-grammars]]
 
 Sometimes you can have phrases that are similar enough to each other that it can cause a problem. Consider the example below:
 
@@ -79,6 +79,10 @@ This is accomplished with the syntax `-> mode(SOME_MODE_YOU_MADE)` following som
 ----
 include::../../examples/tutorial/src/test/antlr4/com/example/PowerfulParameterLexer.g4[]
 ----
+
+CAUTION: If you add a new lexer modes to your file make sure that they are all grouped at the bottom of the file.
+If you place any of your normal rules _below_ a mode they become part of that mode.
+See <<../troubleshooting_antlr_errors.adoc#separate-parameters, the troubleshooting guide>> for more detail.
 
 Note that when an open quote is seen we go into *QUOTED_MODE*. While in quoted mode we can only see 3 tokens: `CLOSE_QUOTE`, `BODY` and `WS`. (The `WS` is only visible in this mode because we started using it in the `CLOSE_QUOTE` token and thus pulled it in from the parent context).
 

@@ -1,0 +1,75 @@
+= Troubleshooting ANTLR4 error messages
+
+== Things to always do:
+
+=== Always provide an implementation for visitErrorNode
+
+Sometimes when people creating languages see a problem in the user's input, they may want
+to react to it in some way. This might be to provide a more helpful error message or try
+to recover the program in some way. *By default, _visitErrorNode_ does nothing*!
+
+This is probably not what you want to do.
+
+This can cause difficult to debug problems because ANTLR4 automatically tries it's best to
+recover and acts like nothing went wrong. When it crashes in these circumstances it isn't
+clear to you that the application crashed because of some problem with the grammar you
+wrote.
+
+Always provide an implementation, preferably that throws a runtime exception:
+
+```
+public MyCustomVisitor implements MyCustomParserVisitor<Void> {
+
+    public Void visitErrorNode(ErrorNode node) {
+        throw new IllegalStateException("There was an error in the grammar! Check the G4 files for the issue!");
+    }
+}
+```
+
+=== Use Lexer modes to parse generic parameters
+
+Ambiguity is the bane of a parser.
+
+See <<tutorials/parameters.adoc#island-grammars, Parameters>> for more detail on how to use lexer modes or "island grammars" to solve this problem.
+
+=== Separate your DEFAULT lexemes from the lexer mode lexemes [[separate-parameters]]
+
+Always place lexer modes at the bottom of your file. If you place a lexer mode in the
+middle of your file *it will treat everything beneath it as part of that lexer mode!*
+
+```
+lexer grammar modeMistakeLexer;
+
+  FOO: 'foo' -> mode(BAR_MODE);
+
+mode BAR_MODE;
+    BAR: -> 'bar ' -> mode(DEFAULT_MODE);
+
+BIZZ: 'bizz'; // <-- This is part of BAR_MODE!
+
+mode BAZZ_MODE;
+    BAZZ: -> 'bazz ' -> mode(DEFAULT_MODE);
+
+```
+
+This can create difficult to debug errors because in your head you assume that tokens like
+`BIZZ` are visible in the current parser context. The reality is probably that you can no longer even _see_ that token because it only exists in a different mode you've since exited.
+
+In this situation ANLTR will spit a lot of _token recognition errors_ out leaving you wondering why it can't see the thing clearly written in your lexer.
+Indentation is ignored by ANTLR, but it may cause _you_ to think it exists in a different context.
+
+The solution is to remember to group modes together at the bottom of the file:
+
+```
+lexer grammar modeMistakeLexer;
+
+FOO: 'foo' -> mode(BAR_MODE);
+BIZZ: 'bizz'; // <-- This is part of BAR_MODE!
+
+mode BAR_MODE;
+    BAR: -> 'bar ' -> mode(DEFAULT_MODE);
+
+mode BAZZ_MODE;
+    BAZZ: -> 'bazz ' -> mode(DEFAULT_MODE);
+```
+
