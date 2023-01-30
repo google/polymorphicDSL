@@ -47,7 +47,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         // Get Metadata
         if (parentMetaData.isPresent() && childMetaData.isPresent()) {
             childMetaData = Optional.of(combineMetadata(parentMetaData.get(), childMetaData.get()));
-        } else if (parentMetaData.isPresent()) {
+        } else if (parentMetaData.isPresent() && childMetaData.isEmpty()) {
             childMetaData = parentMetaData;
         }
         // Add phrases in this node if present
@@ -73,8 +73,8 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
             byte[] parentData = parentMetaData.readAllBytes();
             byte[] childData = childMetaData.readAllBytes();
             byte[] combinedStream = new byte[parentData.length + childData.length];
-            System.arraycopy(combinedStream, 0, parentData, 0, parentData.length);
-            System.arraycopy(combinedStream, parentData.length, childData, 0, childData.length);
+            System.arraycopy(parentData, 0, combinedStream, 0, parentData.length);
+            System.arraycopy(childData, 0, combinedStream, parentData.length, childData.length);
             return new ByteArrayInputStream(combinedStream);
         } catch (IOException e) {
             throw new PolymorphicDslTransformationException("Could not get metadata from test specification!", e);
