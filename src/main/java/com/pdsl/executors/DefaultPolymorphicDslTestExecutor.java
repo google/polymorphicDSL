@@ -73,7 +73,12 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry, String context) {
         PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
         Set<List<String>> previouslyExecutedTests = new HashSet<>();
+        final byte[] RESET =  AnsiTerminalColorHelper.RESET.getBytes(charset);
         for (TestCase testCase : testCases) {
+            notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(charset));
+            notifyStreams(testCase.getTestTitle().getBytes(charset));
+            notifyStreams(String.format("%n").getBytes(charset));
+            notifyStreams(RESET);
             Phrase activePhrase = null;
             Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
             int phraseIndex = 0;
@@ -90,7 +95,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                         if (section.getMetaData().isPresent()) {
                             notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
                             notifyStreams(section.getMetaData().get());
-                            notifyStreams(AnsiTerminalColorHelper.RESET.getBytes(charset));
+                            notifyStreams(RESET);
                         }
                         activePhrase = section.getPhrase();
                         if (phraseRegistry.listener.isPresent()) {
