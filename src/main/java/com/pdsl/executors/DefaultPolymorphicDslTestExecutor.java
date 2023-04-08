@@ -117,6 +117,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                 }
                 results.addTestResult(DefaultTestResult.failedTest(testCase,activePhrase, e, phraseIndex, phrasesSkippedDueToFailure));
 								logger.error("Phrase failure", e);
+								e.printStackTrace();
             }
 
         }
