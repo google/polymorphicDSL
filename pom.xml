@@ -5,7 +5,7 @@
 
     <groupId>com.google.pdsl</groupId>
     <artifactId>pdsl</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.4.2-SNAPSHOT</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>
@@ -54,7 +54,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.1.7</version>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
