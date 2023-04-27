@@ -73,3 +73,113 @@ mode BAZZ_MODE;
     BAZZ: -> 'bazz ' -> mode(DEFAULT_MODE);
 ```
 
+=== Don't create duplicate start or recognizer rules in imported parsers
+
+In fact, don't have rules with duplicate names shared across your grammars in general.
+
+PDSL by default expects you to provide a `polymorphicDslAllRules` and `polymorphicDslSyntaxCheck` unless you explicitly provide different rules.
+
+These are necessary so the framework knows whether your DSL test is written correctly and so it can execute on specific sentences:
+
+```
+parser grammar MyMainParser;
+
+options {tokenVocab=MyMainLexer; }
+
+myFirstRule: MY_FIRST_RULE;
+mySecondRule: MY_SECOND_RULE;
+
+// The rules must go in this specific order and can repeat as many times as needed
+polymorphicDslSyntaxCheck: (myFirstRule mySecondRule)+;
+
+// either rule can be executed on as a sentence
+polymorphicDslAllRules: (
+	myFirstRule
+	| mySecondRule
+)+;
+```
+
+However having your recognizer rule and start rule in the same file can cause a problem if you import another parser:
+
+
+```
+parser grammar OtherParser;
+
+options {tokenVocab=OtherLexer; }
+
+myThirdRule: MY_THIRD_RULE;
+myFourthRule: MY_FOURTH_RULE;
+
+
+polymorphicDslSyntaxCheck: (myThirdRule myFourthRule)+;
+polymorphicDslAllRules: (myThirdRule | myFourthRule)+;
+```
+
+```
+parser grammar MyMainParser;
+
+import OtherParser; // OH NO! This parser has conflicting rule names for the recognizer and start rule!
+
+options {tokenVocab=MyMainLexer; }
+
+myFirstRule: MY_FIRST_RULE;
+mySecondRule: MY_SECOND_RULE;
+
+// The rules must go in this specific order and can repeat as many times as needed
+polymorphicDslSyntaxCheck: ((myFirstRule mySecondRule) | (myThirdRule myFourthRule))+;
+
+// either rule can be executed on as a sentence
+polymorphicDslAllRules: (
+	myFirstRule
+	| mySecondRule
+	| myThirdRule
+	| myFourthRule
+)+;
+
+```
+
+ANTLR will fail is subtle ways when rule names collide. The solution here is to have your recognizer and start rule defined in their own file and never have these in shared parser .g4 files:
+
+
+```
+parser grammar OtherParser;
+
+options {tokenVocab=OtherLexer; }
+
+myThirdRule: MY_THIRD_RULE;
+myFourthRule: MY_FOURTH_RULE;
+
+
+// Removed start rule and syntax check
+```
+
+```
+parser grammar MyMainParser;
+
+import OtherParser; // OH NO! This parser has conflicting rule names for the recognizer and start rule!
+
+options {tokenVocab=MyMainLexer; }
+
+myFirstRule: MY_FIRST_RULE;
+mySecondRule: MY_SECOND_RULE;
+
+// Removed start rule and syntax check
+```
+
+```
+parser grammar PdslMyMainParser;
+
+options {tokenVocab=MyMainLexer; }
+
+
+// The syntax rule here doesn't conflict with any imported parser
+polymorphicDslSyntaxCheck: ((myFirstRule mySecondRule) | (myThirdRule myFourthRule))+;
+
+// The start rule here doesn't conflict with any imported parser
+polymorphicDslAllRules: (
+	myFirstRule
+	| mySecondRule
+	| myThirdRule
+	| myFourthRule
+)+;
+```

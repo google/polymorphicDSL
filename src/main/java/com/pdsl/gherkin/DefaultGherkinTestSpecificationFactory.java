@@ -1,6 +1,7 @@
 package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.exceptions.SentenceNotFoundException;
 import com.pdsl.gherkin.models.GherkinBackground;
 import com.pdsl.gherkin.models.GherkinStep;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
@@ -142,7 +143,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
 
             // Process all rules
             if (!pickleJar.getRules().isEmpty()) {
-                pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules(), pickleJar.getLocation()));
+                    pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules(), pickleJar.getLocation()));
             }
             featureBuilder.withChildTestSpecifications(pickles);
             featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
@@ -203,11 +204,15 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 throw new PolymorphicDslTransformationException("Could not reset input streams to prepare for filtering", e);
             }
         });
-        Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream);
-        if (phrases.isPresent()) {
-            return Optional.of(new DefaultTestSpecification.Builder(title, originalResourceLocation).withPhrases(phrases.get()).build());
-        } else {
-            return Optional.empty();
+        try {
+            Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream);
+            if (phrases.isPresent()) {
+                return Optional.of(new DefaultTestSpecification.Builder(title, originalResourceLocation).withPhrases(phrases.get()).build());
+            } else {
+                return Optional.empty();
+            }
+        } catch (SentenceNotFoundException e) {
+            throw new GrammarParseException(originalResourceLocation, title, stepBody, e);
         }
     }
 
@@ -349,6 +354,17 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             return Optional.of(new GherkinTestSpecification(builder.build(), allGherkinItemTags));
         } catch (IllegalArgumentException e) {
             return Optional.empty();
+        }
+    }
+
+    private static class GrammarParseException extends RuntimeException {
+        GrammarParseException(URI originalSource, String title, List<String> stepBody, Exception e) {
+            super(String.format("There was an error while parsing a scenario:%n"
+                    + "\tSource Location: %s%n"
+                    + "\tTitle: %s%n"
+                    + "\tStep Body:%n"
+                    + String.join(String.format("%n"), stepBody)
+                    + "%nSee the below error message for more details", originalSource, title), e);
         }
     }
 }

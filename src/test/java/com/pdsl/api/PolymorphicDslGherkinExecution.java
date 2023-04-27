@@ -5,7 +5,6 @@ import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseListener;
-import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.PreorderTestCaseFactory;

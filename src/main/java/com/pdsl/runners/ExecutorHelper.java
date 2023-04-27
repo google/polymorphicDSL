@@ -268,7 +268,11 @@ public final class ExecutorHelper {
 
     public static final class DefaultResourceFinderGenerator implements Provider<TestResourceFinderGenerator> {
         private final String resourceRoot;
-        public DefaultResourceFinderGenerator(String resourceRoot) {
+        public DefaultResourceFinderGenerator(String resourceRoot)
+        {
+            if (resourceRoot.startsWith("file:///")) {
+                resourceRoot = resourceRoot.replaceFirst("file:///", "");
+            }
             this.resourceRoot = resourceRoot;
             this.INSTANCE = new FileSystemTestResourceGenerator(resourceRoot);
         }

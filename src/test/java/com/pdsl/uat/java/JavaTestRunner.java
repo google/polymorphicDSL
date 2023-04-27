@@ -22,11 +22,11 @@ import org.jruby.javasupport.Java;
 import org.junit.runner.JUnitCore;
 import org.junit.runner.Result;
 import org.junit.runner.RunWith;
-import com.pdsl.grammars.JavaTestRunnerParserBaseListener;
-import com.pdsl.grammars.JavaTestRunnerParserListener;
-import com.pdsl.grammars.JavaTestRunnerParser;
+import com.pdsl.grammars.PdslJavaTestRunnerParserBaseListener;
+import com.pdsl.grammars.PdslJavaTestRunnerParserListener;
+import com.pdsl.grammars.PdslJavaTestRunnerParser;
 import com.pdsl.grammars.JavaTestRunnerLexer;
-import com.pdsl.grammars.JavaTestRunnerParser;
+import com.pdsl.grammars.PdslJavaTestRunnerParser;
 import javax.inject.Provider;
 import java.util.Collection;
 import java.util.HashMap;
@@ -43,37 +43,37 @@ import static com.google.common.truth.Truth.assertThat;
 public class JavaTestRunner {
 
     @PdslTest(
-            parser = JavaTestRunnerParser.class,
+            parser = PdslJavaTestRunnerParser.class,
             lexer = JavaTestRunnerLexer.class,
-            includesResources = "JavaTestRunner.feature",
-            listener = JavaTestRunner.JavaTestRunnerProvider.class
+            includesResources = "PdslJavaTestRunner.feature",
+            listener = JavaTestRunner.PdslJavaTestRunnerProvider.class
     )
     /*
     @RecognizedBy(
-            dslRecognizerParser = JavaTestRunnerParser.class,
-            dslRecognizerLexer = JavaTestRunnerLexer.class,
+            dslRecognizerParser = PdslJavaTestRunnerParser.class,
+            dslRecognizerLexer = PdslJavaTestRunnerLexer.class,
             recognizerRule = "polymorphicDslAllRules"
     )
    
      */
-    public void javaTestRunnerFeatures_fullySupported() {
+    public void PdslJavaTestRunnerFeatures_fullySupported() {
     }
 
-    public static class JavaTestRunnerProvider implements Provider<ParseTreeListener> {
+    public static class PdslJavaTestRunnerProvider implements Provider<ParseTreeListener> {
 
         @Override
         public ParseTreeListener get() {
-            return new JavaTestRunnerParserListenerImpl();
+            return new PdslJavaTestRunnerParserListenerImpl();
         }
     }
 
-    private static class JavaTestRunnerParserListenerImpl extends AbstractJavaTestRunnerParserListenerImpl {
+    private static class PdslJavaTestRunnerParserListenerImpl extends AbstractPdslJavaTestRunnerParserListenerImpl {
 
         private int criteria = 0;
         private Optional<Result> result = Optional.empty();
 
-        private String applicationName = "";
-        private String context = "";
+        private final String applicationName = "";
+        private final String context = "";
 
         private static final int ALL_TESTS_PASS = 1;
         private static final int CONFIG_DOES_NOT_SPECIFY_DEFAULT_RULE = 1 << 1;
@@ -97,76 +97,76 @@ public class JavaTestRunner {
         private static final int NO_CONFIGURATION_RECOGNIZER = 1 << 19;
         private static final int NO_PDSL_RECOGNIZER = 1 << 20;
         private static final Map<Integer, Class<?>> bitmask2TestClass = new HashMap<>(){{
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS, PdslConfigurableExecutorTest.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS, PdslConfigurableExecutorTest.class);
 
-            put(JavaTestRunnerParserListenerImpl.TAG_FILTERING
-                            | JavaTestRunnerParserListenerImpl.RESOURCE_MATCHES_TAG
-                            | JavaTestRunnerParserListenerImpl.HAS_TAGS, TaggedScenarioRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.TAG_FILTERING
+                            | PdslJavaTestRunnerParserListenerImpl.RESOURCE_MATCHES_TAG
+                            | PdslJavaTestRunnerParserListenerImpl.HAS_TAGS, TaggedScenarioRunner.class);
 
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.SPECIFIES_RESOURCE_ROOT, PdslConfigurableExecutorTest.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.SPECIFIES_RESOURCE_ROOT, PdslConfigurableExecutorTest.class);
 
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.CUSTOM_EXECUTOR, ConfigurableExecutorRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.CUSTOM_EXECUTOR, ConfigurableExecutorRunner.class);
 
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.CUSTOM_RESOURCE_FINDER, CustomResourceFinderRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.CUSTOM_RESOURCE_FINDER, CustomResourceFinderRunner.class);
 
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER, ConfigurationRecognizerRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER, ConfigurationRecognizerRunner.class);
 
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE, ConfigurationRecognizerRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE, ConfigurationRecognizerRunner.class);
 
-            put(JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER, ConfigMissingPhrases.class);
+            put(PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER, ConfigMissingPhrases.class);
 
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
-                    | JavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, PdslRecognizedByPhrases.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
+                    | PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, PdslRecognizedByPhrases.class);
 
-            put(JavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
-                    | JavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, UnrecognizedPdslPhrases.class);
+            put(PdslJavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
+                    | PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, UnrecognizedPdslPhrases.class);
 
-            put(JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
-                    | JavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, PdslRecognizedByPhrases.class);
-            put(JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
-                    | JavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY
-                    | JavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_PDSL_RECOGNIZER, UnrecognizedPdslPhrases.class);
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.NO_CONFIGURATION_RECOGNIZER
-                    | JavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, NoRecognizerRunner.class);
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.NO_CONFIGURATION_RECOGNIZER
-                    | JavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, NoRecognizerRunner.class);
-            put(JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
-                    | JavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, ConfigurationRecognizerRunner.class);
-            put(JavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
-                    | JavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
-                    | JavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, ConfigMissingPhrases.class);
+            put(PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
+                    | PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, PdslRecognizedByPhrases.class);
+            put(PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
+                    | PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY
+                    | PdslJavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_PDSL_RECOGNIZER, UnrecognizedPdslPhrases.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.NO_CONFIGURATION_RECOGNIZER
+                    | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, NoRecognizerRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.NO_CONFIGURATION_RECOGNIZER
+                    | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, NoRecognizerRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
+                    | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, ConfigurationRecognizerRunner.class);
+            put(PdslJavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
+                    | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
+                    | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, ConfigMissingPhrases.class);
         }};
 
         private static String getCriteria(int criteria) {
             StringBuilder builder = new StringBuilder();
-            if ((JavaTestRunnerParserListenerImpl.ALL_TESTS_PASS & criteria) > 0) {
+            if ((PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS & criteria) > 0) {
                 builder.append("All tests pass,");
             }
             if ((CONFIG_DOES_NOT_SPECIFY_DEFAULT_RULE & criteria) > 0) {
@@ -229,11 +229,11 @@ public class JavaTestRunner {
 
             return builder.toString().replaceAll(",", "\n\t");
         }
-        public void enterGivenPdslConfigurationDoesNotSpecifyDefaultRule(JavaTestRunnerParser.GivenPdslConfigurationDoesNotSpecifyDefaultRuleContext ctx) {
+        public void enterGivenPdslConfigurationDoesNotSpecifyDefaultRule(PdslJavaTestRunnerParser.GivenPdslConfigurationDoesNotSpecifyDefaultRuleContext ctx) {
             criteria |= CONFIG_DOES_NOT_SPECIFY_DEFAULT_RULE;
         }
 
-        public void enterWhenTestRunnerExecutes(JavaTestRunnerParser.WhenTestRunnerExecutesContext ctx) {
+        public void enterWhenTestRunnerExecutes(PdslJavaTestRunnerParser.WhenTestRunnerExecutesContext ctx) {
             Class<?> representativeTestClass = bitmask2TestClass.get(criteria);
             if (representativeTestClass == null) {
                 throw new IllegalArgumentException(String.format("Do not know which class to use for criteria%n\tbitmask: %s%n\t%s", Integer.toBinaryString(criteria), getCriteria(criteria)));
@@ -242,57 +242,58 @@ public class JavaTestRunner {
             result = Optional.of(runner.run(representativeTestClass));
 
         }
-        public void enterThenAllTestsPass(JavaTestRunnerParser.ThenAllTestsPassContext ctx) {
+        public void enterThenAllTestsPass(PdslJavaTestRunnerParser.ThenAllTestsPassContext ctx) {
             if (result.isEmpty()) {
                 throw new IllegalStateException("Did not get test result. Did the JUnitCore runner execute?");
             }
             assertThat(result.get().wasSuccessful()).isTrue();
             assertThat(result.get().getFailures()).isEmpty();
         }
-        public void enterThenSpecifiedTestExecutorWasUsed(JavaTestRunnerParser.ThenSpecifiedTestExecutorWasUsedContext ctx) {
+        public void enterThenSpecifiedTestExecutorWasUsed(PdslJavaTestRunnerParser.ThenSpecifiedTestExecutorWasUsedContext ctx) {
             // ConfigurableExecutorRunner.class fails if a custom executor isn't used
             assertThat(result.get().wasSuccessful()).isTrue();
         }
-        public void enterThenSpecifiedResourceProviderWasUsed(JavaTestRunnerParser.ThenSpecifiedResourceProviderWasUsedContext ctx) {
+        public void enterThenSpecifiedResourceProviderWasUsed(PdslJavaTestRunnerParser.ThenSpecifiedResourceProviderWasUsedContext ctx) {
             // CustomResourceFinderRunner.class will not pass unless custom finder used
             assertThat(result.get().wasSuccessful()).isTrue();
         }
-        public void enterThenTestIsSkipped(JavaTestRunnerParser.ThenTestIsSkippedContext ctx) {
+        public void enterThenTestIsSkipped(PdslJavaTestRunnerParser.ThenTestIsSkippedContext ctx) {
             assertThat(result.get().wasSuccessful()).isTrue();
             assertThat(result.get().getRunCount()).isEqualTo(2); // If tags don't work then all tests will run instead of just the one (plus the runner)
 
         }
 
-        public void enterThenPdslFrameworkThrowsAnException(JavaTestRunnerParser.ThenPdslFrameworkThrowsAnExceptionContext ctx) {
+        public void enterThenPdslFrameworkThrowsAnException(PdslJavaTestRunnerParser.ThenPdslFrameworkThrowsAnExceptionContext ctx) {
             if (result.isEmpty()) {
                 throw new IllegalStateException("Did not get test result and cannot check exception. Did the JUnitCore runner execute?");
             }
             assertThat(result.get().wasSuccessful()).isFalse();
         }
 
-        public void enterThenExceptionCommunicatesResourceCouldNotBeInterpreted(JavaTestRunnerParser.ThenExceptionCommunicatesResourceCouldNotBeInterpretedContext ctx) {
+        public void enterThenExceptionCommunicatesResourceCouldNotBeInterpreted(PdslJavaTestRunnerParser.ThenExceptionCommunicatesResourceCouldNotBeInterpretedContext ctx) {
             if (result.isEmpty()) {
                 throw new IllegalStateException("Did not get test result. Did the JUnitCore runner execute?");
             }
             assertThat(result.get().getFailures().stream().anyMatch(e -> e.getException().getMessage().contains("Syntax check on grammar failed"))).isTrue();
         }
-        public void enterThenExceptionStatesBothRecognizerParserAndLexerNeeded(JavaTestRunnerParser.ThenExceptionStatesBothRecognizerParserAndLexerNeededContext ctx) {
+        public void enterThenExceptionStatesBothRecognizerParserAndLexerNeeded(PdslJavaTestRunnerParser.ThenExceptionStatesBothRecognizerParserAndLexerNeededContext ctx) {
             assertThat(result.get().getFailures().stream().anyMatch(e -> e.getException().getMessage().contains("UPDATE MESSAGE"))).isTrue();
         }
-        public void enterThenExceptionStatesMissingRequiredSyntaxCheckRule(JavaTestRunnerParser.ThenExceptionStatesMissingRequiredSyntaxCheckRuleContext ctx) {
+        public void enterThenExceptionStatesMissingRequiredSyntaxCheckRule(PdslJavaTestRunnerParser.ThenExceptionStatesMissingRequiredSyntaxCheckRuleContext ctx) {
             assertThat(result.get().getFailures().stream().anyMatch(e -> e.getException().getMessage().contains("UPDATE MESSAGE"))).isTrue();
         }
-        public void enterGivenPdslTest(JavaTestRunnerParser.GivenPdslTestContext ctx) {
+
+        public void enterGivenPdslTest(PdslJavaTestRunnerParser.GivenPdslTestContext ctx) {
             criteria = 0;
             result = Optional.empty();
         }
 
-        public void enterGivenAllPdslTestsAreValid(JavaTestRunnerParser.GivenAllPdslTestsAreValidContext ctx) {
+        public void enterGivenAllPdslTestsAreValid(PdslJavaTestRunnerParser.GivenAllPdslTestsAreValidContext ctx) {
             criteria |= ALL_TESTS_PASS;
         }
 
-        public void enterGivenPdslConfigurationSpecifiesProperty(JavaTestRunnerParser.GivenPdslConfigurationSpecifiesPropertyContext ctx) {
-            String property = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotes().getText());
+        public void enterGivenPdslConfigurationSpecifiesProperty(PdslJavaTestRunnerParser.GivenPdslConfigurationSpecifiesPropertyContext ctx) {
+            String property = PdslHelper.extractStringInQuotes(ctx.PARAMETER().getText());
             if (ctx.getText().toLowerCase().contains(" not ")) {
                 switch (property) {
                     case "dslRecognizerParser":
@@ -340,45 +341,45 @@ public class JavaTestRunner {
             }
         }
 
-        public void enterGivenThePdslTestUsesFactoriesThatFilterBasedOnTags(JavaTestRunnerParser.GivenThePdslTestUsesFactoriesThatFilterBasedOnTagsContext ctx) {
+        public void enterGivenThePdslTestUsesFactoriesThatFilterBasedOnTags(PdslJavaTestRunnerParser.GivenThePdslTestUsesFactoriesThatFilterBasedOnTagsContext ctx) {
             criteria |= TAG_FILTERING;
         }
-        public void enterGivenThePdslTestHasATagSpecified(JavaTestRunnerParser.GivenThePdslTestHasATagSpecifiedContext ctx) {
+        public void enterGivenThePdslTestHasATagSpecified(PdslJavaTestRunnerParser.GivenThePdslTestHasATagSpecifiedContext ctx) {
             criteria |= HAS_TAGS;
         }
-        public void enterGivenTestResourceMarkWithSpecifiedTag(JavaTestRunnerParser.GivenTestResourceMarkWithSpecifiedTagContext ctx) {
+        public void enterGivenTestResourceMarkWithSpecifiedTag(PdslJavaTestRunnerParser.GivenTestResourceMarkWithSpecifiedTagContext ctx) {
             criteria |= RESOURCE_MATCHES_TAG;
         }
-        public void enterGivenPdslRecognizedBy(JavaTestRunnerParser.GivenPdslRecognizedByContext ctx) {
+        public void enterGivenPdslRecognizedBy(PdslJavaTestRunnerParser.GivenPdslRecognizedByContext ctx) {
             if (ctx.getText().toLowerCase().contains("does not")) {
                 criteria |= NO_PDSL_RECOGNIZER;
             } else {
                 criteria |= PDSL_RECOGNIZED_BY;
             }
         }
-        public void enterGivenPslTestHasPhrasesNotInRecognizer(JavaTestRunnerParser.GivenPslTestHasPhrasesNotInRecognizerContext ctx) {
+        public void enterGivenPslTestHasPhrasesNotInRecognizer(PdslJavaTestRunnerParser.GivenPslTestHasPhrasesNotInRecognizerContext ctx) {
             criteria |= PHRASES_NOT_IN_PDSL_RECOGNIZER;
         }
-        public void enterGivenPdslTestHasResourcesThatMightBeRecognizedByConfiguration(JavaTestRunnerParser.GivenPdslTestHasResourcesThatMightBeRecognizedByConfigurationContext ctx) {
+        public void enterGivenPdslTestHasResourcesThatMightBeRecognizedByConfiguration(PdslJavaTestRunnerParser.GivenPdslTestHasResourcesThatMightBeRecognizedByConfigurationContext ctx) {
             if (ctx.getText().toLowerCase().contains(" not ")) {
                 criteria |= PHRASES_NOT_IN_CONFIG_RECOGNIZER;
             }
         }
-        public void enterGivenPdslTestHasResources(JavaTestRunnerParser.GivenPdslTestHasResourcesContext ctx) {
+        public void enterGivenPdslTestHasResources(PdslJavaTestRunnerParser.GivenPdslTestHasResourcesContext ctx) {
             if (ctx.getText().toLowerCase().contains(" not ")) {
                 criteria |= PHRASES_NOT_IN_PDSL_RECOGNIZER;
             }
         }
 
 
-        public void enterGivenRecognizedBySpecifiesParameter(JavaTestRunnerParser.GivenRecognizedBySpecifiesParameterContext ctx) {
+        public void enterGivenRecognizedBySpecifiesParameter(PdslJavaTestRunnerParser.GivenRecognizedBySpecifiesParameterContext ctx) {
 
-            String param = PdslHelper.extractStringInQuotes(ctx.textInDoubleQuotes().getText());
+            String param = ctx.PARAMETER().getText();
             switch (param) {
                 case "dslRecognizerLexer":
                 case "dslRecognizerParser":
                 case "recognizerRule":
-                    criteria |= JavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY;
+                    criteria |= PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY;
                     break;
                 default:
                     throw new IllegalArgumentException("Do not know how to process " + param);
@@ -386,37 +387,40 @@ public class JavaTestRunner {
         }
     }
 
-    private abstract static class AbstractJavaTestRunnerParserListenerImpl implements JavaTestRunnerParserListener {
-        public void exitTextInDoubleQuotes(JavaTestRunnerParser.TextInDoubleQuotesContext ctx) {}
-        public void enterTextInDoubleQuotes(JavaTestRunnerParser.TextInDoubleQuotesContext ctx) {}
-        public void exitGivenPdslConfigurationSpecifiesProperty(JavaTestRunnerParser.GivenPdslConfigurationSpecifiesPropertyContext ctx) {}
-        public void exitDocstring(JavaTestRunnerParser.DocstringContext ctx ) {}
-        public void enterDocstring(JavaTestRunnerParser.DocstringContext ctx ) {}
-        public void exitGivenAllPdslTestsAreValid(JavaTestRunnerParser.GivenAllPdslTestsAreValidContext ctx) {}
-        public void exitGivenPdslTest(JavaTestRunnerParser.GivenPdslTestContext ctx) {}
-        //public void exitGivenPdslConfigurationSpecifiesProperty(JavaTestRunnerParser.GivenPdslConfigurationSpecifiesPropertyContext ctx) {}
-        public void exitGivenThePdslTestUsesFactoriesThatFilterBasedOnTags(JavaTestRunnerParser.GivenThePdslTestUsesFactoriesThatFilterBasedOnTagsContext ctx) {}
-        public void exitGivenThePdslTestHasATagSpecified(JavaTestRunnerParser.GivenThePdslTestHasATagSpecifiedContext ctx) {}
-        public void exitGivenTestResourceMarkWithSpecifiedTag(JavaTestRunnerParser.GivenTestResourceMarkWithSpecifiedTagContext ctx) {}
-        public void exitGivenPdslRecognizedBy(JavaTestRunnerParser.GivenPdslRecognizedByContext ctx) {}
-        public void exitGivenPslTestHasPhrasesNotInRecognizer(JavaTestRunnerParser.GivenPslTestHasPhrasesNotInRecognizerContext ctx) {}
-        public void exitGivenPdslTestHasResourcesThatMightBeRecognizedByConfiguration(JavaTestRunnerParser.GivenPdslTestHasResourcesThatMightBeRecognizedByConfigurationContext ctx) {}
-        public void exitGivenPdslTestHasResources(JavaTestRunnerParser.GivenPdslTestHasResourcesContext ctx) {}
-        public void exitGivenPdslConfigurationDoesNotSpecifyDefaultRule(JavaTestRunnerParser.GivenPdslConfigurationDoesNotSpecifyDefaultRuleContext ctx) {}
-        public void exitWhenTestRunnerExecutes(JavaTestRunnerParser.WhenTestRunnerExecutesContext ctx) {}
-        public void exitThenAllTestsPass(JavaTestRunnerParser.ThenAllTestsPassContext ctx) {}
-        public void exitThenSpecifiedTestExecutorWasUsed(JavaTestRunnerParser.ThenSpecifiedTestExecutorWasUsedContext ctx) {}
-        public void exitThenSpecifiedResourceProviderWasUsed(JavaTestRunnerParser.ThenSpecifiedResourceProviderWasUsedContext ctx) {}
-        public void exitThenTestIsSkipped(JavaTestRunnerParser.ThenTestIsSkippedContext ctx) {}
+    private abstract static class AbstractPdslJavaTestRunnerParserListenerImpl implements PdslJavaTestRunnerParserListener {
+        @Override
+        public void enterPolymorphicDslAllRules(PdslJavaTestRunnerParser.PolymorphicDslAllRulesContext ctx) {
 
-        public void exitThenPdslFrameworkThrowsAnException(JavaTestRunnerParser.ThenPdslFrameworkThrowsAnExceptionContext ctx) {}
-        public void exitThenExceptionCommunicatesResourceCouldNotBeInterpreted(JavaTestRunnerParser.ThenExceptionCommunicatesResourceCouldNotBeInterpretedContext ctx) {}
-        public void exitThenExceptionStatesBothRecognizerParserAndLexerNeeded(JavaTestRunnerParser.ThenExceptionStatesBothRecognizerParserAndLexerNeededContext ctx) {}
-        public void exitThenExceptionStatesMissingRequiredSyntaxCheckRule(JavaTestRunnerParser.ThenExceptionStatesMissingRequiredSyntaxCheckRuleContext ctx) {}
+        }
 
-        public void enterPolymorphicDslAllRules(JavaTestRunnerParser.PolymorphicDslAllRulesContext ctx) {}
-        public void exitPolymorphicDslAllRules(JavaTestRunnerParser.PolymorphicDslAllRulesContext ctx) {}
-        public void exitGivenRecognizedBySpecifiesParameter(JavaTestRunnerParser.GivenRecognizedBySpecifiesParameterContext ctx) {}
+        @Override
+        public void exitPolymorphicDslAllRules(PdslJavaTestRunnerParser.PolymorphicDslAllRulesContext ctx) {
+
+        }
+        public void exitGivenPdslConfigurationSpecifiesProperty(PdslJavaTestRunnerParser.GivenPdslConfigurationSpecifiesPropertyContext ctx) {}
+        public void exitGivenAllPdslTestsAreValid(PdslJavaTestRunnerParser.GivenAllPdslTestsAreValidContext ctx) {}
+        public void exitGivenPdslTest(PdslJavaTestRunnerParser.GivenPdslTestContext ctx) {}
+        //public void exitGivenPdslConfigurationSpecifiesProperty(PdslJavaTestRunnerParser.GivenPdslConfigurationSpecifiesPropertyContext ctx) {}
+        public void exitGivenThePdslTestUsesFactoriesThatFilterBasedOnTags(PdslJavaTestRunnerParser.GivenThePdslTestUsesFactoriesThatFilterBasedOnTagsContext ctx) {}
+        public void exitGivenThePdslTestHasATagSpecified(PdslJavaTestRunnerParser.GivenThePdslTestHasATagSpecifiedContext ctx) {}
+        public void exitGivenTestResourceMarkWithSpecifiedTag(PdslJavaTestRunnerParser.GivenTestResourceMarkWithSpecifiedTagContext ctx) {}
+        public void exitGivenPdslRecognizedBy(PdslJavaTestRunnerParser.GivenPdslRecognizedByContext ctx) {}
+        public void exitGivenPslTestHasPhrasesNotInRecognizer(PdslJavaTestRunnerParser.GivenPslTestHasPhrasesNotInRecognizerContext ctx) {}
+        public void exitGivenPdslTestHasResourcesThatMightBeRecognizedByConfiguration(PdslJavaTestRunnerParser.GivenPdslTestHasResourcesThatMightBeRecognizedByConfigurationContext ctx) {}
+        public void exitGivenPdslTestHasResources(PdslJavaTestRunnerParser.GivenPdslTestHasResourcesContext ctx) {}
+        public void exitGivenPdslConfigurationDoesNotSpecifyDefaultRule(PdslJavaTestRunnerParser.GivenPdslConfigurationDoesNotSpecifyDefaultRuleContext ctx) {}
+        public void exitWhenTestRunnerExecutes(PdslJavaTestRunnerParser.WhenTestRunnerExecutesContext ctx) {}
+        public void exitThenAllTestsPass(PdslJavaTestRunnerParser.ThenAllTestsPassContext ctx) {}
+        public void exitThenSpecifiedTestExecutorWasUsed(PdslJavaTestRunnerParser.ThenSpecifiedTestExecutorWasUsedContext ctx) {}
+        public void exitThenSpecifiedResourceProviderWasUsed(PdslJavaTestRunnerParser.ThenSpecifiedResourceProviderWasUsedContext ctx) {}
+        public void exitThenTestIsSkipped(PdslJavaTestRunnerParser.ThenTestIsSkippedContext ctx) {}
+
+        public void exitThenPdslFrameworkThrowsAnException(PdslJavaTestRunnerParser.ThenPdslFrameworkThrowsAnExceptionContext ctx) {}
+        public void exitThenExceptionCommunicatesResourceCouldNotBeInterpreted(PdslJavaTestRunnerParser.ThenExceptionCommunicatesResourceCouldNotBeInterpretedContext ctx) {}
+        public void exitThenExceptionStatesBothRecognizerParserAndLexerNeeded(PdslJavaTestRunnerParser.ThenExceptionStatesBothRecognizerParserAndLexerNeededContext ctx) {}
+        public void exitThenExceptionStatesMissingRequiredSyntaxCheckRule(PdslJavaTestRunnerParser.ThenExceptionStatesMissingRequiredSyntaxCheckRuleContext ctx) {}
+
+        public void exitGivenRecognizedBySpecifiesParameter(PdslJavaTestRunnerParser.GivenRecognizedBySpecifiesParameterContext ctx) {}
         /////////////////
         public void enterEveryRule(org.antlr.v4.runtime.ParserRuleContext ctx) {}
         public void exitEveryRule(org.antlr.v4.runtime.ParserRuleContext ctx) {}

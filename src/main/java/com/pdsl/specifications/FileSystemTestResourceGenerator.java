@@ -19,6 +19,9 @@ public class FileSystemTestResourceGenerator implements TestResourceFinderGenera
     }
 
     private List<String> getGlobResourcePaths(String[] resources) {
+        if (resourceRoot.startsWith("file:///")) {
+            return Arrays.stream(resources).map(resourceRoot::concat).collect(Collectors.toList());
+        }
         String root = !resourceRoot.endsWith("/") ? "**/" + resourceRoot + "/" : "**/" + resourceRoot;
         return Arrays.stream(resources).map(root::concat).collect(Collectors.toList());
     }

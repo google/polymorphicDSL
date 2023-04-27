@@ -320,8 +320,6 @@ These are ways in which the framework is intended to be used and work propery
 		And the exception communicates that the resource could not be interpreted by the recognizer
 
 
-
-
 	Scenario: Test Method Recognizer with @RecognizedBy and custom rule
 		@PdslTest can have a @RecognizedBy annotation that specifies which recognizer to use for the test resources it uses.
 		The specified recognizer in @RecognizedBy will always be used, even if there is a different one specified in the @PdslConfiguration.

@@ -47,7 +47,7 @@ public class FileSystemTestResourceFinder implements TestResourceFinder {
 
     @Override
     public Optional<Collection<URI>> scanForTestResources(URI uri) {
-        Path sourceDirectory = Paths.get(uri.getPath());
+        Path sourceDirectory = Paths.get(uri);
         Preconditions.checkArgument(Files.exists(sourceDirectory), String.format("File did not exist at at this location! %s", uri));
         Preconditions.checkArgument(Files.isDirectory(sourceDirectory), String.format("URL must be a directory! %s", uri));
         try {

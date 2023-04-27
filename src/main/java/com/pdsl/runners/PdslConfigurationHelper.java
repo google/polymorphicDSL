@@ -3,6 +3,7 @@ package com.pdsl.runners;
 import com.pdsl.runners.junit.JUnitConfigurationAccessor;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
+import org.junit.jupiter.engine.descriptor.JupiterDescriptorKey;
 
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
@@ -23,4 +24,5 @@ public class PdslConfigurationHelper {
     public static ExecutorHelper getExecutorHelper(JUnitConfigurationAccessor accessor) {
         return INSTANCE;
     }
+    public static ExecutorHelper getExecutorHelper(JupiterDescriptorKey accessor) { return INSTANCE; }
 }

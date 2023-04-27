@@ -62,19 +62,16 @@ public interface TestSpecificationHelper {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             inputStream.transferTo(baos);
             Lexer pdslLexer = (Lexer) lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray())));
-            if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
-                //pdslLexer.removeErrorListeners();
-            }
             PdslErrorListener errorListener = new PdslErrorListener();
             pdslLexer.addErrorListener(errorListener);
             List<? extends Token> allTokens = pdslLexer.getAllTokens();
             if (strategy.equals(ErrorListenerStrategy.GRAMMAR) && (allTokens.isEmpty() || errorListener.isErrorFound())) {
-                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:%n<START>%s<END>%n%nCommon errors include:%n\tNot having this sentence in the lexer%n\tForgetting to create a parser rule for this sentence%n\tLeading and trailing whitespace or newlines%n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens%n%nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", baos.toString()));
+                throw new SentenceNotFoundException(String.format("Could not find the following sentence in the grammar:%n<START>%s<END>%n%nCommon errors include:%n\tNot having this sentence in the lexer%n\tForgetting to create a parser rule for this sentence%n\tLeading and trailing whitespace or newlines%n\tOptional End of file (EOF?) tokens needed at the end of your other lexer tokens%n%nTo further troubleshoot you may want to check for \"token recognition error\"s and/or the generated code directory logged earlier", baos));
             } else {
                 if (allTokens.isEmpty()) {
                     if (strategy.equals(ErrorListenerStrategy.SUBGRAMMAR)) {
                         if (logger.isWarnEnabled()) {
-                            logger.warn(String.format("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, baos.toString(), AnsiTerminalColorHelper.RESET));
+                            logger.warn(String.format("%sFiltering out phrase:%n\t%s%s", AnsiTerminalColorHelper.BRIGHT_CYAN, baos, AnsiTerminalColorHelper.RESET));
                         }
                         return Optional.empty();
                     }
@@ -82,7 +79,7 @@ public interface TestSpecificationHelper {
                     if (logger.isWarnEnabled()) {
                         logger.warn(AnsiTerminalColorHelper.BRIGHT_YELLOW + "A line was partially matched! This may indicate an error in the grammar!");
                         logger.warn(String.format("%sFiltering out phrase:%n%s%nLexed as:%n\t%s%s%n",
-                                AnsiTerminalColorHelper.BRIGHT_RED, baos.toString(), allTokens.stream().map(token -> {
+                                AnsiTerminalColorHelper.BRIGHT_RED, baos, allTokens.stream().map(token -> {
                                     return String.format("%s,\t%s", token, pdslLexer.getVocabulary().getSymbolicName(token.getType()));
                                 }).collect(Collectors.joining(String.format("%n\t"))), AnsiTerminalColorHelper.RESET));
                     }
@@ -164,6 +161,7 @@ public interface TestSpecificationHelper {
                 Parser syntaxParser = parser.get();
                 // Get any helpful error messages using ANTLR4s default error correcting strategy
                 syntaxRule.invoke(parserClass.cast(syntaxParser), null);
+                //bufferdInputStream.mark(0);
                 bufferdInputStream.reset();
                 // Run again and crash with a runtime exception if anything is incorrect
                 Optional<Parser> strictParser = parserOf(bufferdInputStream, ErrorListenerStrategy.GRAMMAR, parserClass, lexerClass);
@@ -177,7 +175,7 @@ public interface TestSpecificationHelper {
                     StringBuilder parsedTokens = new StringBuilder();
                     for (int i=0; i < parser.get().getTokenStream().size(); i++) {
                         Token token = parser.get().getTokenStream().get(i);
-                        Lexer lexer = (Lexer) lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(new byte[0])));
+                        Lexer lexer = lexerClass.getDeclaredConstructor(CharStream.class).newInstance(CharStreams.fromStream(new ByteArrayInputStream(new byte[0])));
                         String tokenType = lexer.getVocabulary().getSymbolicName(token.getType());
                         parsedTokens.append(String.format("%sType: %s%s%n%s%n%n%s", AnsiTerminalColorHelper.BRIGHT_RED, tokenType, AnsiTerminalColorHelper.RED,  token,AnsiTerminalColorHelper.RESET));
                     }
