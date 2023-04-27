@@ -24,24 +24,24 @@ import java.util.stream.Collectors;
  *  The user will need to provide an InvocationContextProvider. An example of how
  *  to practically do that would be like this:
  * 
- *  <pre>
- *   @Override
- *   public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
- *            return getInvocationContext(PdslConfigParameter.createGeneralPdslConfig(testCaseFactorySupplier, testSpecificationFactoryGeneratorSupplier,
- *                        List.of(
- *                                new PdslTestParameter.Builder(parseTreeListenerSupplier,
- *                                        MyLexer.class, MyParser.class)
- *                                        .build()
- *                        )
- *                    )
- *                    .withApplicationName("Polymorphic DSL Framework")
- *                    .withContext("User Acceptance Test")
- *                    .withResourceRoot(Paths.get("src/test/resources/testdata/good").toUri())
- *                    .withRecognizerRule("polymorphicDslAllRules")
- *                    .build())
- *                    .stream();
- *        }
- * </pre>
+ * <pre> <!--
+ * -->  @Override <!--
+ * -->  public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) { <!--
+ * -->           return getInvocationContext(PdslConfigParameter.createGeneralPdslConfig(testCaseFactorySupplier, testSpecificationFactoryGeneratorSupplier, <!--
+ * -->                       List.of( <!--
+ * -->                               new PdslTestParameter.Builder(parseTreeListenerSupplier, <!--
+ * -->                                       MyLexer.class, MyParser.class) <!--
+ * -->                                       .build() <!--
+ * -->                       ) <!--
+ * -->                   ) <!--
+ * -->                   .withApplicationName("Polymorphic DSL Framework") <!--
+ * -->                   .withContext("User Acceptance Test") <!--
+ * -->                   .withResourceRoot(Paths.get("src/test/resources/testdata/good").toUri()) <!--
+ * -->                   .withRecognizerRule("polymorphicDslAllRules") <!--
+ * -->                   .build()) <!--
+ * -->                   .stream(); <!--
+ * -->       } <!--
+ * --> </pre>
  */
 public abstract class PdslGeneralInvocationContextProvider implements InvocationInterceptor, TestTemplateInvocationContextProvider {
 

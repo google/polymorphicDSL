@@ -13,7 +13,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A configuration to be used by a PDSL test runner, such as {@link:com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner}.
+ * A configuration to be used by a PDSL test runner, such as {@link:com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner PdslJUnit4ConfigurableRunner}.
  *
  * If a <b>resourceRoot</b> is specified it will be prepended to all <i>includes</i> and </i>excludes</i> in every underlying
  * @PdslTest.
