@@ -102,15 +102,27 @@ read the DOT file we made.
 First we create a lexer (which is essentially a dictionary that specifies what all
 the words in our language can be).
 
-----
-include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[]
-----
+ifdef::env-github[] 
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[DotNavigationLexer.g4]
+endif::[]
 
-After that we make a parser (which specifies how we're allowed to combine the words).
-
+ifndef::env-github[]
 ----
 include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationParser.g4[]
 ----
+endif::[]
+
+After that we make a parser (which specifies how we're allowed to combine the words).
+
+ifdef::env-github[] 
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[DotNavigationLexer.g4]
+endif::[]
+
+ifndef::env-github[]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationParser.g4[]
+----
+endif::[]
 
 The most important rule in our parser is _dotFile_, which says we have a _HEADER_ token, followed by 1 or more _linkedPages_, followed by the _END_GRAPH_.
 
@@ -127,10 +139,17 @@ _DotNavigationParserBaseListener_ with an empty, no-op implementation for each p
 rule we made. We can just override the method(s) we care about. In our case we only
 care about one, the _linkedPages_ rule which specifies all the possible navigation
 paths.
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/custom/CustomDotNavigationListener.java[CustomDotNavigationListener]
+endif::[]
+
+ifndef::env-github[]
 [source,Java]
 ----
 include::../../examples/tutorial/src/test/java/com/pdsl/custom/CustomDotNavigationListener.java[]
 ----
+endif::[]
 
 === Interpret the Specifications
 
@@ -169,10 +188,17 @@ All we need to do is be able to tell PDSL _where_ the files are.
 === Create the Test Runner
 
 Since we now know everything we need, we can make the PDSL test runner:
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/custom/CustomGrammarTest.java[CustomGrammarTest.java]
+endif::[]
+
+ifndef::env-github[]
 [source,Java]
 ----
 include::../../examples/tutorial/src/test/java/com/pdsl/custom/CustomGrammarTest.java[]
 ----
+endif::[]
 
 At this point we're done! We've made a custom grammar out of thin air and gave PDSL
 enough information it was able to extract the information we care about. While this
