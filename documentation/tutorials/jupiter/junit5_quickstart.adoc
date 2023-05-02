@@ -22,11 +22,16 @@ include::../../../examples/tutorial/src/test/java/com/pdsl/quickstart/JUnit5Quic
 endif::[]
 
 ifdef::env-github[]
-https://github.com/google/polymorphicDSL/tree/main/examples/tutorial/src/test/java/com/pdsl/quickstart/JUnit5Quickstart.java[]
+
+=== GitHub code example 
+
+Since you are viewing this document on Github, please see the
+https://github.com/google/polymorphicDSL/tree/main/examples/tutorial/src/test/java/com/pdsl/quickstart/JUnit5Quickstart.java[code example here]
 endif::[]
+
 After this, simply run your tests using `mvn clean test`.
 
-NOTE: If you noticed you made a mistake in your parser, make sure to run mvn antlr4:antlr4 to regenerate the parser, otherwise you might continue to get the same errors because you're using the old one! Some IDEs such as IntelliJ also have plugins you can download from their marketplace to create the "recognizer" by right-clicking the grammar files.
+NOTE: If you noticed you made a mistake in your parser, make sure to run mvn clean antlr4:antlr4 to regenerate the parser, otherwise you might continue to get the same errors because you're using the old one! Some IDEs such as IntelliJ also have plugins you can download from their marketplace to create the "recognizer" by right-clicking the grammar files.
 
 
 == Next Steps
