@@ -1,193 +1,14 @@
 :toc:
-= PDSL Custom Grammars
-
-Sometimes the best way to represent how your application behaves is through some
-format that no one has natively supported yet. PDSL natively supports gherkin. See <<quickstart.adoc#, the gherkin quickstart>> if you think gherkin can meet your use case.
-
-== A custom grammar
-
-Suppose you made a website. Certain pages can only be accessed by priviledged user.
-Assume it is your job to make sure that it is possible to
-navigate from one page to all others a user has permission to visit.
-
-Technically you can do something like this in gherkin:
-
-[source,cucumber]
-----
-Feature: A Website
-
-    Scenario: Users can navigate to all legal pages from any page they're on
-
-        Given a user is on the sign in page
-        Then the user can navigate to the home page after they sign in
-----
-
-But it can quickly become huge and difficult to reason with.
-
-[source,cucumber]
-----
-    Given a user is on the sign in page
-    Then the user can navigate to the home page after they sign in
-
-    #Going the other way
-    Given a user is on the home page
-    Then they can sign out and navigate to the sign in page
-
-    Given a user is on the sign in page
-    When the user navigates to the home page after they sign in
-    Then the user can navigate to their order history
-
-    # Going the other way
-    Given the user is on the order history page
-    Then they can navigate to the home page
-
-    Given the user is on the order history page
-    Then they can navigate to the home page
-    Then they can sign out and navigate to the sign in page
-
-    # Dozens or hundreds of similar tests
-----
-
-Gherkin is great, but it was designed for user acceptance tests and intended to be
-simple and easy to understand. While the requirements here are in natural language,
-it is still difficult to visualize what is going on as it gets bigger.
-
-A better way to visualize these kinds of requirements would be with a graph:
-
-image:../images/graphviz/website_navigation.png["Sample website navigation path"]
-
-At a glance this is far easier to understand. It is far more concise and the
-permutation of navigation paths is implied by the image itself. It also indicates
-that only admin users are able to access priviledged pages. Finally, we can tell that
-the user is unable to navigate back to previous pages in special areas, such as after
-they have provided payment.
-
-== Creating a Custom Grammar
-
-PDSL requires you to do the following:
-
-. Define some test specification written in a domain specific language you make
-. Generate an interpreter for it using ANTLR
-. Convert the input into a generic _Test Specification_ from 1 or more files.
-. Explain how many _Test Cases_ should be created from each specification
-. Tell it where to find the test files you made (likely as files on a hard drive)
-
-Some of that probably doesn't make sense to you right now, but it will as we go.
-
-=== Use or create a DSL
-
-For our example we're going to use a graph as a test case. The graph above was made using DOT. We're going to use a very simple subset of DOT as our DSL.
-
-=== Create a Test with the DSL
-
-The image above was made using the following DOT code:
-
-include::../images/graphviz/website.dot[Source file]
-
-There really isn't much we need here. We define the links between web pages using
-`->` tokens, and we indicate a page is admin only using `[color="red"]`.
-
-The above code will be our actual test case.
-
-=== Create an Interpreter
-
-Our DSL is understandable, but we need to be able to map some Java code to execute
-when it sees certain phrases in our DSL.
-
-This is where ANTLR comes in. ANTLR is a parser generator we can use to rapidly
-create something that reads our DOT file and then fire off a Java method when we
-need it to. It will do a lot of work for us, all we need to do is tell it how to
-read the DOT file we made.
-
-First we create a lexer (which is essentially a dictionary that specifies what all
-the words in our language can be).
-
-ifdef::env-github[] 
-https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[DotNavigationLexer.g4]
-endif::[]
-
-ifndef::env-github[]
-----
-include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationParser.g4[]
-----
-endif::[]
-
-After that we make a parser (which specifies how we're allowed to combine the words).
-
-ifdef::env-github[] 
-https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[DotNavigationLexer.g4]
-endif::[]
-
-ifndef::env-github[]
-----
-include::../../examples/tutorial/src/test/antlr4/com/example/DotNavigationParser.g4[]
-----
-endif::[]
-
-The most important rule in our parser is _dotFile_, which says we have a _HEADER_ token, followed by 1 or more _linkedPages_, followed by the _END_GRAPH_.
-
-This is going to be our _start rule_ and _syntax check_ rule that the PDSL framework
-will use. It is the entry point we use to recognize the file and phrases we'll see.
-
-==== Create a Listener
-
-This is the part where we'll fire off Java code when we hit the sentences we care
-about. ANTLR will generate code we can use for our listener.
-
-Because we named our parser _DotNavigationParser_ there will be a base class named
-_DotNavigationParserBaseListener_ with an empty, no-op implementation for each parser
-rule we made. We can just override the method(s) we care about. In our case we only
-care about one, the _linkedPages_ rule which specifies all the possible navigation
-paths.
 
 ifdef::env-github[]
-https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/custom/CustomDotNavigationListener.java[CustomDotNavigationListener]
+Because you are viewing this document on Github please complete the steps
+located in this document first:
+https://github.com/google/polymorphicDSL/blob/main/documentation/tutorials/custom_grammar_beginning_section.adoc[Making custom grammars]
 endif::[]
 
 ifndef::env-github[]
-[source,Java]
-----
-include::../../examples/tutorial/src/test/java/com/pdsl/custom/CustomDotNavigationListener.java[]
-----
+include::custom_grammar_beginning_section.adoc[]
 endif::[]
-
-=== Interpret the Specifications
-
-PDSL was designed to run tests on arbitrary grammars like the one we just made.
-However, some grammars might have things like loops or something (like the _Examples_
-tables in gherkin). We need to tell PDSL how to organize information in our test as
-we read it.
-
-In our case we just have a single DOT file that can be read top to bottom. It has no
-nested tests within it or any fancy features. Because of that we can just use a
-built in feature of PDSL: the _FileDelimitedTestSpecificationFactory_.
-
-What this does is produce one specification for each file PDSL reads (as opposed to
-many). To learn about specification factories in general or the other factories PDSL
-provides out of the box, see <<../specification_factories.adoc#, Specification Factories>>.
-
-=== Determine how to produce Test Cases from the Specification
-
-Our needs are simple: we read one DOT file and want to create one test case from it.
-
-PDSL has a standard factory for this called _SingleTestOutputPreorderTestCaseFactory_
-. It is capable of doing some fancy things (such as running some sentences before
-a group of other sentences). We don't actually need any of that, but it will work
-just fine for our purposes.
-
-To lear more about Test Case Factories in general see <<../test_case_factories.adoc#, Test Case Factories>>.
-
-=== How to find the Test Resources
-
-PDSL needs to know where and how to look for our DOT file. Unless you tell it
-otherwise, PDSL will look in the file system for the test data. Since we have a DOT
-file on a hard drive this is perfect.
-
-All we need to do is be able to tell PDSL _where_ the files are.
-
-=== Create the Test Runner
-
-Since we now know everything we need, we can make the PDSL test runner:
 
 ifdef::env-github[]
 https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/custom/CustomGrammarTest.java[CustomGrammarTest.java]
@@ -195,9 +16,9 @@ endif::[]
 
 ifndef::env-github[]
 [source,Java]
-----
+```java
 include::../../examples/tutorial/src/test/java/com/pdsl/custom/CustomGrammarTest.java[]
-----
+```
 endif::[]
 
 At this point we're done! We've made a custom grammar out of thin air and gave PDSL
