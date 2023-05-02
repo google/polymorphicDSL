@@ -1,0 +1,26 @@
+ifdef::env-github[]
+Since you are viewing the documentation on github, please follow the steps
+https://github.com/google/polymorphicDSL/blob/main/documentation/tutorials/customer_grammar.adoc[to make the grammar]
+
+before making the runner below.
+endif::[]
+
+ifndef::env-github[]
+include::../custom_grammar_beginning_section.adoc[]
+endif::[]
+
+ifdef::env-github[]
+Since you are viewing the documentation on github, view the source code
+https://github.com/google/polymorphicDSL/blob/main/documentation/tutorials/customer_grammar.adoc[for the test runner here]
+
+before making the runner below.
+endif::[]
+
+ifndef::env-github[]
+[source,java]
+----
+include::../../../examples/tutorial/src/test/java/com/pdsl/quickstart/JUnit5Quickstart.java[JUnit5Quickstart.java]
+----
+endif::[]
+
+

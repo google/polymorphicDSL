@@ -1,0 +1,35 @@
+ifdef::env-github[]
+Since you are viewing the documentation on github, please follow the steps
+https://github.com/google/polymorphicDSL/blob/main/documentation/tutorials/quickstart_beginning_section.adoc[to make the grammar]
+
+before making the runner below.
+endif::[]
+
+ifndef::env-github[]
+include::../quickstart_beginning_section.adoc[]
+endif::[]
+
+== Implement the runner
+
+The runner is where you execute the tests. You specify the interpreter to use and which files to read with it.
+Finally you specify the listener to use that will fire off methods every time a matching phrase is found.
+
+In JUnit5 we use the `@TestTemplate` feature to run all the PDSL tests made from the grammar and test resources.
+ifndef::env-github[]
+```java
+include::../../../examples/tutorial/src/test/java/com/pdsl/quickstart/JUnit5Quickstart.java[Quickstart Example]
+```
+endif::[]
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/tree/main/examples/tutorial/src/test/java/com/pdsl/quickstart/JUnit5Quickstart.java[]
+endif::[]
+After this, simply run your tests using `mvn clean test`.
+
+NOTE: If you noticed you made a mistake in your parser, make sure to run mvn antlr4:antlr4 to regenerate the parser, otherwise you might continue to get the same errors because you're using the old one! Some IDEs such as IntelliJ also have plugins you can download from their marketplace to create the "recognizer" by right-clicking the grammar files.
+
+
+== Next Steps
+
+PDSL was designed to solve problems for more complicated than we've seen in this tutorial. If you want to create your own language for testing instead of using Gherkin like we did here, see <<custom_grammar.adoc#, this guide>>. Otherwise proceed to <<gherkin_scalability_tutorial.adoc#, the gherkin scalability tutorial>>.
+

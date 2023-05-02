@@ -17,16 +17,18 @@
   </properties>
 
   <dependencies>
+    <!--
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
+    -->
     <dependency>
       <groupId>com.google.pdsl</groupId>
       <artifactId>pdsl</artifactId>
-      <version>1.2.1</version>
+      <version>1.5.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -34,6 +36,12 @@
       <artifactId>antlr4-runtime</artifactId>
       <version>4.9.1</version>
     </dependency>
+      <dependency>
+          <groupId>org.junit.jupiter</groupId>
+          <artifactId>junit-jupiter-api</artifactId>
+          <version>5.9.2</version>
+          <scope>test</scope>
+      </dependency>
 
   </dependencies>
 
