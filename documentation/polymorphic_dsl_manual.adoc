@@ -34,6 +34,8 @@ Hands-on experience and example projects for using PDSL
 
 Information about the framework itself and the built-in features it has.
 
+* <<configuring_pdsl_for_users.adoc#, Overview for Users>>
+* <<pdsl_for_library_developers.adoc#, Overview for Library Developers>>
 * <<specification_factories.adoc#, Specification Factories>>
 * <<test_case_factories.adoc#, Test Case Factories>>
 

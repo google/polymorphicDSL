@@ -1,0 +1,18 @@
+# The parts of PDSL a user can customize
+digraph user_guide {
+  graph[label="Polymorphic DSL User Guide"]
+  subgraph components {
+      node [shape=box color=lightgray style=filled]
+      "Resource Finder"
+      "Test Specification Factory\nGenerator"
+      "Test Case Factory"
+      Executor
+
+  }
+
+ "Resource Finder" -> "Test Specification Factory\nGenerator" [label="Find the test files"]
+ "Test Specification Factory\nGenerator" -> "Test Case Factory" [label="Create 'blueprints' for\ntests (which sentences \nare executed, repeat \nsentences before\n others, etc)."]
+ "Test Case Factory" -> Executor [label="Create test cases\nfrom the blueprint"]
+ Executor -> Finish [label="Run the tests!"]
+
+}

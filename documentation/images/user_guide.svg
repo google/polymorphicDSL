@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="218pt" height="514pt" viewBox="0.00 0.00 217.76 513.60">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 509.6)">
+<title>user_guide</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-509.6 213.7603,-509.6 213.7603,4 -4,4"/>
+<text text-anchor="middle" x="104.8801" y="-8.2" font-family="Times,serif" font-size="14.00" fill="#000000">Polymorphic DSL User Guide</text>
+<!-- Resource Finder -->
+<g id="node1" class="node">
+<title>Resource Finder</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="135.9988,-505.6 27.7306,-505.6 27.7306,-469.6 135.9988,-469.6 135.9988,-505.6"/>
+<text text-anchor="middle" x="81.8647" y="-483.4" font-family="Times,serif" font-size="14.00" fill="#000000">Resource Finder</text>
+</g>
+<!-- Test Specification Factory\nGenerator -->
+<g id="node2" class="node">
+<title>Test Specification Factory\nGenerator</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="163.5943,-416.6019 .1351,-416.6019 .1351,-375.3981 163.5943,-375.3981 163.5943,-416.6019"/>
+<text text-anchor="middle" x="81.8647" y="-400.2" font-family="Times,serif" font-size="14.00" fill="#000000">Test Specification Factory</text>
+<text text-anchor="middle" x="81.8647" y="-383.4" font-family="Times,serif" font-size="14.00" fill="#000000">Generator</text>
+</g>
+<!-- Resource Finder&#45;&gt;Test Specification Factory\nGenerator -->
+<g id="edge1" class="edge">
+<title>Resource Finder-&gt;Test Specification Factory\nGenerator</title>
+<path fill="none" stroke="#000000" d="M81.8647,-469.5028C81.8647,-457.3708 81.8647,-441.0846 81.8647,-426.926"/>
+<polygon fill="#000000" stroke="#000000" points="85.3648,-426.6174 81.8647,-416.6175 78.3648,-426.6175 85.3648,-426.6174"/>
+<text text-anchor="middle" x="130.2746" y="-439" font-family="Times,serif" font-size="14.00" fill="#000000">Find the test files</text>
+</g>
+<!-- Test Case Factory -->
+<g id="node3" class="node">
+<title>Test Case Factory</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="140.4405,-255.2 23.2889,-255.2 23.2889,-219.2 140.4405,-219.2 140.4405,-255.2"/>
+<text text-anchor="middle" x="81.8647" y="-233" font-family="Times,serif" font-size="14.00" fill="#000000">Test Case Factory</text>
+</g>
+<!-- Test Specification Factory\nGenerator&#45;&gt;Test Case Factory -->
+<g id="edge2" class="edge">
+<title>Test Specification Factory\nGenerator-&gt;Test Case Factory</title>
+<path fill="none" stroke="#000000" d="M81.8647,-375.2397C81.8647,-347.2636 81.8647,-297.3429 81.8647,-265.8202"/>
+<polygon fill="#000000" stroke="#000000" points="85.3648,-265.5035 81.8647,-255.5036 78.3648,-265.5036 85.3648,-265.5035"/>
+<text text-anchor="middle" x="145.8125" y="-344.6" font-family="Times,serif" font-size="14.00" fill="#000000">Create 'blueprints' for</text>
+<text text-anchor="middle" x="145.8125" y="-327.8" font-family="Times,serif" font-size="14.00" fill="#000000">tests (which sentences </text>
+<text text-anchor="middle" x="145.8125" y="-311" font-family="Times,serif" font-size="14.00" fill="#000000">are executed, repeat </text>
+<text text-anchor="middle" x="145.8125" y="-294.2" font-family="Times,serif" font-size="14.00" fill="#000000">sentences before</text>
+<text text-anchor="middle" x="145.8125" y="-277.4" font-family="Times,serif" font-size="14.00" fill="#000000"> others, etc).</text>
+</g>
+<!-- Executor -->
+<g id="node4" class="node">
+<title>Executor</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="114.8993,-149.6 48.8301,-149.6 48.8301,-113.6 114.8993,-113.6 114.8993,-149.6"/>
+<text text-anchor="middle" x="81.8647" y="-127.4" font-family="Times,serif" font-size="14.00" fill="#000000">Executor</text>
+</g>
+<!-- Test Case Factory&#45;&gt;Executor -->
+<g id="edge3" class="edge">
+<title>Test Case Factory-&gt;Executor</title>
+<path fill="none" stroke="#000000" d="M81.8647,-218.8059C81.8647,-202.5279 81.8647,-178.5223 81.8647,-159.8163"/>
+<polygon fill="#000000" stroke="#000000" points="85.3648,-159.7833 81.8647,-149.7833 78.3648,-159.7834 85.3648,-159.7833"/>
+<text text-anchor="middle" x="132.7967" y="-188.6" font-family="Times,serif" font-size="14.00" fill="#000000">Create test cases</text>
+<text text-anchor="middle" x="132.7967" y="-171.8" font-family="Times,serif" font-size="14.00" fill="#000000">from the blueprint</text>
+</g>
+<!-- Finish -->
+<g id="node5" class="node">
+<title>Finish</title>
+<ellipse fill="none" stroke="#000000" cx="81.8647" cy="-42.8" rx="35.3703" ry="18"/>
+<text text-anchor="middle" x="81.8647" y="-38.6" font-family="Times,serif" font-size="14.00" fill="#000000">Finish</text>
+</g>
+<!-- Executor&#45;&gt;Finish -->
+<g id="edge4" class="edge">
+<title>Executor-&gt;Finish</title>
+<path fill="none" stroke="#000000" d="M81.8647,-113.2006C81.8647,-101.0949 81.8647,-85.0076 81.8647,-71.2674"/>
+<polygon fill="#000000" stroke="#000000" points="85.3648,-70.872 81.8647,-60.872 78.3648,-70.8721 85.3648,-70.872"/>
+<text text-anchor="middle" x="120.3584" y="-83" font-family="Times,serif" font-size="14.00" fill="#000000">Run the tests!</text>
+</g>
+</g>
+</svg>
