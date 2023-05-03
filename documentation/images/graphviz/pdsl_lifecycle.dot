@@ -1,0 +1,53 @@
+# Overview explaining how PDSL works
+
+digraph pdsl {
+  graph[label="Polymorphic DSL Lifecycle"]
+  subgraph components {
+      node [shape=box color=lightgray style=filled]
+      "Resource Finder"
+      "Test Specification Factory\nGenerator"
+      "Test Specification Factory"
+      "Test Case Factory"
+      Executor
+
+  }
+  subgraph artifacts {
+      node [shape=parallelogram color=cyan style=filled]
+      "Phrase Filter"
+      "Test Cases"
+      "Test Specification"
+      Recognizer
+      Parser
+      URI
+
+      "G4 Files"
+      "Test Run Results"
+      "Test Files written\nwith Grammar"
+      Visitor
+      Listener
+  }
+  "User Creates a DSL with ANTLR"
+  "User specifies code to execute\nwhen sentences in DSL\nare encountered" -> {Visitor Listener}
+Parser -> {Visitor Listener}
+Visitor -> Executor
+Listener -> Executor
+"User Creates a DSL with ANTLR" -> "G4 Files"
+"Parser" -> "Phrase Filter" [label="Parser used to determine which\nsentences are contextually \nrelevant for the test run"]
+    "Recognizer" -> "Phrase Filter" [label="Recognizer used to determine\n if there are nonsense \nsentences in the input"]
+
+
+"G4 Files" -> { "Test Files written\nwith Grammar" "Recognizer" "Parser"}
+  "Test Files written\nwith Grammar" -> {URI }
+   URI -> "Resource Finder" [label="Text Input retrieved from URIs"]
+  "Resource Finder" -> "Test Specification Factory\nGenerator"
+  "Phrase Filter" -> "Test Specification Factory\nGenerator"
+  "Test Specification Factory\nGenerator" -> "Test Specification Factory"
+  [label="Test Specification Factories created from Phrase Filter(s)\n"]
+  "Test Specification Factory" -> "Test Specification" [label="Test inputs structured\nand organized to represent\nlogic such as 'Run this before\neverything' or 'create multiple tests\nin this situation'"]
+  "Test Specification" -> "Test Case Factory" [label="Test Specification used as a blueprint\n to construct test cases from"]
+  "Test Case Factory" -> "Test Cases" [label="One or many test cases created\nfrom the specification\ndepending on which factory is used.\nThe order the sentences run in based\non how factory interprets the specification."]
+  "Test Cases" -> "Executor"
+  "Executor" -> "Test Run Results"  [label="Tests are actually run and results are produced"]
+    "Test Run Results" -> Finished [label="Metrics and information about the test run created.\nCan be collated to see how the same test behaves\non a different platform"]
+
+}

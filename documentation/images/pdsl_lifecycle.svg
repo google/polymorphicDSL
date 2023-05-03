@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="855pt" height="1408pt" viewBox="0.00 0.00 854.96 1408.19">
+<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 1404.1901)">
+<title>pdsl</title>
+<polygon fill="#ffffff" stroke="transparent" points="-4,4 -4,-1404.1901 850.9621,-1404.1901 850.9621,4 -4,4"/>
+<text text-anchor="middle" x="423.481" y="-8.2" font-family="Times,serif" font-size="14.00" fill="#000000">Polymorphic DSL Lifecycle</text>
+<!-- Resource Finder -->
+<g id="node1" class="node">
+<title>Resource Finder</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="148.3022,-930 40.034,-930 40.034,-894 148.3022,-894 148.3022,-930"/>
+<text text-anchor="middle" x="94.1681" y="-907.8" font-family="Times,serif" font-size="14.00" fill="#000000">Resource Finder</text>
+</g>
+<!-- Test Specification Factory\nGenerator -->
+<g id="node2" class="node">
+<title>Test Specification Factory\nGenerator</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="309.8977,-856.8019 146.4385,-856.8019 146.4385,-815.5981 309.8977,-815.5981 309.8977,-856.8019"/>
+<text text-anchor="middle" x="228.1681" y="-840.4" font-family="Times,serif" font-size="14.00" fill="#000000">Test Specification Factory</text>
+<text text-anchor="middle" x="228.1681" y="-823.6" font-family="Times,serif" font-size="14.00" fill="#000000">Generator</text>
+</g>
+<!-- Resource Finder&#45;&gt;Test Specification Factory\nGenerator -->
+<g id="edge15" class="edge">
+<title>Resource Finder-&gt;Test Specification Factory\nGenerator</title>
+<path fill="none" stroke="#000000" d="M126.2644,-893.844C143.1653,-884.2837 164.1773,-872.3978 182.7231,-861.907"/>
+<polygon fill="#000000" stroke="#000000" points="184.6197,-864.8553 191.6004,-856.8853 181.1732,-858.7625 184.6197,-864.8553"/>
+</g>
+<!-- Test Specification Factory -->
+<g id="node3" class="node">
+<title>Test Specification Factory</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="311.8977,-762.6 148.4385,-762.6 148.4385,-726.6 311.8977,-726.6 311.8977,-762.6"/>
+<text text-anchor="middle" x="230.1681" y="-740.4" font-family="Times,serif" font-size="14.00" fill="#000000">Test Specification Factory</text>
+</g>
+<!-- Test Specification Factory\nGenerator&#45;&gt;Test Specification Factory -->
+<g id="edge17" class="edge">
+<title>Test Specification Factory\nGenerator-&gt;Test Specification Factory</title>
+<path fill="none" stroke="#000000" d="M228.3069,-815.3398C228.4066,-804.9058 228.5748,-792.0843 228.8551,-780.6 228.9143,-778.1733 228.9858,-775.655 229.0644,-773.1285"/>
+<polygon fill="#000000" stroke="#000000" points="232.5699,-773.0256 229.4148,-762.9115 225.574,-772.7856 232.5699,-773.0256"/>
+<text text-anchor="middle" x="389.3246" y="-784.8" font-family="Times,serif" font-size="14.00" fill="#000000">Test Specification Factories created from Phrase Filter(s)</text>
+</g>
+<!-- Test Specification -->
+<g id="node8" class="node">
+<title>Test Specification</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="363.768,-606.6 175.1021,-606.6 126.5681,-570.6 315.2341,-570.6 363.768,-606.6"/>
+<text text-anchor="middle" x="245.1681" y="-584.4" font-family="Times,serif" font-size="14.00" fill="#000000">Test Specification</text>
+</g>
+<!-- Test Specification Factory&#45;&gt;Test Specification -->
+<g id="edge18" class="edge">
+<title>Test Specification Factory-&gt;Test Specification</title>
+<path fill="none" stroke="#000000" d="M231.9181,-726.3995C234.5149,-699.3929 239.4101,-648.4833 242.4684,-616.6767"/>
+<polygon fill="#000000" stroke="#000000" points="245.9559,-616.9737 243.4292,-606.6846 238.988,-616.3036 245.9559,-616.9737"/>
+<text text-anchor="middle" x="342.0756" y="-696" font-family="Times,serif" font-size="14.00" fill="#000000">Test inputs structured</text>
+<text text-anchor="middle" x="342.0756" y="-679.2" font-family="Times,serif" font-size="14.00" fill="#000000">and organized to represent</text>
+<text text-anchor="middle" x="342.0756" y="-662.4" font-family="Times,serif" font-size="14.00" fill="#000000">logic such as 'Run this before</text>
+<text text-anchor="middle" x="342.0756" y="-645.6" font-family="Times,serif" font-size="14.00" fill="#000000">everything' or 'create multiple tests</text>
+<text text-anchor="middle" x="342.0756" y="-628.8" font-family="Times,serif" font-size="14.00" fill="#000000">in this situation'</text>
+</g>
+<!-- Test Case Factory -->
+<g id="node4" class="node">
+<title>Test Case Factory</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="363.7439,-501 246.5923,-501 246.5923,-465 363.7439,-465 363.7439,-501"/>
+<text text-anchor="middle" x="305.1681" y="-478.8" font-family="Times,serif" font-size="14.00" fill="#000000">Test Case Factory</text>
+</g>
+<!-- Test Cases -->
+<g id="node7" class="node">
+<title>Test Cases</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="459.4143,-345 336.5328,-345 304.9218,-309 427.8033,-309 459.4143,-345"/>
+<text text-anchor="middle" x="382.1681" y="-322.8" font-family="Times,serif" font-size="14.00" fill="#000000">Test Cases</text>
+</g>
+<!-- Test Case Factory&#45;&gt;Test Cases -->
+<g id="edge20" class="edge">
+<title>Test Case Factory-&gt;Test Cases</title>
+<path fill="none" stroke="#000000" d="M300.309,-464.6288C294.7901,-439.5028 288.9323,-394.0079 308.9225,-363 312.9867,-356.6957 318.5022,-351.4593 324.6948,-347.1188"/>
+<polygon fill="#000000" stroke="#000000" points="326.7836,-349.9439 333.4864,-341.7389 323.1298,-343.9731 326.7836,-349.9439"/>
+<text text-anchor="middle" x="429.2909" y="-434.4" font-family="Times,serif" font-size="14.00" fill="#000000">One or many test cases created</text>
+<text text-anchor="middle" x="429.2909" y="-417.6" font-family="Times,serif" font-size="14.00" fill="#000000">from the specification</text>
+<text text-anchor="middle" x="429.2909" y="-400.8" font-family="Times,serif" font-size="14.00" fill="#000000">depending on which factory is used.</text>
+<text text-anchor="middle" x="429.2909" y="-384" font-family="Times,serif" font-size="14.00" fill="#000000">The order the sentences run in based</text>
+<text text-anchor="middle" x="429.2909" y="-367.2" font-family="Times,serif" font-size="14.00" fill="#000000">on how factory interprets the specification.</text>
+</g>
+<!-- Executor -->
+<g id="node5" class="node">
+<title>Executor</title>
+<polygon fill="#d3d3d3" stroke="#d3d3d3" points="596.2027,-272 530.1335,-272 530.1335,-236 596.2027,-236 596.2027,-272"/>
+<text text-anchor="middle" x="563.1681" y="-249.8" font-family="Times,serif" font-size="14.00" fill="#000000">Executor</text>
+</g>
+<!-- Test Run Results -->
+<g id="node13" class="node">
+<title>Test Run Results</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="676.0243,-183.2 496.4953,-183.2 450.3118,-147.2 629.8409,-147.2 676.0243,-183.2"/>
+<text text-anchor="middle" x="563.1681" y="-161" font-family="Times,serif" font-size="14.00" fill="#000000">Test Run Results</text>
+</g>
+<!-- Executor&#45;&gt;Test Run Results -->
+<g id="edge22" class="edge">
+<title>Executor-&gt;Test Run Results</title>
+<path fill="none" stroke="#000000" d="M563.1681,-235.6006C563.1681,-223.4949 563.1681,-207.4076 563.1681,-193.6674"/>
+<polygon fill="#000000" stroke="#000000" points="566.6682,-193.272 563.1681,-183.272 559.6682,-193.2721 566.6682,-193.272"/>
+<text text-anchor="middle" x="693.1945" y="-205.4" font-family="Times,serif" font-size="14.00" fill="#000000">Tests are actually run and results are produced</text>
+</g>
+<!-- Phrase Filter -->
+<g id="node6" class="node">
+<title>Phrase Filter</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="358.44,-930 218.0192,-930 181.8962,-894 322.317,-894 358.44,-930"/>
+<text text-anchor="middle" x="270.1681" y="-907.8" font-family="Times,serif" font-size="14.00" fill="#000000">Phrase Filter</text>
+</g>
+<!-- Phrase Filter&#45;&gt;Test Specification Factory\nGenerator -->
+<g id="edge16" class="edge">
+<title>Phrase Filter-&gt;Test Specification Factory\nGenerator</title>
+<path fill="none" stroke="#000000" d="M260.0011,-893.6509C255.4126,-885.3699 249.874,-875.3741 244.712,-866.0579"/>
+<polygon fill="#000000" stroke="#000000" points="247.6328,-864.1075 239.7247,-857.0568 241.5099,-867.5002 247.6328,-864.1075"/>
+</g>
+<!-- Test Cases&#45;&gt;Executor -->
+<g id="edge21" class="edge">
+<title>Test Cases-&gt;Executor</title>
+<path fill="none" stroke="#000000" d="M426.9097,-308.9551C455.4714,-297.4357 492.2848,-282.5883 520.4454,-271.2307"/>
+<polygon fill="#000000" stroke="#000000" points="522.0526,-274.3565 530.0176,-267.3701 519.4343,-267.8646 522.0526,-274.3565"/>
+</g>
+<!-- Test Specification&#45;&gt;Test Case Factory -->
+<g id="edge19" class="edge">
+<title>Test Specification-&gt;Test Case Factory</title>
+<path fill="none" stroke="#000000" d="M255.6193,-570.2059C265.0832,-553.5493 279.1445,-528.8015 289.8726,-509.92"/>
+<polygon fill="#000000" stroke="#000000" points="292.9396,-511.607 294.8367,-501.1833 286.8534,-508.1489 292.9396,-511.607"/>
+<text text-anchor="middle" x="388.9413" y="-540" font-family="Times,serif" font-size="14.00" fill="#000000">Test Specification used as a blueprint</text>
+<text text-anchor="middle" x="388.9413" y="-523.2" font-family="Times,serif" font-size="14.00" fill="#000000"> to construct test cases from</text>
+</g>
+<!-- Recognizer -->
+<g id="node9" class="node">
+<title>Recognizer</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="350.9712,-1152.9901 222.4315,-1152.9901 189.3649,-1116.9901 317.9047,-1116.9901 350.9712,-1152.9901"/>
+<text text-anchor="middle" x="270.1681" y="-1130.7901" font-family="Times,serif" font-size="14.00" fill="#000000">Recognizer</text>
+</g>
+<!-- Recognizer&#45;&gt;Phrase Filter -->
+<g id="edge9" class="edge">
+<title>Recognizer-&gt;Phrase Filter</title>
+<path fill="none" stroke="#000000" d="M270.1681,-1116.7419C270.1681,-1077.9343 270.1681,-986.9682 270.1681,-940.4649"/>
+<polygon fill="#000000" stroke="#000000" points="273.6682,-940.1876 270.1681,-930.1876 266.6682,-940.1877 273.6682,-940.1876"/>
+<text text-anchor="middle" x="353.5542" y="-1070.295" font-family="Times,serif" font-size="14.00" fill="#000000">Recognizer used to determine</text>
+<text text-anchor="middle" x="353.5542" y="-1053.495" font-family="Times,serif" font-size="14.00" fill="#000000"> if there are nonsense </text>
+<text text-anchor="middle" x="353.5542" y="-1036.695" font-family="Times,serif" font-size="14.00" fill="#000000">sentences in the input</text>
+</g>
+<!-- Parser -->
+<g id="node10" class="node">
+<title>Parser</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="557.7807,-1075.695 475.6766,-1075.695 454.5555,-1039.695 536.6596,-1039.695 557.7807,-1075.695"/>
+<text text-anchor="middle" x="506.1681" y="-1053.495" font-family="Times,serif" font-size="14.00" fill="#000000">Parser</text>
+</g>
+<!-- Parser&#45;&gt;Phrase Filter -->
+<g id="edge8" class="edge">
+<title>Parser-&gt;Phrase Filter</title>
+<path fill="none" stroke="#000000" d="M482.6692,-1039.6583C470.8105,-1031.3887 455.8531,-1022.1647 441.1681,-1016.4 400.0621,-1000.2636 381.6706,-1020.5241 343.4527,-998.4 318.8005,-984.129 298.5874,-958.3545 285.6802,-938.6586"/>
+<polygon fill="#000000" stroke="#000000" points="288.5737,-936.6856 280.2742,-930.1001 282.6555,-940.4239 288.5737,-936.6856"/>
+<text text-anchor="middle" x="432.0258" y="-985.8" font-family="Times,serif" font-size="14.00" fill="#000000">Parser used to determine which</text>
+<text text-anchor="middle" x="432.0258" y="-969" font-family="Times,serif" font-size="14.00" fill="#000000">sentences are contextually </text>
+<text text-anchor="middle" x="432.0258" y="-952.2" font-family="Times,serif" font-size="14.00" fill="#000000">relevant for the test run</text>
+</g>
+<!-- Visitor -->
+<g id="node15" class="node">
+<title>Visitor</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="601.6813,-930 513.3722,-930 490.6549,-894 578.964,-894 601.6813,-930"/>
+<text text-anchor="middle" x="546.1681" y="-907.8" font-family="Times,serif" font-size="14.00" fill="#000000">Visitor</text>
+</g>
+<!-- Parser&#45;&gt;Visitor -->
+<g id="edge3" class="edge">
+<title>Parser-&gt;Visitor</title>
+<path fill="none" stroke="#000000" d="M511.1532,-1039.5372C518.0099,-1014.5628 530.415,-969.3787 538.469,-940.043"/>
+<polygon fill="#000000" stroke="#000000" points="541.8477,-940.9565 541.1201,-930.3866 535.0974,-939.1032 541.8477,-940.9565"/>
+</g>
+<!-- Listener -->
+<g id="node16" class="node">
+<title>Listener</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="744.8091,-930 645.1612,-930 619.527,-894 719.1749,-894 744.8091,-930"/>
+<text text-anchor="middle" x="682.1681" y="-907.8" font-family="Times,serif" font-size="14.00" fill="#000000">Listener</text>
+</g>
+<!-- Parser&#45;&gt;Listener -->
+<g id="edge4" class="edge">
+<title>Parser-&gt;Listener</title>
+<path fill="none" stroke="#000000" d="M528.1028,-1039.5372C559.4112,-1013.6197 617.0116,-965.9373 652.2225,-936.7894"/>
+<polygon fill="#000000" stroke="#000000" points="654.7629,-939.2301 660.2341,-930.1572 650.2991,-933.8379 654.7629,-939.2301"/>
+</g>
+<!-- URI -->
+<g id="node11" class="node">
+<title>URI</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="125.7862,-1075.695 61.1719,-1075.695 44.5499,-1039.695 109.1643,-1039.695 125.7862,-1075.695"/>
+<text text-anchor="middle" x="85.1681" y="-1053.495" font-family="Times,serif" font-size="14.00" fill="#000000">URI</text>
+</g>
+<!-- URI&#45;&gt;Resource Finder -->
+<g id="edge14" class="edge">
+<title>URI-&gt;Resource Finder</title>
+<path fill="none" stroke="#000000" d="M81.9434,-1039.6639C78.5913,-1017.7858 74.5874,-979.8699 80.4527,-948 80.9464,-945.3175 81.6308,-942.5761 82.4327,-939.8626"/>
+<polygon fill="#000000" stroke="#000000" points="85.7746,-940.9073 85.7206,-930.3126 79.1559,-938.6286 85.7746,-940.9073"/>
+<text text-anchor="middle" x="169.0258" y="-969" font-family="Times,serif" font-size="14.00" fill="#000000">Text Input retrieved from URIs</text>
+</g>
+<!-- G4 Files -->
+<g id="node12" class="node">
+<title>G4 Files</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="334.7764,-1327.1901 231.999,-1327.1901 205.5597,-1291.1901 308.3372,-1291.1901 334.7764,-1327.1901"/>
+<text text-anchor="middle" x="270.1681" y="-1304.9901" font-family="Times,serif" font-size="14.00" fill="#000000">G4 Files</text>
+</g>
+<!-- G4 Files&#45;&gt;Recognizer -->
+<g id="edge10" class="edge">
+<title>G4 Files-&gt;Recognizer</title>
+<path fill="none" stroke="#000000" d="M270.1681,-1290.8769C270.1681,-1260.4777 270.1681,-1199.3866 270.1681,-1163.3691"/>
+<polygon fill="#000000" stroke="#000000" points="273.6682,-1163.0579 270.1681,-1153.0579 266.6682,-1163.0579 273.6682,-1163.0579"/>
+</g>
+<!-- G4 Files&#45;&gt;Parser -->
+<g id="edge11" class="edge">
+<title>G4 Files-&gt;Parser</title>
+<path fill="none" stroke="#000000" d="M287.1406,-1291.1032C328.4577,-1247.0733 434.3714,-1134.2056 482.1503,-1083.2898"/>
+<polygon fill="#000000" stroke="#000000" points="484.7416,-1085.6432 489.0322,-1075.956 479.6371,-1080.8531 484.7416,-1085.6432"/>
+</g>
+<!-- Test Files written\nwith Grammar -->
+<g id="node14" class="node">
+<title>Test Files written\nwith Grammar</title>
+<polygon fill="#00ffff" stroke="#00ffff" points="236.5045,-1254.2903 48.2578,-1254.2903 -.1683,-1170.8898 188.0784,-1170.8898 236.5045,-1254.2903"/>
+<text text-anchor="middle" x="118.1681" y="-1216.7901" font-family="Times,serif" font-size="14.00" fill="#000000">Test Files written</text>
+<text text-anchor="middle" x="118.1681" y="-1199.9901" font-family="Times,serif" font-size="14.00" fill="#000000">with Grammar</text>
+</g>
+<!-- G4 Files&#45;&gt;Test Files written\nwith Grammar -->
+<g id="edge12" class="edge">
+<title>G4 Files-&gt;Test Files written\nwith Grammar</title>
+<path fill="none" stroke="#000000" d="M241.5781,-1291.0204C227.5363,-1282.0964 209.8995,-1270.8878 192.3887,-1259.7592"/>
+<polygon fill="#000000" stroke="#000000" points="194.136,-1256.7227 183.8189,-1254.3129 190.3814,-1262.6306 194.136,-1256.7227"/>
+</g>
+<!-- Finished -->
+<g id="node19" class="node">
+<title>Finished</title>
+<ellipse fill="none" stroke="#000000" cx="563.1681" cy="-42.8" rx="44.1006" ry="18"/>
+<text text-anchor="middle" x="563.1681" y="-38.6" font-family="Times,serif" font-size="14.00" fill="#000000">Finished</text>
+</g>
+<!-- Test Run Results&#45;&gt;Finished -->
+<g id="edge23" class="edge">
+<title>Test Run Results-&gt;Finished</title>
+<path fill="none" stroke="#000000" d="M563.1681,-147.1395C563.1681,-127.0712 563.1681,-94.4113 563.1681,-70.9752"/>
+<polygon fill="#000000" stroke="#000000" points="566.6682,-70.9346 563.1681,-60.9346 559.6682,-70.9347 566.6682,-70.9346"/>
+<text text-anchor="middle" x="705.0651" y="-116.6" font-family="Times,serif" font-size="14.00" fill="#000000">Metrics and information about the test run created.</text>
+<text text-anchor="middle" x="705.0651" y="-99.8" font-family="Times,serif" font-size="14.00" fill="#000000">Can be collated to see how the same test behaves</text>
+<text text-anchor="middle" x="705.0651" y="-83" font-family="Times,serif" font-size="14.00" fill="#000000">on a different platform</text>
+</g>
+<!-- Test Files written\nwith Grammar&#45;&gt;URI -->
+<g id="edge13" class="edge">
+<title>Test Files written\nwith Grammar-&gt;URI</title>
+<path fill="none" stroke="#000000" d="M109.2378,-1170.6732C103.5105,-1143.7904 96.2297,-1109.6157 91.1831,-1085.928"/>
+<polygon fill="#000000" stroke="#000000" points="94.5421,-1084.8975 89.0352,-1075.8463 87.6958,-1086.3561 94.5421,-1084.8975"/>
+</g>
+<!-- Visitor&#45;&gt;Executor -->
+<g id="edge5" class="edge">
+<title>Visitor-&gt;Executor</title>
+<path fill="none" stroke="#000000" d="M552.5951,-893.875C557.4092,-878.6763 563.1681,-856.2951 563.1681,-836.2 563.1681,-836.2 563.1681,-836.2 563.1681,-327 563.1681,-312.2996 563.1681,-295.934 563.1681,-282.4302"/>
+<polygon fill="#000000" stroke="#000000" points="566.6682,-282.3003 563.1681,-272.3003 559.6682,-282.3004 566.6682,-282.3003"/>
+</g>
+<!-- Listener&#45;&gt;Executor -->
+<g id="edge6" class="edge">
+<title>Listener-&gt;Executor</title>
+<path fill="none" stroke="#000000" d="M669.7044,-893.8968C660.7194,-879.0744 650.1681,-857.198 650.1681,-836.2 650.1681,-836.2 650.1681,-836.2 650.1681,-327 650.1681,-301.3526 627.7061,-282.9216 605.6088,-270.9952"/>
+<polygon fill="#000000" stroke="#000000" points="607.0612,-267.8078 596.5557,-266.4341 603.9116,-274.0593 607.0612,-267.8078"/>
+</g>
+<!-- User Creates a DSL with ANTLR -->
+<g id="node17" class="node">
+<title>User Creates a DSL with ANTLR</title>
+<ellipse fill="none" stroke="#000000" cx="270.1681" cy="-1382.1901" rx="142.3307" ry="18"/>
+<text text-anchor="middle" x="270.1681" y="-1377.9901" font-family="Times,serif" font-size="14.00" fill="#000000">User Creates a DSL with ANTLR</text>
+</g>
+<!-- User Creates a DSL with ANTLR&#45;&gt;G4 Files -->
+<g id="edge7" class="edge">
+<title>User Creates a DSL with ANTLR-&gt;G4 Files</title>
+<path fill="none" stroke="#000000" d="M270.1681,-1364.1451C270.1681,-1356.0729 270.1681,-1346.3664 270.1681,-1337.3718"/>
+<polygon fill="#000000" stroke="#000000" points="273.6682,-1337.2804 270.1681,-1327.2804 266.6682,-1337.2805 273.6682,-1337.2804"/>
+</g>
+<!-- User specifies code to execute\nwhen sentences in DSL\nare encountered -->
+<g id="node18" class="node">
+<title>User specifies code to execute\nwhen sentences in DSL\nare encountered</title>
+<ellipse fill="none" stroke="#000000" cx="707.1681" cy="-1057.695" rx="131.2944" ry="41.0911"/>
+<text text-anchor="middle" x="707.1681" y="-1070.295" font-family="Times,serif" font-size="14.00" fill="#000000">User specifies code to execute</text>
+<text text-anchor="middle" x="707.1681" y="-1053.495" font-family="Times,serif" font-size="14.00" fill="#000000">when sentences in DSL</text>
+<text text-anchor="middle" x="707.1681" y="-1036.695" font-family="Times,serif" font-size="14.00" fill="#000000">are encountered</text>
+</g>
+<!-- User specifies code to execute\nwhen sentences in DSL\nare encountered&#45;&gt;Visitor -->
+<g id="edge1" class="edge">
+<title>User specifies code to execute\nwhen sentences in DSL\nare encountered-&gt;Visitor</title>
+<path fill="none" stroke="#000000" d="M664.023,-1018.6514C635.4465,-992.7914 598.8003,-959.6289 574.0159,-937.2006"/>
+<polygon fill="#000000" stroke="#000000" points="576.1743,-934.4334 566.4111,-930.3187 571.4774,-939.6237 576.1743,-934.4334"/>
+</g>
+<!-- User specifies code to execute\nwhen sentences in DSL\nare encountered&#45;&gt;Listener -->
+<g id="edge2" class="edge">
+<title>User specifies code to execute\nwhen sentences in DSL\nare encountered-&gt;Listener</title>
+<path fill="none" stroke="#000000" d="M700.071,-1016.3344C695.8778,-991.8977 690.6803,-961.6075 686.9676,-939.9705"/>
+<polygon fill="#000000" stroke="#000000" points="690.416,-939.3714 685.2752,-930.1073 683.5168,-940.5553 690.416,-939.3714"/>
+</g>
+</g>
+</svg>
