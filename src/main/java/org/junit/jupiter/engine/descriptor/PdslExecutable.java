@@ -8,6 +8,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * A wrapper class for a PDSL TestCase that allows integration with the JUnit5 framework.
@@ -24,11 +25,11 @@ public class PdslExecutable {
 
         private final TestCase pdslTest;
         private final TraceableTestRunExecutor executor;
-        private final Optional<ParseTreeVisitor<?>> visitor;
-        private final Optional<ParseTreeListener> listener;
+        private final Optional<Supplier<ParseTreeVisitor<?>>> visitor;
+        private final Optional<Supplier<ParseTreeListener>> listener;
         private final String context;
 
-        PdslExecutable(TestCase pdslTest, TraceableTestRunExecutor executor, ParseTreeVisitor<?> visitor, String context) {
+        PdslExecutable(TestCase pdslTest, TraceableTestRunExecutor executor, Supplier<ParseTreeVisitor<?>> visitor, String context) {
             this.pdslTest = pdslTest;
             this.executor = executor;
             this.visitor = Optional.of(visitor);
@@ -36,7 +37,7 @@ public class PdslExecutable {
             this.context = context;
         }
 
-        PdslExecutable(TestCase pdslTest, TraceableTestRunExecutor executor, ParseTreeListener listener, String context) {
+        PdslExecutable(TestCase pdslTest, TraceableTestRunExecutor executor, String context, Supplier<ParseTreeListener> listener) {
             this.pdslTest = pdslTest;
             this.executor = executor;
             this.visitor = Optional.empty();
@@ -52,8 +53,8 @@ public class PdslExecutable {
          * A runtime exception will be thrown if any failures are encounted by the test.
          */
         public MetadataTestRunResults execute() {
-            MetadataTestRunResults results = results = visitor.isPresent() ? executor.runTestsWithMetadata(List.of(pdslTest), visitor.get(), context)
-                    : executor.runTestsWithMetadata(List.of(pdslTest), listener.get(), context);
+            MetadataTestRunResults results = results = visitor.isPresent() ? executor.runTestsWithMetadata(List.of(pdslTest), visitor.get().get(), context)
+                    : executor.runTestsWithMetadata(List.of(pdslTest), listener.get().get(), context);
 
             if (results.failingTestTotal() > 0) {
                 Optional<Throwable> throwable = results.getTestResults().stream()
