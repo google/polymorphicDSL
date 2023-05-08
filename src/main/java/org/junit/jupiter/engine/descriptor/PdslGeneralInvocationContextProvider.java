@@ -8,10 +8,13 @@ import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.junit.jupiter.api.extension.*;
 
 import java.net.URI;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -196,10 +199,10 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
                 : DEFAULT_EXECUTOR;
         if (pdslTestParameter.getVisitor().isPresent()) {
             return new PdslExecutable(testCase, executor,
-                    pdslTestParameter.getVisitor().get().get(), parameter.getContext());
+                    (Supplier<ParseTreeVisitor<?>>) pdslTestParameter.getVisitor().get(), parameter.getContext());
         }
         return new PdslExecutable(testCase, executor,
-                pdslTestParameter.getListener().get().get(), parameter.getContext());
+               parameter.getContext(), (Supplier<ParseTreeListener>) pdslTestParameter.getListener().get());
     }
 
     /**

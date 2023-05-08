@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * A background that contains shared functionality with lower level {@code GherkinScenario} or {@GherkinRule}s.
+ * A background that contains shared functionality with lower level {@code GherkinScenario} or {@code GherkinRule}s.
  */
 public class GherkinBackground {
     private final Optional<GherkinString> title;
