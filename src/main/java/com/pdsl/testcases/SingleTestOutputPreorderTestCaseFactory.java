@@ -29,7 +29,8 @@ public class SingleTestOutputPreorderTestCaseFactory implements TestCaseFactory 
         for (TestSpecification testCaseSpecification : testCaseSpecifications) {
             List<TestCase> result = new ArrayList<>(1);
             result.add(new DefaultPdslTestCase(testCaseSpecification.getName(), List.of(new TestBodyFragment(
-                    recursivelyWalkSpecification(testCaseSpecification, new ArrayList<>())))));
+                    recursivelyWalkSpecification(testCaseSpecification, new ArrayList<>()))),
+                testCaseSpecification.getOriginalTestResource()));
             testCases.addAll(result);
         }
         return testCases;

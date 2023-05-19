@@ -1,5 +1,6 @@
 package com.pdsl.testcases;
 
+import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
 
@@ -9,6 +10,11 @@ import java.util.List;
  * @see {com.pdsl.executors.TraceableTestRunExecutor}
  */
 public interface TestCase {
+
+    /**
+     * Returns the original source file this test was created from.
+     */
+    URI getOriginalSource();
 
     /**
      * Provides the original phrases that this test case was created from.

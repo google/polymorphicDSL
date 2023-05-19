@@ -1,0 +1,553 @@
+:toc:
+:source-highlighter: prettify
+
+= Ways to Scale
+
+PDSL allows you to scale _horizontally_ across clients, browsers, devices or even
+completely different applications.
+
+It also allows you to scale _vertically_ in the same application through
+different tiers of the test pyramid:
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/documentation/client_server_test_pyramid.adoc
+endif::[]
+
+ifndef::env-github[]
+<<../client_server_test_pyramid.adoc#_client_server_test_pyramid,Test Pyramid>>
+endif::[]
+
+
+
+== Scaling Vertically through the Pyramid
+
+Suppose you have the following test that describes a customer ordering a meal at a restaurant:
+
+[source,gherkin]
+----
+Scenario: Restaurant serving 4 course meal
+
+  Given a customer
+  And the customer has a reservation
+  When the customer arrives on time
+  Then they are shown to a table
+
+  Given a waiter
+  When the waiter takes the customers order
+  And the customer orders a 4 course meal
+  Then the order is sent to the kitchen
+
+  When the kitchen begins working on the order
+  Then a kitchen porter prepares the ingredients
+  Then a station chef makes soup
+  And a station chef makes an appetizer
+  And a station chef makes an entrée
+  And a station chef a dessert
+  Then the waiter delivers the food to the customer
+
+  When the customer eats the soup
+  And the customer eats the appetizer
+  And the customer eats the entrée
+  And the customer eats the dessert
+  Then the customer is given a bill
+
+  When the customer pays the bill
+  Then the customer may leave a tip
+  And the customer leaves
+  Then the waiter cleans the table
+  And a dishwasher cleans the dishes
+----
+
+There are many actors involved in this: a customer, waiter, dishwasher and 1 or more chefs. This becomes relevant when we scale up and down the test pyramid.
+
+At the highest level all of these steps matter and are relevant. But to these actors a lot of what is going on doesn't directly involve them. For example, a customer doesn't really need to care how their meal is being prepared, just to get it, eat it and pay for it. Likewise, a chef doesn't need to care how the customer pays for their bill.
+
+This is analogous to how different types of tests are needed and where their focus shifts: unit tests only care about a particular class, API tests only care about a particular service, etc.
+
+=== Desegregated Grammars are Problematic
+Let's look at a grammmar that is desegregated:
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DesegregatedRestaurantParser.g4[DesegregatedRestaurantParser]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/DesegregatedRestaurantParser.g4[]
+----
+endif::[]
+
+Everything is in one file.
+
+This works fine for an end to end test. All the phrases are relevant.
+
+But when you try to use the grammar for Unit testing you run into a problem. Because everything is in one chunk your unit tests need to
+implement methods for the entire application!
+
+See
+ifdef::env-github[]
+the interface segregation principle in our best practices document here:
+
+https://github.com/google/polymorphicDSL/blob/main/documentation/best_practices.adoc
+endif::[]
+
+ifndef::env-github[]
+<<../best_practices.adoc#_follow_the_interface_segregation_principle, the Interface Segregation Principle>> in our best practices document for more details
+endif::[]
+
+CAUTION:: If you do not follow the Interface Segregation Principle you may be defeating the purpose of using a DSL in the first place. The maintenance
+cost will become high and you will lose the ability to coordinate across teams.
+
+
+=== Scaling to the Unit layer
+Let's break up the desegregated grammar so we can get all the rewards of the
+interface segregation principle.
+
+To start, let's focus on the one sentence that applies to the dishwasher:
+
+[source,gherkin]
+----
+  And a dishwasher cleans the dishes
+----
+
+The dishwasher only has one job in our restaurant. The source code is fairly simple and reflects that:
+ifdef::env-github[]
+Viewers on github can see the source code here:
+
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/main/java/com/pdsl/scaling/kitchen/DishWasher.java
+endif::[]
+
+ifndef::env-github[]
+[source,java]
+----
+include::../../examples/tutorial/src/main/java/com/pdsl/scaling/kitchen/DishWasher.java[]
+----
+endif::[]
+
+So we'll make a parser that contains this single bit of functionality:
+
+**RestaurantDishwasherLexer.g4**
+ifdef::env-github[]
+Viewers on github can see the source code here:
+
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantDishwasherLexer.g4
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/RestaurantDishwasherLexer.g4[]
+----
+endif::[]
+
+**RestaurantDishwasherParser.g4**
+ifdef::env-github[]
+Viewers on github can see the source code here:
+
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantParserLexer.g4
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/RestaurantDishwasherParser.g4[]
+----
+endif::[]
+
+Finally, we'll follow best practices and make a separate rule containing the start rule and syntax check:
+
+ifdef::env-github[]
+Viewers on github can see the source code here:
+
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/PdslRestaurantDishwasherParser.g4
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/PdslRestaurantDishwasherParser.g4[]
+----
+endif::[]
+
+With this done, we can write the unit tests:
+
+**Dishwasher Unit Tests**
+ifdef::env-github[]
+Viewers on github can see the source code here:
+
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/main/java/com/pdsl/scaling/kitchen/DishWasher.java
+endif::[]
+
+ifndef::env-github[]
+[source,java]
+----
+include::../../examples/tutorial/src/test/java/com/pdsl/scaling/unit/DishwasherTest.java[]
+----
+endif::[]
+
+==== Is it worth a grammar?
+The dishwasher represents an extreme case, there is only one method on one
+object to test, yet we made multiple parsers to accomodate that. What did
+we get out of it?
+
+The most important is we are able to test the Dishwasher at multiple layers
+of the test pyramid. This one sentence actually represents a unit test with
+mocked dishes, a component test with real dishes, and an API test where
+dishes touched  by chefs, customers and waiters need to be cleaned.
+
+The next is traceability. When we run our unit, component, API and every
+other form of test we know where the failures are coming from relative to
+other test suites. Because all tests are currently using the same grammar,
+there is a common place of reference to make sense of not only _where_ in
+the real world this would fail but what the consequences would be.
+
+PDSL has the ability to generate reports that take the same test and show
+which different contexts passed or failed. These traceability reports would
+be very expensive to produce manually and aren't practically producible in
+other test frameworks.
+
+The next benifit is if we create new gherkin files talking about cleaning dishes
+in different kinds of restaurants (some might use edible plates that need
+to be cleaned by throwing the remnants in the trash rather than somehow
+be made reusable) we'll be able to handle those sorts of scenarios as well.
+
+Another is if we make a new DishWasher type: for example a restaurant will
+often have a machine that sterilizes the dishes instead of a person. If we wind up with multiple kinds of dishwashers we can easily implement the
+`PdslRestaurantDishwasherParserVisitor` for all of them. If we had to
+test, say, five dishwasher types and new logic was added to the feature
+file we can be confident that _all_ of our new dishwasher types
+would be tested with the new functionality.
+
+That being said, if you know that only one test case will ever be needed then
+a grammar probably isn't worth making unless you're very serious about
+business driven development. This is often a
+great idea when you need many, constrained, one off tests, such as negative
+test cases for an API. It rarely produces useful BDD documentation to write
+out exactly what goes wrong if you pass one invalid field to a service in
+50 different ways.
+
+
+TIP:: You can run regular JUnit `@Test` cases alongside your PDSL ones.
+
+
+If you decide some functionality isn't worth a grammar, it's not a problem. You can
+add regular `@Test` methods along with your PDSL tests.
+
+See an example here:
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/scaling/api/RestaurantApiTest.java
+endif::[]
+
+ifndef::env-github[]
+link:../../examples/tutorial/src/test/java/com/pdsl/scaling/api/RestaurantApiTest.java[Restaurant API Test]
+endif::[]
+
+=== Scaling to the Component layer
+
+To make component tests for the dishwasher doesn't require much novel work.
+We simply implement a new version of the dishwasher interface and recycle
+our old dishwasher grammar:
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/scaling/component/DishwasherComponentTest.java
+endif::[]
+
+ifndef::env-github[]
+[source,java]
+----
+include::../../examples/tutorial/src/test/java/com/pdsl/scaling/component/DishwasherComponentTest.java[Dishwasher Component Test]
+----
+endif::[]
+
+=== Scaling to the API layer
+
+Our Restaurant is composed of many parts that interact with each other directly
+in many ways. We're testing each of these internal components acting together
+all at once here.
+
+These tests require the highest number of steps just due to the volume
+of objects we are testing.
+
+The main grammar is actually going to be the same as our recognizer because
+we actually are testing _all_ the steps in this case.
+
+
+ifdef::env-github[]
+Since you're on Github, view the source here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantRecognizerParser.g4[Restaurant Recognizer]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/RestaurantRecognizerParser.g4[]
+----
+endif::[]
+
+The recognizer is composed of every parser we've created to segregate the
+interfaces. All the others can be viewed link:https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example[here].
+
+The implementation is a lot more involved. Notice there are no mocks.
+In order to make sure certain methods are called when we expect them
+to we use _Interaction Verifiers_. These are just wrappers around the
+REAL things we're testing, but they can tell us whether they
+were called or other things we'd otherwise not be able to know.
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/scaling/api/RestaurantApiTest.java
+endif::[]
+
+ifndef::env-github[]
+[source,java]
+----
+include::../../examples/tutorial/src/test/java/com/pdsl/scaling/api/RestaurantApiTest.java[Restaurant API Test]
+----
+endif::[]
+
+==== Scaling to the Integration Layer
+
+In our case the integration test has a very simple implementation. The
+restaurant object has one entry point we care about. We put real instances
+of everything it depends on in it, call the method and simply check the
+output.
+
+We don't bother with integration verifiers here because we already did that
+in the API layer. It also makes sense for us to start thinking about the
+Restaurant as a black box from this perspective, so tracking the internal
+details would be misaligned on this tier.
+
+In this case we actually use the `RestaurantReservationParser` for our
+test logic because it happens to cover two methods suitable for doing
+all this work.
+
+Note that although a new parser was made for the entry and syntax rules (`PdslRestaurantReservationParser.g4`), we didn't need to create a new
+lexer because it would have been identical to `RestaurantResrvationLexer` anyway.
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/scaling/integration/RestaurantIntegrationTest.java
+endif::[]
+
+ifndef::env-github[]
+[source,java]
+----
+include::../../examples/tutorial/src/test/java/com/pdsl/scaling/integration/RestaurantIntegrationTest.java[Restaurant API Test]
+----
+endif::[]
+
+=== Scaling further up
+
+At this point we could start writing tests seeing how our code performed
+on actual hardware or in a distributed system, whether or not it worked
+when hosted on a production environment, etc. But at this point we've
+pushed the sample codebase here pretty far as it is.
+
+There is nothing stopping you from scaling through any new tier of the
+test pyramid though. The magic of having the test as a DSL is you can
+scale the test in any new context you find yourself caring about.
+
+=== Scaling productivity
+
+Now that we have a DSL and an implementation, something rather remarkable
+will happen if we add a similar scenario. We now have the potential to
+get _many_ new test cases for free (or almost free).
+
+If we add a new scenario (which we might count as a single unit of work) we
+can potentially get multiple Unit, Component, API and Integration tests out
+of it.
+
+Consider what would happen if you added the following resource:
+
+[source,gherkin]
+----
+include::../../examples/tutorial/src/test/resources/features/RestaurantScalingProductivity.feature[]
+----
+
+The only difference in this file is the sentence `When the customer orders a 3 course meal`.
+
+If we simply make sure this sentence is handled (which doesn't require any
+changes to the parser in this case) then we get several additional tests
+for a single unit of effort!
+
+If you add this file to all the test runners you will notice additional
+tests, but another interesting thing will happen as well.
+
+Remember the dishwasher parser? It only had one sentence:
+
+`And a dishwasher cleans the dishes`
+
+In both of our test files the dishwasher parser only cares about this
+one sentence _and it creates an
+identical test for both_ when it processes the two feature files. It would be a waste of time to run the same
+test twice, but PDSL has a way to prevent this from happening.
+
+In JUnit5, this is handled by the _InvocationContextProvider_ we provide the _@TestTemplate_:
+
+[source,java]
+----
+ return getInvocationContext(PdslConfigParameter.createGherkinPdslConfig(
+              List.of(
+                new PdslTestParameter.Builder(
+                  RestaurantDishwasherLexer.class,
+                  PdslRestaurantDishwasherParser.class,
+                  () -> UNIT_SINGLETON
+              )
+                  // Use any file starting with 'Restaurant'
+                  .withIncludedResources(new String[] {"Restaurant*.feature"}).build())
+          )
+----
+
+Notice the parameter `new PdslTestParameter.Builder`. It is given the resources
+_Restaurant*.feature_ (note the * in the resource matcher). This test parameter
+is considered a group of tests and any duplicates produced by it will be
+excluded from the test run.
+
+Because of this we can add additional tests in our DSL without worrying we
+will bloat our test runs with redundant tests. PDSL allows us to scale
+safely.
+
+NOTE::
+If for some reason you _did_ want to run the same test multiple times you
+would need to put it in another `PdslTestParameter`:
+
+[source,gherkin]
+----
+return getInvocationContext(PdslConfigParameter.createGherkinPdslConfig(
+              List.of(
+                new PdslTestParameter.Builder(
+                  RestaurantDishwasherLexer.class,
+                  PdslRestaurantDishwasherParser.class,
+                  () -> UNIT_SINGLETON
+              )
+                  // Use any file starting with 'Restaurant'
+                  .withIncludedResources(new String[] {"Restaurant*.feature"}).build(),
+
+                new PdslTestParameter.Builder(
+                  RestaurantDishwasherLexer.class,
+                  PdslRestaurantDishwasherParser.class,
+                  () -> UNIT_SINGLETON
+              )
+                  // Run RestaurantScalingProductivity a 2nd time
+                  .withIncludedResources(new String[] {"RestaurantScalingProductivity.feature"}).build())
+            )
+          )
+----
+
+== Scaling Horizontally to other clients, platforms and applications
+
+A grammar is abstract; there is nothing stopping you from providing
+implementations for Appium, WebDriver, Python REST or any
+other implementations you might care about.
+
+In the event your applications use the same target language (such as Java)
+then it is especially achievable if you use an *Abstract Syntax*.
+
+Consider the following visitor implementation:
+
+[source,java]
+----
+class MyCustomVisitor extends
+      AbstractParseTreeVisitor<Void> implements
+      MyCustomParserVisitor<Void> {
+      // ... constructors, class variables, etc
+      @Override
+      public Void visitSearchForProduct(SearchForProductContext ctx) {
+        driver.findElement(By.CSS_SELECTOR, ".search-box")
+          .sendKeys(ctx.PRODUCT.getText());
+        return visitChildren(ctx);
+      }
+
+      @Override
+      public Void visitAddProductToCart(AddProductToCartContext ctx) {
+        driver.findElement(By.CSS_SELECTOR, "button.add-product").click();
+        return visitChildren(ctx);
+      }
+
+      // etc
+}
+----
+
+This grammar can still scale, but because the visitor is tightly coupled to
+webdriver it will require a lot more maintenance.
+
+If we use an *Abstract Syntax* instead we can make the same visitor useful
+for other platforms as well:
+
+[source,java]
+----
+
+interface Products {
+  void searchForProduct(String productName);
+  void addProductToCart();
+  // etc
+}
+
+class MyCustomVisitor extends
+      AbstractParseTreeVisitor<Void> implements
+      MyCustomParserVisitor<Void> {
+      // ... constructors, class variables, etc
+      private final Products products;
+
+      @Override
+      public Void visitSearchForProduct(SearchForProductContext ctx) {
+        products.searchForProduct(ctx.PRODUCT.getText());
+        return visitChildren(ctx);
+      }
+
+      @Override
+      public Void visitAddProductToCart(AddProductToCartContext ctx) {
+        products.addProductToCart();
+        return visitChildren(ctx);
+      }
+      // etc
+}
+
+/** A Web implementation of Products using Selenium WebDriver. */
+class WebDriverProducts implements Products {
+
+      // constructors, variables, etc.
+      private final WebDriver driver;
+
+      @Override
+      public void searchForProduct(String productName) {
+        driver.findElement(By.CSS_SELECTOR, ".search-box")
+          .sendKeys(productName);
+      }
+
+      @Override
+      public void addProductToCart() {
+        driver.findElement(By.CSS_SELECTOR, "button.add-product").click();
+      }
+}
+
+/** An API implementation for Products using REST Assured. */
+class ApiProducts implements Products {
+     // constructors, variables, etc.
+     private final Response response;
+      @Override
+      public void searchForProduct(String productName) {
+        response = when().
+                     get("/products/{product}", productName).
+                  then().
+                     statusCode(200).
+                     body("product.name", equalTo(productName)).
+                  extract().response();
+      }
+
+      @Override
+      public void addProductToCart() {
+        when().
+                     get("/shoppingCart/add/{product}}", productName).
+                  then().
+                     statusCode(200);
+      }
+}
+----
+
+If you do this than you can use the same listener or visitor for _everybody_. While each platform still needs to provide an interface
+implementation, #the test logic itself is preserved#. You are also not
+forced to make a visitor for every platform, potentially reducing the
+maintenance effort of _n_ platforms down to a single unit of effort!
+
+You are highly encouraged to
+use abtract syntaxes to allow your DSLs to scale horizontally.

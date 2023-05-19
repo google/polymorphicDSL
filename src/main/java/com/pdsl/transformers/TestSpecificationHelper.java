@@ -146,7 +146,7 @@ public interface TestSpecificationHelper {
      */
     static void checkGrammarValidity(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, InputStream inputStream, String syntaxRuleName) {
         Method syntaxRule;
-        InputStream bufferdInputStream = new BufferedInputStream(inputStream);
+        InputStream bufferdInputStream = new BufferedInputStream(inputStream, 1024 * 1024);
         bufferdInputStream.mark(0);
         try {
              syntaxRule = parserClass.getMethod(syntaxRuleName);

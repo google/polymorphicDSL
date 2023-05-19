@@ -1,0 +1,5 @@
+lexer grammar RestaurantRecognizerLexer;
+
+import RestaurantCustomerServiceLexer, RestaurantCustomerLexer,
+ RestaurantDishwasherLexer, RestaurantKitchenLexer, RestaurantReservationLexer,
+ RestaurantPorterLexer, RestaurantWaiterLexer, RestaurantStationChefLexer;

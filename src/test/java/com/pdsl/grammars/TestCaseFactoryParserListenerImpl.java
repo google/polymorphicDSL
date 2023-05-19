@@ -8,6 +8,7 @@ import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.*;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import java.net.URISyntaxException;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.RuleContext;
@@ -25,13 +26,18 @@ import java.util.*;
 import static com.google.common.truth.Truth.assertThat;
 
 public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserListener {
+
     private static final GherkinCommonContextHelper ctxHelper = new GherkinCommonContextHelper(TestCaseFactoryParser.VOCABULARY);
     private DefaultTestSpecification.Builder builder;
     private Collection<TestCase> testCases;
     private TestCaseFactory testCaseFactory;
     @Override
     public void enterGivenAnArbitraryTestSpecification(TestCaseFactoryParser.GivenAnArbitraryTestSpecificationContext ctx) {
-        builder = new DefaultTestSpecification.Builder("stub test specification", null);
+        try {
+            builder = new DefaultTestSpecification.Builder("stub test specification", new URI("./"));
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -152,7 +158,7 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
 
                 @Override
                 public String getName() {
-                    return null;
+                    return "stubbed name";
                 }
 
                 @Override
@@ -164,7 +170,11 @@ public class TestCaseFactoryParserListenerImpl implements TestCaseFactoryParserL
 
                 @Override
                 public URI getOriginalTestResource() {
-                    return null;
+                    try {
+                        return new URI("./");
+                    } catch (URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             });
 

@@ -33,7 +33,7 @@ import java.util.stream.Stream;
 import static com.google.common.truth.Truth.assertThat;
 
 public class PdslTestTemplate {
-    
+
     @TestTemplate
     @ExtendWith(PdslExtension.class)
     public void pdslTestFrameworkResources(PdslExecutable executable) {
@@ -79,7 +79,7 @@ public class PdslTestTemplate {
                     List.of(
                             new PdslTestParameter.Builder(
                                     PdslJavaTestRunnerLexer.class, PdslJavaTestRunnerParser.class, () -> INSTANCE)
-                                    .withIncludedResources(new String[] {"JavaTestRunner.feature"})
+                                    .withIncludedResources(new String[] {"JavaTestRunner.feature", "JavaDeleteMe.feature"})
                                     .build()
                             )
                     )

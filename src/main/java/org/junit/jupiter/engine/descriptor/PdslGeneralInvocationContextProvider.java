@@ -16,6 +16,8 @@ import java.net.URI;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A InvocationContextProvider used with a JUnit5 @TestTemplate to integrate
@@ -48,8 +50,10 @@ import java.util.stream.Collectors;
  */
 public abstract class PdslGeneralInvocationContextProvider implements InvocationInterceptor, TestTemplateInvocationContextProvider {
 
+    private static final Logger logger = LoggerFactory.getLogger(PdslGeneralInvocationContextProvider.class);
     private static final ExecutorHelper executorHelper = PdslConfigurationHelper.getExecutorHelper(new JupiterDescriptorKey());
     private static final TraceableTestRunExecutor DEFAULT_EXECUTOR = new DefaultPolymorphicDslTestExecutor();
+    private final Map<List<String>, TestCase> duplicateTest = new HashMap<>();
 
     @Override
     public boolean supportsTestTemplate(ExtensionContext context) {
@@ -147,8 +151,21 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
      * specified by the PdslConfigParameter.
      */
     protected Collection<TestCase> getTestCases(PdslConfigParameter configParameter, Collection<TestSpecification> testSpecifications) {
-        return configParameter.getTestCaseFactoryProvider().get()
+        Collection<TestCase> testCases = configParameter.getTestCaseFactoryProvider().get()
                 .processTestSpecification(testSpecifications);
+        List<URI> duplicateUris = new ArrayList<>();
+        // Remove any duplicates with the same filtered test body
+        testCases.forEach(tc -> {
+                if (duplicateTest.containsKey(tc.getContextFilteredPhraseBody())) {
+                    duplicateUris.add(tc.getOriginalSource());
+                } else {
+                    duplicateTest.put(tc.getContextFilteredPhraseBody(), tc);
+                }
+            }
+        );
+        logger.info("%d duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
+        duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
+        return duplicateTest.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableSet());
     }
 
     /**

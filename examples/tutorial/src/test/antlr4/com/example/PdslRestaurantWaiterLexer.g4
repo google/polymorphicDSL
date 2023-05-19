@@ -1,0 +1,3 @@
+lexer grammar PdslRestaurantWaiterLexer;
+
+import RestaurantWaiterLexer, RestaurantCustomerServiceLexer;

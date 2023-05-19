@@ -7,6 +7,12 @@ import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.InvocationInterceptor;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
@@ -17,6 +23,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A InvocationContextProvider that is optimized for producing TestCases from
@@ -26,8 +34,9 @@ import java.util.stream.Stream;
  * do not need to be provided in any PdslConfigParameters.
  */
 public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralInvocationContextProvider {
-
+    private static final Logger logger = LoggerFactory.getLogger(PdslGherkinInvocationContextProvider.class);
     private static final TestCaseFactory TEST_CASE_FACTORY = new PreorderTestCaseFactory();
+    private final Map<List<String>, TestCase> duplicateTest = new HashMap<>();
 
     /**
      * Creates TestSpecifications using  a {@link
@@ -61,6 +70,23 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
      */
     @Override
     protected Collection<TestCase> getTestCases(PdslConfigParameter configParameter, Collection<TestSpecification> testSpecifications) {
-        return TEST_CASE_FACTORY.processTestSpecification(testSpecifications);
+        Collection<TestCase> testCases = TEST_CASE_FACTORY
+            .processTestSpecification(testSpecifications);
+        List<URI> duplicateUris = new ArrayList<>();
+        // Remove any duplicates with the same filtered test body
+        // In the case of gherkin, ignore leading and trailing whitespace on sentences
+        for (TestCase testCase : testCases) {
+            List<String> whitespaceInsensitiveSteps = testCase.getContextFilteredPhraseBody().stream()
+                .map(String::strip)
+                .collect(Collectors.toUnmodifiableList());
+            if (duplicateTest.containsKey(whitespaceInsensitiveSteps)) {
+                duplicateUris.add(testCase.getOriginalSource());
+            } else {
+                duplicateTest.put(whitespaceInsensitiveSteps, testCase);
+            }
+        }
+        logger.info("%d duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
+        duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
+        return duplicateTest.entrySet().stream().map(Entry::getValue).collect(Collectors.toUnmodifiableSet());
     }
 }

@@ -1,0 +1,8 @@
+parser grammar RestaurantReservationParser;
+
+options{tokenVocab=RestaurantReservationLexer;}
+
+givenTheCustomerHasReservation: GIVEN_THE_CUSTOMER_HAS_RESERVATION;
+whenTheCustomerArrivesOnTime: WHEN_THE_CUSTOMER_ARRIVES_ON_TIME;
+
+reservationAllRules: givenTheCustomerHasReservation | whenTheCustomerArrivesOnTime;
