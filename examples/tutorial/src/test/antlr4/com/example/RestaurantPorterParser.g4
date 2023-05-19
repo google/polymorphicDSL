@@ -1,0 +1,7 @@
+parser grammar RestaurantPorterParser;
+
+options{tokenVocab=RestaurantPorterLexer;}
+
+thenKitchenPorterPreparesTheIngredients: THEN_A_KITCHEN_PORTER_PREPARES_THE_INGREDIENTS;
+
+porterAllRules: thenKitchenPorterPreparesTheIngredients;

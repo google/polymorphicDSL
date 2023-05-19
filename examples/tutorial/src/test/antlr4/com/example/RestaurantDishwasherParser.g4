@@ -1,0 +1,5 @@
+parser grammar RestaurantDishwasherParser;
+
+thenDishwasherCleansTheDishes: THEN_A_DISHWASHER_CLEANS_THE_DISHES;
+
+dishwasherAllRules: thenDishwasherCleansTheDishes;

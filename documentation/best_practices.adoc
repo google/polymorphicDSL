@@ -1,0 +1,610 @@
+:toc:
+:source-highlighter: prettify
+
+= Interpreter Pattern Best Practices
+
+== Follow the Interface Segregation Principle
+
+=== Interface Segregation Principle? What and why?
+Apart from being a widely recognized best practice for computer programmers in general, the Interface Segregation Principle (or *ISP*) is critical in order to make grammars scalable.
+
+The ISP came about because of a common antipattern in which programmers found themselves forced to deal with methods that didn't apply to them.
+
+For example, imagine you are designing a taxonomy for Animals:
+
+[source,java]
+----
+abstract class Bird {
+
+  public void sing();
+  public void layEgg();
+  public void fly();
+  // Other bird stuff
+}
+
+----
+
+Then you extend this to another group:
+
+[source,java]
+----
+//We want to implement ducks!
+abstract class Waterfowl extends Bird {
+  public void swim();
+  public void dive();
+}
+
+class Duck extends Waterfowl {
+  // Yay! Ducks!
+  // implementation...
+}
+----
+
+Eventually we run into a common problem:
+
+[source,java]
+----
+class Penguin extends Waterfowl {
+
+  @Override
+  public void swim() {
+    // implementation, no problem!
+  }
+
+  @Override
+  public void fly() {
+    //uhhhh...penguins don't fly
+  }
+}
+----
+
+This is a classic problem with inheritance based taxonomies. Frequently a boundary case makes its way into the design; You find yourself with a taxonomy that poorly represents one of the members.
+
+Quite often the taxonomy is too _big_ to refactor. More often, the API was made public, so you _can't_ change it without breaking the code of your clients!
+
+So what to do? Here are some naive solutions:
+
+CAUTION: The example below is an antipattern!
+
+[source,java]
+----
+  @Override
+  public void fly() { /* Do nothing */ }
+----
+
+CAUTION: The example below is an antipattern!
+
+[source,java]
+----
+  @Override
+  public void fly() {
+    throw new UnsupportedOperation("Penguins don't fly");
+  }
+----
+
+Both of these cause some pretty nasty errors. Having a no-op implementation is problematic because you are reasonably expecting your `Bird` object to _do_ something. This is a problem if you need the bird to fly over a cliff, call the method expecting this to _solve_ the problem, only to later realize you just had a bunch of penguins walk off the cliff.
+
+Throwing an exception is problematic because the caller has every reason to believe this object can fly, but all it does is crash the program! This can be difficult to catch in advance; earlier testing might indicate that it works only for the application to crash seemingly at random later!
+
+[source,java]
+----
+List<Bird> birds = getTheBirds();
+for (Bird bird : birds) {
+  bird.fly(); //Oh no, there was a penguin in the collection...
+}
+----
+
+
+Finally, `Penguin` needs to have maintenance on a method it doesn't even use! It's possible you could have many such classes with useless implementations, but they _all_ need to be involved if you ever refactor it! You cannot so much as rename the method, let alone modify the API without editing _all_ of these classes even though none of them _do_ anything with it!
+
+In a worst case scenario, someone else is using your code and you will be forced to keep a broken API forever. This is especially relevant with PDSL. The entire point is to share your code.
+
+There are real world examples in the Java standard library of how damaging it
+is when the ISP is not followed:
+
+[source,java]
+----
+// The List API is foundational to Java. Lists are great!
+List<String> foo = List.of("A", "B", "C");
+
+foo.add("D"); // Crash. List.of() returns an immutable list. So why do we imply we can add things?
+foo.remove("B"); // Unsupported operation. So why do we say we can remove things?
+
+// Uhg. One of the most important data structures in the language is the cause of common bugs because we have methods exposed that we don't support.
+
+// ...and millions of lines of code in Java uses the List API, so we can't refactor it and fix the problem...
+
+// Tragic.
+
+// What can we do at this point?
+
+//Suffer and cry.
+//😭
+----
+
+These examples illustrate why you should follow the ISP (and indirectly illustrate why you should prefer composition to inheritence).
+
+When you use PDSL you are making a grammar that is intended to be _shared_. Remember, PDSL is not necessarily Business Driven Development. The primary goal is to describe
+test logic that scale to other domains.
+
+=== Following the ISP in PDSL
+
+==== Have your start rule and syntax check in its own file
+
+Think of your G4 files as interfaces (because they are used to literally generate interfaces). By breaking them into separate files it becomes simple to compose them together to support a new test context.
+
+===== **Customer Logic**
+
+ifdef::env-github[]
+Because you are viewing this document on Github please view the source code here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantCustomerParser.g4[Restaurant Customer Parser]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/RestaurantCustomerParser.g4[]
+----
+endif::[]
+
+===== **Waiter Logic**
+
+ifdef::env-github[]
+Because you are viewing this document on Github please view the source code here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantWaiterParser.g4[Restaurant Waiter Parser]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/RestaurantWaiterParser.g4[]
+----
+endif::[]
+
+===== **Customer/Waiter Interaction Logic**
+
+ifdef::env-github[]
+Because you are viewing this document on Github please view the source code here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantCustomerServiceParser.g4[Restaurant Customer Service Parser]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/RestaurantCustomerServiceParser.g4[]
+----
+endif::[]
+
+Because they are split up it becomes simple to create relevant visitors
+for customer unit tests, waiter unit tests and integration tests:
+
+===== Customer Unit Test Grammar
+
+ifdef::env-github[]
+Because you are viewing this document on Github please view the source code here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/PdslRestaurantCustomerParser.g4[Customer Unit Test Parser]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/PdslRestaurantCustomerParser.g4[]
+----
+endif::[]
+
+
+===== Waiter Unit Test Grammar
+
+ifdef::env-github[]
+Because you are viewing this document on Github please view the source code here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/PdslRestaurantWaiterParser.g4[Waiter Unit Test Parser]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/PdslRestaurantWaiterParser.g4[]
+----
+endif::[]
+
+
+===== Integration Test Grammar (also general Recognizer)
+
+ifdef::env-github[]
+Because you are viewing this document on Github please view the source code here:
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/RestaurantRecognizerParser.g4[Restaurant Recognizer]
+endif::[]
+
+ifndef::env-github[]
+[source,antlrv4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/RestaurantRecognizerParser.g4[]
+----
+endif::[]
+
+
+
+Splitting your grammars like this makes it easier to maintain as things change. For example, because each parser has an `*AllRules`, it becomes easy to remove specific rules in one parser without having to modify the others. It is also possible to add or remove entire parsers through imports and modifying _polymorphicDslAllRules_.
+
+==== Split your grammars just like you would an interface when necessary
+
+See the <<tutorials/scaling_across_the_test_pyramid.adoc#, scaling tutorial>>
+
+
+
+== Use an Abstract Syntax in your listener/visitor implementations
+
+Make your listeners and visitors use data types that are 100% abstract (or close to it).
+
+If you use concrete implementations you will be unable to scale your tests
+across applications or different tiers of the test pyramid.
+
+This below listener doesn't save much work. It makes the test framework
+much weaker:
+
+[source,java]
+----
+class MyListener implements MyParserListener {
+
+  // Implementation logic in the application prevents
+  // the listener from being used for non-web applications.
+  private final WebDriver driver;
+
+  // constructor, other variables, etc
+
+  @Override
+  public void enterSignIn(MyParserListener.SignInContext ctx) {
+    webDriver.findElement(By.CSS_SELECTOR("#log-in")).click();
+    webDriver.findElement(By.CSS_SELECTOR("#username")).sendKeys(ctx.USERNAME.getText() + Keys.ENTER);
+    //etc
+  }
+
+
+}
+----
+
+Contrast that to this other listener which is made completely abstract.
+It is _much_ more capable:
+
+[source,java]
+----
+
+interface Customer {
+  void customerSignsIn();
+  // etc
+}
+
+class MyListener implements MyParserListener {
+
+    // Customer as an interface keeps it 100% abstract and extensible to other domains
+  private final Customer customer;
+
+  // constructor, other variables, etc
+
+  @Override
+  public void enterSignIn(MyParserListener.SignInContext ctx) {
+    customer.customerSignsIn(ctx.USERNAME.getText());
+  }
+}
+----
+
+Because the listener is built on top of interfaces the implementation can be
+swapped out with little or no code changes. The `enterSignIn` method can
+now be used by webdriver to click links and fill out web elements for the web. It can also be used to generate a JWT for API tests. It can also be used for
+unit tests for a variety of classes that might be used for sign in.
+
+The best data types to use in the listeners and visitors are:
+
+. Interface Definition Languages such as protocol buffers
+(Google protocol buffers are useful for cross language enums and DTOs)
+. Interfaces
+
+Abstract classes may also be used, but they can be problematic because they can make assumptions about state that don't apply well to other applications.
+
+== Use a language agnostic grammar
+
+A DSL can be implemented in lots of ways. But if your DSL can only be interpreted by a single language then you will be unable to scale your tests the moment the context of your application changes.
+
+
+CAUTION:: The below example is considered an antipattern in PDSL!
+
+[source,java]
+----
+// Using vanilla Java as a DSL works, but the moment we need to test something outside of Java
+// (such as the front end which may be in javascript) we lose the ability to
+// scale the test cases
+
+interface CommonTestDSL {
+  void addProductToShoppingCart(Product product);
+  void  checkProductPriceMatches(Product product, double amount);
+  // etc...
+}
+
+
+class MyTestClass {
+
+    // Make the below test available to everyone as a DSL.
+    // Each team provides an implementation via dependency injection
+    private Injector getDependencyInjector() { return Guice.createInjector(getGuiceModule())}
+    protected Module getGuiceModule() { /* implementation that can be overridden by child class */}
+
+    @Test
+    public void sharedTest() {
+        CommonTestDsl dsl = getDependencyInjector().getInstance(CommonTestDsl.class);
+        Product frobinator = new Product("frobinator", 10.99D);
+        dsl.addProductToShoppingCart(frobinator);
+        // Do assertions in interface
+        dsl.checkProductPriceMatches(frobinator, 10.99D);
+        // etc...
+    }
+}
+----
+
+**Best Practice**
+
+[source,gherkin]
+----
+# Gherkin can be understood by all major general purpose programming languages
+# If the application gets ported (which is more common than you think)
+# you still will be able to preserve your test cases
+
+Given the product "widget" is added to the shopping cart
+Then the cost of the "widet" in the cart is $25.99
+----
+
+== Use grammar that is Platform/Client agnostic
+
+PDSL is designed to follow the *Interface Segregation Principle* in a scalable way. This means you won't be forced to implement code for methods that you don't care about.
+
+However, you should be careful to write sentences that don't talk about specific applications unless absolutely necessary. Doing so makes it difficult to adapt your DSL to other contexts (which is the entire point of the interpreter pattern).
+
+This is one of the most common problems that pop up when people start following the interpreter pattern for the first time.
+
+Suppose you have an e-commerce website and you've made a DSL like this:
+
+CAUTION: The below example is an antipattern!
+
+[source,gherkin]
+----
+Scenario: A customer buys a product
+
+Given a customer
+And the customer goes to the sign in page
+And the customer clicks the link to sign in
+Then the customer is redirected to the store
+When the customer selects the "Frobinator" product
+Then the "Frobinator" product is in the customers shopping cart
+----
+
+The problem with the test above is that it is heavily biased toward the web application.
+
+Suppose you are now writing API tests and sharing the DSL (which might have dozens or hundreds of similar tests you can leverage if you just provide an implementation for a few sentences).
+
+This is how the API tester might be thinking about the problem:
+
+CAUTION: The below example is an antipattern!
+
+[source,gherkin]
+----
+Given a customer
+When the available products are retrieved by calling "/products"
+Then a "Frobinator" product is in the JSON response
+When the "Frobinator" is added to the shopping cart request
+And the "/shoppingCart" API is called
+Then "/shoppingCart" contains the "Frobinator" product
+----
+
+These examples both suffer from the problem that they focus too much on _how_ the test is being conducted and not _what_ the test is accomplishing.
+
+The API version is _clearly_ difficult to apply to the web and the previous web example talks about navigation and clicking that doesn't make sense to the API.
+
+Even though PDSL filters out useless phrases, consider the remaining phrases that the API tester would be forced to work with:
+
+CAUTION:: The below is an example of how poorly written Gherkin makes it difficult to scale test DSLs
+[source,gherkin]
+----
+# This grammar translates very poorly to API contexts. Do not write like this!
+
+Scenario: A customer buys a product
+
+Given a customer # OK, so far so good
+....
+And the customer clicks the link to sign in
+#Umm, I guess I'll make a JWT token for auth here, but I'm not...clicking anything
+
+Then the customer is redirected to the store
+#Okay, no web pages to redirect with the API, but I guess I'll call the /products endpoint here?
+...
+----
+
+
+Not only does this fail to scale, but if we wanted our DSL to double as living documentation it will be of questionable value to leadership who are more likely to care about *business requirements* rather than clicks, redirects and specific API endpoints.
+
+One solution is to #write your DSL to a requirement, not a platform.#
+
+
+
+**Best Practice**
+
+[source,gherkin]
+----
+Given a customer
+And the customer has authenticated
+When the customer views available products to purchase
+And a customer intends to purchase the "Frobinator" product
+Then the "Frobinator" product is in the customers shopping cart
+----
+
+The above example is applicable to API, Integration, System or other tests without while still being information dense about the feature requirement itself.
+
+We make no mention of webpages, API calls or concrete technologies that don't matter to the requirement itself.
+
+WARNING: Sometimes it might be appropriate to put concrete information about a platform in a test. But this should be actively avoided when possible and minimized when unavoidable. A DSL can acquire a lot of technical debt that causes multiple teams to feel frustrated as they implement tests using a poorly written grammar that has extremely narrow views.
+
+== Use the Base Listener and Visitors cautiously
+Prefer to use the generated ANTLR interfaces instead.
+
+The base visitors are tempting to use because they provide a default, no-op
+implementation of all methods. The allure comes when you have many methods that
+are of no value to your test logic.
+
+However, there are some downsides to doing this:
+
+. The output of the test executes and implies that work is being done on _every_ step, even though this is untrue. This makes it difficult to find out where the test is actually doing work.
+
+**Output of a test run with a base visitor**
+
+CAUTION:: If you use a base visitor or listener poorly, you could wind up with undiscernable output. The below is output from a unit test that only did work on the Waiter object, yet it shows everything else...
+[source,bash]
+----
+21:09:52.154 [main] INFO com.pdsl.executors.DefaultPolymorphicDslTestExecutor - Running tests...
+file:///usr/local/google/home/nboyer/repos/polymorphicDSL/examples/tutorial/./src/test/resources/features/Restaurant.feature0
+#language:en
+Feature: Restaurant
+
+  Scenario: Restaurant serving 4 course meal
+
+    Given a customer
+    And the customer has a reservation
+    When the customer arrives on time
+    Given a waiter
+    Then they are shown to a table
+
+    When the customer orders a 4 course meal
+    And the waiter takes the customers order
+    Then the order is sent to the kitchen
+    When the kitchen begins working on the order
+    Then a kitchen porter prepares the ingredients
+    Then the station chefs prepare the soup
+    And the station chefs prepare an appetizer
+    And the station chefs prepare an entrée
+    And the station chefs prepare a dessert
+    Then the waiter delivers the food to the customer
+
+    When the customer eats the soup
+    And the customer eats the appetizer
+    And the customer eats the entrée
+    And the customer eats the dessert
+    Then the customer is given a bill
+
+    When the customer pays the bill
+    Then the customer may leave a tip
+    And the customer leaves
+    Then the waiter cleans the table
+    And a dishwasher cleans the dishes
+
+21:09:52.169 [main] INFO com.pdsl.executors.DefaultPolymorphicDslTestExecutor - All phrases successfully executed!
+
+----
+
+**Output of a test run with visitor following ISP**
+
+TIP:: Following the interface segregation principle produces better output. The below ran from a file with many sentences, but only the ones relevant to the test execution made it into the output.
+[source,gherkin]
+----
+19:21:46.961 [main] INFO com.pdsl.executors.DefaultPolymorphicDslTestExecutor - Running tests...
+file:///usr/local/google/home/nboyer/repos/polymorphicDSL/examples/tutorial/./src/test/resources/features/Restaurant.feature0
+#language:en
+Feature: Restaurant
+
+  Scenario: Restaurant serving 4 course meal
+
+    Given a waiter
+    Then they are shown to a table
+
+
+    And the waiter takes the customers order
+    Then the waiter delivers the food to the customer
+
+
+    Then the customer is given a bill
+    And the customer leaves
+    Then the waiter cleans the table
+
+19:21:47.030 [main] INFO com.pdsl.executors.DefaultPolymorphicDslTestExecutor - All phrases successfully executed!
+
+----
+[start=2]
+. When new sentences relevant to customer are added the test silently gets an empty no-op method. This makes it easy to forget to add unit tests for the new functionality and produce #false positives#.
+
+. When Test teams or the number of applications under test become large you
+won't be able to coordinate effectively. When one team completes work the
+information could be siloed.
+
+NOTE:: You might add a new sentence that breaks a different teams tests.
+But at least the compiler made them aware that the new feature exists rather than leaving them ignorant of the
+new changes entirely. As teams experience turnover and grow it might be
+the only thing drawing attention to it at all. That being said, the other
+team doesn't _have_ to implement all the new stuff. Version control tools, tagging and other techniques can be used to postpone the implementation to
+a more suitable time while the work is triaged and put in a work backlog.
+
+If you follow the <<Follow the Interface Segregation Principle>> you are much less likely to have nonsense methods to implement.
+
+== Beware of leaky abstractions in the DSL
+
+A DSL can easily be written to expose underlying implementation information.
+But the whole purpose of using PDSL is to have an abstraction to get away from
+the implementation details in the first place.
+
+Compare these two DSLs:
+
+[source,gherkin]
+----
+Given a customer adds a "Frobinator" to their shopping cart
+And customer checks out
+----
+
+[source,gherkin]
+----
+Given the webdriver clicks webelement "button[label='Frobinator']"
+And the webdriver clicks webelement ".highlighted"
+----
+
+Even if they both accomplish the same thing, the latter is starkly limited.
+It is strongly coupled to webdriver. If the underlying library is ever swapped for a replacement it will become completely useless. It also
+cannot be used for API, unit or system tests because those methodologies
+usually use different tools. It is almost certainly better to use the former.
+
+But there are a lot of grey areas when trying to decide how abstract to make
+your DSLs. Exposing _some_ details may allow you to do more complicated things
+without having to write any source code. But too much exposure narrows
+the scope and power of your DSL.
+
+Here is a common boundary condition:
+
+_Grammar A_
+[source,gherkin]
+----
+Given a platinum member customer has signed in
+----
+
+_Grammar B_
+[source,gherkin]
+----
+Given customer "cool.person@somedomain.com" has signed in
+----
+
+The first is preferrable from a BDD perspective because it communicates a business requirement explicitly. The second requires internal knowledge to figure that out.
+
+However, the second can be modified slightly to solve this problem:
+
+[source,gherkin]
+----
+Given customer "cool.person@somedomain.com" has signed in
+And the customer is a platinum member
+----
+
+This creates a compromise of sorts: users of the DSL can specify email addresses or other parameters while still making meaningful and understandable DSLs. The customers email address is exposed [so you are forced to explicitly provide one], but overall it can be considered a reasonable tradeoff.
+
+If you like, you could actually implement both sentences and prefer the less-leaky sentence unless special configuration is needed.
+
+Overall the best metric to know if your grammar is too leaky is to see
+how well it works when you have a different platform, client, application or tier of the test pyramid
+use it. If it's problematic the grammar is probably worth
+revisiting.
+
+
+
+
+
+

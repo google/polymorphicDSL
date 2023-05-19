@@ -75,8 +75,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         Set<List<String>> previouslyExecutedTests = new HashSet<>();
         final byte[] RESET =  AnsiTerminalColorHelper.RESET.getBytes(charset);
         for (TestCase testCase : testCases) {
+
             notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(charset));
-            notifyStreams(testCase.getTestTitle().getBytes(charset));
+            notifyStreams(String.format( "%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle()).getBytes(charset));
             notifyStreams(String.format("%n").getBytes(charset));
             notifyStreams(RESET);
             Phrase activePhrase = null;

@@ -30,8 +30,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
         Collection<TestCase> testCases = new ArrayList<>(testSpecifications.size()); // Will likely need to be resized regardless
         for (TestSpecification testSpecification : testSpecifications) {
-            testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, new ArrayList<>(), Optional.empty(),
-                    testSpecification.getName(), new Accumulator()));
+            testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, new ArrayList<>(), Optional.empty(), new Accumulator()));
         }
         return testCases;
     }
@@ -39,7 +38,6 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
     private List<TestCase> recursiveWalkAndCreateOnLeaf(TestSpecification testSpecification,
                                                         List<TestBodyFragment> parentTestBodyFragments,
                                                         Optional<InputStream> parentMetaData,
-                                                        String rootId,
                                                         Accumulator accumulator) {
         List<TestBodyFragment> childTestBodyFragments = new ArrayList<>(parentTestBodyFragments);
         Optional<InputStream> childMetaData = testSpecification.getMetaData();
@@ -57,11 +55,11 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         // Add phrases in child node if present
         if (testSpecification.nestedTestSpecifications().isPresent()) {
             for (TestSpecification childTestSpecification : testSpecification.nestedTestSpecifications().get()) {
-                testCases.addAll(recursiveWalkAndCreateOnLeaf(childTestSpecification, childTestBodyFragments, childMetaData, rootId, accumulator));
+                testCases.addAll(recursiveWalkAndCreateOnLeaf(childTestSpecification, childTestBodyFragments, childMetaData, accumulator));
             }
             return testCases;
         } else {
-            DefaultPdslTestCase testCase = new DefaultPdslTestCase(rootId + accumulator.nextInt(), childTestBodyFragments);
+            DefaultPdslTestCase testCase = new DefaultPdslTestCase(testSpecification.getName(), childTestBodyFragments, testSpecification.getOriginalTestResource());
             List<TestCase> singleTestCase = new ArrayList<>(1);
             singleTestCase.add(testCase);
             return singleTestCase;

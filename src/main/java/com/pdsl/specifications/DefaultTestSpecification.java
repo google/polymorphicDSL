@@ -56,7 +56,7 @@ public final class DefaultTestSpecification implements TestSpecification {
         private final URI originalTestResource;
 
         public Builder(String id, URI originalTestResource) {
-            Preconditions.checkArgument(id != null && !id.isEmpty(), "Test Specification ID cannot be mepty or null!");
+            Preconditions.checkArgument(id != null && !id.isEmpty(), "Test Specification ID cannot be empty or null!");
             this.id = id;
             this.originalTestResource = originalTestResource;
         }
@@ -64,9 +64,20 @@ public final class DefaultTestSpecification implements TestSpecification {
         public DefaultTestSpecification build() {
             Preconditions.checkArgument(!phrases.isEmpty() || !childItems.isEmpty(), "Phrases cannot be empty if you are not providing childItems!\n"
                     + "Use the other constructor if you have childItems or provide phrases");
+            Preconditions.checkNotNull(id);
+            Preconditions.checkNotNull(originalTestResource);
+            // Make sure all child specifications meet criteria
+            childItems.ifPresent(childList -> childList.stream().forEach(this::validateTestSpecification));
             return new DefaultTestSpecification(this);
         }
 
+        private void validateTestSpecification(TestSpecification specification) {
+            Preconditions.checkArgument(!phrases.isEmpty() || !childItems.isEmpty(), "Phrases cannot be empty if you are not providing childItems!\n"
+                + "Use the other constructor if you have childItems or provide phrases");
+            Preconditions.checkNotNull(id);
+            Preconditions.checkNotNull(originalTestResource);
+            specification.nestedTestSpecifications().ifPresent(childSpecs -> childSpecs.stream().forEach(this::validateTestSpecification));
+        }
         public Builder withTestPhrases(List<FilteredPhrase> phrases) {
             Preconditions.checkArgument(!phrases.isEmpty(), "Phrases cannot be empty!");
             this.phrases = Optional.of(phrases);
