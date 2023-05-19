@@ -4,6 +4,7 @@ import com.pdsl.scaling.ingredients.Ingredient;
 import com.pdsl.scaling.ingredients.PreparationType;
 import java.util.Set;
 
+/** A chef that specializes in sauces. */
 public class SauceChef extends AbstractChef{
 
   @Override

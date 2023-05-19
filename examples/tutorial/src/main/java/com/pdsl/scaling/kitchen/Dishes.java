@@ -1,5 +1,6 @@
 package com.pdsl.scaling.kitchen;
 
+/** Generic utinsils that are used to serve food. */
 public class Dishes {
   private boolean isDirty = true;
 

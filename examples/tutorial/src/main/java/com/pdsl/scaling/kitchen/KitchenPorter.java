@@ -5,6 +5,7 @@ import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.util.Collection;
 import java.util.Set;
 
+/** A kitchen staff member that prepared raw ingredients for chefs to use. */
 public class KitchenPorter {
 
   public static Collection<Ingredient> getIngredientsForRepast(RepastRecipeType repastRecipeType) {

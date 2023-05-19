@@ -5,6 +5,7 @@ import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
 
+/** A famous french appetizer made from snails. */
 public class Escargot extends AbstractRepast {
 
   public Escargot(int quality, Dishes dishes) {

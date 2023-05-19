@@ -4,7 +4,7 @@ import com.pdsl.scaling.MealType;
 import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
-
+/** A famous french entree made with vegetables. */
 public class Ratatouille extends AbstractRepast {
 
   public Ratatouille(int quality, Dishes dishes) {

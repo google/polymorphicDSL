@@ -1,5 +1,6 @@
 package com.pdsl.scaling.reservation;
 
+/** A timeframe that represents a segment of a restaurants operation hours. */
 public enum OperatingHours {
 
   PM12,

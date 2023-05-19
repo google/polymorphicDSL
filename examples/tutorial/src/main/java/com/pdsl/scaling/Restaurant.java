@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 
+/** A provider of meal related services to paying customers. */
 public class Restaurant {
 
   private final ReservationService reservationService;
@@ -36,6 +37,11 @@ public class Restaurant {
     this.waiterTips = waiterTips;
   }
 
+  /**
+   * Feeds a customer.
+   * @param customer the customer to feed
+   * @return the customers satisfaction
+   */
   public int serveCustomer(Customer customer) {
     Optional<Table> tableOptional = reservationService.receiveCustomer(timeService.getTime(), customer);
     if (tableOptional.isEmpty()) {

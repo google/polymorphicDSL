@@ -5,6 +5,7 @@ import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
 
+/** A famous french dessert made from almond flour. */
 public class Macaron extends AbstractRepast {
 
   public Macaron(int quality, Dishes dishes) {

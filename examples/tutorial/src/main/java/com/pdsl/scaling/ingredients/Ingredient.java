@@ -1,5 +1,6 @@
  package com.pdsl.scaling.ingredients;
 
+/** Ingredients used to prepare repasts in the kitchen. */
 public enum Ingredient {
 
   BOILED_POTATOES("Boiled Potatoes"),

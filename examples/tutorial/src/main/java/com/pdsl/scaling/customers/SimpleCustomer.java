@@ -14,6 +14,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A standard customer.
+ *
+ * This customer will reject bills that do not match menu prices. They will leave tips if their
+ * meals are well prepared and order the first thing they notice off the menu.
+ *
+ * They will also only accept meals that match what they ordered.
+ */
+
 public class SimpleCustomer implements Customer {
 
   private Optional<Table> table = Optional.empty();

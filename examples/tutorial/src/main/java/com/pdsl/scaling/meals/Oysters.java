@@ -5,6 +5,7 @@ import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
 
+/** A famous french appetizer made from oysters. */
 public class Oysters extends AbstractRepast {
 
   public Oysters(int quality, Dishes dishes) {

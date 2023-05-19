@@ -5,6 +5,7 @@ import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
 
+/** A famous french soup made from leeks and potatoes. */
 public class LeekAndPotatoSoup extends AbstractRepast {
 
   public LeekAndPotatoSoup(int quality, Dishes dishes) {

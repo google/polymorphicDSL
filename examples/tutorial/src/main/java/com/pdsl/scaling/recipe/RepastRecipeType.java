@@ -6,6 +6,9 @@ import com.pdsl.scaling.meals.Eclair;
 import com.pdsl.scaling.meals.LeekAndPotatoSoup;
 import java.util.Set;
 
+/**
+ * Recipes that can be used to prepare meals.
+ */
 public enum RepastRecipeType {
   COLD_CUTS,
   ECLAIR,
@@ -16,6 +19,7 @@ public enum RepastRecipeType {
   OYSTERS,
   RATATOUILLE;
 
+  /** Provides the type of meal that this recipe is. */
   public MealType getMealType() {
     switch (this) {
       case COLD_CUTS:

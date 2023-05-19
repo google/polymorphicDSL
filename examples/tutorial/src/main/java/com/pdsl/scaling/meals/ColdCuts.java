@@ -5,6 +5,7 @@ import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
 
+/** A famous French Entree that is a meat dish. */
 public class ColdCuts extends AbstractRepast {
 
   public ColdCuts(int quality, Dishes dishes) {

@@ -5,6 +5,12 @@ import com.pdsl.scaling.ingredients.PreparationType;
 import java.util.Collection;
 import java.util.Set;
 
+/**
+ * A general station chef that produces high quality output if they specialize in preparing certain ingredients.
+ *
+ * If the chef does not specialize in the ingredient they will still prepare the ingredients, but
+ * with mediocre quality.
+ */
 public abstract class AbstractChef implements StationChef {
 
   @Override

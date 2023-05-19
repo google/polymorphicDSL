@@ -14,6 +14,7 @@ import com.pdsl.scaling.kitchen.chefs.RoastChef;
 import com.pdsl.scaling.kitchen.chefs.SauceChef;
 import com.pdsl.scaling.kitchen.chefs.VegetableChef;
 
+/** A Kitchen that has the appropriate expert assigned to each brigade station. */
 public class FullKitchen extends Kitchen {
 
   private static final StationChef saucier = new SauceChef();

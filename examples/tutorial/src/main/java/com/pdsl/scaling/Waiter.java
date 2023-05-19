@@ -15,6 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A customer-service oriented staff member who interacts with customers.
+ */
 public class Waiter {
 
   private BigDecimal tips = new BigDecimal(0);
@@ -35,36 +38,71 @@ public class Waiter {
     this.dischargedCustomers = dischargedCustomers;
   }
 
+  /**
+   * Get all the customers that the waiter is currently serving.
+   * @return all customers being serviced by the waiter
+   */
   public Collection<Customer> getCustomersReceivingService() {
     Collection<Customer> customers =  new ArrayList<>(customerOrders.keySet());
     customers.removeAll(dischargedCustomers);
     return customers;
   }
+
+  /**
+   * Seats a customer at the provided table.
+   * @param customer the customer to seat
+   * @param table the table to seat the customer at
+   */
   public void showCustomerToTable(Customer customer, Table table) {
     assertThat(table.isCustomerCurrentlySeated()).isTrue();
   }
 
+  /**
+   * Retrieves an order from the customer to deliver to the kitchen.
+   * @param customer the customer placing the order
+   * @return the order placed by the customer, or a possible recommendation by the waiter
+   */
   public Order takeCustomerOrder(Customer customer) {
     Order order = customer.placeOrder(menu);
     customerOrders.put(customer, order);
     return order;
   }
 
+  /**
+   * Delivers the customers prepared meals to the customer.
+   * @param customer the customer to deliver the meals to
+   * @param repasts the meals to give the customer
+   * @return true if the customer accepts the order, false if they reject it
+   */
   public boolean deliverFoodToCustomer(Customer customer, Collection<Repast> repasts) {
     deliveredMeals.put(customer, new ArrayList<>(repasts));
     return customer.receivePreparedMeals(repasts);
   }
 
+  /**
+   * Delivers the bill to a customer
+   * @param customer the customer who is receiving the bill
+   * @return true if the customer accepts the bill, false if they don't
+   */
   public BigDecimal giveCustomerBill(Customer customer) {
     return deliveredMeals.get(customer).stream()
         .map(Repast::cost)
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
+  /**
+   * Relieves the waiter from having to serve the customer further.
+   * @param customer
+   */
   public void customerLeaves(Customer customer) {
     dischargedCustomers.add(customer);
   }
 
+  /**
+   * Retrieves the dirty dishes from a customers table.
+   * @param customer the customer whose table needs to be cleaned
+   * @return the dishes retrieved from the table
+   */
   public Collection<Dishes> clearTable(Customer customer) {
     customerOrders.get(customer).getTable().clearCustomersTable(customer);
     Collection<Dishes> dirtyDishes = deliveredMeals.get(customer).stream()

@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Stack;
 
+/** A meal preparation area that processes orders and turns them into meals. */
 public abstract class Kitchen {
 
   private final Stack<Dishes> availableDishes = initDishes();
@@ -21,22 +22,32 @@ public abstract class Kitchen {
       }
     return newDishes;
   }
+  /** Provides the highest ranking member of the brigade kitchen who makes sauces. */
   public abstract StationChef getSaucier();
+  /** Provides a station chef that processes most types of meat. */
   public abstract StationChef getBoucher();
+  /** Provides the chef that will cook fish. */
   public abstract StationChef getPoissonnier();
+  /** Provides a chef that will roast ingredients. */
   public abstract StationChef getRotisseur();
+  /** Provides a chef that will fry ingredients. */
   public abstract StationChef getFriturier();
+  /** Provides a chef that will grill ingredients. */
   public abstract StationChef getGrillardin();
+  /** Provides a chef that prepares pantry ingredients. */
   public abstract StationChef getGardeManger();
+  /** Provides a chef that creates pastries and deserts. */
   public abstract StationChef getPattisier();
+  /** Provides a relief cook that can be used when other chefs are occupied. */
   public abstract StationChef getChefDeTournant();
+  /** Provides a chef that cooks vegetables and soups. */
   public abstract StationChef getEntremetier();
+  /** Provides a porter that will prepare raw ingredients for the station chefs. */
   public abstract KitchenPorter getPorter();
+  /** Provides a dishwasher for cleaning dirty kitchen utinsils. */
   public abstract DishWasher getEscuelerie();
 
-
-
-
+  /** Create a collection of repasts to serve a customer from an order. */
   public Collection<Repast> prepareMeal(Order order) {
 
     List<Repast> repasts = new ArrayList<>(order.getRepasts().size());
@@ -75,6 +86,7 @@ public abstract class Kitchen {
     return repasts;
   }
 
+  /** Clean dirty dishes in the kitchen. */
   public void washDishes(Collection<Dishes> dishes) {
     dishes.stream().forEach(d -> {
       getEscuelerie().washDishes(d);

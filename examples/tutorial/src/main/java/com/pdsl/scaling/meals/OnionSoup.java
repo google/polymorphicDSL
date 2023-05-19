@@ -5,6 +5,7 @@ import com.pdsl.scaling.kitchen.Dishes;
 import com.pdsl.scaling.recipe.RepastRecipeType;
 import java.math.BigDecimal;
 
+/** A famous french soup made from onions. */
 public class OnionSoup extends AbstractRepast {
 
   public OnionSoup(int quality, Dishes dishes) {
