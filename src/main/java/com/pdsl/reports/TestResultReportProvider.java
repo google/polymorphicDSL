@@ -10,5 +10,10 @@ import java.util.Optional;
  */
 public interface TestResultReportProvider {
 
+    /**
+     * Returns the results of a test run.
+     *
+     * @return the results of a PDSL test run
+     */
     Optional<TestRunResults> getResults();
 }

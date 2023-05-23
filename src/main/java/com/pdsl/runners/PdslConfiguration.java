@@ -13,13 +13,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * A configuration to be used by a PDSL test runner, such as {@link:com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner}.
+ * A configuration to be used by a PDSL test runner, such as {@link com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner PdslJUnit4ConfigurableRunner}.
  *
- * If a <b>resourceRoot</b> is specified it will be prepended to all <i>includes</i> and </i>excludes</i> in every underlying
- * @PdslTest.
+ * If a <b>resourceRoot</b> is specified it will be prepended to all <i>includes</i> and <i>excludes</i> in every underlying
+ * ＠PdslTest.
  *
  * If <b>dslRecognizerParser</b> and <b>dslRecognizerLexer</b> are specified they will be used as recognizers on all
- * @PdslTest grammars <i>unless</i> a @RecognizedBy annotation is also specified on the same method as the @PdslTest.
+ * ＠PdslTest grammars <i>unless</i> a @RecognizedBy annotation is also specified on the same method as the ＠PdslTest.
  *
  * <b>specificationFactoryProvider</b> is a required field that tells the framework how to convert to divide the
  * input into executable phrases.

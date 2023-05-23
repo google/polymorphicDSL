@@ -59,7 +59,7 @@ public class Table {
 
   /**
    * Opens the tables schedule to be used by a different customer.
-   *
+   * <p>
    * If a customer has multiple appointments only the most earliest will be removed.
    */
   public void clearCustomersTable(Customer customer) {

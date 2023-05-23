@@ -13,5 +13,12 @@ import java.net.URL;
  */
 public interface TacticalReportGenerator {
 
+    /**
+     * Creates report with homogenous metrics suitable for a specific team or application.
+     *
+     * @param contextToTestResults the data to generate a report with
+     * @return the URL of the generated report
+     * @throws IOException  if there is an issue writing the report
+     */
     URL generateTacticalReport(TacticalReportData contextToTestResults) throws IOException;
 }

@@ -2,10 +2,17 @@ package com.pdsl.gherkin.models;
 
 import java.util.Optional;
 
+/**
+ * A DTO representing a docstring in a gherkin step.
+ */
 public class GherkinDocString {
 
     private final GherkinString rawString;
 
+    /**
+     * Creates a docstring DTO.
+     * @param rawString the string literal of the docstring
+     */
     public GherkinDocString(String rawString) {
         this.rawString = new GherkinString(rawString);
     }
@@ -23,8 +30,8 @@ public class GherkinDocString {
      * Finds the content type from the text immediately following the first quote block.
      * <p>
      * Docstrings can have a "type" (e.g, xml, json, etc) which provide meta information about the content
-     * This information exists on the first line of the docdocstring by convention in the format:
-     * """<content type>
+     * This information exists on the first line of the docstring by convention in the format:
+     * """&lt;content type&gt;
      * ....
      * ....
      * """"

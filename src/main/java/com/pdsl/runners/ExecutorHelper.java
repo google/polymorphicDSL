@@ -23,6 +23,19 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.util.*;
 
+/**
+ * A helper for performing common operations with the PDSL framework to assist with integrating
+ * in other test frameworks, such as JUnit.
+ *
+ * The basic flow of a PDSL application is largely language agnostic:
+ * - Source files are located and read
+ * - They are turned into specifications
+ * - Relevant phrases are determined and filtered
+ * - Those in turn are turned into test cases
+ * - Finally they are executed
+ *
+ * The helper creates a common workflow for performing some of these actions.
+ */
 public final class ExecutorHelper {
     private static final String TEST_CASEFACTORY_PROVIDER = "testCaseFactoryProvider";
     private static final String SPECIFICATION_FACTORY_PROVIDER = "specificationFactoryProvider";
@@ -46,20 +59,40 @@ public final class ExecutorHelper {
         private final Optional<ParseTreeVisitor<?>> visitor;
         private final Optional<ParseTreeListener> listener;
 
+        /**
+         * Creates a tree traversal using a visitor.
+         * @param visitor to use
+         */
         public ParseTreeTraversal(ParseTreeVisitor<?> visitor) {
             this.visitor = Optional.of(visitor);
             this.listener = Optional.empty();
         }
 
+        /**
+         * Creates a tree traversal using a listener
+         * @param listener to use
+         */
         public ParseTreeTraversal(ParseTreeListener listener) {
             this.visitor = Optional.empty();
             this.listener = Optional.of(listener);
         }
 
+        /**
+         * Retrieves the listener if one was created.
+         *
+         * If there is no listener than a visitor was created instead.
+         * @return Optional ANTLR4 visitor for reading test DSLs
+         */
         public Optional<ParseTreeListener> getListener() {
             return  listener;
         }
 
+        /**
+         * Retrieves the visitor if one was created.
+         *
+         * If there is no visitor than a listener was created instead.
+         * @return Optional ANTLR4 visitor for reading test DSLs
+         */
         public Optional<ParseTreeVisitor<?>> getVisitor() {
             return visitor;
         }
@@ -72,7 +105,7 @@ public final class ExecutorHelper {
      *
      * If neither are provided a runtime exception will be thrown.
      *
-     * @param pdslTest
+     * @param pdslTest the pdsl test annotation on the class
      * @return a ParseTreeTraversal containing either a visitor or listener instance.
      */
     public ParseTreeTraversal getParseTreeTraversal(PdslTest pdslTest) {
@@ -99,7 +132,7 @@ public final class ExecutorHelper {
 
     /**
      * @deprecated use getParseTreeTraversal instead. This will be removed in a future major release.
-     * @param pdslTest
+     * @param pdslTest the pdsl test annotation on the class
      * @return the ParseTreeListener made from the listenerProvider in the pdslTest
      */
     @Deprecated
@@ -120,6 +153,13 @@ public final class ExecutorHelper {
         }
     }
 
+    /**
+     * Creates test specifications from the provided input.
+     * @param testSpecificationFactory the factory that will produce test specifications from resources
+     * @param testResources the URIs that have the tests written in a DSL
+     * @param pdslTest an annotation containing information about how to process the specificaitons
+     * @return a collection of TestSpecifications
+     */
     public Collection<TestSpecification> getTestSpecifications(TestSpecificationFactory testSpecificationFactory, Set<URI> testResources, PdslTest pdslTest) {
         Optional<Collection<TestSpecification>> testSpecifications = testSpecificationFactory.getTestSpecifications(testResources);
         if (testSpecifications.isEmpty()) {
@@ -129,6 +169,13 @@ public final class ExecutorHelper {
         return testSpecifications.get();
     }
 
+    /**
+     * Creates test cases from test specifications using the provided input.
+     *
+     * @param testCaseFactory the factory that will produce the test cases
+     * @param specifications the specifications used by the factory to create the test cases.
+     * @return Collection of test cases
+     */
     public Collection<TestCase> getTestCases(TestCaseFactory testCaseFactory, Collection<TestSpecification> specifications) {
         if (specifications.isEmpty()) {
             throw new IllegalArgumentException("Test Case Factory could not process specifications because it was empty!");
@@ -141,6 +188,15 @@ public final class ExecutorHelper {
         return testCases;
     }
 
+    /**
+     * Creates JUnit4 friendly "methods" that map to each individual test case.
+     *
+     * For JUnit4 hooks and other features to work they need to be in the form of a method. We
+     * artificially convert the tests into methods to accomodate this.
+     *
+     * @param clazz the test class with the PDSL annotations
+     * @return a collection of framework methods that each represent a single PDSL TestCase
+     */
     public List<FrameworkMethod> computePdslTestMethods(TestClass clazz) {
         List<FrameworkMethod> frameworkMethods = new ArrayList<>();
         // Validate annotations are valid
@@ -161,12 +217,32 @@ public final class ExecutorHelper {
         return frameworkMethods;
     }
 
+    /**
+     * Create a phrase filter with no general recognizer.
+     *
+     * If any sentences are not recognized by the parser in the PdslTest it will crash.
+     *
+     * @param pdslTest the pdsl test annotation on the class
+     * @return a phrase filter
+     */
     public PolymorphicDslPhraseFilter makeDefaultFilter(PdslTest pdslTest) {
         return new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer(), pdslTest.startRule());
     }
 
-
-
+    /**
+     * Create a phrase filter with context sensitive phrases and a general recognizer.
+     *
+     * The only phrases executed will be the ones understood by the subgrammarparser. The
+     * supergrammar parser will not execute any code, but will crash the test if it cannot
+     * recognize a phrase.
+     * @param subGrammarParser parser for phrases that require behavior
+     * @param subGrammarLexer lexer for phrases that require behavior
+     * @param superGrammarParser parser for phrases that should be ignored
+     * @param superGrammarLexer lexer for phrases that should be ignored
+     * @param recognizerRule the start rule to invoke in the supergrammar parser
+     * @param syntaxCheckRule the syntax rule that all tests must conform to specified in the supergrammar
+     * @return a phrase filter
+     */
     public PolymorphicDslPhraseFilter makeDefaultFilter(Class<? extends Parser> subGrammarParser,
                                                         Class<? extends Lexer> subGrammarLexer,
                                                         Class<? extends Parser> superGrammarParser,
@@ -176,19 +252,51 @@ public final class ExecutorHelper {
         return new DefaultPolymorphicDslPhraseFilter( subGrammarParser,
                 subGrammarLexer, superGrammarParser, superGrammarLexer, recognizerRule, syntaxCheckRule);
     }
+
+    /**
+     * Create a phrase filter with a subgrammar parser and a supergrammar recognizer using the
+     * PdslTest and RecognizedBy annotations.
+     * @param pdslTest annotation provided by a test method
+     * @param recognizedBy annotation on the same test method
+     * @return a phrase filter created from the annotation parameters
+     */
     public PolymorphicDslPhraseFilter makeDefaultFilter(PdslTest pdslTest, RecognizedBy recognizedBy) {
         return makeDefaultFilter(pdslTest.parser(), pdslTest.lexer(), recognizedBy.dslRecognizerParser(),
                 recognizedBy.dslRecognizerLexer(), pdslTest.startRule(), recognizedBy.recognizerRule());
     }
 
+    /**
+     * Create a phrase filter with a subgrammar parser and a supergrammar recognizer using the
+     * PdslTest and RecognizedBy annotations. Also requires all tests to conform to the specified
+     * recognizerRule in the created recognizer.
+     *
+     * @param pdslTest annotation provided by a test method
+     * @param recognizedBy annotation on the same test method
+     * @param recognizerRule the syntax check rule to invoke in the recognizer
+     * @return a phrase filter created from the annotation parameters
+     */
     public PolymorphicDslPhraseFilter makeDefaultFilter(PdslTest pdslTest, RecognizedBy recognizedBy, String recognizerRule) {
         return makeDefaultFilter(pdslTest.parser(), pdslTest.lexer(), recognizedBy.dslRecognizerParser(), recognizedBy.dslRecognizerLexer(), pdslTest.startRule(), recognizerRule);
     }
 
+    /**
+     * Create a phrase filter with a subgrammar parser and a supergrammar recognizer using the
+     * PdslTest and RecognizedBy annotations.
+     *
+     * The default rules polymorphicDslAllRules and polymorphicDslSyntaxCheck rules must exist in the
+     * parser and recognizer or there will be a runtime exception.
+     *
+     * @param pdslTest annotation provided by a test method
+     * @param configuration the configuration annotation on a test class
+     * @return a phrase filter created from the annotation parameters
+     */
     public PolymorphicDslPhraseFilter makeDefaultFilter(PdslTest pdslTest, PdslConfiguration configuration) {
         return new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer(), configuration.dslRecognizerParser(), configuration.dslRecognizerLexer(), pdslTest.startRule(), configuration.recognizerRule());
     }
 
+    /**
+     * A simple data transfer object for providing the results of helper factories.
+     */
     public static class PdslProvidersDto {
         private final Provider<? extends TestSpecificationFactoryGenerator> testSpecificationFactoryGenerator;
         private final Provider<? extends TestCaseFactory> testCaseFactoryProvider;
@@ -217,31 +325,48 @@ public final class ExecutorHelper {
                     ? Optional.empty() : Optional.of(pdslConfiguration.dslRecognizerLexer());
         }
 
+        /** Provides the created test specification factory generator.
+         *
+         * @return a provider for a specification factory
+         */
         public Provider<? extends TestSpecificationFactoryGenerator> getTestSpecificationFactoryGenerator() {
             return testSpecificationFactoryGenerator;
         }
 
+        /**
+         * Provides the created test case factory provider.
+         */
         public Provider<? extends TestCaseFactory> getTestCaseFactoryProvider() {
             return testCaseFactoryProvider;
         }
 
+        /** Provides the created test executor provider. */
         public Provider<? extends TraceableTestRunExecutor> getTestRunExecutor() {
             return testRunExecutor;
         }
 
+        /** Provides the created test resource finder generator. */
         public Provider<? extends TestResourceFinderGenerator> getResourceFinder() {
             return resourceFinder;
         }
 
+        /** Provides a recognizer class intended to be used unless overridden by PdslTests. */
         public Optional<Class<? extends Parser>> getClassWideParserRecognizerOptional() {
             return classWideParserRecognizerOptional;
         }
 
+        /** Provides a recognizer lexer class intended to be used unless overridden by PdslTests. */
         public Optional<Class<? extends Lexer>> getClassWideLexerRecognizerOptional() {
             return classWideLexerRecognizerOptional;
         }
     }
 
+    /**
+     * Creates a variety of factories useful for running Polymorphic DSL tests.
+     * @param provider the class containing PDSL annotations.
+     * @param configurationField name of the field associated with the class (used in friendly error message)
+     * @return an instance of the provided class.
+     */
     public Object createPdslProviderFromClass(Class<?> provider, String configurationField) {
         try {
             return  provider.getConstructor().newInstance();
@@ -258,6 +383,9 @@ public final class ExecutorHelper {
         }
     }
 
+    /**
+     * Provides the default test executor used by most PDSL tests.
+     */
     public static final class DefaultExecutorProvider implements Provider<TraceableTestRunExecutor> {
         private static final TraceableTestRunExecutor INSTANCE = new DefaultPolymorphicDslTestExecutor();
         @Override
@@ -266,8 +394,16 @@ public final class ExecutorHelper {
         }
     }
 
+    /**
+     * Provides the default resource finder used by most PDSL tests.
+     */
     public static final class DefaultResourceFinderGenerator implements Provider<TestResourceFinderGenerator> {
         private final String resourceRoot;
+
+        /**
+         * Creates a generator for resource finders.
+         * @param resourceRoot the root directory to search in
+         */
         public DefaultResourceFinderGenerator(String resourceRoot)
         {
             if (resourceRoot.startsWith("file:///")) {
@@ -284,6 +420,11 @@ public final class ExecutorHelper {
         }
     }
 
+    /**
+     * Create a collection of factories and other useful objects for a PDSL run.
+     * @param pdslConfiguration the configuration specifying which factories to use.
+     * @return PdslProvidersDto containing factories needed to run PDSL test cases
+     */
     public PdslProvidersDto makePdslElements(PdslConfiguration pdslConfiguration) {
             Provider<? extends TestCaseFactory> testCaseFactory = (Provider<? extends TestCaseFactory>) createPdslProviderFromClass(
                     pdslConfiguration.testCaseFactoryProvider(), TEST_CASEFACTORY_PROVIDER);

@@ -21,6 +21,14 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.*;
 
+/**
+ * An executor that runs PDSL tests create from a TestCaseFactory.
+ *
+ * The default executor has colorized terminal output and prints the phrases as they execute
+ * and the stack trace on failure.
+ *
+ * All metadata associated with the tests will also be printed.
+ */
 public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslTestExecutor.class);

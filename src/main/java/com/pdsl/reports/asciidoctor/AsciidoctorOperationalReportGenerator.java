@@ -5,8 +5,6 @@ import com.pdsl.reports.proto.OperationalReportData;
 import com.pdsl.reports.proto.TacticalReportData;
 import com.pdsl.reports.proto.TechnicalReportData;
 import com.pdsl.reports.proto.TestCaseGroup;
-import com.pdsl.testcases.TestCase;
-
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -15,10 +13,21 @@ import java.nio.file.StandardOpenOption;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * A reporter that presents information at an operational level.
+ *
+ * Consumers of these reports would be concerned about CI/CD and non-homogenous data.
+ * This report will provide information into multiple applications.
+ */
 public class AsciidoctorOperationalReportGenerator implements OperationalReportGenerator {
 
     private final Path fileResource;
     private final AsciidoctorTacticalReportGenerator asciidoctorTacticalReportGenerator;
+
+    /**
+     * Creates an asciidoctor report generator from the provided file.
+     * @param fileResource location of the file to process
+     */
     public AsciidoctorOperationalReportGenerator(Path fileResource) {
         this.fileResource = fileResource;
         this.asciidoctorTacticalReportGenerator = new AsciidoctorTacticalReportGenerator(fileResource);

@@ -19,7 +19,16 @@ import java.util.stream.Collectors;
  */
 public interface TestSection {
 
+    /**
+     * Provides additional information associated with this test section if found.
+     * @return optional of type input stream representing the metadata
+     */
     Optional<InputStream> getMetaData();
+
+    /**
+     * returns the phrase that composes part of a test.
+     * @return a phrase that represents part of a test case
+     */
     Phrase getPhrase();
 
     static List<TestSection> convertBodyFragment(TestBodyFragment testBodyFragment) {

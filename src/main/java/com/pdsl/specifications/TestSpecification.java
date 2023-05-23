@@ -45,7 +45,7 @@ public interface TestSpecification {
 
     /**
      * Returns a list of {@code Phrase}s that may contain a parse tree that will trigger code execution when consumed by a
-     * {@PolymorphicDslTestExecutor}.
+     * ＠PolymorphicDslTestExecutor.
      * <p>
      * If this TestItem has no child test items then this method <i>must</i> return an optional contiaining a list with
      * at least one element present

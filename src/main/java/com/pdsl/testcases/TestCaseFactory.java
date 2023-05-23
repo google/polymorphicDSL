@@ -6,7 +6,7 @@ import java.util.Collection;
 
 /**
  * A factory that is able to convert TestSpecification objects into TestCases that are used as inputs for
- * @code{PolymorphicDslTestExecutor}s.
+ * {@code PolymorphicDslTestExecutor}s.
  */
 public interface TestCaseFactory {
     /**

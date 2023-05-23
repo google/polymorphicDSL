@@ -10,12 +10,25 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+/**
+ * A generator of test reports that focuses on high level metrics suitable for executives.
+ *
+ * The strategic report generator will also create nested levels of reports for lower level
+ * stakeholders that link to the strategic reports.
+ */
 public class AsciidoctorStrategicReportGenerator implements StrategicReportGenerator {
 
     private final Path fileResource;
     private final String documentTitle;
     private final AsciidoctorOperationalReportGenerator operationalReportGenerator;
 
+    /**
+     * Creates a report generator focusing on high level, heterogenous metrics.
+     *
+     * Also will create all lower level metrics in the process.
+     * @param fileResource the location to create the report
+     * @param documentTitle the title of the output document
+     */
     public AsciidoctorStrategicReportGenerator(Path fileResource, String documentTitle) {
         this.fileResource = fileResource;
         this.documentTitle = documentTitle;

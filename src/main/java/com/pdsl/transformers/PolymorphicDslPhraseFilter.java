@@ -19,8 +19,8 @@ public interface PolymorphicDslPhraseFilter {
      * <p>
      * Some phrases may be filtered out because they are deemed irrelevant to some context by the underlying grammar.
      *
-     * @param testInput
-     * @return An optional containing the FilteredPhrases which indicate whether or not they were recognized by the grammar
+     * @param testInput the test resources to parse
+     * @return An optional containing the FilteredPhrases which indicate whether they were recognized by the grammar
      */
     Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput);
 

@@ -22,6 +22,11 @@ public final class GherkinCommonContextHelper {
 
     private final Map<String, Integer> tokenToType = new HashMap<>();
 
+    /**
+     * Creates a helper using the provided vocabular.
+     *
+     * @param vocabulary an ANTLR lexer vocabulary
+     */
     public GherkinCommonContextHelper(Vocabulary vocabulary) {
         this.vocabulary = vocabulary;
         for (int i=0; i < vocabulary.getMaxTokenType(); i++) {
@@ -29,12 +34,22 @@ public final class GherkinCommonContextHelper {
         }
     }
 
-    /** Returns the integer value in the grammars symbol table that corresponds of the specified tokens abstract name. */
+    /**
+     * Returns the integer value in the grammars symbol table that corresponds of the specified tokens abstract name.
+     *
+     * @param symbolicName the name of the token
+     * @return the integer value of hte token in the lexer
+     */
     public Integer getTokenType(String symbolicName) {
         return tokenToType.get(symbolicName);
     }
 
-    /** Gets the abstract name from the underlying vocabulary that matches the integer value in the grammar symbol table. */
+    /**
+     * Gets the abstract name from the underlying vocabulary that matches the integer value in the grammar symbol table.
+     *
+     * @param type the token type in an ANTLR vocabulary
+     * @return the symbolic name of the token
+     */
     public String getTokenSymbolicName(int type) {
         return vocabulary.getSymbolicName(type);
     }
@@ -43,6 +58,7 @@ public final class GherkinCommonContextHelper {
      * Returns inner text of a string that is enquoted by a leading and trailing character ignoring trailing and leading
      * whitespace.
      *
+     * @param textInQuotes the test to remove quotes from
      * @return text inside arbitrary delimiting characters used for quotes
      */
     public static String extractTextInQuotes(String textInQuotes) {

@@ -40,11 +40,11 @@ import java.util.*;
 
         /**
          * Determines what pages another page can navigate to.
-         *
+         * <p>
          * In a real test we would probably use something like webdriver to actually attempt to navigate to these
          * pages, or after we define the graph internally (which we do with the variables navigationPath and adminOnly)
          * use an algorithm to traverse all possible paths.
-         *
+         * <p>
          * However since this is just a proof of concept we'll just find out what the navigation paths are and spot
          * check whether it identified them.
          * @param ctx the parse tree

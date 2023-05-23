@@ -6,7 +6,7 @@ import java.util.Collection;
 
 /**
  * A chef that is capable of preparing ingredients as part of making a repast.
- *
+ * <p>
  * The quality of the meal may vary depending on what the chef specializes in.
  */
 public interface StationChef {

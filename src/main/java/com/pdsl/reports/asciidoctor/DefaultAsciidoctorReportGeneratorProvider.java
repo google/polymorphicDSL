@@ -15,6 +15,11 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 
+/**
+ * The standard report generator for producing Ascii-doctor based test reports.
+ *
+ * This is useful for better making sense of aggregated TestRunResults.
+ */
 public class DefaultAsciidoctorReportGeneratorProvider implements TraceableReportGenerator {
 
     private static final OptionsBuilder OPTIONS = OptionsBuilder.options().attributes(AttributesBuilder.attributes()
@@ -26,6 +31,9 @@ public class DefaultAsciidoctorReportGeneratorProvider implements TraceableRepor
 
     private final AsciidoctorReportGenerator asciidoctorReportGenerator;
 
+    /**
+     * Creates an Ascii-doctor based report generator.
+     */
     public DefaultAsciidoctorReportGeneratorProvider() {
         String tempDir = System.getProperty("java.io.tmpdir");
         Path path = Path.of(String.format("%s/%s.adoc", tempDir, UUID.randomUUID()));

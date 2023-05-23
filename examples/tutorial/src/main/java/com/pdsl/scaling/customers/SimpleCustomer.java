@@ -16,10 +16,10 @@ import java.util.stream.Collectors;
 
 /**
  * A standard customer.
- *
+ * <p>
  * This customer will reject bills that do not match menu prices. They will leave tips if their
  * meals are well prepared and order the first thing they notice off the menu.
- *
+ * <p>
  * They will also only accept meals that match what they ordered.
  */
 

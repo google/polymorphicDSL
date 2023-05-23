@@ -11,6 +11,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * A standard test case used by PDSL for test case execution.
+ */
 public class DefaultPdslTestCase implements TestCase {
 
     private final String testCaseTitle;
@@ -18,6 +21,14 @@ public class DefaultPdslTestCase implements TestCase {
     private final List<String> unfilteredPhraseBody;
     private final List<String> contextFilteredPhraseBody;
     private final URI source;
+
+    /**
+     * Creates a PDSL test case.
+     *
+     * @param testCaseTitle title of the test case
+     * @param testBodyFragments chunks of phrases that may or may not execute
+     * @param source the original source this test case was created from
+     */
     public DefaultPdslTestCase(String testCaseTitle, List<TestBodyFragment> testBodyFragments, URI source) {
         String errMessage = "Test case title cannot be empty or null!";
         Preconditions.checkNotNull(testCaseTitle, errMessage);
