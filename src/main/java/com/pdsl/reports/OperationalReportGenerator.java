@@ -12,5 +12,13 @@ import java.net.URL;
  * both one application and the other.
  */
 public interface OperationalReportGenerator {
+
+        /**
+         * Creates a report from the provided report data.
+         *
+         * @param applicationToContextResults heterogeneous report data
+         * @return a URL directed to the generated report
+         * @throws IOException if there is an issue writing the report
+         */
         URL generateOperationalReport(OperationalReportData applicationToContextResults) throws IOException;
 }

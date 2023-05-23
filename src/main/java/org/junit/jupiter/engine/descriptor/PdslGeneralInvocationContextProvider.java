@@ -29,9 +29,9 @@ import org.slf4j.LoggerFactory;
  *  The user will need to provide an InvocationContextProvider. An example of how
  *  to practically do that would be like this:
  * 
- *  <pre>
- *   @Override
- *   public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
+ *
+ *   ＠Override
+ *   public Stream&lt;TestTemplateInvocationContext&gt; provideTestTemplateInvocationContexts(ExtensionContext context) {
  *            return getInvocationContext(PdslConfigParameter.createGeneralPdslConfig(testCaseFactorySupplier, testSpecificationFactoryGeneratorSupplier,
  *                        List.of(
  *                                new PdslTestParameter.Builder(parseTreeListenerSupplier,
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  *                    .build())
  *                    .stream();
  *        }
- * </pre>
+ *
  */
 public abstract class PdslGeneralInvocationContextProvider implements InvocationInterceptor, TestTemplateInvocationContextProvider {
 
@@ -195,7 +195,7 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
 
     /**
      * Creates InvocationContext using the PDSL test framework to use with a JUnit5
-     * @TestTemplate.
+     * ＠TestTemplate.
      *
      */
     public Collection<TestTemplateInvocationContext> getInvocationContext(PdslConfigParameter parameter) {
@@ -223,7 +223,7 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
     }
 
     /**
-     * Creates an invocationContext for a JUnit5 @TestTemplate from the provided
+     * Creates an invocationContext for a JUnit5 ＠TestTemplate from the provided
      * PdslExecutable.
      */
     protected TestTemplateInvocationContext invocationContext(PdslExecutable executable) {
@@ -252,7 +252,5 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
                 });
             }
         };
-
-
     }
 }

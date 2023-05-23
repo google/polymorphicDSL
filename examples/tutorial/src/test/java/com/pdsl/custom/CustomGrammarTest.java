@@ -57,7 +57,7 @@ public class CustomGrammarTest {
 
     /**
      * Do all the assertions after finding out what all the page links are.
-     *
+     * <p>
      * This is not what we would do in real life, but for the sake of demonstrating that we can at least tell what some
      * page links would be, we'll verify we can find some expected navigation paths after parsing everything.
      */

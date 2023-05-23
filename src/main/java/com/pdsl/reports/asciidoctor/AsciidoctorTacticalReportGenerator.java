@@ -14,11 +14,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * A report generator that is suitable for creating team oriented metrics.
+ *
+ * This will also create lower level metrics that link to the tactical metrics sa well.
+ */
 public class AsciidoctorTacticalReportGenerator implements TacticalReportGenerator {
 
     private final Path fileResource;
     private final AsciidoctorTechnicalReportGenerator asciidoctorTechnicalReportGenerator;
     private static final String TABLE_START = " | %d ";
+
+    /**
+     * Creates a report generator capable of producing reports at the provided path.
+     * @param fileResource the location to write the new test reports
+     */
     public AsciidoctorTacticalReportGenerator(Path fileResource) {
         this.fileResource = fileResource;
         this.asciidoctorTechnicalReportGenerator = new AsciidoctorTechnicalReportGenerator(fileResource);

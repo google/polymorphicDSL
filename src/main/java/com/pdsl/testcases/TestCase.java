@@ -7,12 +7,14 @@ import java.util.List;
 /**
  * An executable test for PDSL to process with a test case executor of some kind.
  *
- * @see {com.pdsl.executors.TraceableTestRunExecutor}
+ * {@see com.pdsl.executors.TraceableTestRunExecutor}
  */
 public interface TestCase {
 
     /**
      * Returns the original source file this test was created from.
+     *
+     * @return the URI the test case was produced from
      */
     URI getOriginalSource();
 
@@ -20,7 +22,7 @@ public interface TestCase {
      * Provides the original phrases that this test case was created from.
      *
      * No metadata or any other residual data from the original test resource this test case was created from is included.
-     * @return
+     * @return all the phrases that the recognizer encountered when making the test
      */
     List<String> getUnfilteredPhraseBody();
 
@@ -34,7 +36,7 @@ public interface TestCase {
      * {@link com.pdsl.executors.PolymorphicDslTestExecutor} can execute with the iterator returned from
      * {@link #getContextFilteredTestSectionIterator()}.
      *
-     * @return
+     * @return the phrases that PDSL views as executable for this test case
      */
     List<String> getContextFilteredPhraseBody();
 

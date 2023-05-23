@@ -38,15 +38,32 @@ public final class FileDelimitedTestSpecificationFactory implements TestSpecific
       return INSTANCE;
     }
   }
+
+  /**
+   * A default generator for file delimited specification factories.
+   */
   public static final class Generator implements TestSpecificationFactoryGenerator {
     @Override
     public TestSpecificationFactory get(PolymorphicDslPhraseFilter filter) {
       return new FileDelimitedTestSpecificationFactory(filter);
     }
   }
+
+  /**
+   * Creates a specification factory that reads each file as a single sentence.
+   *
+   * @param phraseFilter parser logic for the file
+   */
   public FileDelimitedTestSpecificationFactory(PolymorphicDslPhraseFilter phraseFilter) {
     this.phraseFilter = phraseFilter;
   }
+
+  /**
+   * Creates a specification factory that reads each file as a single sentence.
+   *
+   * @param phraseFilter parser logic for the file
+   * @param charset the character set to use when parsing
+   */
   public FileDelimitedTestSpecificationFactory(
       PolymorphicDslPhraseFilter phraseFilter, Charset charset) {
     this.charset = charset;

@@ -2,6 +2,9 @@ package com.pdsl.gherkin.models;
 
 import java.util.*;
 
+/**
+ * A DTO representing a table in a gherkin scenario.
+ */
 public class GherkinExamplesTable {
     private final Optional<List<String>> tags;
     private final Optional<String> title;
@@ -49,6 +52,9 @@ public class GherkinExamplesTable {
         return rows;
     }
 
+    /**
+     * A builder for creating an Examples table DTO.
+     */
     public static class Builder {
         private String title = "";
         private String longDescription = "";

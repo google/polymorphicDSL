@@ -82,7 +82,7 @@ public class Waiter {
   /**
    * Delivers the bill to a customer
    * @param customer the customer who is receiving the bill
-   * @return true if the customer accepts the bill, false if they don't
+   * @return BigDecimal the amount the customer is expected to pay
    */
   public BigDecimal giveCustomerBill(Customer customer) {
     return deliveredMeals.get(customer).stream()
@@ -92,7 +92,6 @@ public class Waiter {
 
   /**
    * Relieves the waiter from having to serve the customer further.
-   * @param customer
    */
   public void customerLeaves(Customer customer) {
     dischargedCustomers.add(customer);

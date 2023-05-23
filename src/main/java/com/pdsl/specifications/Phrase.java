@@ -11,6 +11,10 @@ import org.antlr.v4.runtime.tree.ParseTree;
  */
 public interface Phrase {
 
+    /**
+     * Gets the ANTLR parse tree associated with this phrase.
+     * @return the ANTLR parse tree
+     */
     ParseTree getParseTree();
 
     /**

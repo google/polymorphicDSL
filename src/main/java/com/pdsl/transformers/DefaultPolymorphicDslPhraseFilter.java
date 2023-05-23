@@ -16,6 +16,13 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * The standard phrase filter used by PDSL.
+ *
+ * This filter is composed of a parser that will execute phrases it recognizes triggering
+ * work. It may also have an optional recognizer that must be able to parse all sentences,
+ * or it will halt.
+ */
 public class DefaultPolymorphicDslPhraseFilter
         implements PolymorphicDslPhraseFilter {
     private static final String BOLD = "\033[1m";
@@ -27,8 +34,14 @@ public class DefaultPolymorphicDslPhraseFilter
     private final Optional<Class<? extends Lexer>> recognizerLexer;
     private final Method subgrammarActivePhraseRule;
     private final Optional<String> syntaxRuleName;
+    /** The standard start rule to invoke in the parser if none is provided. */
     public static String DEFAULT_ALL_RULES_METHOD_NAME = "polymorphicDslAllRules";
 
+    /**
+     * Creates a phrase filter that will ignore any phrases it doesn't recognize.
+     * @param subgrammarParser the parser to use
+     * @param subgrammarLexer the lexer to use
+     */
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer) {
         Optional<Method> syntaxRuleOptional1;
         try {
@@ -44,6 +57,15 @@ public class DefaultPolymorphicDslPhraseFilter
         syntaxRuleName = Optional.empty();
     }
 
+    /**
+     * Creates a phrase filter that ignores any sentences it dosetn' recognize.
+     *
+     * It also will parse using the provided rule.
+     *
+     * @param subgrammarParser the parser to use
+     * @param subgrammarLexer the lexer to use
+     * @param recognizerRule the start rule in the parser
+     */
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, String recognizerRule) {
         Optional<Method> syntaxRuleOptional1;
         try {
@@ -59,6 +81,17 @@ public class DefaultPolymorphicDslPhraseFilter
         syntaxRuleName = Optional.empty();
     }
 
+    /**
+     * Creates a phrase filter that will halt parsing if the recognizer doesn't understand all
+     * sentences.
+     *
+     * This phrase filter will use the default rules for syntax checking and starting the parser.
+     *
+     * @param subgrammarParser parser to find executable phrases
+     * @param subgrammarLexer lexer to find executable phrases
+     * @param parserRecognizer parser to recognize all sentensces
+     * @param lexerRecognizer lexer to recognize all sentences
+     */
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer)  {
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
@@ -74,8 +107,19 @@ public class DefaultPolymorphicDslPhraseFilter
         syntaxRuleName = Optional.of(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
     }
 
-
-
+    /**
+     * Creates a phrase filter that will halt parsing if the recognizer doesn't understand all
+     * sentences.
+     *
+     * This phrase filter will use the provided rules for syntax checking and starting the parser.
+     *
+     * @param subgrammarParser parser to find executable phrases
+     * @param subgrammarLexer lexer to find executable phrases
+     * @param parserRecognizer parser to recognize all sentensces
+     * @param lexerRecognizer lexer to recognize all sentences
+     * @param startRule the rule for executing phrases in the subgrammar
+     * @param syntaxCheckRuleName the recognizer rule to parse the input
+     */
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, Class<? extends Parser> parserRecognizer, Class<? extends Lexer> lexerRecognizer, String startRule, String syntaxCheckRuleName)  {
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);

@@ -50,26 +50,26 @@ import static org.mockito.Mockito.when;
 
 /**
  * A problematic example of a unit test made with a unsegregated parser.
- *
+ * <p>
  * When a parser is created without following the Interface Segregation Principle a lot of extra
  * methods are added to the test that aren't relevant.
- *
+ * <p>
  * In this example, the problem is "worked around" by using a Base Visitor which provides empty,
  * stubbed methods by default.
- *
+ * <p>
  * This causes several problems:
- *
+ * <p>
  * 1. The output of the test executes and implies that work is being done on <em>every</em> step,
  *    even though this is untrue. This makes it difficult to find out where the test is actually
  *    doing work.
- *
+ * <p>
  * 2. When new sentences relevant to customer are added the test silently gets an empty no-op method.
  *    This makes it easy to forget to add unit tests for the new functionality and produce false
  *    positives.
- *
+ * <p>
  * While this test suite actually runs and does useful work, it is done in a way that is difficult
  * to coordinate maintenance across different teams whenever the Customer object is impacted.
- *
+ * <p>
  * A recommended alternative is to break the g4 file into multiple parts in the same way you would
  * break up an interface such that every test only implements the parts relevant to it. The test
  * could then implement the visitor interface instead of the base visitor. This will immediately

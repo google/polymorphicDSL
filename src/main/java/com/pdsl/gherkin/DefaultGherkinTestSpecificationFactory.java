@@ -29,6 +29,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * A factory that can product test specifications from gherkin input.
+ */
 public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
@@ -52,6 +55,10 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         this.recognizerLexer = builder.recognizerLexer;
         this.recognizerRule = builder.recognizerRule;
     }
+
+    /**
+     * Creates a builder for a gherkin test specification factory.
+     */
     public static class Builder {
         private int maxDescriptionLength = 1024;
         private final PolymorphicDslPhraseFilter phraseFilter;
@@ -61,46 +68,94 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         private Optional<? extends Class<? extends Lexer>> recognizerLexer = Optional.empty();
         private Optional<String> recognizerRule = Optional.of(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
 
+        /**
+         * Prepares the builder to use a phrase filter for determining which sentences to execute.
+         *
+         * @param polymorphicDslPhrasefilter the phrase filter to use
+         */
         public Builder(PolymorphicDslPhraseFilter polymorphicDslPhrasefilter) {
             Preconditions.checkNotNull(polymorphicDslPhrasefilter);
             phraseFilter = polymorphicDslPhrasefilter;
         }
 
+        /**
+         * Prepares the builder to set a hard limit on feature description text to use.
+         * By default, 1024 characters will be tsroed for each feature, scenario, background
+         * or rule description.
+         *
+         * @param maxDescriptionLength maximum length for descriptions
+         * @return this builders
+         */
         public Builder withMaxDescriptionLength(int maxDescriptionLength) {
             this.maxDescriptionLength = maxDescriptionLength;
             return this;
         }
 
+        /**
+         * Prepares the builder to generate test specifications via the provided pickle jar factory.
+         *
+         * @param pickleJarFactory the pickle jar factory to use
+         * @return this builder
+         */
         public Builder withPickleJarFactory(PickleJarFactory pickleJarFactory) {
             Preconditions.checkNotNull(pickleJarFactory);
             this.pickleJarFactory = pickleJarFactory;
             return this;
         }
 
+        /**
+         * Determines the charset to use when processesing the gherkin input.
+         * The default charset of the JVM is used if one isn't provided.
+         *
+         * @param charset of the input files being processed
+         * @return this builder
+         */
         public Builder withCharset(Charset charset) {
             Preconditions.checkNotNull(charset);
             this.charset = charset;
             return this;
         }
 
+        /**
+         * Processes the input using the provided recognizer.
+         *
+         * @param parserClass the recognizer parser to use
+         * @return this builder
+         */
         public Builder withRecognizerParser(Class<? extends Parser> parserClass) {
             Preconditions.checkNotNull(parserClass);
             recognizerParser = Optional.of(parserClass);
             return this;
         }
 
+        /**
+         * Processes the input using the provided recognizer.
+         *
+         * @param lexerClass the recognizer lexer to use
+         * @return this builder
+         */
         public Builder withRecognizerLexer(Class<? extends Lexer> lexerClass) {
             Preconditions.checkNotNull(lexerClass);
             recognizerLexer = Optional.of(lexerClass);
             return this;
         }
 
+        /**
+         * Processes the input using the provided recognizer.
+         *
+         * @param rule the parser rule to read all input with
+         * @return this builder
+         */
         public Builder withRecognizerRule(String rule) {
             Preconditions.checkNotNull(rule);
             recognizerRule = Optional.of(rule);
             return this;
         }
 
+        /**
+         * Creates a GherkinTestSpecificationFactory from the parameters given to this builder.
+         * @return a new DefaultGherkinTestSpecificationFactory
+         */
         public DefaultGherkinTestSpecificationFactory build() {
             return new DefaultGherkinTestSpecificationFactory(this);
         }

@@ -16,6 +16,9 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * A resource finder that searches the local filesystem.
+ */
 public class FileSystemTestResourceFinder implements TestResourceFinder {
 
     private final PathMatcher pathMatcher;
@@ -24,6 +27,14 @@ public class FileSystemTestResourceFinder implements TestResourceFinder {
         this.pathMatcher = pathMatcher;
     }
 
+    /**
+     * Finds a file in a directory tree a specific name.
+     *
+     * @param searchDirectory directory to search
+     * @param fileName name of the file
+     * @return paths to all files that matched the name
+     * @throws IOException if there was an error traversing the file system
+     */
     public static Collection<Path> findExactMatch(Path searchDirectory, String fileName) throws IOException {
         try (Stream<Path> files = Files.walk(searchDirectory)) {
             return files
@@ -32,6 +43,14 @@ public class FileSystemTestResourceFinder implements TestResourceFinder {
         }
     }
 
+    /**
+     * Finds files that match the provided criteria.
+     *
+     * @param searchDirectory the root directory to search
+     * @param matcher a match expression for filtering files
+     * @return paths to matching files
+     * @throws IOException if there was an error traversing the filesystem
+     */
     public static Collection<Path> findMatchingFiles(Path searchDirectory, PathMatcher matcher) throws IOException {
         try (Stream<Path> files = Files.walk(searchDirectory)) {
             return files
@@ -41,6 +60,12 @@ public class FileSystemTestResourceFinder implements TestResourceFinder {
         }
     }
 
+    /**
+     * Searches filesystem path using an internal path matcher when created.
+     *
+     * @param path directory to search
+     * @return URIs to all matching files
+     */
     public Optional<Collection<URI>> scanForTestResources(Path path) {
         return scanForTestResources(path.toUri());
     }

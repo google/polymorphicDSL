@@ -31,6 +31,9 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * The standard test executor for gherkin test cases.
+ */
 public class GherkinTestExecutor implements TraceableTestRunExecutor {
 
     private static final PickleJarFactory pickleJarFactory = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);

@@ -12,5 +12,15 @@ import java.net.URL;
  * level.
  */
 public interface StrategicReportGenerator {
+
+    /**
+     * Creats a report with high level metrics from the provided data.
+     *
+     * Metrics produced by this reflect total quality when systems are combined.
+     *
+     * @param strategicReportData the data from which to generate the report
+     * @return a URL location of the generated report
+     * @throws IOException if there is an issue writing the report
+     */
     URL generateStrategicReport(StrategicReportData strategicReportData) throws IOException;
 }

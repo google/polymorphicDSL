@@ -9,10 +9,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 
+/**
+ * A report generator that focuses on test or codepoint specific metrics.
+ *
+ * These reports are suitable for engineers that are analyzing or
+ * troubleshooting individual test cases.
+ */
 public class AsciidoctorTechnicalReportGenerator implements TechnicalReportGenerator {
 
     private final Path fileResource;
 
+    /**
+     * A report generator that can produce granular metrics at the provided location.
+     * @param fileResource the location to generate reports at
+     */
     public AsciidoctorTechnicalReportGenerator(Path fileResource) {
         this.fileResource = fileResource;
     }

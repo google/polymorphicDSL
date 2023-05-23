@@ -10,10 +10,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * A resource finder that searches the local file system.
+ */
 public class FileSystemTestResourceGenerator implements TestResourceFinderGenerator {
 
     private final String resourceRoot;
 
+    /**
+     * Creates a resource generator that searches from a specified directory.
+     *
+     * The provided parameter does not need to be a valid URI as it will internally be
+     * converted into one if possible.
+     *
+     * E.g., the value "./" will search from the directory PDSL executes from.
+     *
+     * @param resourceRoot a relative path to search
+     */
     public FileSystemTestResourceGenerator(String resourceRoot) {
         this.resourceRoot = resourceRoot;
     }

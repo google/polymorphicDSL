@@ -19,12 +19,26 @@ import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Map;
 
+/**
+ * Creates tiered reports from the outputs of multiple PdslTests.
+ *
+ * The output is rendered with Asciidoctor. The reports themselves are tiered,
+ * providing strategic, operational, tactical and technical metrics for corresponding
+ * stakeholders.
+ */
 public class AsciidoctorReportGenerator implements TraceableReportGenerator {
 
     private final Charset charset;
     private final AsciidoctorStrategicReportGenerator asciidoctorStrategicReportGenerator;
     private final Options options;
     private final Logger logger = LoggerFactory.getLogger(AsciidoctorReportGenerator.class);
+
+    /**
+     * Creates a report generator for rendering PDSL test results in a user friendly format.
+     *
+     * @param fileLocation the location to create the reports at
+     * @param reportTitle the title to give the report
+     */
     public AsciidoctorReportGenerator(Path fileLocation, String reportTitle) {
         Preconditions.checkNotNull(fileLocation);
         Preconditions.checkArgument(!Files.isDirectory(fileLocation));
@@ -38,6 +52,13 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
         this.asciidoctorStrategicReportGenerator = new AsciidoctorStrategicReportGenerator(fileLocation, reportTitle);
     }
 
+    /**
+     * Creates an asciidoctor report generator with specific Asciidoctor options.
+     *
+     * @param fileLocation the location to create the reports at
+     * @param reportTitle the title for the reports
+     * @param options asciidoctor options to use while generating the reports
+     */
     public AsciidoctorReportGenerator(Path fileLocation, String reportTitle, Options options) {
         Preconditions.checkNotNull(fileLocation);
         Preconditions.checkArgument(!Files.isDirectory(fileLocation));

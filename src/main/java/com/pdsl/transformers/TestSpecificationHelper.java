@@ -142,7 +142,6 @@ public interface TestSpecificationHelper {
      * @param lexerClass the ANTLR lexer for tokenizing the input
      * @param inputStream the input to parse
      * @param syntaxRuleName the ANTLR rule in the provided parser to use for checking hte input
-     * @return a new copy of the provided InputStream
      */
     static void checkGrammarValidity(Class<? extends Parser> parserClass, Class<? extends Lexer> lexerClass, InputStream inputStream, String syntaxRuleName) {
         Method syntaxRule;

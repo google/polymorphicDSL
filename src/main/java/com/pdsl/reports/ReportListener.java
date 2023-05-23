@@ -17,7 +17,7 @@ public interface ReportListener {
     /**
      * Checks to see if the test ID has already been recorded in the report
      *
-     * @param postFilteredTestId Identifier of the TestSpecification after filtering out phrases
+     * @param filteredBody The defacto identifier of the TestSpecification after filtering out phrases
      * @return true if report contains this test or false if not
      */
     boolean containsFilteredTest(List<String> filteredBody);
