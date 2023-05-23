@@ -32,7 +32,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
-//@RunWith(PdslJUnit4ConfigurableRunner.class)
+@RunWith(PdslJUnit4ConfigurableRunner.class)
 @PdslConfiguration(
         context = "Component",
         resourceRoot = "src/test/resources/testcase_factories",
@@ -278,7 +278,7 @@ public class PreorderTestCaseFactoryTest {
         return list;
     }
 
-    //@Test
+    @Test
     public void preorderFactory_producesTestCasesWithPhrasesInProperOrder() throws URISyntaxException {
         // ARRANGE
         ParseTree parseTree = mock(ParseTree.class);
