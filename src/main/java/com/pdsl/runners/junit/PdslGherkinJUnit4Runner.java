@@ -182,17 +182,6 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
     }
 
     @Override
-    public void run(RunNotifier runNotifier) {
-        for (FrameworkMethod method : getChildren()) {
-            if (isIgnored(method)) {
-                runNotifier.fireTestIgnored(describeChild(method));
-            } else {
-                runChild(method, runNotifier);
-            }
-        }
-    }
-
-    @Override
     protected void runChild(final FrameworkMethod method, RunNotifier notifier) {
         PdslTest pdslTest = method.getAnnotation(PdslTest.class);
         if (pdslTest != null) {
