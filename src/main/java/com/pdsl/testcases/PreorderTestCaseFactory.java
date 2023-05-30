@@ -1,7 +1,5 @@
 package com.pdsl.testcases;
 
-import com.pdsl.runners.TestSpecificationFactoryGenerator;
-import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.specifications.TestSpecification;
 

@@ -53,8 +53,9 @@ public class PdslExecutable {
          * A runtime exception will be thrown if any failures are encounted by the test.
          */
         public MetadataTestRunResults execute() {
-            MetadataTestRunResults results = results = visitor.isPresent() ? executor.runTestsWithMetadata(List.of(pdslTest), visitor.get().get(), context)
-                    : executor.runTestsWithMetadata(List.of(pdslTest), listener.get().get(), context);
+            MetadataTestRunResults results =
+                visitor.isPresent() ? executor.runTestsWithMetadata(List.of(pdslTest), visitor.get().get(), context)
+                        : executor.runTestsWithMetadata(List.of(pdslTest), listener.get().get(), context);
 
             if (results.failingTestTotal() > 0) {
                 Optional<Throwable> throwable = results.getTestResults().stream()
@@ -66,6 +67,7 @@ public class PdslExecutable {
                 }
                 throw new IllegalStateException("A test failed while executing! (No stack trace was produced by the failure)");
             }
+
             return results;
         }
 

@@ -8,9 +8,7 @@ import org.antlr.v4.runtime.misc.ParseCancellationException;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Set;
 
 import static com.google.common.truth.Truth.assertThat;

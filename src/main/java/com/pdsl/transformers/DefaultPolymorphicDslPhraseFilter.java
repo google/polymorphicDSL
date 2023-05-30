@@ -43,7 +43,6 @@ public class DefaultPolymorphicDslPhraseFilter
      * @param subgrammarLexer the lexer to use
      */
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer) {
-        Optional<Method> syntaxRuleOptional1;
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
             this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
@@ -67,7 +66,6 @@ public class DefaultPolymorphicDslPhraseFilter
      * @param recognizerRule the start rule in the parser
      */
     public DefaultPolymorphicDslPhraseFilter(Class<? extends Parser> subgrammarParser, Class<? extends Lexer> subgrammarLexer, String recognizerRule) {
-        Optional<Method> syntaxRuleOptional1;
         try {
             this.subgrammarLexerConstructor = subgrammarLexer.getConstructor(CharStream.class);
             this.subgrammarParserConstructor = subgrammarParser.getConstructor(TokenStream.class);
@@ -142,45 +140,44 @@ public class DefaultPolymorphicDslPhraseFilter
         List<InputStream> testContextForfiltering = testContent;
         if (recognizerParser.isPresent() && recognizerLexer.isPresent()) {
             testContextForfiltering = TestSpecificationHelper.checkGrammarValidity(recognizerParser.get(), recognizerLexer.get(), testContent,
-                    syntaxRuleName.isPresent() ? syntaxRuleName.get() : RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME);
+                syntaxRuleName.orElse(RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME));
         }
         List<FilteredPhrase> filteredPhrases = new ArrayList<>();
         int phrasesFilteredOut = 0;
         for (InputStream inputStream : testContextForfiltering) {
-            ByteArrayInputStream bais;
-            try {
-                bais = new ByteArrayInputStream(inputStream.readAllBytes());
+            try (ByteArrayInputStream bais = new ByteArrayInputStream(inputStream.readAllBytes())) {
+                Optional<Parser> parser = subgrammarParserOf(new ByteArrayInputStream(bais.readAllBytes()));
+                if (parser.isPresent()) {
+                    parser.get().setBuildParseTree(true); // A parse tree creates a child object, causing the tree walker to traverse the rule twice
+                    ParseTree parseTree = subgrammarParseTreeOf(parser.get());
+                    filteredPhrases.add(new FilteredPhrase() {
+                        @Override
+                        public String getPhrase() {
+                            return parseTree.getText();
+                        }
+
+                        @Override
+                        public Optional<ParseTree> getParseTree() {
+                            return Optional.of(parseTree);
+                        }
+                    });
+                } else {
+                    filteredPhrases.add(new FilteredPhrase() {
+                        @Override
+                        public String getPhrase() {
+                                return new String(bais.readAllBytes());
+                        }
+
+                        @Override
+                        public Optional<ParseTree> getParseTree() {
+                            return Optional.empty();
+                        }
+                    });
+                    phrasesFilteredOut++;
+                }
+                    inputStream.close();
             } catch (IOException e) {
                 throw new PolymorphicDslTransformationException("Could not read from the stream while filtering phrases!", e);
-            }
-            Optional<Parser> parser = subgrammarParserOf(new ByteArrayInputStream(bais.readAllBytes()));
-            if (parser.isPresent()) {
-                parser.get().setBuildParseTree(true); // A parse tree creates a child object, causing the tree walker to traverse the rule twice
-                ParseTree parseTree = subgrammarParseTreeOf(parser.get());
-                filteredPhrases.add(new FilteredPhrase() {
-                    @Override
-                    public String getPhrase() {
-                        return parseTree.getText();
-                    }
-
-                    @Override
-                    public Optional<ParseTree> getParseTree() {
-                        return Optional.of(parseTree);
-                    }
-                });
-            } else {
-                filteredPhrases.add(new FilteredPhrase() {
-                    @Override
-                    public String getPhrase() {
-                            return new String(bais.readAllBytes());
-                    }
-
-                    @Override
-                    public Optional<ParseTree> getParseTree() {
-                        return Optional.empty();
-                    }
-                });
-                phrasesFilteredOut++;
             }
         }
         if (filteredPhrases.isEmpty() || filteredPhrases.stream().noneMatch(filteredPhrase -> filteredPhrase.getParseTree().isPresent())) { // Let the user know we couldn't parse
@@ -195,12 +192,13 @@ public class DefaultPolymorphicDslPhraseFilter
     }
 
     private Optional<? extends Lexer> createSublexer(InputStream inputStream) {
-        try {
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
             // We need to see if the lexer will recognize any of the tokens in the input stream
             // However checking this will consume the tokens in the lexer, making it useless for future processing,
             // so we create two: one to check if this line is relevant at all and the other to use if it is
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
             inputStream.transferTo(baos);
+            inputStream.close();
+
             CharStream charStream = CharStreams.fromStream(new ByteArrayInputStream(baos.toByteArray()));
             Lexer pdslLexer = subgrammarLexerConstructor.newInstance(charStream);
             pdslLexer.removeErrorListeners();
@@ -215,9 +213,7 @@ public class DefaultPolymorphicDslPhraseFilter
             } else if (errorListener.isErrorFound()) { //Stream may have been partially consumed. Only keep if there were no errors
                 if (logger.isWarnEnabled()) {
                     String filteredTokens = allTokens.stream()
-                                    .map(token -> {
-                                        return String.format("\t%s: %s", pdslLexer.getVocabulary().getSymbolicName(token.getType()), token);
-                                    })
+                                    .map(token -> String.format("\t%s: %s", pdslLexer.getVocabulary().getSymbolicName(token.getType()), token))
                                     .collect(Collectors.joining(String.format("%n")));
                     logger.warn(String.format("%sA line was partially matched! This may indicate an error in the grammar!%n", AnsiTerminalColorHelper.YELLOW));
                     logger.warn(String.format("The match was:%n%s%s%s", AnsiTerminalColorHelper.BRIGHT_YELLOW, filteredTokens, AnsiTerminalColorHelper.RESET));
@@ -230,6 +226,7 @@ public class DefaultPolymorphicDslPhraseFilter
                 return Optional.empty();
             }
             pdslLexer.reset();
+
             return Optional.of(pdslLexer);
         } catch (IllegalAccessException | InstantiationException | InvocationTargetException | IOException e) {
             throw new PolymorphicDslTransformationException("Could not create lexer from input stream!", e);

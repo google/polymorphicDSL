@@ -1,13 +1,11 @@
 package org.junit.jupiter.engine.descriptor;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.runners.PdslTest;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
-import javax.inject.Provider;
 import java.util.Optional;
 import java.util.function.Supplier;
 

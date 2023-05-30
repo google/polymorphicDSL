@@ -17,7 +17,6 @@ import java.net.URL;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 
 @RunWith(JUnit4.class)
 public class FrameworkTestSpecification {

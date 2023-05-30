@@ -8,21 +8,15 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.junit.jupiter.api.extension.ExtensionContext;
-import org.junit.jupiter.api.extension.InvocationInterceptor;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
-import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 
 import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,7 +79,7 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
                 duplicateTest.put(whitespaceInsensitiveSteps, testCase);
             }
         }
-        logger.info("%d duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
+        logger.info("[{}] duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
         duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
         return duplicateTest.entrySet().stream().map(Entry::getValue).collect(Collectors.toUnmodifiableSet());
     }

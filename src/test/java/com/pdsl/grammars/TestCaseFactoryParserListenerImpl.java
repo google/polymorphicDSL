@@ -20,7 +20,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;

@@ -1,7 +1,6 @@
 package com.pdsl.specifications;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
 
