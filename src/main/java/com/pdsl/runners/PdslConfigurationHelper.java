@@ -1,16 +1,7 @@
 package com.pdsl.runners;
 
 import com.pdsl.runners.junit.JUnitConfigurationAccessor;
-import com.pdsl.specifications.TestSpecification;
-import com.pdsl.specifications.TestSpecificationFactory;
 import org.junit.jupiter.engine.descriptor.JupiterDescriptorKey;
-
-import javax.inject.Provider;
-import java.lang.annotation.Annotation;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.Set;
 
 /**
  * A helper class used to limit the instantiation and use of the @link{com.pdls.runners.ExecutorHelper} class.

@@ -3,7 +3,6 @@ package com.pdsl.gherkin.models;
 import com.google.common.base.Preconditions;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

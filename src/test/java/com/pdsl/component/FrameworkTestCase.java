@@ -1,12 +1,10 @@
 package com.pdsl.component;
 
-import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.TestCaseFactoryLexer;
 import com.pdsl.grammars.TestCaseFactoryParser;
 import com.pdsl.grammars.TestCaseFactoryParserListenerImpl;
 import com.pdsl.reports.TestRunResults;
-import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.junit.Test;

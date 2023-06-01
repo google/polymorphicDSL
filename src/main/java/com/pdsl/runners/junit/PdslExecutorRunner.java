@@ -3,8 +3,6 @@ package com.pdsl.runners.junit;
 import com.google.common.base.Preconditions;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
-import com.pdsl.runners.PdslConfiguration;
-import com.pdsl.runners.PdslGherkinApplication;
 import com.pdsl.testcases.TestCase;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;

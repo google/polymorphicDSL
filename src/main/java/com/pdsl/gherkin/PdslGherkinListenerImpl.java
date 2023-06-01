@@ -5,7 +5,6 @@ import com.pdsl.gherkin.parser.GherkinParser;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.net.URI;
-import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
 

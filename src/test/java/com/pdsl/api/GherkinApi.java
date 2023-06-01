@@ -3,7 +3,6 @@ package com.pdsl.api;
 import com.pdsl.gherkin.*;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
-import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;

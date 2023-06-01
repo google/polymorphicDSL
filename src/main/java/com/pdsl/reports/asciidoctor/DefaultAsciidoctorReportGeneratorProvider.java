@@ -7,7 +7,6 @@ import org.asciidoctor.OptionsBuilder;
 import org.asciidoctor.Placement;
 import org.asciidoctor.SafeMode;
 
-import javax.inject.Provider;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;

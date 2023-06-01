@@ -2,7 +2,6 @@ package com.pdsl.api;
 
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.grammars.*;
-import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestRunResults;
 import org.junit.Test;
 

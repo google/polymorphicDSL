@@ -163,7 +163,7 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
                 }
             }
         );
-        logger.info("%d duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
+        logger.info("{} duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
         duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
         return duplicateTest.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableSet());
     }

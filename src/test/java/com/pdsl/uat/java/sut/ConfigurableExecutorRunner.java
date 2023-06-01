@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsLexer;
-import com.pdsl.grammars.AllGrammarsFailListener;
+
 @RunWith(PdslJUnit4ConfigurableRunner.class)
 @PdslConfiguration(
         resourceRoot = "src/test/resources/testdata/good",

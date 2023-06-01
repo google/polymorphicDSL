@@ -7,9 +7,7 @@ import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 
 import javax.inject.Provider;
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;

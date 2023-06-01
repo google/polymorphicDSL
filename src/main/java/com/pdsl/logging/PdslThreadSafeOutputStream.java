@@ -61,7 +61,8 @@ public final class PdslThreadSafeOutputStream extends OutputStream {
     @Override
     public void close() throws IOException {
         super.close();
+        mem.get().setLength(0);
         mem.remove();
-        mem = null;
+        mem.set(null);
     }
 }

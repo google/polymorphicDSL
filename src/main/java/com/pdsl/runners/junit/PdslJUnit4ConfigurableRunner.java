@@ -1,7 +1,6 @@
 package com.pdsl.runners.junit;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.exceptions.PolymorphicDslTestResourceException;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
@@ -16,7 +15,6 @@ import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.Test;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
@@ -87,7 +85,7 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
     private static String getClassNameWithoutPackage(Class<?> clazz) {
         String[] classNameComponents = clazz.getName().split("\\.");
         return classNameComponents[classNameComponents.length - 1];
-    };
+    }
 
     /**
      * Returns the methods that run tests.
