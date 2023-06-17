@@ -1,21 +1,20 @@
 package org.junit.jupiter.engine.descriptor;
 
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
+import com.pdsl.gherkin.filter.GherkinTagFilterer;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.PreorderTestCaseFactory;
+import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.Map.Entry;
 
 import java.net.URI;
-import java.util.Collection;
-import java.util.Optional;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,7 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
     private static final Logger logger = LoggerFactory.getLogger(PdslGherkinInvocationContextProvider.class);
     private static final TestCaseFactory TEST_CASE_FACTORY = new PreorderTestCaseFactory();
     private final Map<List<String>, TestCase> duplicateTest = new HashMap<>();
+    private static final GherkinTagFilterer gherkinTagFilterer = new GherkinTagsVisitorImpl();
 
     /**
      * Creates TestSpecifications using  a {@link
@@ -38,7 +38,7 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
      * DefaultGherkinTestSpecificationFactory}.
      */
     @Override
-    protected Collection<TestSpecification> getTestSpecifications(PdslConfigParameter configParameter, PdslTestParameter pdslTestParameter, PolymorphicDslPhraseFilter phraseFilter, Collection<URI> testResources) {
+    protected Collection<TestSpecification> getTestSpecifications(PdslConfigParameter configParameter, PolymorphicDslPhraseFilter phraseFilter, Collection<URI> testResources) {
         GherkinTestSpecificationFactory gherkinTestSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();
         Optional<Collection<TestSpecification>> testSpecifications = gherkinTestSpecificationFactory
                 .getTestSpecifications(testResources.stream().collect(Collectors.toUnmodifiableSet()));
@@ -48,14 +48,18 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
                             + "Resources: %s%n", configParameter.getSpecificationFactoryProvider().get().getClass(),
                     String.join(String.format("%n\t\t")), testResources));
         }
-        Optional<Collection<TestSpecification>> filteredSpecifications = gherkinTestSpecificationFactory.filterGherkinTestSpecificationsByTagExpression(testSpecifications.get(), pdslTestParameter.getTagExpression());
-        if (filteredSpecifications.isEmpty()) {
-            throw new IllegalStateException(String.format("All scenarios were filtered out!%n"
-            + "Tag Expression: %s%n"
-                            + "Resources: %s%n", pdslTestParameter.getTagExpression(),
-                    String.join(String.format("%n\t\t")), testResources));
-        }
         return testSpecifications.get();
+    }
+
+    @Override
+    protected Collection<TestCase> filterTestCases(Collection<TestCase> testCases, String tagExpression) {
+        return testCases.stream()
+                .filter(tc -> {
+                    if (tc instanceof TaggedTestCase) {
+                        return gherkinTagFilterer.tagExpressionMatchesPickle(new HashSet(((TaggedTestCase)tc).getTags()), tagExpression);
+                    }
+                    return true;
+                }).collect(Collectors.toUnmodifiableList());
     }
 
     /**

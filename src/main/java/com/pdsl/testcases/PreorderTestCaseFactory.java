@@ -1,6 +1,7 @@
 package com.pdsl.testcases;
 
 import com.pdsl.specifications.PolymorphicDslTransformationException;
+import com.pdsl.specifications.TaggedTestSpecification;
 import com.pdsl.specifications.TestSpecification;
 
 import javax.inject.Provider;
@@ -28,18 +29,22 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
         Collection<TestCase> testCases = new ArrayList<>(testSpecifications.size()); // Will likely need to be resized regardless
         for (TestSpecification testSpecification : testSpecifications) {
-            testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, new ArrayList<>(), Optional.empty(), new Accumulator()));
+            testCases.addAll(recursiveWalkAndCreateOnLeaf(testSpecification, new ArrayList<>(), new ArrayList<>(), Optional.empty(), new Accumulator()));
         }
         return testCases;
     }
 
     private List<TestCase> recursiveWalkAndCreateOnLeaf(TestSpecification testSpecification,
+                                                        Collection<String> tags,
                                                         List<TestBodyFragment> parentTestBodyFragments,
                                                         Optional<InputStream> parentMetaData,
                                                         Accumulator accumulator) {
         List<TestBodyFragment> childTestBodyFragments = new ArrayList<>(parentTestBodyFragments);
         Optional<InputStream> childMetaData = testSpecification.getMetaData();
         List<TestCase> testCases = new ArrayList<>();
+        if (testSpecification instanceof TaggedTestSpecification) {
+            tags.addAll(((TaggedTestSpecification)testSpecification).getTags());
+        }
         // Get Metadata
         if (parentMetaData.isPresent() && childMetaData.isPresent()) {
             childMetaData = Optional.of(combineMetadata(parentMetaData.get(), childMetaData.get()));
@@ -53,11 +58,14 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         // Add phrases in child node if present
         if (testSpecification.nestedTestSpecifications().isPresent()) {
             for (TestSpecification childTestSpecification : testSpecification.nestedTestSpecifications().get()) {
-                testCases.addAll(recursiveWalkAndCreateOnLeaf(childTestSpecification, childTestBodyFragments, childMetaData, accumulator));
+                testCases.addAll(recursiveWalkAndCreateOnLeaf(childTestSpecification, new ArrayList<>(tags), childTestBodyFragments, childMetaData, accumulator));
             }
             return testCases;
         } else {
-            DefaultPdslTestCase testCase = new DefaultPdslTestCase(testSpecification.getName(), childTestBodyFragments, testSpecification.getOriginalTestResource());
+            TestCase testCase = new DefaultPdslTestCase(testSpecification.getName(), childTestBodyFragments, testSpecification.getOriginalTestResource());
+            if (!tags.isEmpty()) {
+                testCase = new DefaultTaggedTestCase(testCase, tags);
+            }
             List<TestCase> singleTestCase = new ArrayList<>(1);
             singleTestCase.add(testCase);
             return singleTestCase;

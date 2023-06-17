@@ -2,6 +2,7 @@ package com.pdsl.gherkin.testcases;
 
 import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
+import com.pdsl.specifications.TaggedTestSpecification;
 import com.pdsl.specifications.TestSpecification;
 
 import java.io.InputStream;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-public class GherkinTestCaseSpecification implements TestSpecification {
+public class GherkinTestCaseSpecification implements TaggedTestSpecification {
 
     private final Set<String> tags;
     private final TestSpecification testSpecification;
@@ -28,6 +29,7 @@ public class GherkinTestCaseSpecification implements TestSpecification {
         this.tags = Set.of();
     }
 
+    @Override
     public Set<String> getTags() {
         return tags;
     }

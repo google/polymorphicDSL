@@ -3,9 +3,11 @@ package org.junit.jupiter.engine.descriptor;
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.runners.*;
+import com.pdsl.specifications.TaggedTestSpecification;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
+import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -91,7 +93,7 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
      *
      * If no specifications can be produced a runtime exception will be thrown.
      */
-    protected Collection<TestSpecification> getTestSpecifications(PdslConfigParameter configParameter, PdslTestParameter pdslTestParameter,  PolymorphicDslPhraseFilter phraseFilter, Collection<URI> testResources) {
+    protected Collection<TestSpecification> getTestSpecifications(PdslConfigParameter configParameter, PolymorphicDslPhraseFilter phraseFilter, Collection<URI> testResources) {
         Optional<Collection<TestSpecification>> testSpecifications = configParameter.getSpecificationFactoryProvider().get()
                 .get(phraseFilter)
                 .getTestSpecifications(testResources.stream().collect(Collectors.toUnmodifiableSet()));
@@ -169,6 +171,23 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
     }
 
     /**
+     *     Filters out test cases that do not match the supplied tag expression.
+     *
+     *     It is up to the underlying implementation on how to do this. By default only TaggedTestCases can be
+     *     filtered out. In the event the test case is a tagged test case and none of its tags exactly equals the tag
+     *     expression provided then it is filtered out.
+     */
+    protected Collection<TestCase> filterTestCases(Collection<TestCase> testCases, String tagExpression) {
+        return testCases.stream()
+                .filter(tc -> {
+                    if (tc instanceof TaggedTestCase) {
+                        return ((TaggedTestCase)tc).getTags().equals(tagExpression);
+                    }
+                    return true;
+                }).collect(Collectors.toUnmodifiableList());
+    }
+
+    /**
      * Creates a PdslExecutables from the provided PdslConfigParameter.
      *
      * Users are unlikely to need to call this unless they are embedding PDSL
@@ -182,11 +201,20 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
             // Create the phrase filter which determines which sentences are relevant to the tests based on context
             PolymorphicDslPhraseFilter phraseFilter = getPhrasefilter(parameter, pdslTestParameter);
             // Create test specifications from the test resource files written in a DSL
-            Collection<TestSpecification> testSpecifications = getTestSpecifications(parameter, pdslTestParameter, phraseFilter, testResources);
+            Collection<TestSpecification> testSpecifications = getTestSpecifications(parameter, phraseFilter, testResources);
             // Convert specifications to test cases
-            Collection<TestCase> testCases = getTestCases(parameter, testSpecifications);
+            Collection<TestCase> unfilteredTestCases = getTestCases(parameter, testSpecifications);
+            // Filter the test cases
+            Collection<TestCase> filteredTestCases = filterTestCases(unfilteredTestCases, pdslTestParameter.getTagExpression());
+            if (filteredTestCases.isEmpty()) {
+                throw new IllegalArgumentException(String.format(" All of the test cases were filtered out of a test!%n"
+                        + "\tResources: %s%n"
+                        + "\tFilter: %s", pdslTestParameter.getIncludesResources(), pdslTestParameter.getTagExpression())
+
+                );
+            }
             // Finally convert test cases into invocation contexts for a JUnit5 @TestTemplate
-            executables.addAll(testCases.stream()
+            executables.addAll(filteredTestCases.stream()
                     .map(testCase ->  getPdslExecutable(testCase, parameter, pdslTestParameter))
                     .collect(Collectors.toUnmodifiableList()));
         }

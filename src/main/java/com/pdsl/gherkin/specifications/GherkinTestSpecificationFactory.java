@@ -8,7 +8,11 @@ import java.util.Optional;
 
 /**
  * A test specification factory that provides additional gherkin features.
+ *
+ * @deprecated filtering is more reliably done in a test case factory. This class will be removed in a future
+ * version of PDSL.
  */
+@Deprecated(since = "1.5.4")
 public interface GherkinTestSpecificationFactory extends TestSpecificationFactory {
 
     /**
