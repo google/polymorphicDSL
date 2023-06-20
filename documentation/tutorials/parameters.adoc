@@ -174,5 +174,5 @@ include::../../examples/tutorial/src/test/java/com/pdsl/parameters/AdvancedGherk
 endif::[]
 
 ifdef::env-github[]
-https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/parameters/AdvancedGherkinTest.java[AdvancedGherkinTest.g4]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/parameters/AdvancedGherkinTest.java[AdvancedGherkinTest.java[]
 endif::[]
