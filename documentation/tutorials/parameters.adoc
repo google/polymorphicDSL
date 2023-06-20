@@ -118,3 +118,61 @@ It's better if you avoid this. One of the fundamental purposes of a parser and l
 You can see a running example for the code discussed here at link:../../examples/tutorial/src/test/java/com/pdsl/parameters/ParametersTest.java[ParametersTest.java]
 
 The implementations of the _ParseTreeListeners_ in particular show you how to grab and use the parameters.
+
+== Advanced Gherkin
+
+The Gherkin protocol supports docstrings and datatables:
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/src/test/resources/testdata/good/datatables_with_new_lines.feature[datatables_with_new_lines.feature]
+
+https://github.com/google/polymorphicDSL/blob/main/src/test/resources/testdata/good/scenario_outline_with_docstring.feature[scenario_outline_with_docstring.feature]
+endif::[]
+
+ifndef::env-github[]
+[source,antlr4]
+----
+include::../../src/test/resources/testdata/good/datatables_with_new_lines.feature[]
+
+include::../../src/test/resources/testdata/good/scenario_outline_with_docstring.feature[]
+----
+endif::[]
+
+
+Island grammars are the recommended way to handle situations like this.
+
+=== Data Table Parser
+
+An example parser for data tables can be viewed below:
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/AdvancedGherkinLexer.g4[AdvancedGherkinLexer.g4]
+
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/AdvancedGherkinParser.g4[AdvancedGherkinParser.g4]
+endif::[]
+
+ifndef::env-github[]
+[source,antlr4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/AdvancedGherkinLexer.g4[]
+----
+
+[source,antlr4]
+----
+include::../../examples/tutorial/src/test/antlr4/com/example/AdvancedGherkinParser.g4[]
+----
+endif::[]
+
+There are multiple ways to get at the data in a particular cell.
+The Visitor implementation in the test indicates how this can be done:
+
+ifndef::env-github[]
+[souce,java]
+----
+include::../../examples/tutorial/src/test/java/com/pdsl/parameters/AdvancedGherkinTest.java[]
+----
+endif::[]
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/java/com/pdsl/parameters/AdvancedGherkinTest.java[AdvancedGherkinTest.g4]
+endif::[]
