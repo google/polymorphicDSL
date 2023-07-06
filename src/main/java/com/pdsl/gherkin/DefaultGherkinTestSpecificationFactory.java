@@ -297,7 +297,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
-                logger.debug(String.format("%Rule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle()));
+                logger.debug(String.format("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle()));
                 Optional<List<FilteredPhrase>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
                 filteredBackgroundStepBody.ifPresent(ruleBuilder::withTestPhrases);
             }
