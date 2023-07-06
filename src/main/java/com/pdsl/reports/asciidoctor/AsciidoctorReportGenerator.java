@@ -91,7 +91,7 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
         }
         String processedPath = options.map().get("destination_dir") != null ? (String)options.map().get("destination_dir")
                 : adocURL.toString().replace(".adoc", ".html").replaceFirst("file:", "");
-        logger.info(String.format("Wrote report to %s",processedPath));
+        logger.info(String.format("Wrote report to %s", processedPath));
         return Paths.get(processedPath).toUri().toURL();
     }
 }

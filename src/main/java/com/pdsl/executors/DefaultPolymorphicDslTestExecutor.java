@@ -93,7 +93,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
             int phraseIndex = 0;
             try {
                 if (previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
-                    logger.warn("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle());
+                    logger.warn(String.format("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle()));
                     StringBuilder duplicateBody = new StringBuilder();
                     testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
                     results.addTestResult(DefaultTestResult.duplicateTest(testCase));
