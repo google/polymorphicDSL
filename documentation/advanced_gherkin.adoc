@@ -1,0 +1,56 @@
+:toc:
+:source-highlighter: prettify
+
+= Advanced Gherkin
+
+Gherkin has many features people don't know about. You might also
+want some help on how to write parsers to enable the advanced
+features.
+
+== Sample Gherkin File
+
+The below file demos many of Gherkin's advanced features:
+
+ifndef::env-github[]
+[source,gherkin]
+----
+include::../examples/tutorial/src/test/resources/features/FullGherkinExample.feature[Advanced Gherkin]
+----
+endif::[]
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/resources/features/FullGherkinExample.feature[AdvancedGherkin.feature]
+endif::[]
+
+
+
+== Sample Gherkin Parser
+
+The below lexer and parser shows you how to work with these features:
+
+=== Lexer
+
+ifndef::env-github[]
+[source,antlr4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/FullGherkinLexer.g4[FullGherkinLexer.g4]
+----
+endif::[]
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/FullGherkinLexer.g4[FullGherkinLexer.g4]
+endif::[]
+
+=== Parser
+
+ifndef::env-github[]
+[source,antlr4]
+----
+include::../examples/tutorial/src/test/antlr4/com/example/FullGherkinParser.g4[FullGherkinParser.g4]
+----
+endif::[]
+
+ifdef::env-github[]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/FullGherkinParser.g4[FullGherkinParser.g4]
+endif::[]
+
