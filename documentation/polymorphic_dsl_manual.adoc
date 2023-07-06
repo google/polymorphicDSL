@@ -29,6 +29,7 @@ Hands-on experience and example projects for using PDSL
 * <<tutorials/custom_grammar.adoc#, JUnit4 Custom Grammars>>
 * <<tutorials/parameters.adoc#, Handling Parameters>>
 * <<tutorials/antlr4_cheat_sheet.adoc#, ANTLR4 Regular Expression Cheat Sheet>>
+* <<advanced_gherkin.adoc#, Advanced Gherkin>>
 
 == Framework Documentation
 
