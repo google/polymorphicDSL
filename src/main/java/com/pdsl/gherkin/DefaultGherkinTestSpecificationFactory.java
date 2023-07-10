@@ -192,9 +192,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                                 pickleJar.getFeatureTitle()));
                     }
                     addBytesWithCorrectEncoding(featureMetaData, getBackgroundText(bg));
-                    logger.info("%sTop level%s Background%s in %s%s", AnsiTerminalColorHelper.CYAN,
+                    logger.info(String.format("%sTop level%s Background%s in %s", AnsiTerminalColorHelper.CYAN,
                         AnsiTerminalColorHelper.BRIGHT_CYAN, AnsiTerminalColorHelper.RESET,
-                        pickleJar.getLocation());
+                        pickleJar.getLocation()));
                     Optional<List<FilteredPhrase>> filteredBackgroundStepBody = processStepBodyContent(
                         bg.getSteps().get());
 
@@ -297,7 +297,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
-                logger.debug("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle());
+                logger.debug(String.format("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle()));
                 Optional<List<FilteredPhrase>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
                 filteredBackgroundStepBody.ifPresent(ruleBuilder::withTestPhrases);
             }

@@ -105,7 +105,7 @@ public class GherkinTagsVisitorImpl implements GherkinTagsVisitor<Boolean>, Gher
             GherkinTagsLexer lexer = new GherkinTagsLexer(charStream);
             lexer.addErrorListener(new TagExpressionErrorListener(tagExpression));
             List<? extends Token> allTokens = lexer.getAllTokens();
-						String message = String.format(String.format("Parsing tag expression%n\tExpression: %s%n\tResults: %s", tagExpression, allTokens));
+						String message = String.format("Parsing tag expression%n\tExpression: %s%n\tResults: %s", tagExpression, allTokens);
             logger.debug(message);
             if (allTokens.isEmpty()) {
                 throw new IllegalArgumentException(String.format("Could not parse tag expression: %s", tagExpression));

@@ -76,10 +76,19 @@ public class PdslExecutable {
             return pdslTest.getTestTitle();
         }
 
-    private static class TestFailure extends RuntimeException {
-        TestFailure(Throwable t) {
-            super(t);
+        /**
+         * The purpose of that getter it to provide access to the `TestCase` instance inside the test case execution (@TestTemplate).
+         *
+         * @return
+         */
+        public TestCase getTestCase() {
+          return pdslTest;
         }
-    }
+
+        private static class TestFailure extends RuntimeException {
+            TestFailure(Throwable t) {
+                super(t);
+            }
+        }
 
 }

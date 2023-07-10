@@ -31,21 +31,21 @@ public class TagExpressionErrorListener implements ANTLRErrorListener {
     @Override
     public void reportAmbiguity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, ATNConfigSet configs) {
         if (logger.isWarnEnabled()) {
-            logger.warn("Ambiguity in gherkin tag! at %s", tagExpression.substring(startIndex, stopIndex));
+            logger.warn(String.format("Ambiguity in gherkin tag! at %s", tagExpression.substring(startIndex, stopIndex)));
         }
     }
 
     @Override
     public void reportAttemptingFullContext(Parser recognizer, DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, ATNConfigSet configs) {
         if (logger.isTraceEnabled()) {
-            logger.trace("Attempting full context at %s", tagExpression.substring(startIndex, stopIndex));
+            logger.trace(String.format("Attempting full context at %s", tagExpression.substring(startIndex, stopIndex)));
         }
     }
 
     @Override
     public void reportContextSensitivity(Parser recognizer, DFA dfa, int startIndex, int stopIndex, int prediction, ATNConfigSet configs) {
         if (logger.isTraceEnabled()) {
-            logger.trace("Context sensitive issue at %s", tagExpression.substring(startIndex, stopIndex));
+            logger.trace(String.format("Context sensitive issue at %s", tagExpression.substring(startIndex, stopIndex)));
         }
     }
 }

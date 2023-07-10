@@ -268,7 +268,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
         assertThat(results.isPresent()).isTrue();
         for (TestResult metadata : results.get().getTestResults()) {
             if (metadata.getFailingPhrase().isPresent()) {
-                logger.error("Test Case ID: %s %n\tException: %s", metadata.getTestCaseTitle(), metadata.getFailureReason().orElseThrow());
+                logger.error(String.format("Test Case ID: %s %n\tException: %s", metadata.getTestCaseTitle(), metadata.getFailureReason().orElseThrow()));
             }
         }
         assertThat(results.get().passingTestTotal()).isEqualTo(ctxHelper.extractInt(ctx));
