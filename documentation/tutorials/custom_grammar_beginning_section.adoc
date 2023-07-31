@@ -115,7 +115,7 @@ endif::[]
 After that we make a parser (which specifies how we're allowed to combine the words).
 
 ifdef::env-github[]
-https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DotNavigationLexer.g4[DotNavigationLexer.g4]
+https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/DotNavigationParser.g4[DotNavigationParser.g4]
 endif::[]
 
 ifndef::env-github[]
