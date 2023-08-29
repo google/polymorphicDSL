@@ -13,19 +13,14 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.apache.commons.lang3.mutable.Mutable;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
-import org.mockito.Mockito;
 
 import javax.inject.Provider;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.logging.Filter;
 import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
