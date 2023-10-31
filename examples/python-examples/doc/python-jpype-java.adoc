@@ -1,0 +1,59 @@
+== High Level Diagram
+
+
+[graphviz]
+---------------------------------------------------------------------
+digraph {
+  node [shape=box, style=rounded]
+  nodesep = 0.2
+
+    subgraph cluster_1 {
+      color=greenyellow
+      style=solid
+
+  subgraph cluster_2 {
+    graph [style=dashed, label="Python", color=green]
+    A, B, C
+  }
+
+  subgraph cluster_3 {
+    graph [style=dashed, label="Java", color=red]
+    D
+  }
+
+    A[label="PyTest module", style="rounded,filled", color=green]
+    B[label="Allure module"]
+    C[label="JPype module", style="rounded,filled", color=gold]
+    D[label="polymorphicDSL", style="rounded,filled", color=darkslategray1]
+    E[label="JVM", style="rounded,filled", color=darkslategray1]
+
+
+
+    A -> B, C;
+    C, D -> E;
+    E -> C, D;
+
+}
+    graph [label="Python + Java"]
+}
+---------------------------------------------------------------------
+
+Let's explain that diagram.
+
+==== *Python layer.*
+
+So, we have three logical blocks:
+
+* *Pytest module* - will be responsible for test execution and parametrization;
+
+* *JPype module* - this module help us to integrate Python and Java, implementing Java interfaces on Python, and use JVM to run that code use *polymorphicDSL* uber jar.
+
+* *Allure* - module reponsible for collecting test results and generating report (JavaScript + HTML).
+
+
+==== *Java layer.*
+
+* *polymorphicDSL* - framework what will process/execute ANTLR Listener (what we implemented using Python) to process the feature file (our test case).
+
+
+The last but not least it's *JVM* - Java virtual machine for *JPype* and *polymorphicDSL* framework.
