@@ -1,0 +1,243 @@
+= Python Polymorphic Domain Specific Language Framework Example
+
+
+== Intro
+
+The main purpose of this example/demo is to show how to use https://github.com/google/polymorphicDSL[polymorphicDSL] Java libraries with Python (3+). In https://github.com/google/polymorphicDSL[polymorphicDSL] you can find a lot of the examples on Java language only.
+
+Instead of re-writing whole parse/process/engine of *polymorphicDSL* - we would like to show you the way how you can integrate Python code with Java.
+
+
+// == Code Base (my-fiber-mobile)
+include::doc/python-jpype-java.adoc[]
+
+
+== Getting Started
+
+
+.Dependencies
+[%collapsible]
+====
+Make sure you have installed on your operating system:
+
+1. http://www.java.com[JDK. Oracle] OR https://jdk.java.net/archive[OpenJDK 11+]
+2. https://www.python.org[Python]
+3. https://git-scm.com[Git]
+4. https://www.jetbrains.com/pycharm/download/other.html[PyCharm IDE]
+5. https://github.com/antlr/antlr4-tools[ANTLR tools]
+6. https://docs.pytest.org[Python testing framework]
+
+
+Optional:
+
+1. https://github.com/pyenv/pyenv#getting-pyenv[Simple Python Version Management: pyenv]
+2. https://docs.qameta.io/allure/#_python[Allure. Python integration]
+====
+
+.Pre-requisites
+[%collapsible]
+====
+
+.penv
+[%collapsible]
+=====
+We will use *Simple Python Version Management: pyenv* to install Python
+
+
+Install pyenv
+
+[source, shell]
+----
+curl https://pyenv.run | bash
+
+----
+
+Update _~/.bash_profile_ if it exists, otherwise _~/.profile_ (for login shells)
+and _~/.bashrc_ (for interactive shells) :
+
+[source, shell]
+----
+export PYENV_ROOT="$HOME/.pyenv"
+command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init -)"
+
+----
+
+Restart your shell for the changes to take effect.
+
+
+Running `pyenv install -l` gives the list of all available versions:
+[source, shell]
+----
+pyenv install 3.11.5
+pyenv local 3.11.5
+----
+
+//penv
+=====
+
+.MISC
+[%collapsible]
+=====
+
+Inside the project folder you can set up
+Virtual env:
+[source, shell]
+----
+python3 -m venv venv
+source venv/bin/activate
+----
+
+Upgrade `pip` and install additional required tools:
+[source, shell]
+----
+pip install --upgrade pip
+pip install pycodestyle
+pip install allure-pytest
+pip install antlr4-tools
+pip3 install pytest
+pip install JPype1
+pip install pytest-selenium
+pip install request
+
+pip3 freeze > requirements.txt
+----
+
+Allure Installation
+To be able to generate report from test results we need to install locally _Allure command line utility_ (linux):
+
+[source, shell]
+----
+wget https://github.com/allure-framework/allure2/releases/download/2.24.0/allure_2.24.0-1_all.deb
+sudo dpkg -i allure_2.24.0-1_all.deb
+allure --version
+----
+
+// .MISC
+=====
+
+
+.JAR dependencies
+[%collapsible]
+=====
+
+
+The *JPype module* required to provide all jar dependencies to the JVM class path before start a JVM.
+[source, python]
+----
+include::./tests/git_hub_ui_user_profile_test.py[lines=11..19]
+----
+It means we need to have three jar files before the test execution
+
+include::tests/resources/jar/artifacts.adoc[]
+
+
+// JAR dependencies
+=====
+
+
+// Pre-requisites
+====
+
+.Demo
+[%collapsible]
+====
+
+The demo will be simple, to make sure like GitHub profile is exist, but test case will be implemented for API and UI.
+The test case definition we will in the Gherkin manner:
+
+[source, shell]
+----
+include::./tests/resources/features/GitHubUser.feature[lines=6..17]
+----
+
+the same scenario we will execute for API and UI verification, but the source of true will be the same, this feature file (python-examples/tests/resources/features/GitHubUser.feature).
+
+
+The two ANTLR files (_GitHubLexer.g4_ & _GitHubParser.g4_) will be responsible for the parsing and processing phrases in the *GitHubUser.feature* file.
+
+[NOTE]
+=====
+It is vital that the versions for the Antlr tool used to generate the parser and the Antlr Python3 runtime match. E.g., 4.9.1. Using build files will help eliminate common errors from happening.
+=====
+
+To simplify the process of demo execution we put all stages in *runner.sh* file.
+
+the whole demo execution can be described in the 6 stages:
+
+1. Clean up before the execution - delete old artifacts, reports etc.
+2. Generate ANTLR4 artifacts: Lexer, Parser and Listener (Java files from _GitHubLexer.g4_ & _GitHubParser.g4_).
+3. Compile Java classes (using *antlr4-4.9.1-complete.jar* - the version should be compatible with *polymorphicDSL* - check ANTLR version in the *pom.xml* file)
+4. Generate JAR artifacts from the ANTLR4 java classes.
+5. Run tests using Pytest framework.
+6. Generate Allure report.
+
+
+Executor:
+[source, shell]
+----
+include::./runner.sh[lines=10..40]
+----
+
+
+// Demo
+====
+
+.Test design
+[%collapsible]
+====
+The couple words about the source code of tests and their design.
+
+* `python-examples/tests/resources/features/GitHubUser.feature` - it's source of true, test case description and steps.
+
+We will test this scenario for UI and API features:
+* `python-examples/tests/git_hub_api_user_profile_test.py` - parametrized test for API testing.
+* `python-examples/tests/git_hub_ui_user_profile_test.py` - parametrized test for UI (Selenium) testing.
+
+Let's check the test method implementation `examples/python-examples/tests/git_hub_ui_user_profile_test.py#test_git_hub_user_profile`:
+[source, python]
+----
+include::./tests/git_hub_ui_user_profile_test.py[lines=104..115]
+----
+
+We can skip different Allure decorators, you can find their description on the https://github.com/allure-framework/allure2[official website with examples], and check the https://docs.pytest.org/en/7.3.x/how-to/parametrize.html[Pytest parametrize fixture] `@pytest.mark.parametrize("input", data_provider)`.
+
+This fixture hase two input parameters:
+* `input` - this is the wrapper class `TestCaseWrap.py`,
+* `data_provider` - method what will produce the collections of the wrapper classes `TestCaseWrap.py`.
+
+The classes `TestCaseWrap.py` - just contained for Java classes:
+* `com.pdsl.testcases.TestCase`,
+* `com.pdsl.gherkin.executors.GherkinTestExecutor`,
+* `com.pdsl.python.GitHubParserListener`.
+[source, python]
+----
+include::./tests/TestCaseWrap.py[lines=1..12]
+----
+
+The decorator `data_provider` using his input parameters to configure the *polymorphicDSL* execution.
+[source, python]
+----
+include::./tests/git_hub_ui_user_profile_test.py[lines=97..101]
+----
+
+
+// Test design
+====
+
+
+== References
+
+.Links
+[%collapsible]
+====
+
+* https://github.com/google/polymorphicDSL[Polymorphic Domain Specific Language Framework]
+* https://github.com/allure-framework/allure2[Allure. Python examples]
+* https://github.com/google/polymorphicDSL/blob/main/documentation/pdsl_for_library_developers.adoc[Polymorphic DSL Architecture]
+* https://github.com/google/polymorphicDSL/tree/main/src/test/resources/framework_specifications/features[Polymorphic DSL specifications]
+* https://github.com/antlr/website-antlr4/tree/gh-pages/download[ANTLR4 tool]
+* https://jpype.readthedocs.io/en/latest/[JPype is a Python module to provide full access to Java]
+
+// References
+====

@@ -111,7 +111,7 @@ public final class ExecutorHelper {
     public ParseTreeTraversal getParseTreeTraversal(PdslTest pdslTest) {
         try {
             if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
-                throw new IllegalArgumentException("Either a listener or listener needs to be provided to the @PdslTest annotation!");
+                throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation!");
             }
             if (!pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
                 Constructor<?> providerConstructor = pdslTest.visitor().getDeclaredConstructor();
