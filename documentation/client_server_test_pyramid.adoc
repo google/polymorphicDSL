@@ -11,7 +11,7 @@ While there is yet another test pyramid included in this document surrounded by 
 [cols=2*]
 |===
 | *Problem*
-| *Reasonabl testing term*
+| *Reasonable testing term*
 
 | Was our recent deploy successful? Is the application working for users right now?
 | Smoke
