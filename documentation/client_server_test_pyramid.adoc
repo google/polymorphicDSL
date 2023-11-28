@@ -25,6 +25,9 @@ While there is yet another test pyramid included in this document surrounded by 
 | Logically, do the client and server interact appropriately in some environment?
 | Integration (Client + Server)
 
+| When we're supposed to use the same inputs/outputs did we remember to do that everywhere?
+| Contract
+
 | Does the client work well on it's own if it gets expected input?
 | API (Client side)
 
