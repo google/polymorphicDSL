@@ -22,6 +22,7 @@ public interface PolymorphicDslPhraseFilter {
      * @param testInput the test resources to parse
      * @return An optional containing the FilteredPhrases which indicate whether they were recognized by the grammar
      */
-    Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput);
+    //Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput);
 
+    Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput);
 }

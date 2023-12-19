@@ -59,5 +59,5 @@ public interface TestCase {
      *
      * @return an iterator for all <b>filtered</b> test phrases
      */
-    Iterator<TestSection> getContextFilteredTestSectionIterator();
+    Iterator<TestSection> getContextFilteredTestSectionIterator(); //LABEL
 }

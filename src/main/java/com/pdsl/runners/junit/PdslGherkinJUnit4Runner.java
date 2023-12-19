@@ -116,12 +116,23 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         return List.copyOf(frameworkMethods);
     }
 
+    /**
+     * Class level
+     * */
     private Collection<TestCase> getTestCases(PdslTest pdslTest, RecognizedBy recognizedBy) {
         Preconditions.checkNotNull(recognizedBy);
         Set<URI> testResources = getTestResources(pdslTest);
+
+        /**
+         * If the [codeExecution]:
+         * 1) is NULL or empty we can use old approach
+         * 2) is NOT NULL use the multiple lexer/parser 'S
+         * */
+        // LABEL
         // Create the phrase filter that will determine the grammar we use
-        PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(),
-                pdslTest.lexer(), recognizedBy.dslRecognizerParser(), recognizedBy.dslRecognizerLexer(), pdslTest.startRule(), recognizedBy.recognizerRule());
+        PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer(), recognizedBy.dslRecognizerParser(), recognizedBy.dslRecognizerLexer(), pdslTest.startRule(), recognizedBy.recognizerRule());
+        System.out.println("1. com.pdsl.runners.junit.PdslGherkinJUnit4Runner.getTestCases(com.pdsl.runners.PdslTest, com.pdsl.runners.RecognizedBy)");
+
         // Make sure that the parser has a rule called 'syntaxRule'
         GherkinTestSpecificationFactory gherkinTestSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter)
                 .withRecognizerParser(recognizedBy.dslRecognizerParser())
@@ -131,10 +142,35 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         return getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest);
     }
 
+    /**
+     * Test method level
+     * */
     private Collection<TestCase> getTestCases(PdslTest pdslTest) {
+        System.out.println("2. com.pdsl.runners.junit.PdslGherkinJUnit4Runner.getTestCases(com.pdsl.runners.PdslTest)");
+        System.out.println("3. " + pdslTest.parser().getName());
+
         Set<URI> testResources = getTestResources(pdslTest);
-        // Create the phrase filter that will determine the grammar we use
         PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer());
+
+        /**
+         * TODO: Optional
+         * */
+        //PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = null;
+
+        // LABEL
+        /**
+         * If the [codeExecution]:
+         * 1) is NULL or empty we can use old approach
+         * 2) is NOT NULL use the multiple lexer/parser'S
+         */
+        // if(pdslTest.codeExecution() == null) {
+        //     // Create the phrase filter that will determine the grammar we use
+        //     polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer());
+        // }
+        // else {
+        //     polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(pdslTest.codeExecution());
+        // }
+
         GherkinTestSpecificationFactory gherkinTestSpecificationFactory = /*!pdslTest.skipUnrecognized()
                 ? new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter)
                     .withRecognizerParser(pdslTest.parser())
@@ -142,6 +178,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                         .withRecognizerRule(PdslTest.DEFAULT_ALL_RULE)
                     .build()
                 :*/ new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter).build();
+
         return getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest);
     }
 
