@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A standard test case used by PDSL for test case execution.
@@ -20,6 +21,7 @@ public class DefaultPdslTestCase implements TestCase {
     private final List<TestBodyFragment> testBodyFragments;
     private final List<String> unfilteredPhraseBody;
     private final List<String> contextFilteredPhraseBody;
+    private final List<FilteredPhrase> phrasesToTestSections;
     private final URI source;
 
     /**
@@ -39,14 +41,14 @@ public class DefaultPdslTestCase implements TestCase {
         this.source = source;
         this.testBodyFragments = testBodyFragments;
         this.testCaseTitle = testCaseTitle;
-        List<FilteredPhrase> filteredPhrases = testBodyFragments.stream()
+        this.phrasesToTestSections = testBodyFragments.stream()
                 .map(TestBodyFragment::getTestPhrases)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toUnmodifiableList());
-        this.unfilteredPhraseBody = filteredPhrases.stream()
+        this.unfilteredPhraseBody = phrasesToTestSections.stream()
                 .map(FilteredPhrase::getPhrase)
                 .collect(Collectors.toUnmodifiableList());
-        this.contextFilteredPhraseBody = filteredPhrases.stream()
+        this.contextFilteredPhraseBody = phrasesToTestSections.stream()
                 .map(FilteredPhrase::getParseTree)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -73,10 +75,19 @@ public class DefaultPdslTestCase implements TestCase {
 
     @Override
     public Iterator<TestSection> getContextFilteredTestSectionIterator() {
-        return testBodyFragments.stream()
-                .map(TestSection::convertBodyFragment)
-                .flatMap(Collection::stream)
+        return getTestSectionStream()
                 .collect(Collectors.toUnmodifiableList())
                 .iterator();
+    }
+
+    private Stream<TestSection> getTestSectionStream() {
+        return testBodyFragments.stream()
+                .map(TestSection::convertBodyFragment)
+                .flatMap(Collection::stream);
+    }
+
+    @Override
+    public List<FilteredPhrase> getFilteredPhrases() {
+       return phrasesToTestSections;
     }
 }
