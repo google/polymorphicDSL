@@ -420,9 +420,9 @@
                     </argLine>
                     <!--    This section for debugging only    -->
                     <includes>
-                        <include>**/com/pdsl/tmp/GammaOneTest.java</include>
-                        <include>**/com/pdsl/tmp/GammaTwoTest.java</include>
-<!--                    <include>**/com/pdsl/tmp/GammaAllTest.java</include>    -->
+<!--                        <include>**/com/pdsl/tmp/GammaOneTest.java</include>-->
+<!--                        <include>**/com/pdsl/tmp/GammaTwoTest.java</include>-->
+                        <include>**/com/pdsl/tmp/GammaAllTest.java</include>
                     </includes>
                 </configuration>
             </plugin>

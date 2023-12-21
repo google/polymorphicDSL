@@ -30,7 +30,9 @@ public class GammaTwoListenerImpl implements GammaTwoParserListener {
   public void exitEveryRule(ParserRuleContext parserRuleContext) {}
 
   @Override
-  public void enterHiFolks(HiFolksContext ctx) {}
+  public void enterHiFolks(HiFolksContext ctx) {
+    System.out.println("enterHiFolks(). I am from GammaTwoListenerImpl");
+  }
 
   @Override
   public void exitHiFolks(HiFolksContext ctx) {}
@@ -40,5 +42,4 @@ public class GammaTwoListenerImpl implements GammaTwoParserListener {
 
   @Override
   public void exitPolymorphicDslAllRules(GammaTwoParser.PolymorphicDslAllRulesContext ctx) {}
-
 }

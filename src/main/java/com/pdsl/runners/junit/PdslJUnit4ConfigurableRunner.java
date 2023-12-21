@@ -114,7 +114,8 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 throw new PolymorphicDslTestResourceException(String.format("No test resources found!%n\tResource Finder Generator:%s%n\tResource Root:%s",
                         resourceFinderGenerator.getClass(), pdslConfiguration.resourceRoot()));
             }
-            ExecutorHelper.ParseTreeTraversal traversal = executorHelper.getParseTreeTraversal(pdslTest);
+
+            ExecutorHelper.ParseTreeTraversal traversal = executorHelper.getParseTreeTraversal(pdslTest).get(0);//TODO FIXME
             RecognizedBy recognizedBy = method.getAnnotation(RecognizedBy.class);
             Collection<TestCase> testCases = null;
             try {
@@ -140,6 +141,7 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 notifier.fireTestFailure(new Failure(describeChild(method), e));
                 return;
             }
+
             try {
                 PdslExecutorRunner pdslExecutorRunner = traversal.getVisitor().isPresent()
                         ? new PdslExecutorRunner(getTestClass().getJavaClass(),

@@ -37,7 +37,9 @@ public class GammaOneListenerImpl implements GammaOneParserListener {
   public void exitPolymorphicDslAllRules(PolymorphicDslAllRulesContext ctx) {}
 
   @Override
-  public void enterHelloWorld(HelloWorldContext ctx) {}
+  public void enterHelloWorld(HelloWorldContext ctx) {
+    System.out.println("enterHelloWorld(). I am from GammaOneListenerImpl");
+  }
 
   @Override
   public void exitHelloWorld(HelloWorldContext ctx) {}

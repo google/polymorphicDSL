@@ -24,83 +24,200 @@ import java.util.*;
 /**
  * An executor that runs PDSL tests create from a TestCaseFactory.
  *
- * The default executor has colorized terminal output and prints the phrases as they execute
- * and the stack trace on failure.
+ * The default executor has colorized terminal output and prints the phrases as they execute and the
+ * stack trace on failure.
  *
  * All metadata associated with the tests will also be printed.
  */
 public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor {
 
-    private static final Logger logger = LoggerFactory.getLogger(DefaultPolymorphicDslTestExecutor.class);
-    private final ParseTreeWalker walker = new ParseTreeWalker();
-    private final Optional<MultiOutputStream> outputStreams = Optional.of(new MultiOutputStream(new PdslThreadSafeOutputStream()));
-    private final Charset charset = Charset.defaultCharset();
+  private static final Logger logger = LoggerFactory.getLogger(
+      DefaultPolymorphicDslTestExecutor.class);
+  private final ParseTreeWalker walker = new ParseTreeWalker();
+  private final Optional<MultiOutputStream> outputStreams = Optional.of(
+      new MultiOutputStream(new PdslThreadSafeOutputStream()));
+  private final Charset charset = Charset.defaultCharset();
 
-    @Override
-    public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener phraseRegistry) {
-        // Walk the phrase registry to make sure all phrases are defined
-        logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
-        MetadataTestRunResults results = walk(testCases, new PhraseRegistry(phraseRegistry), "NONE");
-        if (results.failingTestTotal() == 0) {
-            logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
+  @Override
+  public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases,
+      ParseTreeListener phraseRegistry) {
+    // Walk the phrase registry to make sure all phrases are defined
+    logger.info(
+        AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
+    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(phraseRegistry), "NONE");
+    if (results.failingTestTotal() == 0) {
+      logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
+          + AnsiTerminalColorHelper.RESET);
+    } else {
+      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
+          + AnsiTerminalColorHelper.RESET);
+    }
+    return (PolymorphicDslTestRunResults) results;
+  }
+
+  @Override
+  public TestRunResults runTests(Collection<TestCase> testCases,
+      ParseTreeVisitor subgrammarVisitor) {
+    logger.info(
+        AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
+    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarVisitor), "NONE");
+    if (results.failingTestTotal() == 0) {
+      logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "All phrases successfully executed!"
+          + AnsiTerminalColorHelper.RESET);
+    } else {
+      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
+          + AnsiTerminalColorHelper.RESET);
+    }
+    return (PolymorphicDslTestRunResults) results;
+  }
+
+  /**
+   * A container for a listener XOR a visitor.
+   */
+  private static final class PhraseRegistry {
+
+    private final Optional<ParseTreeListener> listener;
+    private final Optional<ParseTreeVisitor<?>> visitor;
+
+    PhraseRegistry(ParseTreeListener listener) {
+      this.listener = Optional.of(listener);
+      this.visitor = Optional.empty();
+    }
+
+    PhraseRegistry(ParseTreeVisitor visitor) {
+      this.listener = Optional.empty();
+      this.visitor = Optional.of(visitor);
+    }
+  }
+
+  private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry,
+      String context) {
+    PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
+        new PdslThreadSafeOutputStream(), context);
+    Set<List<String>> previouslyExecutedTests = new HashSet<>();
+    final byte[] RESET = AnsiTerminalColorHelper.RESET.getBytes(charset);
+    for (TestCase testCase : testCases) {
+
+      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(charset));
+      notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
+          .getBytes(charset));
+      notifyStreams(String.format("%n").getBytes(charset));
+      notifyStreams(RESET);
+      Phrase activePhrase = null;
+      Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
+      int phraseIndex = 0;
+      try {
+        if (previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
+          logger.warn(String.format(
+              "A test was skipped because after filtering it duplicated an earlier run test!%n\t%s",
+              testCase.getTestTitle()));
+          StringBuilder duplicateBody = new StringBuilder();
+          testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
+          results.addTestResult(DefaultTestResult.duplicateTest(testCase));
         } else {
-            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
+          previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
+          while (testBody.hasNext()) {
+            TestSection section = testBody.next();
+            if (section.getMetaData().isPresent()) {
+              notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
+              notifyStreams(section.getMetaData().get());
+              notifyStreams(RESET);
+            }
+            activePhrase = section.getPhrase();
+            if (phraseRegistry.listener.isPresent()) {
+              walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
+            } else {
+              phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
+            }
+            phraseIndex++;
+            notifyStreams(
+                (AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n"
+                    + AnsiTerminalColorHelper.RESET).getBytes(charset));
+          }
+          results.addTestResult(DefaultTestResult.passingTest(testCase));
         }
-        return (PolymorphicDslTestRunResults) results;
+      } catch (Throwable e) {
+        notifyStreams(
+            (AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n"
+                + AnsiTerminalColorHelper.RESET).getBytes(charset));
+        int phrasesSkippedDueToFailure = 0;
+        while (testBody.hasNext()) {
+          testBody.next();
+          phrasesSkippedDueToFailure++;
+        }
+        results.addTestResult(DefaultTestResult.failedTest(testCase, activePhrase, e, phraseIndex,
+            phrasesSkippedDueToFailure));
+        logger.error("Phrase failure", e);
+        e.printStackTrace();
+      }
+
     }
+    return results;
+  }
 
-    @Override
-    public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor) {
-        logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
-        MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarVisitor), "NONE");
-        if (results.failingTestTotal() == 0) {
-            logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
-        } else {
-            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
-        }
-        return (PolymorphicDslTestRunResults) results;
+  private void notifyStreams(InputStream inputStream) {
+    if (outputStreams.isPresent()) {
+      try {
+        outputStreams.get().write(inputStream.readAllBytes());
+      } catch (IOException e) {
+        throw new PolymorphicDslTransformationException("Could not notify streams!", e);
+      }
     }
+  }
 
-    /**
-     * A container for a listener XOR a visitor.
-     */
-    private static final class PhraseRegistry {
-        private final Optional<ParseTreeListener> listener;
-        private final Optional<ParseTreeVisitor<?>> visitor;
-
-        PhraseRegistry(ParseTreeListener listener) {
-            this.listener = Optional.of(listener);
-            this.visitor = Optional.empty();
-        }
-
-        PhraseRegistry(ParseTreeVisitor visitor) {
-            this.listener = Optional.empty();
-            this.visitor = Optional.of(visitor);
-        }
+  private void notifyStreams(byte[] bytes) {
+    if (outputStreams.isPresent()) {
+      try {
+        outputStreams.get().write(bytes);
+      } catch (IOException e) {
+        throw new PolymorphicDslTransformationException("Could not notify streams!", e);
+      }
     }
-    private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry, String context) {
-        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
-        Set<List<String>> previouslyExecutedTests = new HashSet<>();
-        final byte[] RESET =  AnsiTerminalColorHelper.RESET.getBytes(charset);
-        for (TestCase testCase : testCases) {
+  }
 
-            notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(charset));
-            notifyStreams(String.format( "%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle()).getBytes(charset));
-            notifyStreams(String.format("%n").getBytes(charset));
-            notifyStreams(RESET);
-            Phrase activePhrase = null;
-            Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
-            int phraseIndex = 0;
-            try {
-                if (previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
-                    logger.warn(String.format("A test was skipped because after filtering it duplicated an earlier run test!%n\t%s", testCase.getTestTitle()));
-                    StringBuilder duplicateBody = new StringBuilder();
-                    testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
-                    results.addTestResult(DefaultTestResult.duplicateTest(testCase));
-                } else {
-                    previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
-                    while (testBody.hasNext()) {
-                        TestSection section = testBody.next();
+  @Override
+  public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
+      ParseTreeListener subgrammarListener, String context) {
+    logger.info("Running tests...");
+    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarListener),
+        context);
+    if (results.failingTestTotal() == 0) {
+      logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
+          + AnsiTerminalColorHelper.RESET);
+    } else {
+      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
+          + AnsiTerminalColorHelper.RESET);
+    }
+    return (PolymorphicDslTestRunResults) results;
+  }
+
+  @Override
+  public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
+      ParseTreeVisitor<?> visitor, String context) {
+    logger.info("Running tests...");
+    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
+    if (results.failingTestTotal() == 0) {
+      logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
+          + AnsiTerminalColorHelper.RESET);
+    } else {
+      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
+          + AnsiTerminalColorHelper.RESET);
+    }
+    return (PolymorphicDslTestRunResults) results;
+  }
+
+  @Override
+  public MetadataTestRunResults runTestsWithMetadata(List<List<TestCase>> testCases,
+      List<ParseTreeVisitor<?>> visitor, String context) {
+    logger.info("Running tests...");
+
+    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
+
+    return null;
+  }
+
+    /*
+    *  TestSection section = testBody.next();
                         if (section.getMetaData().isPresent()) {
                             notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
                             notifyStreams(section.getMetaData().get());
@@ -114,66 +231,27 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                         }
                         phraseIndex++;
                         notifyStreams((AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n" + AnsiTerminalColorHelper.RESET).getBytes(charset));
-                    }
-                    results.addTestResult(DefaultTestResult.passingTest(testCase));
-                }
-            } catch (Throwable e) {
-                notifyStreams((AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n" + AnsiTerminalColorHelper.RESET).getBytes(charset));
-                int phrasesSkippedDueToFailure = 0;
-                while (testBody.hasNext()) {
-                    testBody.next();
-                    phrasesSkippedDueToFailure++;
-                }
-                results.addTestResult(DefaultTestResult.failedTest(testCase,activePhrase, e, phraseIndex, phrasesSkippedDueToFailure));
-								logger.error("Phrase failure", e);
-								e.printStackTrace();
-            }
 
-        }
-        return results;
-    }
+    * */
 
-    private void notifyStreams(InputStream inputStream) {
-        if (outputStreams.isPresent()) {
-            try {
-                outputStreams.get().write(inputStream.readAllBytes());
-            } catch (IOException e) {
-                throw new PolymorphicDslTransformationException("Could not notify streams!", e);
-            }
-        }
-    }
+  private void tmp(List<TestSection> sections, List<PhraseRegistry> phraseRegistry) {
 
-    private void notifyStreams(byte[] bytes) {
-        if (outputStreams.isPresent()) {
-            try {
-                outputStreams.get().write(bytes);
-            } catch (IOException e) {
-                throw new PolymorphicDslTransformationException("Could not notify streams!", e);
-            }
-        }
-    }
 
-    @Override
-    public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeListener subgrammarListener, String context) {
-        logger.info("Running tests...");
-        MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarListener), context);
-        if (results.failingTestTotal() == 0) {
-            logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
-        } else {
-            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
-        }
-        return (PolymorphicDslTestRunResults) results;
+//TestSection     section = testBody.next();
+    if (section.getMetaData().isPresent()) {
+      notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
+      notifyStreams(section.getMetaData().get());
+      notifyStreams(RESET);
     }
+    activePhrase = section.getPhrase();
+    if (phraseRegistry.listener.isPresent()) {
+      walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
+    } else {
+      phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
+    }
+    phraseIndex++;
+    notifyStreams((AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n"
+        + AnsiTerminalColorHelper.RESET).getBytes(charset));
 
-    @Override
-    public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, String context) {
-        logger.info("Running tests...");
-        MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
-        if (results.failingTestTotal() == 0) {
-            logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!" + AnsiTerminalColorHelper.RESET);
-        } else {
-            logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!" + AnsiTerminalColorHelper.RESET);
-        }
-        return (PolymorphicDslTestRunResults) results;
-    }
+  }
 }

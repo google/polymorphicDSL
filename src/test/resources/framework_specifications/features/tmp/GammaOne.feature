@@ -1,5 +1,4 @@
-Feature: Multiple sources of the truth for Listener (GammaOneLexer.g4 & GammaOneParser.g4).
+Feature: GammaOne
 
-Scenario: Combine the two different Lexers in one Listener
+Scenario: GammaOne regular scenario.
   Given Hello, world!
-  Then Hi, folks :).
