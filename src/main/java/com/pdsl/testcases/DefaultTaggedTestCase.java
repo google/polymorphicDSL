@@ -1,5 +1,7 @@
 package com.pdsl.testcases;
 
+import com.pdsl.specifications.FilteredPhrase;
+
 import java.net.URI;
 import java.util.Collection;
 import java.util.Iterator;
@@ -44,5 +46,10 @@ public class DefaultTaggedTestCase implements TaggedTestCase {
     @Override
     public Iterator<TestSection> getContextFilteredTestSectionIterator() {
         return testCase.getContextFilteredTestSectionIterator();
+    }
+
+    @Override
+    public List<FilteredPhrase> getFilteredPhrases() {
+        return testCase.getFilteredPhrases();
     }
 }
