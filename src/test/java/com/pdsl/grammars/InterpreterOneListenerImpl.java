@@ -1,16 +1,16 @@
 package com.pdsl.grammars;
 
-import com.pdsl.grammars.GammaOneParser.HelloWorldContext;
-import com.pdsl.grammars.GammaOneParser.PolymorphicDslAllRulesContext;
+import com.pdsl.grammars.InterpreterOneParser.HelloWorldContext;
+import com.pdsl.grammars.InterpreterOneParser.PolymorphicDslAllRulesContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GammaOneListenerImpl implements GammaOneParserListener {
+public class InterpreterOneListenerImpl implements InterpreterOneParserListener {
 
-  private Logger logger = LoggerFactory.getLogger(GammaOneListenerImpl.class);
+  private Logger logger = LoggerFactory.getLogger(InterpreterOneListenerImpl.class);
 
   @Override
   public void visitErrorNode(ErrorNode node) {
@@ -38,7 +38,8 @@ public class GammaOneListenerImpl implements GammaOneParserListener {
 
   @Override
   public void enterHelloWorld(HelloWorldContext ctx) {
-    System.out.println("enterHelloWorld(). I am from GammaOneListenerImpl");
+    logger.info("enterHelloWorld(). I am from GammaOneListenerImpl");
+    //throw new IllegalStateException("Bla enterHelloWorld");
   }
 
   @Override

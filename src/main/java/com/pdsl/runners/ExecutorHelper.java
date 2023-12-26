@@ -116,7 +116,7 @@ public final class ExecutorHelper {
          * 1) is NULL or empty we can use old approach
          * 2) is NOT NULL use the multiple lexer/parser'S
          */
-        if(pdslTest.codeExecution() == null || pdslTest.codeExecution().length == 0) {
+        if(pdslTest.interpreter() == null || pdslTest.interpreter().length == 0) {
             try {
                 if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
                     throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation!");
@@ -140,27 +140,27 @@ public final class ExecutorHelper {
             }
         }
         else {
-            for(CodeExecution codeExecution : pdslTest.codeExecution()) {
+            for(Interpreter interpreter : pdslTest.interpreter()) {
                 try {
-                    if (codeExecution.listener().equals(EmptyParseTreeListenerProvider.class) && codeExecution.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
+                    if (interpreter.listener().equals(EmptyParseTreeListenerProvider.class) && interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
                         throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation, attribute [codeExecution]!");
                     }
-                    if (!codeExecution.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
-                        Constructor<?> providerConstructor = codeExecution.visitor().getDeclaredConstructor();
+                    if (!interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
+                        Constructor<?> providerConstructor = interpreter.visitor().getDeclaredConstructor();
                         traversals.add(new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get()));
                         //return new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get());
                     } else {
-                        Constructor<?> providerConstructor = codeExecution.listener().getDeclaredConstructor();
+                        Constructor<?> providerConstructor = interpreter.listener().getDeclaredConstructor();
                         traversals.add(new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get()));
                         //return new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get());
                     }
                 } catch (NoSuchMethodException e) {
                     throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
-                        + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", codeExecution.listener().getSimpleName()), e);
+                        + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", interpreter.listener().getSimpleName()), e);
                 } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", codeExecution.listener()), e);
+                    throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", interpreter.listener()), e);
                 } catch (InstantiationException | InvocationTargetException e) {
-                    throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", codeExecution.listener().getSimpleName()), e);
+                    throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", interpreter.listener().getSimpleName()), e);
                 }
             }//FOR loop
         }

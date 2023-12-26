@@ -1,7 +1,6 @@
 package com.pdsl.runners;
 
 import java.lang.annotation.ElementType;
-import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
@@ -13,8 +12,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-//@Repeatable(PdslTest.class)
-public @interface CodeExecution {
+public @interface Interpreter {
 
   Class<? extends Parser> parser();
   Class<? extends Lexer> lexer();

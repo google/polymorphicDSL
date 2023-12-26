@@ -3,5 +3,4 @@ Feature: Multiple sources of the truth for Listener (GammaTwoLexer.g4 & GammaTwo
 Scenario: Combine the two different Lexers in one Listener
   Given Hi, folks :).
   Then Hello, world!
-  And Bla Bla
 

@@ -1,8 +1,11 @@
 package com.pdsl.testcases;
 
+import com.pdsl.specifications.FilteredPhrase;
+
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * An executable test for PDSL to process with a test case executor of some kind.
@@ -59,5 +62,22 @@ public interface TestCase {
      *
      * @return an iterator for all <b>filtered</b> test phrases
      */
-    Iterator<TestSection> getContextFilteredTestSectionIterator(); //LABEL
+    Iterator<TestSection> getContextFilteredTestSectionIterator();
+
+    /**
+     * Provides a list of FilteredPhrases that represent this test case.
+     *
+     * <p>Each FilteredPhrase represents a potential parse tree to be executed by a visitor/listener.
+     * It is possible that some phrase was not recognized by the parser that created this test case.
+     *
+     * This feature was added to make it easier for multiple listeners/visitors to coordinate with each other when
+     * processing parse trees created from the same input. This is particularly necessary when they recognize different
+     * subsets of the same input.
+     *
+     * There should be a 1:1 mapping with the elements produced by this method and the strings returned by
+     * getUnfilteredPhraseBody()
+     *
+     * @return List<FilteredPhrase>  the filtered phrases from all phrases that are associated with the test case
+     */
+    List<FilteredPhrase> getFilteredPhrases();
 }

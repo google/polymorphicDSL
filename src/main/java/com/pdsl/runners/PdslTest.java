@@ -18,8 +18,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface PdslTest {
-    Class<? extends Parser> parser() default Parser.class;//
-    Class<? extends Lexer> lexer() default Lexer.class;//
+    Class<? extends Parser> parser() default Parser.class;
+    Class<? extends Lexer> lexer() default Lexer.class;
     Class<? extends Provider<? extends ParseTreeListener>> listener() default EmptyParseTreeListenerProvider.class;
     Class<? extends Provider<? extends ParseTreeVisitor<?>>> visitor() default EmptyParseTreeVisitorProvider.class;
 
@@ -30,5 +30,5 @@ public @interface PdslTest {
     String startRule() default DEFAULT_ALL_RULE;
     static String DEFAULT_ALL_RULE = "polymorphicDslAllRules" ;
 
-    CodeExecution[] codeExecution() default {};
+    Interpreter[] interpreter() default {};
 }

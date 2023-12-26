@@ -143,11 +143,13 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
             }
 
             try {
-                PdslExecutorRunner pdslExecutorRunner = traversal.getVisitor().isPresent()
-                        ? new PdslExecutorRunner(getTestClass().getJavaClass(),
-                        traversal.getVisitor().get(), testCases, testRunExecutor.get(), pdslConfiguration.context())
-                        : new PdslExecutorRunner(getTestClass().getJavaClass(),
-                        traversal.getListener().orElseThrow(), testCases, testRunExecutor.get(), pdslConfiguration.context());
+                //TODO FIXME
+                // PdslExecutorRunner pdslExecutorRunner = traversal.getVisitor().isPresent()
+                //         ? new PdslExecutorRunner(getTestClass().getJavaClass(),
+                //         traversal.getVisitor().get(), testCases, testRunExecutor.get(), pdslConfiguration.context())
+                //         : new PdslExecutorRunner(getTestClass().getJavaClass(),
+                //         traversal.getListener().orElseThrow(), testCases, testRunExecutor.get(), pdslConfiguration.context());
+                PdslExecutorRunner pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(), null, testRunExecutor.get(), pdslConfiguration.context());
                 pdslExecutorRunner.run(notifier);
                 List<MetadataTestRunResults> methodResults = pdslExecutorRunner.getMetadataTestRunResults();
                 if (!methodResults.stream().anyMatch(r -> r.failingTestTotal() > 0)) {

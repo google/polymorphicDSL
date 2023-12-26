@@ -13,6 +13,7 @@ import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.PreorderTestCaseFactory;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -105,6 +106,12 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
     @Override
     public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, String context) {
         return executor.runTestsWithMetadata(testCases, visitor, context);
+    }
+
+    //TODO FIXME
+    @Override
+    public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCase, String context) {
+        return null;
     }
 
     public MetadataTestRunResults runTestsWithMetadata(Set<URI> resources, ParseTreeListener subgrammarListener, String context) {

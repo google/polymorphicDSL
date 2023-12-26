@@ -1,6 +1,7 @@
 package com.pdsl.executors;
 
 import com.pdsl.reports.MetadataTestRunResults;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.util.List;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -39,6 +40,8 @@ public interface TraceableTestRunExecutor extends PolymorphicDslTestExecutor {
     MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, String context);
 
     // TO MIX
+    MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCase, String context);
 
-    MetadataTestRunResults runTestsWithMetadata(List<List<TestCase>> testCases, List<ParseTreeVisitor<?>> visitor, String context);
+
+
 }

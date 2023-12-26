@@ -1,15 +1,15 @@
 package com.pdsl.grammars;
 
-import com.pdsl.grammars.GammaTwoParser.HiFolksContext;
+import com.pdsl.grammars.InterpreterTwoParser.HiFolksContext;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GammaTwoListenerImpl implements GammaTwoParserListener {
+public class InterpreterTwoListenerImpl implements InterpreterTwoParserListener {
 
-  private Logger logger = LoggerFactory.getLogger(GammaTwoListenerImpl.class);
+  private Logger logger = LoggerFactory.getLogger(InterpreterTwoListenerImpl.class);
 
   @Override
   public void visitErrorNode(ErrorNode node) {
@@ -31,15 +31,15 @@ public class GammaTwoListenerImpl implements GammaTwoParserListener {
 
   @Override
   public void enterHiFolks(HiFolksContext ctx) {
-    System.out.println("enterHiFolks(). I am from GammaTwoListenerImpl");
+    logger.info("enterHiFolks(). I am from GammaTwoListenerImpl");
   }
 
   @Override
   public void exitHiFolks(HiFolksContext ctx) {}
 
   @Override
-  public void enterPolymorphicDslAllRules(GammaTwoParser.PolymorphicDslAllRulesContext ctx) {}
+  public void enterPolymorphicDslAllRules(InterpreterTwoParser.PolymorphicDslAllRulesContext ctx) {}
 
   @Override
-  public void exitPolymorphicDslAllRules(GammaTwoParser.PolymorphicDslAllRulesContext ctx) {}
+  public void exitPolymorphicDslAllRules(InterpreterTwoParser.PolymorphicDslAllRulesContext ctx) {}
 }
