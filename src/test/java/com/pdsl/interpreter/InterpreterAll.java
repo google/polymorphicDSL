@@ -11,7 +11,6 @@ import com.pdsl.runners.PdslGherkinApplication;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.RecognizedBy;
 import com.pdsl.runners.junit.PdslGherkinJUnit4Runner;
-import org.junit.Test;
 import org.junit.runner.RunWith;
 
 /**

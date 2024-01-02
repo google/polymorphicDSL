@@ -5,7 +5,6 @@ import com.pdsl.specifications.FilteredPhrase;
 import java.net.URI;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * An executable test for PDSL to process with a test case executor of some kind.

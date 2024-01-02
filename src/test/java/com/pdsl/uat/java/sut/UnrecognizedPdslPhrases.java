@@ -1,7 +1,6 @@
 package com.pdsl.uat.java.sut;
 
 import com.pdsl.runners.PdslConfiguration;
-import com.pdsl.runners.PdslConfiguration;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.RecognizedBy;
 import com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner;

@@ -15,10 +15,8 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 
@@ -27,7 +25,6 @@ import java.net.URISyntaxException;
 import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
-import static org.junit.Assert.fail;
 
 /**
  * Component tests for PolymorphicDslTestExecutor
