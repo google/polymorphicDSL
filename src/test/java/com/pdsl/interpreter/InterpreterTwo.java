@@ -11,12 +11,16 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.runner.RunWith;
 import com.pdsl.runners.RecognizedBy;
 
+/**
+ * This is for debugging only.
+ * It's basic happy path pDSL framework scenario testing - it's covered in the regular regression, does not require to be included in the main regression scope.
+ */
 @RunWith(PdslGherkinJUnit4Runner.class)
 @PdslGherkinApplication(
         resourceRoot = "src/test/resources/framework_specifications/features/interpreter",
         recognizerRule = "polymorphicDslAllRules"
 )
-public class InterpreterTwo {
+public final class InterpreterTwo {
 
     @PdslTest(
             includesResources = "InterpreterTwo.feature",

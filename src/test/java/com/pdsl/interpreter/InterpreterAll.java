@@ -38,15 +38,13 @@ public final class InterpreterAll {
       dslRecognizerLexer = InterpreterAllLexer.class,
       recognizerRule = "polymorphicDslAllRulesAll"
   )
-  public void helloHiTest1() {
-  }
+  public void helloHiTest1() {}
 
   @PdslTest(includesResources = "InterpreterAll.feature",
 
       interpreters = {
-          @Interpreter(parser = InterpreterOneParser.class, lexer = InterpreterOneLexer.class, listener = InterpreterOne.InterpreterOneListenerProvider.class)
-          ,@Interpreter(parser = InterpreterTwoParser.class, lexer = InterpreterTwoLexer.class, listener = InterpreterTwo.InterpreterTwoListenerProvider.class)
-          //,@Interpreter(parser = InterpreterTwoParser.class, lexer = InterpreterTwoLexer.class, listener = InterpreterTwo.InterpreterTwoListenerProvider.class)
+          @Interpreter(parser = InterpreterOneParser.class, lexer = InterpreterOneLexer.class, listener = InterpreterOne.InterpreterOneListenerProvider.class),
+          @Interpreter(parser = InterpreterTwoParser.class, lexer = InterpreterTwoLexer.class, listener = InterpreterTwo.InterpreterTwoListenerProvider.class)
       }
   )
   @RecognizedBy(
@@ -54,7 +52,5 @@ public final class InterpreterAll {
       dslRecognizerLexer = InterpreterAllLexer.class,
       recognizerRule = "polymorphicDslAllRulesAll"
   )
-  //@Test()//expected = RuntimeException.class
-  public void helloHiTest2() {
-  }
+  public void helloHiTest2() {}
 }

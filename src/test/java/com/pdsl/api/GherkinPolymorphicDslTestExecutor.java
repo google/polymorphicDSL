@@ -9,6 +9,8 @@ import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.InterpreterOneLexer;
 import com.pdsl.grammars.InterpreterOneListenerImpl;
 import com.pdsl.grammars.InterpreterOneParser;
+import com.pdsl.grammars.InterpreterTwoLexer;
+import com.pdsl.grammars.InterpreterTwoParser;
 import com.pdsl.grammars.InterpreterTwoListenerImpl;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.TestSpecification;
@@ -305,9 +307,9 @@ public class GherkinPolymorphicDslTestExecutor {
         testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsOne.get()).stream().collect(Collectors.toUnmodifiableList()));
 
         // Initialize the Interpreter#1
-        // GherkinTestSpecificationFactory gherkinTestSpecificationFactoryTwo = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterTwoParser.class, InterpreterTwoLexer.class)).build();
-        // Optional<Collection<TestSpecification>> gherkinTestSpecificationsTwo = gherkinTestSpecificationFactoryTwo.getTestSpecifications(dslFiles);
-        // testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsTwo.get()).stream().collect(Collectors.toUnmodifiableList()));
+        GherkinTestSpecificationFactory gherkinTestSpecificationFactoryTwo = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterTwoParser.class, InterpreterTwoLexer.class)).build();
+        Optional<Collection<TestSpecification>> gherkinTestSpecificationsTwo = gherkinTestSpecificationFactoryTwo.getTestSpecifications(dslFiles);
+        testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsTwo.get()).stream().collect(Collectors.toUnmodifiableList()));
 
         // Act
         /*

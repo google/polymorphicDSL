@@ -44,7 +44,7 @@ public class PdslExecutorRunner extends ParentRunner<SharedTestCase> {
     @Override
     protected Description describeChild(SharedTestCase sharedTestCase) {
             return Description.createTestDescription(getTestClass().getName(),
-                String.format("%d - %s", accumulator ++, sharedTestCase.getTestCases().stream().findFirst().orElseThrow().getTestTitle()));
+                String.format("%d - %s", accumulator++, sharedTestCase.getTestCases().stream().findFirst().orElseThrow().getTestTitle()));
     }
 
     @Override

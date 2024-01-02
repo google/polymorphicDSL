@@ -39,7 +39,6 @@ public final class InterpreterOneListenerImpl implements InterpreterOneParserLis
   @Override
   public void enterHelloWorld(HelloWorldContext ctx) {
     logger.info("enterHelloWorld(). I am from InterpreterOneListenerImpl.");
-    //throw new IllegalStateException("Bla enterHelloWorld");
   }
 
   @Override

@@ -129,6 +129,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
          * 2) is NOT NULL use the multiple Lexer/Parser
          */
         if(pdslTest.interpreters() == null || pdslTest.interpreters().length == 0) {
+            // Create the phrase filter that will determine the grammar we use
             PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(
                 pdslTest.parser(), pdslTest.lexer(), recognizedBy.dslRecognizerParser(),
                 recognizedBy.dslRecognizerLexer(), pdslTest.startRule(),
