@@ -1,4 +1,4 @@
-Feature: GammaOne
+Feature: Interpreter
 
-Scenario: GammaOne regular scenario.
+Scenario: InterpreterOne regular scenario.
   Given Hello, world!

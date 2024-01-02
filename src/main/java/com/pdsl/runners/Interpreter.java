@@ -10,6 +10,11 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
+/**
+ * An attribute/container for {@link com.pdsl.runners.PdslTest} annotation,
+ * created for supporting multiple Interpreters (Lexer/Parser; Listener/Visitor)
+ * {@link com.pdsl.executors.InterpreterObj}.
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Interpreter {

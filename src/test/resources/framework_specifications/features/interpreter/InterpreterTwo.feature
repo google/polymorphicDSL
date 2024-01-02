@@ -1,4 +1,4 @@
-Feature: GammaTwo
+Feature: Interpreter
 
-Scenario: GammaTwo regular scenario.
+  Scenario: InterpreterTwo regular scenario.
   Given Hi, folks :).

@@ -108,10 +108,9 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
         return executor.runTestsWithMetadata(testCases, visitor, context);
     }
 
-    //TODO FIXME
     @Override
     public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCase, String context) {
-        return null;
+        return executor.runTestsWithMetadata(sharedTestCase, context);
     }
 
     public MetadataTestRunResults runTestsWithMetadata(Set<URI> resources, ParseTreeListener subgrammarListener, String context) {

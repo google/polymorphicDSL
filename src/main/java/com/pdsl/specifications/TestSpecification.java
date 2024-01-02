@@ -52,7 +52,7 @@ public interface TestSpecification {
      * @return an Optional containing "test phrases" if this TestItem is a leaf node, or possibly an empty optional if
      * not
      */
-    Optional<List<FilteredPhrase>> getFilteredPhrases(); //LABEL
+    Optional<List<FilteredPhrase>> getFilteredPhrases();
 
     /**
      * The location from which this test specification was created.

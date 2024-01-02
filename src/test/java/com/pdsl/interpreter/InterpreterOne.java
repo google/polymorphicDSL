@@ -16,13 +16,13 @@ import org.junit.runner.RunWith;
         resourceRoot = "src/test/resources/framework_specifications/features/interpreter",
         recognizerRule = "polymorphicDslAllRules"
 )
-public class InterpreterOneTest {
+public class InterpreterOne {
 
     @PdslTest(
             includesResources = "InterpreterOne.feature",
             parser = InterpreterOneParser.class,
             lexer = InterpreterOneLexer.class,
-            listener = InterpreterOneTest.InterpreterOneListenerProvider.class
+            listener = InterpreterOne.InterpreterOneListenerProvider.class
     )
     @RecognizedBy(
             dslRecognizerParser = InterpreterOneParser.class,

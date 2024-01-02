@@ -1,13 +1,30 @@
 package com.pdsl.api;
 
+import com.pdsl.executors.InterpreterObj;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
+import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
+import com.pdsl.grammars.InterpreterOneLexer;
+import com.pdsl.grammars.InterpreterOneListenerImpl;
+import com.pdsl.grammars.InterpreterOneParser;
+import com.pdsl.grammars.InterpreterTwoLexer;
+import com.pdsl.grammars.InterpreterTwoListenerImpl;
+import com.pdsl.grammars.InterpreterTwoParser;
 import com.pdsl.reports.MetadataTestRunResults;
+import com.pdsl.runners.junit.PdslExecutorRunner;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
+import com.pdsl.testcases.PreorderTestCaseFactory;
+import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.TestCase;
+import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.junit.Test;
 
 import java.io.File;
@@ -273,5 +290,41 @@ public class GherkinPolymorphicDslTestExecutor {
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
+    }
+
+    @Test
+    public void interpreter_executesSuccessfully()  {
+        final URI absolutePathValid = new File(getClass().getClassLoader().getResource("framework_specifications/features/interpreter/InterpreterAll.feature").getFile()).toURI();
+        final List<List<TestCase>> testCasesList = new ArrayList<>();
+
+        // Arrange
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid);
+
+        final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
+
+        // Initialize the Interpreter#1
+        GherkinTestSpecificationFactory gherkinTestSpecificationFactoryOne = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterOneParser.class, InterpreterOneLexer.class)).build();
+        Optional<Collection<TestSpecification>> gherkinTestSpecificationsOne = gherkinTestSpecificationFactoryOne.getTestSpecifications(dslFiles);
+        testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsOne.get()).stream().collect(Collectors.toUnmodifiableList()));
+
+        // Initialize the Interpreter#1
+        // GherkinTestSpecificationFactory gherkinTestSpecificationFactoryTwo = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterTwoParser.class, InterpreterTwoLexer.class)).build();
+        // Optional<Collection<TestSpecification>> gherkinTestSpecificationsTwo = gherkinTestSpecificationFactoryTwo.getTestSpecifications(dslFiles);
+        // testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsTwo.get()).stream().collect(Collectors.toUnmodifiableList()));
+
+        // Act
+        /*
+        * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
+        * */
+        List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerImpl()));
+        SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "Interpreter");
+
+        // Assert
+        assertThat(results.totalPhrases()).isEqualTo(1);
+        assertThat(results.getTestResults().size()).isEqualTo(1);
+        assertThat(results.failingTestTotal()).isEqualTo(0);
+        assertThat(results.passingTestTotal()).isEqualTo(1);
     }
 }

@@ -30,5 +30,5 @@ public @interface PdslTest {
     String startRule() default DEFAULT_ALL_RULE;
     static String DEFAULT_ALL_RULE = "polymorphicDslAllRules" ;
 
-    Interpreter[] interpreter() default {};
+    Interpreter[] interpreters() default {};
 }

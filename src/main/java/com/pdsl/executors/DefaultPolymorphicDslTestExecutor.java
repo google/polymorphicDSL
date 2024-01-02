@@ -39,7 +39,8 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   private final ParseTreeWalker walker = new ParseTreeWalker();
   private final Optional<MultiOutputStream> outputStreams = Optional.of(
       new MultiOutputStream(new PdslThreadSafeOutputStream()));
-  private final Charset charset = Charset.defaultCharset();
+  private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+  private static final byte[] RESET = AnsiTerminalColorHelper.RESET.getBytes(DEFAULT_CHARSET);
 
   @Override
   public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases,
@@ -96,13 +97,13 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry, String context) {
     PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
     Set<List<String>> previouslyExecutedTests = new HashSet<>();
-    final byte[] RESET = AnsiTerminalColorHelper.RESET.getBytes(charset);
+
     for (TestCase testCase : testCases) {
 
-      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(charset));
+      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
       notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
-          .getBytes(charset));
-      notifyStreams(String.format("%n").getBytes(charset));
+          .getBytes(DEFAULT_CHARSET));
+      notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
       notifyStreams(RESET);
       Phrase activePhrase = null;
       Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
@@ -120,7 +121,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
           while (testBody.hasNext()) {
             TestSection section = testBody.next();
             if (section.getMetaData().isPresent()) {
-              notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
+              notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(DEFAULT_CHARSET));
               notifyStreams(section.getMetaData().get());
               notifyStreams(RESET);
             }
@@ -133,14 +134,14 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
             phraseIndex++;
             notifyStreams(
                 (AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n"
-                    + AnsiTerminalColorHelper.RESET).getBytes(charset));
+                    + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
           }
           results.addTestResult(DefaultTestResult.passingTest(testCase));
         }
       } catch (Throwable e) {
         notifyStreams(
             (AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n"
-                + AnsiTerminalColorHelper.RESET).getBytes(charset));
+                + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
         int phrasesSkippedDueToFailure = 0;
         while (testBody.hasNext()) {
           testBody.next();
@@ -211,19 +212,19 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases, String context) {
     PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
     //Set<List<String>> previouslyExecutedTests = new HashSet<>();
-    final byte[] RESET = AnsiTerminalColorHelper.RESET.getBytes(charset);
 
-    //
+    for(SharedTestCase sharedTestCase : sharedTestCases) {
 
-    for(SharedTestCase sharedTestCase : sharedTestCases){
+      TestCase testCase = sharedTestCase.getTestCases().stream().findFirst().orElseThrow();
 
-      TestCase testCase = sharedTestCase.getTestCases().get(0);
-
-      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(charset));
+      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
       notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
-          .getBytes(charset));
-      notifyStreams(String.format("%n").getBytes(charset));
+          .getBytes(DEFAULT_CHARSET));
+      notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
       notifyStreams(RESET);
+
+      Phrase activePhrase = null;
+      Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
 
       List<Iterator<FilteredPhrase>> sharedParseIterator = sharedTestCase.getSharedParseIterator();
 
@@ -232,10 +233,11 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
 
           Iterator<FilteredPhrase> iterator = sharedParseIterator.get(i);
 
-          //if (iterator.hasNext()) {
-            Optional<ParseTree> parseTree = iterator.next().getParseTree();
+          FilteredPhrase filteredPhrase = iterator.next();
 
-            //TODO - A test was skipped because after filtering it duplicated an earlier run test
+            Optional<ParseTree> parseTree = filteredPhrase.getParseTree(); // iterator.next()
+
+            //TODO - Add implementation for the duplication checking
             if (parseTree.isPresent()) {
 
               InterpreterObj interpreterObj = sharedTestCase.getInterpreters().get(i);
@@ -244,77 +246,17 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                 walker.walk(interpreterObj.getParseTreeListener().get(), parseTree.get());
               } else {
                 interpreterObj.getParseTreeVisitor().get().visit(parseTree.get());
-                //phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
               }
 
               notifyStreams(
                   (AnsiTerminalColorHelper.GREEN + parseTree.get().getText() + "\n"
-                      + AnsiTerminalColorHelper.RESET).getBytes(charset));
-
-
-
+                      + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
             }
-          //}
-
-          // while(iterator.hasNext()){
-          //
-          // }
-
         }//for
-
       }//while
       results.addTestResult(DefaultTestResult.passingTest(testCase));
     }//for
 
-
     return results;
   }
-
-  // @Override
-  // public MetadataTestRunResults runTestsWithMetadata(List<List<TestCase>> testCases, List<ParseTreeVisitor<?>> visitor, String context) {
-  //   logger.info("Running tests...");
-  //
-  //   //MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
-  //
-  //   return null;
-  // }
-
-    /*
-    *  TestSection section = testBody.next();
-                        if (section.getMetaData().isPresent()) {
-                            notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
-                            notifyStreams(section.getMetaData().get());
-                            notifyStreams(RESET);
-                        }
-                        activePhrase = section.getPhrase();
-                        if (phraseRegistry.listener.isPresent()) {
-                            walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
-                        } else {
-                            phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
-                        }
-                        phraseIndex++;
-                        notifyStreams((AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n" + AnsiTerminalColorHelper.RESET).getBytes(charset));
-
-    * */
-
-//   private void tmp(List<TestSection> sections, List<PhraseRegistry> phraseRegistry) {
-//
-//
-// //TestSection     section = testBody.next();
-//     if (section.getMetaData().isPresent()) {
-//       notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(charset));
-//       notifyStreams(section.getMetaData().get());
-//       notifyStreams(RESET);
-//     }
-//     activePhrase = section.getPhrase();
-//     if (phraseRegistry.listener.isPresent()) {
-//       walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
-//     } else {
-//       phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
-//     }
-//     phraseIndex++;
-//     notifyStreams((AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n"
-//         + AnsiTerminalColorHelper.RESET).getBytes(charset));
-//
-//   }
 }

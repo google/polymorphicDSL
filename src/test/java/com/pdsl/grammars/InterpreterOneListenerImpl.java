@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InterpreterOneListenerImpl implements InterpreterOneParserListener {
+public final class InterpreterOneListenerImpl implements InterpreterOneParserListener {
 
   private Logger logger = LoggerFactory.getLogger(InterpreterOneListenerImpl.class);
 
@@ -38,7 +38,7 @@ public class InterpreterOneListenerImpl implements InterpreterOneParserListener 
 
   @Override
   public void enterHelloWorld(HelloWorldContext ctx) {
-    logger.info("enterHelloWorld(). I am from GammaOneListenerImpl");
+    logger.info("enterHelloWorld(). I am from InterpreterOneListenerImpl.");
     //throw new IllegalStateException("Bla enterHelloWorld");
   }
 

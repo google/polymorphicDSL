@@ -16,13 +16,13 @@ import com.pdsl.runners.RecognizedBy;
         resourceRoot = "src/test/resources/framework_specifications/features/interpreter",
         recognizerRule = "polymorphicDslAllRules"
 )
-public class InterpreterTwoTest {
+public class InterpreterTwo {
 
     @PdslTest(
             includesResources = "InterpreterTwo.feature",
             parser = InterpreterTwoParser.class,
             lexer = InterpreterTwoLexer.class,
-            listener = InterpreterTwoTest.InterpreterTwoListenerProvider.class)
+            listener = InterpreterTwo.InterpreterTwoListenerProvider.class)
     @RecognizedBy(
             dslRecognizerParser = InterpreterTwoParser.class,
             dslRecognizerLexer = InterpreterTwoLexer.class,

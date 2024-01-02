@@ -7,21 +7,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * TODO
- * the collections of the input parameter should to have the same capacity - ADD VALIDATION
- *
- *
- *
+ * The container for the {@link com.pdsl.testcases.TestCase}
+ * and associated (Lexer/Parser; Listener/Visitor) with them.
+ * {@link com.pdsl.executors.InterpreterObj}
  */
 public final class SharedTestCase {
 
- private final List<TestCase> testCases;// = new ArrayList<>();
- private final List<InterpreterObj> interpreterObjs;// = new ArrayList<>();
- // List<Interpreter> interpreter,
+ private final List<TestCase> testCases;
+ private final List<InterpreterObj> interpreterObjs;
 
   private final List<Iterator<FilteredPhrase>> iterators;
 
   public SharedTestCase(List<TestCase> testCases, List<InterpreterObj> interpreterObjs) {
+    /**
+     * Because, the all instances of {@link com.pdsl.testcases.TestCase} in collection - will have the same
+     * Listener/Visitor (InterpreterObj) we can take first one.
+     */
     int countFirst = testCases.get(0).getUnfilteredPhraseBody().size();
     Preconditions.checkArgument(testCases.stream().allMatch(tc -> tc.getUnfilteredPhraseBody().size() == countFirst), "The size should be the same for all " + countFirst);
     this.testCases = testCases;
@@ -34,19 +35,4 @@ public final class SharedTestCase {
   public List<InterpreterObj> getInterpreters(){return interpreterObjs;}
 
   public List<Iterator<FilteredPhrase>> getSharedParseIterator() { return iterators;}
-
-  // // public Optional<ParseTree> getNextParseTree() {
-  // //   List<Pair<Optional<ParseTree>, Interpreter> optParseTree= new ArrayList<>();
-  // //
-  // //   for(TestCase testCase : testCases) {
-  // //
-  // //     optParseTree.add(testCase.getFilteredPhrases().get(0).getParseTree());
-  // //
-  // //
-  // //   }//for
-  //
-  //
-  // }
-
-
 }

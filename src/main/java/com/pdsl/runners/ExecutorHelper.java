@@ -112,11 +112,11 @@ public final class ExecutorHelper {
         List<ParseTreeTraversal> traversals = new ArrayList<>();
 
         /**
-         * If the [codeExecution]:
-         * 1) is NULL or empty we can use old approach
-         * 2) is NOT NULL use the multiple lexer/parser'S
+         * If the [@PdsLTest.interpreters()]:
+         * 1) is NULL or empty array we can use old approach
+         * 2) is NOT NULL use the multiple Lexer/Parser; Listener/Visitor
          */
-        if(pdslTest.interpreter() == null || pdslTest.interpreter().length == 0) {
+        if(pdslTest.interpreters() == null || pdslTest.interpreters().length == 0) {
             try {
                 if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
                     throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation!");
@@ -124,11 +124,9 @@ public final class ExecutorHelper {
                 if (!pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
                     Constructor<?> providerConstructor = pdslTest.visitor().getDeclaredConstructor();
                     traversals.add(new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get()));
-                    //return new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get());
                 } else {
                     Constructor<?> providerConstructor = pdslTest.listener().getDeclaredConstructor();
                     traversals.add(new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get()));
-                    //return new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get());
                 }
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
@@ -140,19 +138,20 @@ public final class ExecutorHelper {
             }
         }
         else {
-            for(Interpreter interpreter : pdslTest.interpreter()) {
+            Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
+                "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
+
+            for(Interpreter interpreter : pdslTest.interpreters()) {
                 try {
                     if (interpreter.listener().equals(EmptyParseTreeListenerProvider.class) && interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
-                        throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation, attribute [codeExecution]!");
+                        throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation, attribute [interpreters]!");
                     }
                     if (!interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
                         Constructor<?> providerConstructor = interpreter.visitor().getDeclaredConstructor();
                         traversals.add(new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get()));
-                        //return new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get());
                     } else {
                         Constructor<?> providerConstructor = interpreter.listener().getDeclaredConstructor();
                         traversals.add(new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get()));
-                        //return new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get());
                     }
                 } catch (NoSuchMethodException e) {
                     throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
@@ -162,30 +161,12 @@ public final class ExecutorHelper {
                 } catch (InstantiationException | InvocationTargetException e) {
                     throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", interpreter.listener().getSimpleName()), e);
                 }
-            }//FOR loop
+            }//for-loop
+
+
         }
 
         return traversals;
-
-        // try {
-        //     if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
-        //         throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation!");
-        //     }
-        //     if (!pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
-        //         Constructor<?> providerConstructor = pdslTest.visitor().getDeclaredConstructor();
-        //         return new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get());
-        //     } else {
-        //         Constructor<?> providerConstructor = pdslTest.listener().getDeclaredConstructor();
-        //         return new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get());
-        //     }
-        // } catch (NoSuchMethodException e) {
-        //     throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
-        //             + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", pdslTest.listener().getSimpleName()), e);
-        // } catch (IllegalAccessException e) {
-        //     throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
-        // } catch (InstantiationException | InvocationTargetException e) {
-        //     throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", pdslTest.listener().getSimpleName()), e);
-        // }
     }
 
     /**
@@ -383,8 +364,8 @@ public final class ExecutorHelper {
                     ? Optional.empty() : Optional.of(pdslConfiguration.dslRecognizerLexer());
         }
 
-        /** Provides the created test specification factory generator.
-         *
+        /**
+         * Provides the created test specification factory generator.
          * @return a provider for a specification factory
          */
         public Provider<? extends TestSpecificationFactoryGenerator> getTestSpecificationFactoryGenerator() {

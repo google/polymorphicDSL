@@ -41,7 +41,7 @@ public class GherkinApi {
     private static final ParseTreeListener allGrammarsListener = new AllGrammarsParserBaseListener();
 
     @Test
-    public void complexBackgroundWithRuleFilteredOut_runsSuccessfully() throws URISyntaxException, MalformedURLException {
+    public void complexBackgroundWithRuleFilteredOut_runsSuccessfully() throws URISyntaxException {
         final URL absolutePathValid = getClass().getClassLoader().getResource("testdata/good/complex_background.feature");
         // Arrange
         Set<URI> dslFiles = new HashSet<>();

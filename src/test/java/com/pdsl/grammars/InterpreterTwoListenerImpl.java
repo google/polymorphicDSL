@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class InterpreterTwoListenerImpl implements InterpreterTwoParserListener {
+public final class InterpreterTwoListenerImpl implements InterpreterTwoParserListener {
 
   private Logger logger = LoggerFactory.getLogger(InterpreterTwoListenerImpl.class);
 
@@ -31,7 +31,7 @@ public class InterpreterTwoListenerImpl implements InterpreterTwoParserListener 
 
   @Override
   public void enterHiFolks(HiFolksContext ctx) {
-    logger.info("enterHiFolks(). I am from GammaTwoListenerImpl");
+    logger.info("enterHiFolks(). I am from InterpreterTwoListenerImpl.");
   }
 
   @Override

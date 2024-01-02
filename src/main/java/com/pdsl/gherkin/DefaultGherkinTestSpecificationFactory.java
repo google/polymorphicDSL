@@ -244,7 +244,6 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         return gherkinTestSpecifications;
     }
 
-    //LABEL
     private void checkGrammar(List<InputStream> stepBodyAsStrings) {
         if (recognizerParser.isPresent() && recognizerLexer.isPresent()) {
             stepBodyAsStrings = TestSpecificationHelper.checkGrammarValidity(recognizerParser.get(), recognizerLexer.get(), stepBodyAsStrings,
@@ -258,7 +257,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 .map(step -> new ByteArrayInputStream(step.getBytes(charset)))
                 .collect(Collectors.toUnmodifiableList());
         checkGrammar(stepBodyAsStrings);
-        return phraseFilter.filterPhrases(stepBodyAsStrings); //LABEL
+        return phraseFilter.filterPhrases(stepBodyAsStrings);
     }
 
     private Optional<TestSpecification> processStepBody(String title, List<String> stepBody, URI originalResourceLocation) {
@@ -274,9 +273,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             }
         });
         try {
-            Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream); //LABEL
+            Optional<List<FilteredPhrase>> phrases = phraseFilter.filterPhrases(stepBodyAsInputStream);
             if (phrases.isPresent()) {
-                return Optional.of(new DefaultTestSpecification.Builder(title, originalResourceLocation).withPhrases(phrases.get()).build());//LABEL
+                return Optional.of(new DefaultTestSpecification.Builder(title, originalResourceLocation).withPhrases(phrases.get()).build());
             } else {
                 return Optional.empty();
             }

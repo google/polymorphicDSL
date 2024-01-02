@@ -140,12 +140,9 @@ public class ConfigurableExecutorRunner {
             throw new UnsupportedOperationException("Not implemented for this test case!");
         }
 
-        //TODO FIXME
         @Override
-        public MetadataTestRunResults runTestsWithMetadata(
-            Collection<SharedTestCase> sharedTestCase,
-            String context) {
-            return null;
+        public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCase, String context) {
+            throw new UnsupportedOperationException("Not implemented for this test case!");
         }
     }
 }
