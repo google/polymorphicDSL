@@ -13,9 +13,9 @@ public final class InterpreterOneListenerImpl implements InterpreterOneParserLis
   private Logger logger = LoggerFactory.getLogger(InterpreterOneListenerImpl.class);
 
   @Override
-  public void visitErrorNode(ErrorNode node) {
-    logger.error(node.toString());
-    logger.error(node.getText());
+  public void visitErrorNode(ErrorNode errorNode) {
+    logger.error(errorNode.toString());
+    logger.error(errorNode.getText());
 
     throw new IllegalStateException(
         "There was an error in the grammar! Check the G4 files for the issue!");

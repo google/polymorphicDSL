@@ -126,22 +126,27 @@ public class JavaTestRunner {
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
                     | PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY, PdslRecognizedByPhrases.class);
+
             put(PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
                     | PdslJavaTestRunnerParserListenerImpl.PDSL_RECOGNIZED_BY
                     | PdslJavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_PDSL_RECOGNIZER, UnrecognizedPdslPhrases.class);
+
             put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
                     | PdslJavaTestRunnerParserListenerImpl.NO_CONFIGURATION_RECOGNIZER
                     | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, NoRecognizerRunner.class);
+
             put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
                     | PdslJavaTestRunnerParserListenerImpl.NO_CONFIGURATION_RECOGNIZER
                     | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, NoRecognizerRunner.class);
+
             put(PdslJavaTestRunnerParserListenerImpl.ALL_TESTS_PASS
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_RULE
                     | PdslJavaTestRunnerParserListenerImpl.NO_PDSL_RECOGNIZER, ConfigurationRecognizerRunner.class);
+
             put(PdslJavaTestRunnerParserListenerImpl.PHRASES_NOT_IN_CONFIG_RECOGNIZER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_PARSER
                     | PdslJavaTestRunnerParserListenerImpl.CONFIGURATION_RECOGNIZER_LEXER
@@ -214,6 +219,7 @@ public class JavaTestRunner {
 
             return builder.toString().replaceAll(",", "\n\t");
         }
+
         public void enterGivenPdslConfigurationDoesNotSpecifyDefaultRule(PdslJavaTestRunnerParser.GivenPdslConfigurationDoesNotSpecifyDefaultRuleContext ctx) {
             criteria |= CONFIG_DOES_NOT_SPECIFY_DEFAULT_RULE;
         }
@@ -227,6 +233,7 @@ public class JavaTestRunner {
             result = Optional.of(runner.run(representativeTestClass));
 
         }
+
         public void enterThenAllTestsPass(PdslJavaTestRunnerParser.ThenAllTestsPassContext ctx) {
             if (result.isEmpty()) {
                 throw new IllegalStateException("Did not get test result. Did the JUnitCore runner execute?");
@@ -261,9 +268,11 @@ public class JavaTestRunner {
             }
             assertThat(result.get().getFailures().stream().anyMatch(e -> e.getException().getMessage().contains("Syntax check on grammar failed"))).isTrue();
         }
+
         public void enterThenExceptionStatesBothRecognizerParserAndLexerNeeded(PdslJavaTestRunnerParser.ThenExceptionStatesBothRecognizerParserAndLexerNeededContext ctx) {
             assertThat(result.get().getFailures().stream().anyMatch(e -> e.getException().getMessage().contains("UPDATE MESSAGE"))).isTrue();
         }
+
         public void enterThenExceptionStatesMissingRequiredSyntaxCheckRule(PdslJavaTestRunnerParser.ThenExceptionStatesMissingRequiredSyntaxCheckRuleContext ctx) {
             assertThat(result.get().getFailures().stream().anyMatch(e -> e.getException().getMessage().contains("UPDATE MESSAGE"))).isTrue();
         }
@@ -406,7 +415,7 @@ public class JavaTestRunner {
         public void exitThenExceptionStatesMissingRequiredSyntaxCheckRule(PdslJavaTestRunnerParser.ThenExceptionStatesMissingRequiredSyntaxCheckRuleContext ctx) {}
 
         public void exitGivenRecognizedBySpecifiesParameter(PdslJavaTestRunnerParser.GivenRecognizedBySpecifiesParameterContext ctx) {}
-        /////////////////
+
         public void enterEveryRule(org.antlr.v4.runtime.ParserRuleContext ctx) {}
         public void exitEveryRule(org.antlr.v4.runtime.ParserRuleContext ctx) {}
         public void visitErrorNode(org.antlr.v4.runtime.tree.ErrorNode ctx) {}
