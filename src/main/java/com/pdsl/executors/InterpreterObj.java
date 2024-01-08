@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 /**
  * A container of Visitor/Listener for the Test Case, created for supporting multiple Interpreters (Lexer/Parser; Listener/Visitor)
  * implementation of {@link com.pdsl.runners.PdslTest} annotation; {@link com.pdsl.runners.Interpreter}.
- * The object should contain or `ParseTreeListener` or `ParseTreeVisitor`.
+ * The object should contain either a `ParseTreeListener` or `ParseTreeVisitor`.
  */
 public final class InterpreterObj {
 
