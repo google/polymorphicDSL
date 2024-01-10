@@ -36,7 +36,8 @@ class PdslStatement extends Statement {
        * and Listener or Visitor provided in the {@link com.pdsl.runners.PdslTest} annotation - default implementation/behaviour.
        * And we will use - com.pdsl.executors.TraceableTestRunExecutor#runTestsWithMetadata(java.util.Collection, org.antlr.v4.runtime.tree.ParseTreeListener, java.lang.String)
        *
-       * 2) In the opposite case - it means we have collections of additional Listener or Visitor and
+       * 2) If the size of collection (of Interpreter - Listener or Visitor) is MANY -
+       * it means we have collections of additional Listener or Visitor, and
        * we will use - com.pdsl.executors.TraceableTestRunExecutor#runTestsWithMetadata(java.util.Collection, java.lang.String)
        */
     if(sharedTestCase.getInterpreters().size() == 1){

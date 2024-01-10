@@ -325,7 +325,7 @@ public final class GherkinPolymorphicDslTestExecutor {
         * */
         List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerImpl()));
         SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
-        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "Interpreter");
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "API");
 
         // Assert
         assertThat(results.totalPhrases()).isEqualTo(1);
@@ -398,7 +398,7 @@ public final class GherkinPolymorphicDslTestExecutor {
          * */
         List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerExceptionImpl()));
         SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
-        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "Interpreter");
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "APIs");
 
         // Assert
         assertThat(results.totalPhrases()).isEqualTo(1);

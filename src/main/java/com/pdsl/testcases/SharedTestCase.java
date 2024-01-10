@@ -20,8 +20,7 @@ public final class SharedTestCase {
 
   public SharedTestCase(List<TestCase> testCases, List<InterpreterObj> interpreterObjs) {
     /**
-     * Because, the all instances of {@link com.pdsl.testcases.TestCase} in collection - will have the same
-     * Listener/Visitor (InterpreterObj) we can take first one.
+     *  Take the first one (same) phrase in different Listener/Visitor (InterpreterObj).
      */
     int countFirst = testCases.get(0).getUnfilteredPhraseBody().size();
     Preconditions.checkArgument(testCases.stream().allMatch(tc -> tc.getUnfilteredPhraseBody().size() == countFirst), "The size should be the same for all " + countFirst);

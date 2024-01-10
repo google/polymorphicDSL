@@ -143,8 +143,8 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                 .build();
 
             main.add(getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest));
+            return main;
         }
-        else {
             Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
                 "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
 
@@ -165,7 +165,6 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
 
                 main.add(getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest));
             }
-        }
         return main;
     }
 
@@ -190,8 +189,8 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                 :*/ new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter).build();
 
             main.add(getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest));
+            return main;
         }
-        else {
             Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
                 "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
 
@@ -199,17 +198,10 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                 PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(
                     interpreter.parser(), interpreter.lexer());
 
-                GherkinTestSpecificationFactory gherkinTestSpecificationFactory = /*!pdslTest.skipUnrecognized()
-                ? new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter)
-                    .withRecognizerParser(pdslTest.parser())
-                    .withRecognizerLexer(pdslTest.lexer())
-                        .withRecognizerRule(PdslTest.DEFAULT_ALL_RULE)
-                    .build()
-                :*/ new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter).build();
+                GherkinTestSpecificationFactory gherkinTestSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(polymorphicDslPhraseFilter).build();
 
                 main.add(getTestCases(gherkinTestSpecificationFactory, testResources, pdslTest));
             }
-        }
 
         return main;
     }

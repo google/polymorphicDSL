@@ -136,8 +136,10 @@ public final class ExecutorHelper {
             } catch (InstantiationException | InvocationTargetException e) {
                 throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", pdslTest.listener().getSimpleName()), e);
             }
+
+            return traversals;
         }
-        else {
+
             Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
                 "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
 
@@ -161,10 +163,7 @@ public final class ExecutorHelper {
                 } catch (InstantiationException | InvocationTargetException e) {
                     throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", interpreter.listener().getSimpleName()), e);
                 }
-            }//for-loop
-
-
-        }
+            }
 
         return traversals;
     }

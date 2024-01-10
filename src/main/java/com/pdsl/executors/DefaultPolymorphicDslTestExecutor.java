@@ -257,8 +257,8 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                   (AnsiTerminalColorHelper.GREEN + parseTree.get().getText() + "\n"
                       + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
             }
-        }//for
-      }//while
+        }
+      }
 
       } catch (Throwable e) {
         notifyStreams(
@@ -276,7 +276,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       }
 
       results.addTestResult(DefaultTestResult.passingTest(testCase));
-    }//for
+    }
 
     return results;
   }
