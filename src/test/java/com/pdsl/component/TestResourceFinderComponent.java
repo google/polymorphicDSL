@@ -5,7 +5,6 @@ import com.pdsl.specifications.GlobPathMatcher;
 import org.junit.Test;
 
 import java.net.URI;
-import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
 import java.util.Collection;

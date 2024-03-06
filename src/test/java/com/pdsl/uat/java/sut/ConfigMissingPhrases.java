@@ -7,8 +7,6 @@ import com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner;
 import com.pdsl.uat.PdslConfigurableExecutorTest;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.runner.RunWith;
-import com.pdsl.grammars.RegistryParser;
-import com.pdsl.grammars.RegistryLexer;
 import com.pdsl.grammars.AlphaParser;
 import com.pdsl.grammars.AlphaLexer;
 import com.pdsl.grammars.BetaParser;

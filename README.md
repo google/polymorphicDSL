@@ -38,6 +38,13 @@ mvn antlr4:antlr4 install
 
 At this point you can use `mvn anltr4:antlr4 <some lifecycle>` up until you run `mvn clean` again. If you do that you will need to regenerate the source code using the `-P test` profile as shown above.
 
+This example will run all test and generate SureFire report for the tests:
+```
+mvn clean antlr4:antlr4 -P test
+mvn antlr4:antlr4 verify site -DgenerateReports=false surefire-report:report-only
+```
+
+
 ### Deployment
 
 #### Deploying to Remote Repository

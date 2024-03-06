@@ -47,7 +47,7 @@ public class DefaultTestResult implements TestResult {
         this.status = TechnicalReportData.Status.FAILED;
         this.passingPhraseTotal = passingPhraseTotal;
         this.phrasesSkippedDueToFailure = phrasesSkippedDueToFailure;
-        this.failingPhrase = Optional.of(failingStep);
+        this.failingPhrase = Optional.ofNullable(failingStep);
         this.failureReason = Optional.of(failureReason);
         this.testCase = testCase;
     }

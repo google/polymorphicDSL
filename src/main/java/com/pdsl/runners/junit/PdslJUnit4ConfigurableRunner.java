@@ -2,6 +2,7 @@ package com.pdsl.runners.junit;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.PolymorphicDslTestResourceException;
+import com.pdsl.executors.InterpreterObj;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestResult;
@@ -10,6 +11,7 @@ import com.pdsl.runners.*;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
@@ -114,15 +116,22 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 throw new PolymorphicDslTestResourceException(String.format("No test resources found!%n\tResource Finder Generator:%s%n\tResource Root:%s",
                         resourceFinderGenerator.getClass(), pdslConfiguration.resourceRoot()));
             }
-            ExecutorHelper.ParseTreeTraversal traversal = executorHelper.getParseTreeTraversal(pdslTest);
+
+            List<ExecutorHelper.ParseTreeTraversal> traversals = executorHelper.getParseTreeTraversal(pdslTest);
+            List<InterpreterObj> interpreterObjs = traversals.stream().map(v -> v.getVisitor().isPresent()
+                ? new InterpreterObj(v.getVisitor().get())
+                : new InterpreterObj(v.getListener().get())).collect(Collectors.toUnmodifiableList());
+
             RecognizedBy recognizedBy = method.getAnnotation(RecognizedBy.class);
             Collection<TestCase> testCases = null;
+
             try {
                 // Use the @RecognizedBy rule if specified, else @PdslConfiguration if specified, else default
                 String syntaxCheck = recognizedBy != null && recognizedBy.recognizerRule() != null
                         ? recognizedBy.recognizerRule()
                         : pdslConfiguration != null && pdslConfiguration.recognizerRule() != null
                             ? pdslConfiguration.recognizerRule() : RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME;
+
                 final PolymorphicDslPhraseFilter phraseFilter;
                 if (recognizedBy == null && pdslConfiguration.dslRecognizerLexer() == null) { // No specifications and recognized means no recognizer check
                     phraseFilter = executorHelper.makeDefaultFilter(pdslTest);
@@ -136,18 +145,21 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 }
                 Collection<TestSpecification> specifications = executorHelper.getTestSpecifications(testSpecificationFactoryGenerator.get().get(phraseFilter), new HashSet<>(resources.get()), pdslTest);
                 testCases = executorHelper.getTestCases(testCaseFactoryProvider.get(), specifications);
+
             } catch (RuntimeException e) { // e.g., an issue checking the grammar syntax
                 notifier.fireTestFailure(new Failure(describeChild(method), e));
                 return;
             }
+
             try {
-                PdslExecutorRunner pdslExecutorRunner = traversal.getVisitor().isPresent()
-                        ? new PdslExecutorRunner(getTestClass().getJavaClass(),
-                        traversal.getVisitor().get(), testCases, testRunExecutor.get(), pdslConfiguration.context())
-                        : new PdslExecutorRunner(getTestClass().getJavaClass(),
-                        traversal.getListener().orElseThrow(), testCases, testRunExecutor.get(), pdslConfiguration.context());
+                PdslExecutorRunner pdslExecutorRunner;
+                SharedTestCase sharedTestCase = new SharedTestCase((List<TestCase>) testCases, interpreterObjs);
+
+                pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(), sharedTestCase, testRunExecutor.get(), pdslConfiguration.context());
+
                 pdslExecutorRunner.run(notifier);
                 List<MetadataTestRunResults> methodResults = pdslExecutorRunner.getMetadataTestRunResults();
+
                 if (!methodResults.stream().anyMatch(r -> r.failingTestTotal() > 0)) {
                     notifier.fireTestFinished(describeChild(method));
                 } else {
@@ -160,7 +172,7 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
                 }
                 results.addAll(methodResults);
             } catch (InitializationError initializationError) {
-                throw new IllegalStateException("Could not intialize PdslExecutorRunner!", initializationError);
+                throw new IllegalStateException("Could not initialize PdslExecutorRunner!", initializationError);
             }
         } else {
             super.runChild(method, notifier);

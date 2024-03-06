@@ -1,13 +1,34 @@
 package com.pdsl.api;
 
+import com.pdsl.executors.InterpreterObj;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
+import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
+import com.pdsl.grammars.InterpreterOneLexer;
+import com.pdsl.grammars.InterpreterOneListenerImpl;
+import com.pdsl.grammars.InterpreterOneParser;
+import com.pdsl.grammars.InterpreterTwoLexer;
+import com.pdsl.grammars.InterpreterTwoParser;
+import com.pdsl.grammars.InterpreterTwoListenerImpl;
+import com.pdsl.grammars.InterpreterTwoParser.HiFolksContext;
+import com.pdsl.grammars.InterpreterTwoParser.PolymorphicDslAllRulesContext;
+import com.pdsl.grammars.InterpreterTwoParserListener;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
+import com.pdsl.testcases.PreorderTestCaseFactory;
+import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.TestCase;
+import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ErrorNode;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.junit.Test;
 
 import java.io.File;
@@ -16,10 +37,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class GherkinPolymorphicDslTestExecutor {
+public final class GherkinPolymorphicDslTestExecutor {
 
     private static final TestSpecificationFactory provider =
             new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(AllGrammarsParser.class, AllGrammarsLexer.class)).build();
@@ -273,5 +296,114 @@ public class GherkinPolymorphicDslTestExecutor {
         // Assert
         assertThat(specifications.get().nestedTestSpecifications().isPresent() || specifications.get().getFilteredPhrases().isPresent()).isTrue();
         assertThat(stepCounterListener.getPhrasesEncountered()).isEqualTo(1);
+    }
+
+    @Test
+    public void interpreter_executesSuccessfully()  {
+        final URI absolutePathValid = new File(getClass().getClassLoader().getResource("framework_specifications/features/interpreter/InterpreterAll.feature").getFile()).toURI();
+        final List<List<TestCase>> testCasesList = new ArrayList<>();
+
+        // Arrange
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid);
+
+        final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
+
+        // Initialize the Interpreter#1
+        GherkinTestSpecificationFactory gherkinTestSpecificationFactoryOne = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterOneParser.class, InterpreterOneLexer.class)).build();
+        Optional<Collection<TestSpecification>> gherkinTestSpecificationsOne = gherkinTestSpecificationFactoryOne.getTestSpecifications(dslFiles);
+        testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsOne.get()).stream().collect(Collectors.toUnmodifiableList()));
+
+        // Initialize the Interpreter#2
+        GherkinTestSpecificationFactory gherkinTestSpecificationFactoryTwo = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterTwoParser.class, InterpreterTwoLexer.class)).build();
+        Optional<Collection<TestSpecification>> gherkinTestSpecificationsTwo = gherkinTestSpecificationFactoryTwo.getTestSpecifications(dslFiles);
+        testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsTwo.get()).stream().collect(Collectors.toUnmodifiableList()));
+
+        // Act
+        /*
+        * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
+        * */
+        List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerImpl()));
+        SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "API");
+
+        // Assert
+        assertThat(results.totalPhrases()).isEqualTo(1);
+        assertThat(results.getTestResults().size()).isEqualTo(1);
+        assertThat(results.failingTestTotal()).isEqualTo(0);
+        assertThat(results.passingTestTotal()).isEqualTo(1);
+    }
+
+    @Test
+    public void interpreter_executesFail()  {
+        final URI absolutePathValid = new File(getClass().getClassLoader().getResource("framework_specifications/features/interpreter/InterpreterAll.feature").getFile()).toURI();
+        final List<List<TestCase>> testCasesList = new ArrayList<>();
+
+        // Arrange
+        Set<URI> dslFiles = new HashSet<>();
+        dslFiles.add(absolutePathValid);
+
+        final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
+
+        // Initialize the Interpreter#1
+        GherkinTestSpecificationFactory gherkinTestSpecificationFactoryOne = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterOneParser.class, InterpreterOneLexer.class)).build();
+        Optional<Collection<TestSpecification>> gherkinTestSpecificationsOne = gherkinTestSpecificationFactoryOne.getTestSpecifications(dslFiles);
+        testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsOne.get()).stream().collect(Collectors.toUnmodifiableList()));
+
+        // Initialize the Interpreter#2
+        GherkinTestSpecificationFactory gherkinTestSpecificationFactoryTwo = new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(InterpreterTwoParser.class, InterpreterTwoLexer.class)).build();
+        Optional<Collection<TestSpecification>> gherkinTestSpecificationsTwo = gherkinTestSpecificationFactoryTwo.getTestSpecifications(dslFiles);
+        testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsTwo.get()).stream().collect(Collectors.toUnmodifiableList()));
+
+        // Prepare the Listener implementation with exception
+        class InterpreterTwoListenerExceptionImpl implements InterpreterTwoParserListener {
+            private Logger logger = LoggerFactory.getLogger(InterpreterTwoListenerExceptionImpl.class);
+
+            @Override
+            public void enterHiFolks(HiFolksContext ctx) {
+                throw new IllegalStateException("Let's fail our test execution");
+            }
+
+            @Override
+            public void visitErrorNode(ErrorNode errorNode) {
+                logger.error(errorNode.toString());
+                logger.error(errorNode.getText());
+
+                throw new IllegalStateException(
+                    "There was an error in the grammar! Check the G4 files for the issue!");
+            }
+
+            @Override
+            public void exitHiFolks(HiFolksContext ctx) {}
+
+            @Override
+            public void enterPolymorphicDslAllRules(PolymorphicDslAllRulesContext ctx) {}
+
+            @Override
+            public void exitPolymorphicDslAllRules(PolymorphicDslAllRulesContext ctx) {}
+
+            @Override
+            public void visitTerminal(TerminalNode terminalNode) {}
+
+            @Override
+            public void enterEveryRule(ParserRuleContext parserRuleContext) {}
+
+            @Override
+            public void exitEveryRule(ParserRuleContext parserRuleContext) {}
+        }
+
+        // Act
+        /*
+         * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
+         * */
+        List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerExceptionImpl()));
+        SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "APIs");
+
+        // Assert
+        assertThat(results.totalPhrases()).isEqualTo(1);
+        assertThat(results.getTestResults().size()).isEqualTo(1);
+        assertThat(results.failingTestTotal()).isEqualTo(1);
+        assertThat(results.passingTestTotal()).isEqualTo(0);
     }
 }

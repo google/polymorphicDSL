@@ -20,9 +20,8 @@ public interface PolymorphicDslTestExecutor {
      * @param subgrammarListener the listener to trigger work on appropriate phrases
      * @return the results of the test run
      */
-    TestRunResults runTests(Collection<TestCase> testCases,
+    TestRunResults runTests(Collection<TestCase> testCases, ParseTreeListener subgrammarListener);
 
-                            ParseTreeListener subgrammarListener);
     /**
      * Walks each of the ParseTrees in each test case triggering a method in the provided parse tree visitor.
      * <p>
@@ -33,7 +32,8 @@ public interface PolymorphicDslTestExecutor {
      * @param subgrammarVisitor the visitor to trigger work on appropriate phrases
      * @return the results of the test run
      */
-    TestRunResults runTests(Collection<TestCase> testCases,
-                            ParseTreeVisitor subgrammarVisitor);
+    TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor);
+
+
 
 }

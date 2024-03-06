@@ -7,7 +7,6 @@ import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.*;
-import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import java.net.URISyntaxException;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.ParserRuleContext;

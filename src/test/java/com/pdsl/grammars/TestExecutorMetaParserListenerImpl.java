@@ -231,8 +231,7 @@ public class TestExecutorMetaParserListenerImpl implements TestExecutorMetaParse
 
     @Override
     public void enterPolymorphicDslTestExecutor(TestExecutorMetaParser.PolymorphicDslTestExecutorContext ctx) {
-        System.out.println("I am at\n" + ctx.getText());
-        assert(false);
+
     }
 
     @Override

@@ -4,16 +4,12 @@ import com.pdsl.runners.PdslConfiguration;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.junit.PdslJUnit4ConfigurableRunner;
 import com.pdsl.specifications.FileSystemTestResourceGenerator;
-import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.uat.GherkinJunitRecognizerTest;
 import com.pdsl.uat.PdslConfigurableExecutorTest;
 import org.junit.runner.RunWith;
 
 import javax.inject.Provider;
-import java.net.URI;
-import java.util.Collection;
-import java.util.Optional;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.PdslTestResourceParser;

@@ -96,8 +96,7 @@ public final class FileDelimitedTestSpecificationFactory implements TestSpecific
         } else {
           throw new IllegalArgumentException(String.format("The input was empty!%nFile: %s", uri));
         }
-        Optional<List<FilteredPhrase>> parseTreesOptional =
-            phraseFilter.filterPhrases(List.of(combined));
+        Optional<List<FilteredPhrase>> parseTreesOptional = phraseFilter.filterPhrases(List.of(combined));
         if (parseTreesOptional.isPresent()) {
           testSpecifications.add(
               new DefaultTestSpecification.Builder(uri.toString(), uri)

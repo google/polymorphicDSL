@@ -3,7 +3,6 @@ package org.junit.jupiter.engine.descriptor;
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.runners.*;
-import com.pdsl.specifications.TaggedTestSpecification;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
