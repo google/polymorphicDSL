@@ -5,7 +5,7 @@
 
     <groupId>com.google.pdsl</groupId>
     <artifactId>pdsl</artifactId>
-    <version>1.6.3-SNAPSHOT</version>
+    <version>1.6.4-SNAPSHOT</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>
@@ -188,11 +188,11 @@
                   <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>3.5.0</version>
+                        <version>3.8.0</version>
                         <configuration>
                             <sourceFileExcludes>
-                                <exclude>**/target/generated-sources/antlr4/**/*.java</exclude>
-                                <exclude>**/target/**/com/pdsl/grammars/**/*.java</exclude>
+                                <exclude>**/target/generated-sources/antlr4/**/*</exclude>
+                                <exclude>**/target/**/com/pdsl/grammars/**/*</exclude>
                             </sourceFileExcludes>
                             <excludePackageNames>com.pdsl.grammars</excludePackageNames>
                             <doclint>none</doclint>

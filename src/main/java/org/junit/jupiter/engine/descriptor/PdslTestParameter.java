@@ -185,8 +185,8 @@ public class PdslTestParameter {
         }
 
         public Builder withRecognizerRule(String recognizerRule) {
-            Preconditions.checkNotNull("Recognizer rule cannot be null!", recognizerRule);
-            Preconditions.checkArgument(recognizerRule.isEmpty(), "Recognizer rule cannot be empty!");
+            Preconditions.checkNotNull(recognizerRule, "Recognizer rule cannot be null!");
+            Preconditions.checkArgument(!recognizerRule.isEmpty(), "Recognizer rule cannot be empty!");
             this.recognizerRule = Optional.of(recognizerRule);
             return this;
         }
@@ -196,3 +196,4 @@ public class PdslTestParameter {
         }
     }
 }
+
