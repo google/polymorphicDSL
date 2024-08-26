@@ -129,8 +129,8 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
         if (pdslTestParameter.getRecognizedByLexer().isPresent() && pdslTestParameter.getRecognizedByParser().isPresent()) {
             return executorHelper.makeDefaultFilter(pdslTestParameter.getParser(), pdslTestParameter.getLexer(),
                     pdslTestParameter.getRecognizedByParser().get(), pdslTestParameter.getRecognizedByLexer().get(),
-                    pdslTestParameter.getRecognizerRule().isPresent() ? pdslTestParameter.getRecognizerRule().get() : configParameter.getRecognizerRule(),
-                    pdslTestParameter.getStartRule()
+                    pdslTestParameter.getStartRule(),
+                    pdslTestParameter.getRecognizerRule().isPresent() ? pdslTestParameter.getRecognizerRule().get() : configParameter.getRecognizerRule()
                     );
         }
         // Otherwise use the recognizer specified in the configuration. If none specified, the parser used by the
@@ -139,8 +139,8 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
                 pdslTestParameter.getLexer(),
                 configParameter.getDslRecognizerParser().isPresent() ? configParameter.getDslRecognizerParser().get() : pdslTestParameter.getParser(),
                 configParameter.getDslRecognizerLexer().isPresent() ? configParameter.getDslRecognizerLexer().get() : pdslTestParameter.getLexer(),
-                pdslTestParameter.getRecognizerRule().isPresent() ? pdslTestParameter.getRecognizerRule().get() : configParameter.getRecognizerRule(),
-                pdslTestParameter.getStartRule()
+                pdslTestParameter.getStartRule(),
+                pdslTestParameter.getRecognizerRule().isPresent() ? pdslTestParameter.getRecognizerRule().get() : configParameter.getRecognizerRule()
         );
         return phraseFilter;
     }
