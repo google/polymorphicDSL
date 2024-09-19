@@ -8,31 +8,41 @@ import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestResult;
-import com.pdsl.reports.TestRunResults;
 import com.pdsl.runners.*;
 import com.pdsl.specifications.*;
 import com.pdsl.testcases.PreorderTestCaseFactory;
-import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
+import org.junit.AssumptionViolatedException;
 import org.junit.Test;
+import org.junit.internal.runners.model.EachTestNotifier;
+import org.junit.runner.Description;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
+import org.junit.runner.notification.StoppedByUserException;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
+import org.junit.runners.model.Statement;
 
 import javax.inject.Provider;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
+
+@Deprecated(since="1.6.6") // Use JUnit5 because the JUnit4 API has extreme limitations
+// Keep the JUnit4 implementation for Google
 public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
 
     private final String context;
@@ -45,9 +55,11 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
     private final Provider<? extends TestResourceFinderGenerator> resourceFinderGeneratorProvider;
     private final Provider<? extends TraceableTestRunExecutor> executorProvider;
     private final ExecutorHelper executorHelper;
+    private final ConcurrentMap<FrameworkMethod, Description> methodDescriptions = new ConcurrentHashMap<FrameworkMethod, Description>();
 
     public PdslGherkinJUnit4Runner(Class<?> testClass) throws InitializationError {
         super(testClass);
+        System.out.print("JS23001 : 50");
         PdslGherkinApplication annotation = testClass.getAnnotation(PdslGherkinApplication.class);
         Preconditions.checkNotNull(annotation, String.format("Class run with %s must be annotated with %s!",
                 getClass().getSimpleName(), PdslConfiguration.class.getSimpleName()));
@@ -147,8 +159,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         }
             Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
                 "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
-
-            for(Interpreter interpreter : pdslTest.interpreters()) {
+        for(Interpreter interpreter : pdslTest.interpreters()) {
 
                 // Create the phrase filter that will determine the grammar we use
                 PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(
@@ -246,13 +257,22 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
     protected void runChild(final FrameworkMethod method, RunNotifier notifier) {
         PdslTest pdslTest = method.getAnnotation(PdslTest.class);
         if (pdslTest != null) {
-            notifier.fireTestStarted(describeChild(method));
             RecognizedBy recognizedBy = method.getAnnotation(RecognizedBy.class);
             List<List<TestCase>> testCasesList;
+            // This should be a test suite, but because we want the lifecycle benefits of the
+            // BlockJunit4Runner class the results will display strangely
+
+            // There isn't a great way to solve this without rewriting large swathes of code. It seems a lot of the
+            // trouble exists in the JUnit logic implemented in the logic of IDEs like IntelliJ. They seem to make
+            // assumptions on how JUnit4 tests will be run and code changes we make in this code appear not to affect
+            // how they render hierarchically.
+            Description description = super.describeChild(method);
+           notifier.fireTestStarted(description);
+
             try {
                 testCasesList = recognizedBy == null ? getTestCases(pdslTest) : getTestCases(pdslTest, recognizedBy);
             } catch (RuntimeException e) { // e.g., an issue checking the grammar syntax
-                notifier.fireTestFailure(new Failure(describeChild(method), e));
+                notifier.fireTestAssumptionFailed(new Failure(describeChild(method), e));
                 return;
             }
             //TODO: Allow the input streams for the executor to be customized
@@ -261,9 +281,7 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
             try {
                 Preconditions.checkArgument(!testCasesList.isEmpty(), "Somehow no test cases were produced from the features! This is likely an error with the PDSL framework");
 
-                List<MetadataTestRunResults> methodResults = new ArrayList<>();
-
-                    List<ExecutorHelper.ParseTreeTraversal> traversals = executorHelper.getParseTreeTraversal(pdslTest);
+                List<ExecutorHelper.ParseTreeTraversal> traversals = executorHelper.getParseTreeTraversal(pdslTest);
                     List<InterpreterObj> interpreterObjs = traversals.stream().map(v -> v.getVisitor().isPresent()
                         ? new InterpreterObj(v.getVisitor().get())
                         : new InterpreterObj(v.getListener().get())).collect(Collectors.toUnmodifiableList());
@@ -271,27 +289,27 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                 Preconditions.checkArgument(traversals.size() == testCasesList.size(),
                     "The size of TC's and provided interpreters (Listener/Visitor) should be the same.");
 
-                        PdslExecutorRunner pdslExecutorRunner;
-                        SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()),
-                            interpreterObjs);
+                SharedTestSuite sharedTestSuite = SharedTestSuite.of(testCasesList,interpreterObjs);
 
-                        pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(), sharedTestCase, executor, context);
 
+                PdslExecutorRunner pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(), sharedTestSuite.getSharedTestCaseList(), executor, context);
                         pdslExecutorRunner.run(notifier);
-                        methodResults.addAll(pdslExecutorRunner.getMetadataTestRunResults());
-
-                if (!methodResults.stream().anyMatch(r -> r.failingTestTotal() > 0)) {
-                    notifier.fireTestFinished(describeChild(method));
-                } else {
-                    List<TestResult> failureReasons = methodResults.stream().filter(r -> r.failingTestTotal() > 0)
-                            .map(MetadataTestRunResults::getTestResults)
-                            .flatMap(Collection::stream)
-                            .collect(Collectors.toList());
-                    Preconditions.checkArgument(!failureReasons.isEmpty());
-                    notifier.fireTestFailure(new Failure(describeChild(method), new TestRunResults.FailedTestResults(failureReasons)));
-                }
-
+                List<MetadataTestRunResults> methodResults = new ArrayList<>(pdslExecutorRunner.getMetadataTestRunResults());
                 results.addAll(methodResults);
+                // The results rendered in IDEs will be the individual test cases like you'd expect, but also
+                // each individual method that ran them. This is undesirable, but it looks like it would require a
+                // custom plugin made for the IDE to solve it.
+                // To make things less awkward, make the test suite fail if one of it's test failed, so we don't see a
+                // passing test suite and failed test case.
+                Optional<MetadataTestRunResults> failingTest = pdslExecutorRunner.getMetadataTestRunResults().stream().filter(r -> r.failingTestTotal() > 0).findFirst();
+                failingTest.ifPresent(metadataTestRunResults -> notifier.fireTestFailure(new Failure(describeChild(method),
+                                metadataTestRunResults.getTestResults().stream()
+                                        .map(TestResult::getFailureReason)
+                                        .filter(Optional::isPresent)
+                                        .findFirst().orElseThrow().orElseThrow()
+                        )
+                ));
+                notifier.fireTestFinished(description);
             } catch (InitializationError initializationError) {
                 throw new IllegalStateException("Could not initialize PdslExecutorRunner!", initializationError);
             }

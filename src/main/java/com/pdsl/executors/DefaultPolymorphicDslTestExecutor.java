@@ -10,8 +10,10 @@ import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.Phrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.SharedTestSuite.SharedTestCaseWithInterpreter;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestSection;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -94,8 +96,10 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     }
   }
 
-  private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry, String context) {
-    PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
+  private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry,
+      String context) {
+    PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
+        new PdslThreadSafeOutputStream(), context);
     Set<List<String>> previouslyExecutedTests = new HashSet<>();
 
     for (TestCase testCase : testCases) {
@@ -206,7 +210,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     }
     return (PolymorphicDslTestRunResults) results;
   }
-
+/*
   @Override
   public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases, String context) {
     PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(new PdslThreadSafeOutputStream(), context);
@@ -279,5 +283,81 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     }
 
     return results;
+  }*/
+
+  @Override
+  public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases,
+      String context) {
+    PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
+        new PdslThreadSafeOutputStream(), context);
+    //Set<List<String>> previouslyExecutedTests = new HashSet<>();
+
+    for (SharedTestCase sharedTestCase : sharedTestCases) {
+      List<TestCase> listOfTestCases = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
+          .map(tc -> tc.getTestCase()).collect(
+              Collectors.toUnmodifiableList());
+      int size = listOfTestCases.get(0).getUnfilteredPhraseBody().size();
+      TestCase testCase = listOfTestCases.stream().findFirst().orElseThrow();
+
+      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
+      notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
+          .getBytes(DEFAULT_CHARSET));
+      notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
+      notifyStreams(RESET);
+
+      String filteredPhraseText = null;
+
+      int phraseIndex = 0;
+
+      try {
+        //for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
+        for (int j = 0;
+            j < sharedTestCase.getSharedTestCaseWithInterpreters().get(0).getTestCase()
+                .getUnfilteredPhraseBody().size(); j++) {
+          for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
+
+            FilteredPhrase filteredPhrase = interpreter.getTestCase().getFilteredPhrases()
+                .get(phraseIndex);
+            filteredPhraseText = filteredPhrase.getPhrase();
+
+            Optional<ParseTree> parseTree = filteredPhrase.getParseTree();
+
+            //TODO - Add implementation for the duplication checking
+            if (parseTree.isPresent()) {
+
+              InterpreterObj interpreterObj = interpreter.getInterpreterObj();
+
+              if (interpreterObj.getParseTreeListener().isPresent()) {
+                walker.walk(interpreterObj.getParseTreeListener().get(), parseTree.get());
+              } else {
+                interpreterObj.getParseTreeVisitor().get().visit(parseTree.get());
+              }
+
+              notifyStreams(
+                  (AnsiTerminalColorHelper.GREEN + parseTree.get().getText() + "\n"
+                      + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
+            }
+          }
+          phraseIndex++;
+        }
+
+      } catch (Throwable e) {
+        notifyStreams(
+            (AnsiTerminalColorHelper.BRIGHT_RED + filteredPhraseText + "\n"
+                + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
+
+        results.addTestResult(DefaultTestResult.failedTest(testCase, null, e, phraseIndex,
+            size - phraseIndex));
+        logger.error("Phrase failure", e);
+      }
+
+      results.addTestResult(DefaultTestResult.passingTest(testCase));
+    }
+
+    return results;
   }
+
+
 }
+
+

@@ -3,6 +3,7 @@ package com.pdsl.testcases;
 import com.google.common.base.Preconditions;
 import com.pdsl.executors.InterpreterObj;
 import com.pdsl.specifications.FilteredPhrase;
+import com.pdsl.testcases.SharedTestSuite.SharedTestCaseWithInterpreter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
  * {@link com.pdsl.executors.InterpreterObj}
  */
 public final class SharedTestCase {
+
+  List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters;
 
  private final List<TestCase> testCases;
  private final List<InterpreterObj> interpreterObjs;
@@ -29,9 +32,19 @@ public final class SharedTestCase {
     this.iterators = this.testCases.stream().map(TestCase::getFilteredPhrases).map(v-> v.iterator()).collect(Collectors.toUnmodifiableList());
   }
 
-  public List<TestCase> getTestCases(){return testCases;}
+  public SharedTestCase(List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters) {
+    this.sharedTestCaseWithInterpreters = sharedTestCaseWithInterpreters;
+    this.testCases=null;
+    this.interpreterObjs=null;
+    this.iterators = null;
+  }
 
-  public List<InterpreterObj> getInterpreters(){return interpreterObjs;}
+  //public List<TestCase> getTestCases(){return testCases;}
 
-  public List<Iterator<FilteredPhrase>> getSharedParseIterator() { return iterators;}
+  //public List<InterpreterObj> getInterpreters(){return interpreterObjs;}
+
+  //public List<Iterator<FilteredPhrase>> getSharedParseIterator() { return iterators;}
+
+  public List<SharedTestCaseWithInterpreter> getSharedTestCaseWithInterpreters() {return sharedTestCaseWithInterpreters;}
+
 }

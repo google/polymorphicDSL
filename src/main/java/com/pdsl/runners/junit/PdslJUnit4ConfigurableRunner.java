@@ -153,9 +153,11 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
 
             try {
                 PdslExecutorRunner pdslExecutorRunner;
-                SharedTestCase sharedTestCase = new SharedTestCase((List<TestCase>) testCases, interpreterObjs);
-
-                pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(), sharedTestCase, testRunExecutor.get(), pdslConfiguration.context());
+                //List<SharedTestCase> sharedTestCases = new SharedTestCase((List<TestCase>) testCases, interpreterObjs);
+                List<SharedTestCase> sharedTestCases = testCases.stream()
+                    .map(list -> new SharedTestCase(List.of(list), interpreterObjs))// this is definitely welcome to fix
+                    .collect(Collectors.toUnmodifiableList());
+                pdslExecutorRunner = new PdslExecutorRunner(getTestClass().getJavaClass(), sharedTestCases, testRunExecutor.get(), pdslConfiguration.context());
 
                 pdslExecutorRunner.run(notifier);
                 List<MetadataTestRunResults> methodResults = pdslExecutorRunner.getMetadataTestRunResults();
