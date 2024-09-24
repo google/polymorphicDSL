@@ -1,6 +1,8 @@
 package com.pdsl.executors;
 
 import java.util.Optional;
+
+import com.pdsl.runners.PdslTestParams;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
@@ -11,20 +13,39 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public final class InterpreterObj {
 
-  private final Optional<ParseTreeVisitor> parseTreeVisitor;
+  private final Optional<ParseTreeVisitor<?>> parseTreeVisitor;
   private final Optional<ParseTreeListener> parseTreeListener;
-
-  public InterpreterObj(ParseTreeVisitor parseTreeVisitor) {
+  private final String startRule;
+  private final String syntaxRule;
+  public InterpreterObj(ParseTreeVisitor<?> parseTreeVisitor) {
     this.parseTreeVisitor = Optional.of(parseTreeVisitor);
     this.parseTreeListener = Optional.empty();
+    this.startRule = PdslTestParams.DEFAULT_ALL_RULE;
+    this.syntaxRule = PdslTestParams.DEFAULT_SYNTAX_RULE;
   }
 
   public InterpreterObj(ParseTreeListener parseTreeListener) {
     this.parseTreeVisitor = Optional.empty();
     this.parseTreeListener = Optional.of(parseTreeListener);
+    this.startRule = PdslTestParams.DEFAULT_ALL_RULE;
+    this.syntaxRule = PdslTestParams.DEFAULT_SYNTAX_RULE;
   }
 
-  public Optional<ParseTreeVisitor> getParseTreeVisitor(){
+  public InterpreterObj(ParseTreeListener parseTreeListener, String startRule, String syntaxRule) {
+    this.parseTreeVisitor = Optional.empty();
+    this.parseTreeListener = Optional.of(parseTreeListener);
+    this.startRule = startRule;
+    this.syntaxRule = syntaxRule;
+  }
+
+  public InterpreterObj(ParseTreeVisitor<?> parseTreeVisitor, String startRule, String syntaxRule) {
+    this.parseTreeVisitor = Optional.of(parseTreeVisitor);
+    this.parseTreeListener = Optional.empty();
+    this.startRule = startRule;
+    this.syntaxRule = syntaxRule;
+  }
+
+  public Optional<ParseTreeVisitor<?>> getParseTreeVisitor(){
     return parseTreeVisitor;
   }
 

@@ -3,9 +3,12 @@ package com.pdsl.runners;
 import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
+import com.pdsl.executors.InterpreterObj;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.runners.junit.PolymorphicDslJUnitException;
 import com.pdsl.specifications.*;
+import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -14,6 +17,7 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.TestClass;
 
@@ -224,6 +228,20 @@ public final class ExecutorHelper {
                     "No test cases were produced from the specifications!%n\tTest Case Factory: %s", testCaseFactory.getClass()));
         }
         return testCases;
+    }
+
+    record CreateSharedSuiteDto(TestCaseFactory testCaseFactory, Collection<TestSpecification> specifications, InterpreterObj interpreterObj) {}
+
+    public SharedTestSuite getSharedTestSuite(List<CreateSharedSuiteDto> dtos) {
+        List<InterpreterObj> interpreters = new ArrayList<>(dtos.size());
+        List<List<TestCase>> testCasesPerInterpreter = new ArrayList<>();
+
+        for (CreateSharedSuiteDto dto : dtos) {
+            testCasesPerInterpreter.add(new ArrayList<>(getTestCases(dto.testCaseFactory(), dto.specifications())));
+            interpreters.add(dto.interpreterObj());
+        }
+        // Organize the test cases so the ith test case with each interpreter maps to the ith test case of all the others
+        return SharedTestSuite.of(testCasesPerInterpreter, interpreters);
     }
 
     /**

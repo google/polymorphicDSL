@@ -4,24 +4,13 @@ import com.pdsl.executors.InterpreterObj;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
-import com.pdsl.grammars.AllGrammarsLexer;
-import com.pdsl.grammars.AllGrammarsParser;
-import com.pdsl.grammars.InterpreterOneLexer;
-import com.pdsl.grammars.InterpreterOneListenerImpl;
-import com.pdsl.grammars.InterpreterOneParser;
-import com.pdsl.grammars.InterpreterTwoLexer;
-import com.pdsl.grammars.InterpreterTwoParser;
-import com.pdsl.grammars.InterpreterTwoListenerImpl;
+import com.pdsl.grammars.*;
 import com.pdsl.grammars.InterpreterTwoParser.HiFolksContext;
 import com.pdsl.grammars.InterpreterTwoParser.PolymorphicDslAllRulesContext;
-import com.pdsl.grammars.InterpreterTwoParserListener;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
-import com.pdsl.testcases.PreorderTestCaseFactory;
-import com.pdsl.testcases.SharedTestCase;
-import com.pdsl.testcases.TestCase;
-import com.pdsl.testcases.TestCaseFactory;
+import com.pdsl.testcases.*;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import java.util.ArrayList;
 import java.util.List;
@@ -324,14 +313,15 @@ public final class GherkinPolymorphicDslTestExecutor {
         * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
         * */
         List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerImpl()));
-        SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
-        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "API");
+        SharedTestSuite sharedTestSuite = SharedTestSuite.of(testCasesList, InterpreterObjs);
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(sharedTestSuite.getSharedTestCaseList(), "API");
 
         // Assert
-        assertThat(results.totalPhrases()).isEqualTo(1);
-        assertThat(results.getTestResults().size()).isEqualTo(1);
+        assertThat(results.totalPhrases()).isEqualTo(2); // 2 Unique test suites out of 3, 1 filtered out
+        assertThat(results.getTestResults().size()).isEqualTo(2); // 2 Unique test suites out of 3, 1 filtered out
         assertThat(results.failingTestTotal()).isEqualTo(0);
-        assertThat(results.passingTestTotal()).isEqualTo(1);
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
+        assertThat(results.passingTestTotal()).isEqualTo(2); // 2 Unique test suites out of 3, 1 filtered out
     }
 
     @Test
@@ -356,7 +346,7 @@ public final class GherkinPolymorphicDslTestExecutor {
         testCasesList.add(testCaseFactory.processTestSpecification(gherkinTestSpecificationsTwo.get()).stream().collect(Collectors.toUnmodifiableList()));
 
         // Prepare the Listener implementation with exception
-        class InterpreterTwoListenerExceptionImpl implements InterpreterTwoParserListener {
+        class InterpreterTwoListenerExceptionImpl extends InterpreterTwoParserBaseListener {
             private Logger logger = LoggerFactory.getLogger(InterpreterTwoListenerExceptionImpl.class);
 
             @Override
@@ -372,38 +362,21 @@ public final class GherkinPolymorphicDslTestExecutor {
                 throw new IllegalStateException(
                     "There was an error in the grammar! Check the G4 files for the issue!");
             }
-
-            @Override
-            public void exitHiFolks(HiFolksContext ctx) {}
-
-            @Override
-            public void enterPolymorphicDslAllRules(PolymorphicDslAllRulesContext ctx) {}
-
-            @Override
-            public void exitPolymorphicDslAllRules(PolymorphicDslAllRulesContext ctx) {}
-
-            @Override
-            public void visitTerminal(TerminalNode terminalNode) {}
-
-            @Override
-            public void enterEveryRule(ParserRuleContext parserRuleContext) {}
-
-            @Override
-            public void exitEveryRule(ParserRuleContext parserRuleContext) {}
         }
 
         // Act
         /*
          * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
          * */
-        List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerExceptionImpl()));
-        SharedTestCase sharedTestCase = new SharedTestCase(testCasesList.stream().flatMap(v-> v.stream()).collect(Collectors.toUnmodifiableList()), InterpreterObjs);
-        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(List.of(sharedTestCase), "APIs");
+        List<InterpreterObj> interpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerExceptionImpl()));
+        SharedTestSuite sharedTestSuite = SharedTestSuite.of(testCasesList, interpreterObjs);
+        MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(sharedTestSuite.getSharedTestCaseList(), "APIs");
 
         // Assert
-        assertThat(results.totalPhrases()).isEqualTo(1);
-        assertThat(results.getTestResults().size()).isEqualTo(1);
-        assertThat(results.failingTestTotal()).isEqualTo(1);
+        assertThat(results.totalPhrases()).isEqualTo(2);
+        assertThat(results.getTestResults().size()).isEqualTo(2);
+        assertThat(results.failingTestTotal()).isEqualTo(2);
+        //assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
         assertThat(results.passingTestTotal()).isEqualTo(0);
     }
 }

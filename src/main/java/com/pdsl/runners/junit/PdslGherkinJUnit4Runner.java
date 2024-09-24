@@ -40,22 +40,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
-
-@Deprecated(since="1.6.6") // Use JUnit5 because the JUnit4 API has extreme limitations
-// Keep the JUnit4 implementation for Google
 public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
 
     private final String context;
     private final String applicationName;
     private final String resourceRoot;
-    private final Optional<? extends Class<? extends Parser>> classWideRecognizerParser;
-    private final Optional<? extends Class<? extends Lexer>> classWideRecognizerLexer;
-    private final String classWideRecognizerRule;
     private final Collection<MetadataTestRunResults> results = new ArrayList<>();
     private final Provider<? extends TestResourceFinderGenerator> resourceFinderGeneratorProvider;
-    private final Provider<? extends TraceableTestRunExecutor> executorProvider;
     private final ExecutorHelper executorHelper;
-    private final ConcurrentMap<FrameworkMethod, Description> methodDescriptions = new ConcurrentHashMap<FrameworkMethod, Description>();
 
     public PdslGherkinJUnit4Runner(Class<?> testClass) throws InitializationError {
         super(testClass);
@@ -67,34 +59,13 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
         Preconditions.checkArgument(!annotation.applicationName().isBlank());
         executorHelper = PdslConfigurationHelper.getExecutorHelper(new JUnitConfigurationAccessor());
         ExecutorHelper.PdslProvidersDto providers = executorHelper.makePdslElements(new PdslGherkinHelperAnnotation(annotation));
-        this.classWideRecognizerLexer = providers.getClassWideLexerRecognizerOptional();
-        this.classWideRecognizerParser = providers.getClassWideParserRecognizerOptional();
         this.resourceFinderGeneratorProvider = providers.getResourceFinder();
-        this.executorProvider = providers.getTestRunExecutor();
         context = annotation.context();
         applicationName = annotation.applicationName();
         this.resourceRoot = annotation.resourceRoot();
-        Class<? extends Parser> parser = annotation.dslRecognizerParser();
-        Class<? extends Lexer> lexer = annotation.dslRecognizerLexer();
-        classWideRecognizerRule = annotation.recognizerRule();
     }
-    private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
 
-    public Object createPdslProviderFromClass(Class<?> provider, String configurationField) {
-        try {
-            return  provider.getConstructor().newInstance();
-        } catch (NoSuchMethodException e) {
-            throw new PolymorphicDslJUnitException(String.format("Error with parameter(s) in the @PdslGherkinApplication!%n"
-                            + "The field %s must have a default constructor.%n"
-                            + "Only the default constructor will be invoked by the JUnit runner."
-                            + "CLASS THAT NEEDS DEFAULT CONSTRUCTOR: %s",
-                    configurationField, provider.getName()), e);
-        } catch (InvocationTargetException | InstantiationException e) {
-            throw new PolymorphicDslJUnitException(String.format("Error creating %s!", provider.getName()), e);
-        } catch (IllegalAccessException e) {
-            throw new PolymorphicDslJUnitException(String.format("Could not access constructor for %s. Make sure it is public!", provider.getName()), e);
-        }
-    }
+    private static final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
 
     public Map<String, Collection<MetadataTestRunResults>> getMetaDataTestRunResults() {
         return Map.of(context, results);
@@ -246,11 +217,6 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
                     resourceRoot, Arrays.deepToString(pdslTest.includesResources()), Arrays.deepToString(pdslTest.excludesResources())));
         }
         return testResources;
-    }
-
-    private List<String> getGlobResourcePaths(String[] resources) {
-        String root = !resourceRoot.endsWith("/") ? "**/" + resourceRoot + "/" : "**/" + resourceRoot;
-        return Arrays.stream(resources).map(root::concat).collect(Collectors.toList());
     }
 
     @Override

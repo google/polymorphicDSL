@@ -47,19 +47,6 @@ public class SharedTestSuite {
         listOfSharedTestCaseWithInterpreter.get(testCase).add(sharedTestCaseWithInterpreter);
       }
     }
-    /*for (InterpreterObj interpreter : interpreterObj) {
-      for (List<TestCase> interpreterTestSuite : listOfTestCases) {
-        List<SharedTestCaseWithInterpreter> SharedTestCaseWithInterpreterList = new ArrayList<>();
-        for (int testCase = 0; testCase < interpreterTestSuite.size(); testCase++) {
-
-          SharedTestCaseWithInterpreter sharedTestCaseWithInterpreter = new SharedTestCaseWithInterpreter(
-              interpreterTestSuite.get(testCase),interpreter);
-          SharedTestCaseWithInterpreterList.add(sharedTestCaseWithInterpreter);
-          listOfSharedTestCaseWithInterpreter.get(testCase).add(sharedTestCaseWithInterpreter);
-        }
-        sharedTestCaseList.add(new SharedTestCase(SharedTestCaseWithInterpreterList));
-      }
-    }*/
     return new SharedTestSuite(
         listOfSharedTestCaseWithInterpreter.stream().map(item -> new SharedTestCase(item)).collect(
             Collectors.toUnmodifiableList()));
