@@ -7,19 +7,15 @@ import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.PreorderTestCaseFactory;
-import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.jruby.ir.Interp;
 
 import javax.inject.Provider;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,20 +35,20 @@ public final class JUnit4RecognizerParamsConverter {
 
     public record PdslTestDto(PdslTest pdslTest, Optional<RecognizedBy> recognizedBy) {}
 
-    public static RecognizerParams<SharedTestSuite> convert(PdslTestDto pdslTestDto, PdslConfiguration configuration) {
+    public static RecognizerParams convert(PdslTestDto pdslTestDto, PdslConfiguration configuration) {
         Preconditions.checkNotNull(pdslTestDto, "PdslTest DTOs cannot be null!");
         Preconditions.checkNotNull(pdslTestDto.recognizedBy, "RecognizedBy cannot be null!");
         Preconditions.checkNotNull(pdslTestDto.pdslTest, "PdslTest cannot be null!");
         Preconditions.checkNotNull(configuration, "PdslConfiguration cannot be null!");
-        PdslTestParams<SharedTestSuite> pdslTestParams = getPdslTestParams(pdslTestDto, configuration);
-        return new RecognizerParams<>(
+        PdslTestParams pdslTestParams = getPdslTestParams(pdslTestDto, configuration);
+        return new RecognizerParams(
                 configuration.context(),
                 configuration.applicationName(),
                 configuration.resourceRoot(),
                 List.of(pdslTestParams),
                 configuration.dslRecognizerLexer(),
                 configuration.dslRecognizerParser(),
-                new RecognizerParams.PdslProviders(
+                new RecognizerParams.PdslSuppliers(
                         () -> HELPER.makeTestResourceFinderGenerator(configuration.resourceFinder(), configuration.resourceRoot()).get(),
                         configuration instanceof GherkinWrapperConfiguration
                                 ?  () -> filter -> new DefaultGherkinTestSpecificationFactory.Builder(filter)
@@ -66,22 +62,22 @@ public final class JUnit4RecognizerParamsConverter {
         );
     }
 
-    public static RecognizerParams<SharedTestSuite> convert(PdslTestDto pdslTestDto, PdslGherkinApplication pdslGherkinApplication) {
+    public static RecognizerParams convert(PdslTestDto pdslTestDto, PdslGherkinApplication pdslGherkinApplication) {
         Preconditions.checkNotNull(pdslTestDto, "PdslTest DTOs cannot be null!");
         Preconditions.checkNotNull(pdslTestDto.recognizedBy, "RecognizedBy cannot be null!");
         Preconditions.checkNotNull(pdslTestDto.pdslTest, "PdslTest cannot be null!");
         Preconditions.checkNotNull(pdslGherkinApplication, "PdslGherkinApplication cannot be null!");
-        PdslTestParams<SharedTestSuite> pdslTestParams = getPdslTestParams(pdslTestDto, convert(pdslGherkinApplication));
+        PdslTestParams pdslTestParams = getPdslTestParams(pdslTestDto, convert(pdslGherkinApplication));
         ProviderInstances providers = getProviderInstances(pdslGherkinApplication);
 
-        return new RecognizerParams<>(
+        return new RecognizerParams(
                 pdslGherkinApplication.context(),
                 pdslGherkinApplication.applicationName(),
                 pdslGherkinApplication.resourceRoot(),
                 List.of(pdslTestParams),
                 pdslGherkinApplication.dslRecognizerLexer(),
                 pdslGherkinApplication.dslRecognizerParser(),
-                new RecognizerParams.PdslProviders(
+                new RecognizerParams.PdslSuppliers(
                         () -> providers.testResourceFinderGenerator().get(),
                         () -> providers.testSpecificationFactoryGenerator().get(),
                         () -> providers.testCaseFactory().get()
@@ -180,10 +176,10 @@ public final class JUnit4RecognizerParamsConverter {
             }
         };
     }
-    private static PdslTestParams<SharedTestSuite> getPdslTestParams(
+    private static PdslTestParams getPdslTestParams(
             PdslTestDto pdslTestDto, PdslConfiguration pdslConfiguration) {
 
-       return new PdslTestParams<>(
+       return new PdslTestParams(
                getRecognizerLexer(pdslTestDto, pdslConfiguration),
                getRecognizerParser(pdslTestDto, pdslConfiguration),
                getInterpreterParams(pdslTestDto, pdslConfiguration),

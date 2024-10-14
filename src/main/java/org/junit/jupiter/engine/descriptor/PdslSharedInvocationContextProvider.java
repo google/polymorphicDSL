@@ -20,6 +20,45 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+/**
+ * A JUnit5 invocation context provider that provides tests created from the Polymorphic DSL test framework.
+ *
+ * The method getInvocationContext serves as the primary means of creating PDSL tests for JUnit5. The end user is
+ * expected to use this in conjunction with a JUnit5 TestTemplate in order to run those tests.
+ *
+ * Note that a PdslConfigParameter is also used to provide information about the specific tests being run. That object
+ * has methods for generating test cases written in Gherkin (via the static constructor createGherkinPdslConfig) or
+ * using a different DSL you've created (via createGeneralPdslConfig).
+ *
+ * E.g
+ *
+ *  private static class InterpreterOneExtension extends PdslSharedInvocationContextProvider {
+ *         @Override
+ *         public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
+ *             return getInvocationContext(PdslConfigParameter.createGherkinPdslConfig(
+ *                             List.of(
+ *                                     new PdslTestParameter.Builder(List.of(
+ *                                             new Interpreter(InterpreterOneLexer.class, InterpreterOneParser.class,
+ *                                                     new InterpreterObj(
+ *                                                             new InterpreterOne.InterpreterOneListenerProvider().get()))
+ *                                         )
+ *                                     )
+ *                                             .withStartRule("interpreterAllRules")
+ *                                             .withIncludedResources(new String[] {"InterpreterAll.feature"})
+ *                                             .withRecognizer(InterpreterAllLexer.class, InterpreterAllParser.class)
+ *                                             .withRecognizerRule("polymorphicDslAllRules")
+ *                                             .build()
+ *                             )
+ *                     )
+ *                     .withApplicationName("Polymorphic DSL Framework")
+ *                     .withContext("User Acceptance Test")
+ *                     .withResourceRoot(Paths.get("src/test/resources/framework_specifications/features/interpreter/").toUri())
+ *                     .withRecognizerRule("polymorphicDslAllRules")
+ *                     .build())
+ *                     .stream();
+ *         }
+ *     }
+ */
 public abstract class PdslSharedInvocationContextProvider
         implements InvocationInterceptor, TestTemplateInvocationContextProvider {
 
@@ -50,6 +89,11 @@ public abstract class PdslSharedInvocationContextProvider
         return true;
     }
 
+    /**
+     * Creates the TestTemplateInvocationContext objects needed for a JUnit5 TestTemplate.
+     * @param parameter the Pdsl configuration to generate a suite of tests.
+     * @return a collection of TestTempalteInvocationContext objects to be used by a JUnit5 TestTemplate
+     */
     public Collection<TestTemplateInvocationContext> getInvocationContext(PdslConfigParameter parameter) {
         SharedTestSuite suite = SHARED_TEST_SUITE_VISITOR.recognizerParamsOperation(convert(parameter));
 
@@ -63,15 +107,15 @@ public abstract class PdslSharedInvocationContextProvider
                 .collect(Collectors.toUnmodifiableList());
     }
 
-    private static RecognizerParams<SharedTestSuite> convert(PdslConfigParameter parameter) {
-        return new RecognizerParams<>(
+    private static RecognizerParams convert(PdslConfigParameter parameter) {
+        return new RecognizerParams(
                 parameter.getContext(),
                 parameter.getApplicationName(),
                 parameter.getResourceRoot().toString(),
                 convert(parameter.getPdslTestParameters(), parameter),
                 parameter.getDslRecognizerLexer().orElse(ACCESSOR.getEmptyRecognizerLexerClass()),
                 parameter.getDslRecognizerParser().orElse(ACCESSOR.getEmptyRecognizerParserClass()),
-                new RecognizerParams.PdslProviders(
+                new RecognizerParams.PdslSuppliers(
                         parameter.getResourceFinder().isPresent() ? parameter.getResourceFinder().get()
                                 : new DefaultResourceFinderGenerator(parameter.getResourceRoot().toString()),
                         parameter.getSpecificationFactoryProvider(),
@@ -96,11 +140,11 @@ public abstract class PdslSharedInvocationContextProvider
 
     }
 
-    private static List<PdslTestParams<SharedTestSuite>> convert(Collection<PdslTestParameter> parameters,
+    private static List<PdslTestParams> convert(Collection<PdslTestParameter> parameters,
                                                                  PdslConfigParameter config) {
-        List<PdslTestParams<SharedTestSuite>> params = new ArrayList<>(parameters.size());
+        List<PdslTestParams> params = new ArrayList<>(parameters.size());
         for (PdslTestParameter p : parameters) {
-            PdslTestParams<SharedTestSuite> pdslTestParams = new PdslTestParams<>(
+            PdslTestParams pdslTestParams = new PdslTestParams(
                     getRecognizerLexer(config, p),
                     getRecognizerParser(config, p),
                     getInterpreterParams(config, p),

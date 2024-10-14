@@ -15,9 +15,8 @@ import java.util.List;
  * @param tags arbitrary information used for message passing to the underlying framework
  * @param includesResources the tests written in the DSL
  * @param excludesResources the tests to ignore
- * @param <T> the type to be returned by any visitors of this clss
  */
-public record PdslTestParams<T>(
+public record PdslTestParams (
         Class<? extends Lexer> lexerRecognizerClass,
         Class<? extends Parser> parserRecognizerClass,
         InterpreterParam[] interpreters,
@@ -27,12 +26,26 @@ public record PdslTestParams<T>(
     public static final String DEFAULT_ALL_RULE = "polymorphicDslAllRules";
     public static final String DEFAULT_SYNTAX_RULE = "polymorphicDslSyntaxCheck";
 
-    // Use visitor pattern so behavior can be modified without modifying PdslTestParams
-    public interface PdslTestParamsVisitor<T> {
-        T visitParams(PdslTestParams<?> params);
+    /**
+     * A visitor used to extend the behavior of the PdslTestParams obje3ct without modifying
+     * the record itself.
+     *
+     * This gives external library developers a convenient way to embed or enhace PDSL without them
+     * needing to contribute directly to the PDSL repository as well as developing custom, independent
+     * functionality.
+     *
+     * @param <T> the type of object returned
+     */
+    public interface PdslTestParamsVisitor {
+        <T> T visitParams(PdslTestParams params);
     }
 
-    public T accept(PdslTestParamsVisitor<?> visitor) {
+    /**
+     * Performs an operation on the PdslTestParam as defined by the provided visitor.
+     * @param visitor
+     * @return an object that matches the type of the visitor
+     */
+    public <T> T accept(PdslTestParamsVisitor visitor) {
         return (T) visitor.visitParams(this);
     }
 

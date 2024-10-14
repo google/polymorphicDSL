@@ -6,6 +6,9 @@ import org.junit.jupiter.api.extension.*;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * An invocation context used by JUnit5 that has an embedded PDSL test.
+ */
 final class PdslInvocationContext implements TestTemplateInvocationContext {
 
     private final PdslExecutable executable;

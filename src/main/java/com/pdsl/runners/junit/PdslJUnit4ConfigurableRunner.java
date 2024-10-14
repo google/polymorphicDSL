@@ -125,7 +125,7 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
         PdslTest pdslTest = method.getAnnotation(PdslTest.class);
         if (pdslTest != null) {
             notifier.fireTestStarted(describeChild(method));
-            RecognizerParams<SharedTestSuite> recognizerParams = JUnit4RecognizerParamsConverter.convert(
+            RecognizerParams recognizerParams = JUnit4RecognizerParamsConverter.convert(
                     new JUnit4RecognizerParamsConverter.PdslTestDto(pdslTest, Optional.ofNullable(method.getAnnotation(RecognizedBy.class))),
                     pdslConfiguration);
             SharedTestSuite sharedTestSuite = SHARED_TEST_SUITE_VISITOR.recognizerParamsOperation(recognizerParams);
