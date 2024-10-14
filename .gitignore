@@ -1,4 +1,6 @@
 examples/quickstart/gen
 examples/quickstart/target
 examples/tutorial/.idea/
+gen/
+target/
 .idea/
