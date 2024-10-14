@@ -1,23 +1,13 @@
 package com.pdsl.runners.junit;
 
 import com.google.common.base.Preconditions;
-import com.pdsl.exceptions.PolymorphicDslTestResourceException;
-import com.pdsl.executors.InterpreterObj;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestResult;
 import com.pdsl.reports.TestRunResults;
 import com.pdsl.runners.*;
-import com.pdsl.specifications.TestResourceFinder;
-import com.pdsl.specifications.TestResourceFinderGenerator;
-import com.pdsl.specifications.TestSpecification;
-import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.SharedTestSuite;
-import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
-import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.Lexer;
-import org.antlr.v4.runtime.Parser;
 import org.junit.Test;
 import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
@@ -26,9 +16,10 @@ import org.junit.runners.model.FrameworkMethod;
 import org.junit.runners.model.InitializationError;
 
 import javax.inject.Provider;
-import java.net.URI;
-import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -74,6 +65,39 @@ public class PdslJUnit4ConfigurableRunner extends BlockJUnit4ClassRunner {
         ExecutorHelper.PdslProvidersDto providers = executorHelper.makePdslElements(pdslConfiguration);
         this.pdslConfiguration = testClass.getAnnotation(PdslConfiguration.class);
         this.testRunExecutor = providers.getTestRunExecutor();
+    }
+
+    // Constructor used by PdslGherkinJUnit4Runner to delegate most logic.
+    // The Method object has a closed API that makes using a wrapper class difficult, so we manually create the
+    // annotation and delegate it to this object instead.
+    PdslJUnit4ConfigurableRunner(Class<?> testClass, PdslConfiguration pdslConfiguration, Provider<TestCaseFactory> testCaseFactorProvider) throws InitializationError {
+        super(testClass);
+        Preconditions.checkNotNull(pdslConfiguration);
+        final String exampleConfiguration = String.format(
+                "@PdslConfiguration(%n"
+                        + "%s: <your specification generator>,%n"
+                        + "%s: <testCaseFactoryProvider>%n"
+                        + ")%n"
+                        + "public class %s {%n", SPECIFICATION_FACTORY_PROVIDER, FACTORY_PROVIDER_FIELD, testClass.getName());
+        final String className = getClassNameWithoutPackage(testClass);
+        // Check to see if required fields are available
+        if (pdslConfiguration == null) {
+            throw new InitializationError(String.format("The class %s does not have the required @PdslConfiguration annotation.%n"
+                    + "e.g.:%n%s", exampleConfiguration, className));
+        }
+        List<String> missingRequiredFields = new ArrayList<>();
+        if (pdslConfiguration.testCaseFactoryProvider() == null) {
+            missingRequiredFields.add(FACTORY_PROVIDER_FIELD);
+        }
+
+        if (!missingRequiredFields.isEmpty()) {
+            String requiredFields = missingRequiredFields.stream().collect(Collectors.joining(String.format("%n\t")));
+            throw new InitializationError(String.format("@PdslConfiguration is missing the required field(s):%n\t%s%n"
+                    + "Please update it to have these fields:%n%s", requiredFields, exampleConfiguration));
+        }
+        this.pdslConfiguration = pdslConfiguration;
+        // Verify that the factories have default constructors we can call
+        this.testRunExecutor = executorHelper.makeTraceableTestRunExecuter(pdslConfiguration.testRunExecutor());
     }
 
     private static String getClassNameWithoutPackage(Class<?> clazz) {

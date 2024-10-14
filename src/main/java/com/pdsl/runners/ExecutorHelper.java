@@ -45,6 +45,7 @@ public final class ExecutorHelper {
     private static final String SPECIFICATION_FACTORY_PROVIDER = "specificationFactoryProvider";
     private static final String TEST_RUN_EXECUTOR = "testRunExecutor";
     private static final String RESOURCE_FINDER = "resourceFinder";
+
     ExecutorHelper(){
         try {
             Preconditions.checkNotNull(PdslConfiguration.class.getMethod(TEST_CASEFACTORY_PROVIDER));
@@ -143,10 +144,11 @@ public final class ExecutorHelper {
 
             return traversals;
         }
-
+        // TODO: I thnk this assertion is incorrect. Remove it?
+        /*
             Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
                 "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
-
+         */
             for(Interpreter interpreter : pdslTest.interpreters()) {
                 try {
                     if (interpreter.listener().equals(EmptyParseTreeListenerProvider.class) && interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
@@ -417,6 +419,8 @@ public final class ExecutorHelper {
         }
     }
 
+
+
     /**
      * Creates a variety of factories useful for running Polymorphic DSL tests.
      * @param provider the class containing PDSL annotations.
@@ -454,8 +458,6 @@ public final class ExecutorHelper {
      * Provides the default resource finder used by most PDSL tests.
      */
     public static final class DefaultResourceFinderGenerator implements Provider<TestResourceFinderGenerator> {
-        private final String resourceRoot;
-
         /**
          * Creates a generator for resource finders.
          * @param resourceRoot the root directory to search in
@@ -465,7 +467,6 @@ public final class ExecutorHelper {
             if (resourceRoot.startsWith("file:///")) {
                 resourceRoot = resourceRoot.replaceFirst("file:///", "");
             }
-            this.resourceRoot = resourceRoot;
             this.INSTANCE = new FileSystemTestResourceGenerator(resourceRoot);
         }
         private final TestResourceFinderGenerator INSTANCE;
@@ -482,15 +483,38 @@ public final class ExecutorHelper {
      * @return PdslProvidersDto containing factories needed to run PDSL test cases
      */
     public PdslProvidersDto makePdslElements(PdslConfiguration pdslConfiguration) {
-            Provider<? extends TestCaseFactory> testCaseFactory = (Provider<? extends TestCaseFactory>) createPdslProviderFromClass(
-                    pdslConfiguration.testCaseFactoryProvider(), TEST_CASEFACTORY_PROVIDER);
-            Provider<? extends TestSpecificationFactoryGenerator> specificationFactory = (Provider<? extends TestSpecificationFactoryGenerator>) createPdslProviderFromClass(pdslConfiguration.specificationFactoryProvider(), SPECIFICATION_FACTORY_PROVIDER);
-            Provider<? extends TraceableTestRunExecutor> executor = !pdslConfiguration.testRunExecutor().equals(EmptyTestExecutorProvider.class)
-                    ? (Provider<? extends TraceableTestRunExecutor>) createPdslProviderFromClass(pdslConfiguration.testRunExecutor(), TEST_RUN_EXECUTOR)
-                    : new DefaultExecutorProvider();
-            Provider<? extends TestResourceFinderGenerator> resourceFinder = !pdslConfiguration.resourceFinder().equals(EmptyTestResourceFinder.class)
-            ? (Provider<? extends TestResourceFinderGenerator>) createPdslProviderFromClass(pdslConfiguration.resourceFinder(), RESOURCE_FINDER)
-                    : new DefaultResourceFinderGenerator(pdslConfiguration.resourceRoot());
+            Provider<? extends TestCaseFactory> testCaseFactory = makeTestCaseFactoryProvider(pdslConfiguration.testCaseFactoryProvider());
+            Provider<? extends TestSpecificationFactoryGenerator> specificationFactory = makeSpecificationFactoryGenerator(pdslConfiguration.specificationFactoryProvider());
+            Provider<? extends TraceableTestRunExecutor> executor = makeTraceableTestRunExecuter(pdslConfiguration.testRunExecutor());
+            Provider<? extends TestResourceFinderGenerator> resourceFinder = makeTestResourceFinderGenerator(pdslConfiguration.resourceFinder(), pdslConfiguration.resourceRoot());
             return new PdslProvidersDto(specificationFactory, testCaseFactory, executor, resourceFinder, pdslConfiguration);
+    }
+
+    public Provider<? extends TestCaseFactory> makeTestCaseFactoryProvider(Class<? extends Provider<? extends TestCaseFactory>> testFactoryClass) {
+        return (Provider<? extends TestCaseFactory>) createPdslProviderFromClass(
+                testFactoryClass, TEST_CASEFACTORY_PROVIDER);
+    }
+
+    public Provider<? extends TestSpecificationFactoryGenerator> makeSpecificationFactoryGenerator(
+            Class<? extends Provider<? extends TestSpecificationFactoryGenerator>> testSpecificationFactoryGeneratorClass
+    ) {
+        return (Provider<? extends TestSpecificationFactoryGenerator>) createPdslProviderFromClass(testSpecificationFactoryGeneratorClass, SPECIFICATION_FACTORY_PROVIDER);
+    }
+
+    public  Provider<? extends TraceableTestRunExecutor> makeTraceableTestRunExecuter(
+            Class<? extends Provider<? extends TraceableTestRunExecutor>> traceableTestRunExecutorClass
+    ) {
+        return !traceableTestRunExecutorClass.equals(EmptyTestExecutorProvider.class)
+                ? (Provider<? extends TraceableTestRunExecutor>) createPdslProviderFromClass(traceableTestRunExecutorClass, TEST_RUN_EXECUTOR)
+                : new DefaultExecutorProvider();
+    }
+
+    public Provider<? extends TestResourceFinderGenerator> makeTestResourceFinderGenerator(
+            Class<? extends Provider<? extends TestResourceFinderGenerator>> testResourceFinderGeneratorClass,
+            String resourceRoot
+    ) {
+        return !testResourceFinderGeneratorClass.equals(EmptyTestResourceFinder.class)
+                ? (Provider<? extends TestResourceFinderGenerator>) createPdslProviderFromClass(testResourceFinderGeneratorClass, RESOURCE_FINDER)
+                : new DefaultResourceFinderGenerator(resourceRoot);
     }
 }

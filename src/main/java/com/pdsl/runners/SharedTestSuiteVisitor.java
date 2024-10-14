@@ -13,8 +13,11 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.Parser;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.*;
 
@@ -36,12 +39,19 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
         for (PdslTestParams<SharedTestSuite> params : recognizerParams.pdslTestParams()) {
 
             // Get the tests written in a DSL
-            Set<URI> testResources = getTestResources(recognizerParams.providers().resourceFinderProvider().get(),
-                    params.includesResources(), params.excludesResources(), recognizerParams.resourceRoot());
+            Set<URI> testResources;
+            try {
+                URI resourceRoot = new URI(recognizerParams.resourceRoot());
+                testResources = getTestResources(recognizerParams.providers().resourceFinderProvider().get(),
+                        params.includesResources(), params.excludesResources(), resourceRoot);
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+
             for (InterpreterParam parser : params.interpreters()) {
                 // Read the files and structure them as specifications which will allow us to figure out how many
                 // test cases to create from each file, which parts to ignore, etc.
-                Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, testResources);
+                Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, params, testResources);
                 // Convert the specificaitons into test cases
                 List<TestCase> testCasesForSingleInterpreter = new ArrayList<>(getTestCases(recognizerParams.providers().testCaseFactoryProvider().get(), specifications));
                 testCasesPerInterpreters.add(testCasesForSingleInterpreter);
@@ -52,11 +62,11 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
 
     }
 
-    private Set<URI> getTestResources(TestResourceFinderGenerator finderGenerator, String[] includes, String[] excludes, String resourceRoot) {
+    private Set<URI> getTestResources(TestResourceFinderGenerator finderGenerator, String[] includes, String[] excludes, URI resourceRoot) {
         TestResourceFinder finder = finderGenerator.get(includes,excludes);
         Set<URI> testResources = new HashSet<>();
         // Find the files we will be testing
-        Optional<Collection<URI>> resources = finder.scanForTestResources(Paths.get(resourceRoot).toUri());
+        Optional<Collection<URI>> resources =  finder.scanForTestResources(resourceRoot);
         resources.ifPresent(testResources::addAll);
         if (testResources.isEmpty()) {
             throw new IllegalArgumentException(String.format(
@@ -66,10 +76,11 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
         return testResources;
     }
 
-    private Collection<TestSpecification> getSpecifications(InterpreterParam parser, RecognizerParams<SharedTestSuite> recognizerParams, Set<URI> testResources) {
+    private Collection<TestSpecification> getSpecifications(InterpreterParam parser, RecognizerParams<SharedTestSuite> recognizerParams, PdslTestParams<?> pdslTestParams,  Set<URI> testResources) {
         PolymorphicDslPhraseFilter polymorphicDslPhraseFilter = new DefaultPolymorphicDslPhraseFilter(
                 parser.parser(), parser.lexer(),
-                recognizerParams.defaultParserRecognizer(), recognizerParams.defaultLexerRecognizer(),
+                getRecognizerParser(pdslTestParams, parser, recognizerParams),
+                getRecognizerLexer(pdslTestParams, parser, recognizerParams),
                 parser.startRule(),
                 parser.syntaxCheckRule()
         );
@@ -106,5 +117,28 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
         }
         return testCases;
     }
+
+    public static Class<? extends Parser> getRecognizerParser(PdslTestParams<?> params, InterpreterParam parser,
+                                                                    RecognizerParams<SharedTestSuite> recognizerParams) {
+        if (!params.parserRecognizerClass().equals(EmptyRecognizerParser.class)) {
+            return params.parserRecognizerClass();
+        }
+        if(!recognizerParams.defaultParserRecognizer().equals(EmptyRecognizerParser.class)) {
+          return recognizerParams.defaultParserRecognizer();
+        }
+        return parser.parser();
+    }
+
+    public static Class<? extends Lexer> getRecognizerLexer(PdslTestParams<?> params, InterpreterParam parser,
+                                                            RecognizerParams<SharedTestSuite> recognizerParams) {
+        if (!params.lexerRecognizerClass().equals(EmptyRecognizerLexer.class)) {
+            return params.lexerRecognizerClass();
+        }
+        if(!recognizerParams.defaultLexerRecognizer().equals(EmptyRecognizerLexer.class)) {
+            return recognizerParams.defaultLexerRecognizer();
+        }
+        return parser.lexer();
+    }
+
 
 }

@@ -1,5 +1,6 @@
 package org.junit.jupiter.engine.descriptor;
 
+import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.filter.GherkinTagFilterer;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
@@ -15,7 +16,11 @@ import java.util.*;
 import java.util.Map.Entry;
 
 import java.net.URI;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,5 +91,16 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
         logger.info("[{}] duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
         duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
         return duplicateTest.entrySet().stream().map(Entry::getValue).collect(Collectors.toUnmodifiableSet());
+    }
+
+    protected PdslExecutable getPdslExecutable(TestCase testCase, PdslConfigParameter parameter, PdslTestParameter pdslTestParameter) {
+        TraceableTestRunExecutor executor = parameter.getTestRunExecutor().isPresent() ? parameter.getTestRunExecutor().get().get()
+                : DEFAULT_EXECUTOR;
+        if (pdslTestParameter.getVisitor().isPresent()) {
+            return new PdslExecutable(testCase, executor,
+                    (Supplier<ParseTreeVisitor<?>>) pdslTestParameter.getVisitor().get(), parameter.getContext());
+        }
+        return new PdslExecutable(testCase, executor,
+                parameter.getContext(), (Supplier<ParseTreeListener>) pdslTestParameter.getListener().get());
     }
 }

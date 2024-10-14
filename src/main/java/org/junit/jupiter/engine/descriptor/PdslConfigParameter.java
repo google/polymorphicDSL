@@ -2,9 +2,11 @@ package org.junit.jupiter.engine.descriptor;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.executors.TraceableTestRunExecutor;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.runners.*;
 import com.pdsl.specifications.LineDelimitedTestSpecificationFactory;
 import com.pdsl.specifications.TestResourceFinderGenerator;
+import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TestCaseFactory;
 
@@ -32,8 +34,8 @@ public class PdslConfigParameter {
     private String recognizerRule = RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME;
     private final Supplier<? extends TestSpecificationFactoryGenerator> specificationFactoryProvider;
     private final Supplier<? extends TestCaseFactory> testCaseFactoryProvider;
-
     private final Collection<PdslTestParameter> pdslTestParameters;
+
     private PdslConfigParameter(Builder builder) {
         this.context = builder.context;
         this.applicationName = builder.applicationName;
@@ -98,9 +100,11 @@ public class PdslConfigParameter {
         return new Builder(testCaseFactoryProvider, specificationFactoryProvider, pdslTestParameters);
     }
 
+    private static final TestCaseFactory GHERKIN_TEST_SPECIFICATION_FACTORY_SINGLETON = new PreorderTestCaseFactory();
     public static Builder createGherkinPdslConfig(Collection<PdslTestParameter> pdslTestParameters) {
-        // Gherkin uses predetermined specification/test factories. Because it ignores them put in placeholder suppliers.
-        return new Builder (() -> new PreorderTestCaseFactory(), () -> new LineDelimitedTestSpecificationFactory.Generator(), pdslTestParameters);
+        return new Builder(() -> GHERKIN_TEST_SPECIFICATION_FACTORY_SINGLETON,
+                () -> filter -> new DefaultGherkinTestSpecificationFactory.Builder(filter).build(),
+                pdslTestParameters);
     }
 
     /**
@@ -136,7 +140,6 @@ public class PdslConfigParameter {
             this.testCaseFactoryProvider = testCaseFactoryProvider;
             this.specificationFactoryProvider = specificationFactoryProvider;
         }
-
 
         public Builder withContext(String context) {
             this.context = context;

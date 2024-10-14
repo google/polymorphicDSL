@@ -4,9 +4,8 @@ import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.testcases.TestCaseFactory;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
-
-import javax.inject.Provider;
 import java.util.List;
+import java.util.function.Supplier;
 
 public record RecognizerParams<T>(
         String context,
@@ -19,9 +18,9 @@ public record RecognizerParams<T>(
 ) {
 
     public record PdslProviders(
-            Provider<? extends TestResourceFinderGenerator> resourceFinderProvider,
-            Provider<? extends TestSpecificationFactoryGenerator> specificationFactoryProvider,
-            Provider<? extends TestCaseFactory> testCaseFactoryProvider) {}
+            Supplier<? extends TestResourceFinderGenerator> resourceFinderProvider,
+            Supplier<? extends TestSpecificationFactoryGenerator> specificationFactoryProvider,
+            Supplier<? extends TestCaseFactory> testCaseFactoryProvider) {}
     /**
      * An operation enabling the visitor pattern for the RecognizerParams class.
      * <p>
@@ -35,4 +34,5 @@ public record RecognizerParams<T>(
     public T accept(RecognizerParamsOperation<T> visitor) {
         return visitor.recognizerParamsOperation(this);
     }
+
 }

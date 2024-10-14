@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -28,6 +29,7 @@ public class PdslTestParameter {
     private final Class<? extends Lexer> lexer;
     private final Optional<Supplier<? extends ParseTreeListener>> listener;
     private final Optional<Supplier<? extends ParseTreeVisitor<?>>> visitor;
+    private final Optional<List<Interpreter>> interpreterParams;
     private final String tagExpression;
     private final String[] includesResources;
     private final String[] excludesResources;
@@ -35,6 +37,9 @@ public class PdslTestParameter {
     private final Optional<String> recognizerRule;
 
     private PdslTestParameter(Builder builder) {
+        Preconditions.checkArgument((builder.listener.isPresent()
+                ^ builder.visitor.isPresent() ^ builder.interpreterParams.isPresent()),
+                "You can only have one of a visitor, listener or list of interpreterDtos!");
         this.parser = builder.parser;
         this.lexer = builder.lexer;
         this.listener = builder.listener;
@@ -46,7 +51,10 @@ public class PdslTestParameter {
         this.recognizerRule = builder.recognizerRule;
         this.recognizedByLexer = builder.recognizedByLexer;
         this.recognizedByParser = builder.recognizedByParser;
+        this.interpreterParams = builder.interpreterParams;
     }
+
+    public Optional<List<Interpreter>> getInterpreters() { return interpreterParams; }
 
     public Optional<Class<? extends Parser>> getRecognizedByParser() {
         return recognizedByParser;
@@ -104,6 +112,7 @@ public class PdslTestParameter {
         private String[] excludesResources = {};
         private String startRule = DEFAULT_ALL_RULE;
         private Optional<String> recognizerRule = Optional.empty();
+        private Optional<List<Interpreter>> interpreterParams = Optional.empty();
 
         public Builder(
                 Class<? extends Lexer> lexer,
@@ -116,6 +125,10 @@ public class PdslTestParameter {
             this.parser = parser;
             this.lexer = lexer;
             this.visitor = Optional.of(visitor);
+        }
+
+        public Builder(List<Interpreter> interpreters) {
+            withInterpreters(interpreters);
         }
 
         public Builder(
@@ -143,15 +156,25 @@ public class PdslTestParameter {
         public Builder withParser(Class<? extends Parser> parser) {
             Preconditions.checkNotNull(parser, "Parser cannot be null!");
             this.parser = parser;
+            this.interpreterParams = Optional.empty();
             return this;
         }
 
         public Builder withLexer(  Class<? extends Lexer> lexer) {
             Preconditions.checkNotNull(lexer, "Lexer cannot be null!");
             this.lexer = lexer;
+            this.interpreterParams = Optional.empty();
             return this;
         }
 
+        public Builder withInterpreters(List<Interpreter> interpreters) {
+            Preconditions.checkNotNull(interpreters, "InterpreterParams cannot be null!");
+            Preconditions.checkArgument(!interpreters.isEmpty(), "Interpreter params cannot be empty!");
+            interpreters.forEach(i -> Preconditions.checkNotNull(i, "InterpreterDto cannot be null!"));
+            interpreters.forEach(i -> Preconditions.checkNotNull(i.interpreterObj(), "InterpreterObj cannot be null!"));
+            this.interpreterParams = Optional.of(interpreters);
+            return this;
+        }
         public Builder withListener( Supplier<? extends ParseTreeListener> listener) {
             this.listener = Optional.of(listener);
             return this;

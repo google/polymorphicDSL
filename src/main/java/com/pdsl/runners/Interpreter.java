@@ -23,4 +23,5 @@ public @interface Interpreter {
   Class<? extends Lexer> lexer();
   Class<? extends Provider<? extends ParseTreeListener>> listener() default EmptyParseTreeListenerProvider.class;
   Class<? extends Provider<? extends ParseTreeVisitor<?>>> visitor() default EmptyParseTreeVisitorProvider.class;
+  String startRule() default "";
 }

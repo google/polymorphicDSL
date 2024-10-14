@@ -2,6 +2,8 @@ package org.junit.jupiter.engine.descriptor;
 
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
+import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TestCase;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -23,27 +25,39 @@ import java.util.function.Supplier;
  */
 public class PdslExecutable {
 
-        private final TestCase pdslTest;
+        private final Optional<TestCase> pdslTest;
         private final TraceableTestRunExecutor executor;
         private final Optional<Supplier<ParseTreeVisitor<?>>> visitor;
         private final Optional<Supplier<ParseTreeListener>> listener;
         private final String context;
+        private final Optional<SharedTestCase> sharedTestCase;
 
         PdslExecutable(TestCase pdslTest, TraceableTestRunExecutor executor, Supplier<ParseTreeVisitor<?>> visitor, String context) {
-            this.pdslTest = pdslTest;
+            this.pdslTest = Optional.of(pdslTest);
             this.executor = executor;
             this.visitor = Optional.of(visitor);
             this.listener = Optional.empty();
             this.context = context;
+            sharedTestCase = Optional.empty();
         }
 
         PdslExecutable(TestCase pdslTest, TraceableTestRunExecutor executor, String context, Supplier<ParseTreeListener> listener) {
-            this.pdslTest = pdslTest;
+            this.pdslTest = Optional.of(pdslTest);
             this.executor = executor;
             this.visitor = Optional.empty();
             this.listener = Optional.of(listener);
             this.context = context;
+            sharedTestCase = Optional.empty();
         }
+
+    PdslExecutable(SharedTestCase pdslTest, TraceableTestRunExecutor executor, String context) {
+        this.pdslTest = Optional.empty();
+        this.executor = executor;
+        this.visitor = Optional.empty();
+        this.listener = Optional.empty();
+        this.context = context;
+        sharedTestCase = Optional.of(pdslTest);
+    }
 
         /**
          * Runs a PDSL TestCase and returns MetadataTestRunResults if successful.
@@ -53,10 +67,14 @@ public class PdslExecutable {
          * A runtime exception will be thrown if any failures are encounted by the test.
          */
         public MetadataTestRunResults execute() {
-            MetadataTestRunResults results =
-                visitor.isPresent() ? executor.runTestsWithMetadata(List.of(pdslTest), visitor.get().get(), context)
-                        : executor.runTestsWithMetadata(List.of(pdslTest), listener.get().get(), context);
-
+            MetadataTestRunResults results;
+            if (pdslTest.isPresent()) {
+                results =
+                        visitor.isPresent() ? executor.runTestsWithMetadata(List.of(pdslTest.get()), visitor.get().get(), context)
+                                : executor.runTestsWithMetadata(List.of(pdslTest.get()), listener.get().get(), context);
+            } else {
+                results = executor.runTestsWithMetadata(List.of(sharedTestCase.orElseThrow()), context);
+            }
             if (results.failingTestTotal() > 0) {
                 Optional<Throwable> throwable = results.getTestResults().stream()
                         .filter(r -> r.getFailureReason().isPresent())
@@ -73,7 +91,10 @@ public class PdslExecutable {
 
         /** Returns the text representation of the test case. */
         public String getTestTitle() {
-            return pdslTest.getTestTitle();
+            return pdslTest.isPresent() ? pdslTest.get().getTestTitle()
+                    : sharedTestCase.orElseThrow().getSharedTestCaseWithInterpreters().stream()
+                    .findFirst().orElseThrow()
+                    .getTestCase().getTestTitle();
         }
 
         /**
@@ -81,9 +102,11 @@ public class PdslExecutable {
          *
          * @return
          */
-        public TestCase getTestCase() {
+        public Optional<TestCase> getTestCase() {
           return pdslTest;
         }
+
+        public Optional<SharedTestCase> getSharedTestCase() { return sharedTestCase; }
 
         private static class TestFailure extends RuntimeException {
             TestFailure(Throwable t) {
