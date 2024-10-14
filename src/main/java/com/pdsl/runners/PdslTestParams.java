@@ -33,19 +33,24 @@ public record PdslTestParams (
      * This gives external library developers a convenient way to embed or enhace PDSL without them
      * needing to contribute directly to the PDSL repository as well as developing custom, independent
      * functionality.
-     *
-     * @param <T> the type of object returned
      */
-    public interface PdslTestParamsVisitor {
-        <T> T visitParams(PdslTestParams params);
+    public interface PdslTestParamsVisitor<T> {
+        /**
+         * Perform some operation and return result based on the PdslTestParams input.
+         *
+         * @param params the PDSL parameters used as input to do some operation
+         * @return
+         * @param <T>
+         */
+        T visitParams(PdslTestParams params);
     }
 
     /**
      * Performs an operation on the PdslTestParam as defined by the provided visitor.
-     * @param visitor
+     * @param visitor the visitor that performs the operation
      * @return an object that matches the type of the visitor
      */
-    public <T> T accept(PdslTestParamsVisitor visitor) {
+    public <T> T accept(PdslTestParamsVisitor<T> visitor) {
         return (T) visitor.visitParams(this);
     }
 
