@@ -33,14 +33,14 @@ public record PdslTestParams (
      * This gives external library developers a convenient way to embed or enhace PDSL without them
      * needing to contribute directly to the PDSL repository as well as developing custom, independent
      * functionality.
+     * @param <T> the type of data returned by the visitor operationvim
      */
     public interface PdslTestParamsVisitor<T> {
         /**
          * Perform some operation and return result based on the PdslTestParams input.
          *
          * @param params the PDSL parameters used as input to do some operation
-         * @return
-         * @param <T>
+         * @return the value that this visitor uses
          */
         T visitParams(PdslTestParams params);
     }
