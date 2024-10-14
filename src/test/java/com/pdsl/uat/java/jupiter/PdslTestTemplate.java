@@ -82,7 +82,7 @@ public class PdslTestTemplate {
         }
     }
 
-    private static class JupiterFrameworkVisitor extends AbstractParseTreeVisitor<Void>  implements PdslJavaTestRunnerParserVisitor<Void> {
+    static class JupiterFrameworkVisitor extends AbstractParseTreeVisitor<Void>  implements PdslJavaTestRunnerParserVisitor<Void> {
         private static final Supplier<ParseTreeVisitor<?>> VISITOR_SUPPLIER = () -> new AllGrammarsParserBaseVisitor<>();
         private PdslTestParameter.Builder pdslTestBuilder;
         private PdslConfigParameter.Builder configBuilder;

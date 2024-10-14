@@ -3,9 +3,14 @@ package com.pdsl.runners;
 import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.PolymorphicDslFrameworkException;
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
+import com.pdsl.executors.InterpreterObj;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.runners.junit.PolymorphicDslJUnitException;
-import com.pdsl.specifications.*;
+import com.pdsl.specifications.FileSystemTestResourceGenerator;
+import com.pdsl.specifications.TestResourceFinderGenerator;
+import com.pdsl.specifications.TestSpecification;
+import com.pdsl.specifications.TestSpecificationFactory;
+import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -26,14 +31,14 @@ import java.util.*;
 /**
  * A helper for performing common operations with the PDSL framework to assist with integrating
  * in other test frameworks, such as JUnit.
- *
+ * <p>
  * The basic flow of a PDSL application is largely language agnostic:
  * - Source files are located and read
  * - They are turned into specifications
  * - Relevant phrases are determined and filtered
  * - Those in turn are turned into test cases
  * - Finally they are executed
- *
+ * <p>
  * The helper creates a common workflow for performing some of these actions.
  */
 public final class ExecutorHelper {
@@ -41,7 +46,8 @@ public final class ExecutorHelper {
     private static final String SPECIFICATION_FACTORY_PROVIDER = "specificationFactoryProvider";
     private static final String TEST_RUN_EXECUTOR = "testRunExecutor";
     private static final String RESOURCE_FINDER = "resourceFinder";
-    ExecutorHelper(){
+
+    ExecutorHelper() {
         try {
             Preconditions.checkNotNull(PdslConfiguration.class.getMethod(TEST_CASEFACTORY_PROVIDER));
             Preconditions.checkNotNull(PdslConfiguration.class.getMethod(SPECIFICATION_FACTORY_PROVIDER));
@@ -53,56 +59,10 @@ public final class ExecutorHelper {
     }
 
     /**
-     * A mutually exclusive container for a parse tree listener or visitor.
-     */
-    public static class ParseTreeTraversal {
-        private final Optional<ParseTreeVisitor<?>> visitor;
-        private final Optional<ParseTreeListener> listener;
-
-        /**
-         * Creates a tree traversal using a visitor.
-         * @param visitor to use
-         */
-        public ParseTreeTraversal(ParseTreeVisitor<?> visitor) {
-            this.visitor = Optional.of(visitor);
-            this.listener = Optional.empty();
-        }
-
-        /**
-         * Creates a tree traversal using a listener
-         * @param listener to use
-         */
-        public ParseTreeTraversal(ParseTreeListener listener) {
-            this.visitor = Optional.empty();
-            this.listener = Optional.of(listener);
-        }
-
-        /**
-         * Retrieves the listener if one was created.
-         *
-         * If there is no listener than a visitor was created instead.
-         * @return Optional ANTLR4 visitor for reading test DSLs
-         */
-        public Optional<ParseTreeListener> getListener() {
-            return  listener;
-        }
-
-        /**
-         * Retrieves the visitor if one was created.
-         *
-         * If there is no visitor than a listener was created instead.
-         * @return Optional ANTLR4 visitor for reading test DSLs
-         */
-        public Optional<ParseTreeVisitor<?>> getVisitor() {
-            return visitor;
-        }
-    }
-
-    /**
      * Obtains either a visitor or listener provider instance from metadata in the supplied @PdslTest annotation.
      *
      * <p>If both a visitor and listener are provided the visitor instance will be created and the listener ignored.
-     *
+     * <p>
      * If neither are provided a runtime exception will be thrown.
      *
      * @param pdslTest the pdsl test annotation on the class
@@ -116,9 +76,9 @@ public final class ExecutorHelper {
          * 1) is NULL or empty array we can use old approach
          * 2) is NOT NULL use the multiple Lexer/Parser; Listener/Visitor
          */
-        if(pdslTest.interpreters() == null || pdslTest.interpreters().length == 0) {
+        if (pdslTest.interpreters() == null || pdslTest.interpreters().length == 0) {
             try {
-                if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
+                if (pdslTest.listener().equals(EmptyParseTreeListenerProvider.class) && pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
                     throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation!");
                 }
                 if (!pdslTest.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
@@ -130,7 +90,7 @@ public final class ExecutorHelper {
                 }
             } catch (NoSuchMethodException e) {
                 throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
-                    + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", pdslTest.listener().getSimpleName()), e);
+                        + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", pdslTest.listener().getSimpleName()), e);
             } catch (IllegalAccessException e) {
                 throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", pdslTest.listener()), e);
             } catch (InstantiationException | InvocationTargetException e) {
@@ -139,39 +99,35 @@ public final class ExecutorHelper {
 
             return traversals;
         }
-
-            Preconditions.checkArgument(pdslTest.interpreters().length %2 == 0,
-                "The size of alternative interpreters (Lexer/Parser; Visitor/Listener) in [com.pdsl.runners.@PdslTest], should be even! Actual size: " + pdslTest.interpreters().length);
-
-            for(Interpreter interpreter : pdslTest.interpreters()) {
-                try {
-                    if (interpreter.listener().equals(EmptyParseTreeListenerProvider.class) && interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class) ) {
-                        throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation, attribute [interpreters]!");
-                    }
-                    if (!interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
-                        Constructor<?> providerConstructor = interpreter.visitor().getDeclaredConstructor();
-                        traversals.add(new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get()));
-                    } else {
-                        Constructor<?> providerConstructor = interpreter.listener().getDeclaredConstructor();
-                        traversals.add(new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get()));
-                    }
-                } catch (NoSuchMethodException e) {
-                    throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
-                        + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", interpreter.listener().getSimpleName()), e);
-                } catch (IllegalAccessException e) {
-                    throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", interpreter.listener()), e);
-                } catch (InstantiationException | InvocationTargetException e) {
-                    throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", interpreter.listener().getSimpleName()), e);
+        for (Interpreter interpreter : pdslTest.interpreters()) {
+            try {
+                if (interpreter.listener().equals(EmptyParseTreeListenerProvider.class) && interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
+                    throw new IllegalArgumentException("Either a listener or visitor needs to be provided to the @PdslTest annotation, attribute [interpreters]!");
                 }
+                if (!interpreter.visitor().equals(EmptyParseTreeVisitorProvider.class)) {
+                    Constructor<?> providerConstructor = interpreter.visitor().getDeclaredConstructor();
+                    traversals.add(new ParseTreeTraversal(((Provider<ParseTreeVisitor<?>>) providerConstructor.newInstance()).get()));
+                } else {
+                    Constructor<?> providerConstructor = interpreter.listener().getDeclaredConstructor();
+                    traversals.add(new ParseTreeTraversal(((Provider<ParseTreeListener>) providerConstructor.newInstance()).get()));
+                }
+            } catch (NoSuchMethodException e) {
+                throw new IllegalStateException(String.format("Could not find a default constructor for the Provider<ParseTreeListener> %s%n"
+                        + "Note the Provider MUST have a constructor that takes no parameters, but see the below error for more details.", interpreter.listener().getSimpleName()), e);
+            } catch (IllegalAccessException e) {
+                throw new IllegalStateException(String.format("Could not create a %s. Note the provider MUST be public.", interpreter.listener()), e);
+            } catch (InstantiationException | InvocationTargetException e) {
+                throw new IllegalStateException(String.format("Something went wrong when trying to create the Parse Tree Listener %s.%n", interpreter.listener().getSimpleName()), e);
             }
+        }
 
         return traversals;
     }
 
     /**
-     * @deprecated use getParseTreeTraversal instead. This will be removed in a future major release.
      * @param pdslTest the pdsl test annotation on the class
      * @return the ParseTreeListener made from the listenerProvider in the pdslTest
+     * @deprecated use getParseTreeTraversal instead. This will be removed in a future major release.
      */
     @Deprecated
     public ParseTreeListener getParseTreeListener(PdslTest pdslTest) {
@@ -193,9 +149,10 @@ public final class ExecutorHelper {
 
     /**
      * Creates test specifications from the provided input.
+     *
      * @param testSpecificationFactory the factory that will produce test specifications from resources
-     * @param testResources the URIs that have the tests written in a DSL
-     * @param pdslTest an annotation containing information about how to process the specificaitons
+     * @param testResources            the URIs that have the tests written in a DSL
+     * @param pdslTest                 an annotation containing information about how to process the specificaitons
      * @return a collection of TestSpecifications
      */
     public Collection<TestSpecification> getTestSpecifications(TestSpecificationFactory testSpecificationFactory, Set<URI> testResources, PdslTest pdslTest) {
@@ -211,7 +168,7 @@ public final class ExecutorHelper {
      * Creates test cases from test specifications using the provided input.
      *
      * @param testCaseFactory the factory that will produce the test cases
-     * @param specifications the specifications used by the factory to create the test cases.
+     * @param specifications  the specifications used by the factory to create the test cases.
      * @return Collection of test cases
      */
     public Collection<TestCase> getTestCases(TestCaseFactory testCaseFactory, Collection<TestSpecification> specifications) {
@@ -226,9 +183,21 @@ public final class ExecutorHelper {
         return testCases;
     }
 
+    public SharedTestSuite getSharedTestSuite(List<CreateSharedSuiteDto> dtos) {
+        List<InterpreterObj> interpreters = new ArrayList<>(dtos.size());
+        List<List<TestCase>> testCasesPerInterpreter = new ArrayList<>();
+
+        for (CreateSharedSuiteDto dto : dtos) {
+            testCasesPerInterpreter.add(new ArrayList<>(getTestCases(dto.testCaseFactory(), dto.specifications())));
+            interpreters.add(dto.interpreterObj());
+        }
+        // Organize the test cases so the ith test case with each interpreter maps to the ith test case of all the others
+        return SharedTestSuite.of(testCasesPerInterpreter, interpreters);
+    }
+
     /**
      * Creates JUnit4 friendly "methods" that map to each individual test case.
-     *
+     * <p>
      * For JUnit4 hooks and other features to work they need to be in the form of a method. We
      * artificially convert the tests into methods to accomodate this.
      *
@@ -257,7 +226,7 @@ public final class ExecutorHelper {
 
     /**
      * Create a phrase filter with no general recognizer.
-     *
+     * <p>
      * If any sentences are not recognized by the parser in the PdslTest it will crash.
      *
      * @param pdslTest the pdsl test annotation on the class
@@ -269,16 +238,17 @@ public final class ExecutorHelper {
 
     /**
      * Create a phrase filter with context sensitive phrases and a general recognizer.
-     *
+     * <p>
      * The only phrases executed will be the ones understood by the subgrammarparser. The
      * supergrammar parser will not execute any code, but will crash the test if it cannot
      * recognize a phrase.
-     * @param subGrammarParser parser for phrases that require behavior
-     * @param subGrammarLexer lexer for phrases that require behavior
+     *
+     * @param subGrammarParser   parser for phrases that require behavior
+     * @param subGrammarLexer    lexer for phrases that require behavior
      * @param superGrammarParser parser for phrases that should be ignored
-     * @param superGrammarLexer lexer for phrases that should be ignored
-     * @param recognizerRule the start rule to invoke in the supergrammar parser
-     * @param syntaxCheckRule the syntax rule that all tests must conform to specified in the supergrammar
+     * @param superGrammarLexer  lexer for phrases that should be ignored
+     * @param recognizerRule     the start rule to invoke in the supergrammar parser
+     * @param syntaxCheckRule    the syntax rule that all tests must conform to specified in the supergrammar
      * @return a phrase filter
      */
     public PolymorphicDslPhraseFilter makeDefaultFilter(Class<? extends Parser> subGrammarParser,
@@ -287,14 +257,15 @@ public final class ExecutorHelper {
                                                         Class<? extends Lexer> superGrammarLexer,
                                                         String recognizerRule,
                                                         String syntaxCheckRule) {
-        return new DefaultPolymorphicDslPhraseFilter( subGrammarParser,
+        return new DefaultPolymorphicDslPhraseFilter(subGrammarParser,
                 subGrammarLexer, superGrammarParser, superGrammarLexer, recognizerRule, syntaxCheckRule);
     }
 
     /**
      * Create a phrase filter with a subgrammar parser and a supergrammar recognizer using the
      * PdslTest and RecognizedBy annotations.
-     * @param pdslTest annotation provided by a test method
+     *
+     * @param pdslTest     annotation provided by a test method
      * @param recognizedBy annotation on the same test method
      * @return a phrase filter created from the annotation parameters
      */
@@ -308,8 +279,8 @@ public final class ExecutorHelper {
      * PdslTest and RecognizedBy annotations. Also requires all tests to conform to the specified
      * recognizerRule in the created recognizer.
      *
-     * @param pdslTest annotation provided by a test method
-     * @param recognizedBy annotation on the same test method
+     * @param pdslTest       annotation provided by a test method
+     * @param recognizedBy   annotation on the same test method
      * @param recognizerRule the syntax check rule to invoke in the recognizer
      * @return a phrase filter created from the annotation parameters
      */
@@ -320,16 +291,135 @@ public final class ExecutorHelper {
     /**
      * Create a phrase filter with a subgrammar parser and a supergrammar recognizer using the
      * PdslTest and RecognizedBy annotations.
-     *
+     * <p>
      * The default rules polymorphicDslAllRules and polymorphicDslSyntaxCheck rules must exist in the
      * parser and recognizer or there will be a runtime exception.
      *
-     * @param pdslTest annotation provided by a test method
+     * @param pdslTest      annotation provided by a test method
      * @param configuration the configuration annotation on a test class
      * @return a phrase filter created from the annotation parameters
      */
     public PolymorphicDslPhraseFilter makeDefaultFilter(PdslTest pdslTest, PdslConfiguration configuration) {
         return new DefaultPolymorphicDslPhraseFilter(pdslTest.parser(), pdslTest.lexer(), configuration.dslRecognizerParser(), configuration.dslRecognizerLexer(), pdslTest.startRule(), configuration.recognizerRule());
+    }
+
+    /**
+     * Creates a variety of factories useful for running Polymorphic DSL tests.
+     *
+     * @param provider           the class containing PDSL annotations.
+     * @param configurationField name of the field associated with the class (used in friendly error message)
+     * @return an instance of the provided class.
+     */
+    public Object createPdslProviderFromClass(Class<?> provider, String configurationField) {
+        try {
+            return provider.getConstructor().newInstance();
+        } catch (NoSuchMethodException e) {
+            throw new PolymorphicDslJUnitException(String.format("Error with parameter(s) in the @PdslConfiguration!%n"
+                            + "\tThe field %s must have a default constructor.%n"
+                            + "\tOnly the default constructor will be invoked by the JUnit runner.%n"
+                            + "\tCLASS THAT NEEDS DEFAULT CONSTRUCTOR:%n\t%s%n",
+                    configurationField, provider.getName()), e);
+        } catch (InvocationTargetException | InstantiationException e) {
+            throw new PolymorphicDslJUnitException(String.format("Error creating %s!", provider.getName()), e);
+        } catch (IllegalAccessException e) {
+            throw new PolymorphicDslJUnitException(String.format("Could not access constructor for %s. Make sure it is public!", provider.getName()), e);
+        }
+    }
+
+    /**
+     * Create a collection of factories and other useful objects for a PDSL run.
+     *
+     * @param pdslConfiguration the configuration specifying which factories to use.
+     * @return PdslProvidersDto containing factories needed to run PDSL test cases
+     */
+    public PdslProvidersDto makePdslElements(PdslConfiguration pdslConfiguration) {
+        Provider<? extends TestCaseFactory> testCaseFactory = makeTestCaseFactoryProvider(pdslConfiguration.testCaseFactoryProvider());
+        Provider<? extends TestSpecificationFactoryGenerator> specificationFactory = makeSpecificationFactoryGenerator(pdslConfiguration.specificationFactoryProvider());
+        Provider<? extends TraceableTestRunExecutor> executor = makeTraceableTestRunExecuter(pdslConfiguration.testRunExecutor());
+        Provider<? extends TestResourceFinderGenerator> resourceFinder = makeTestResourceFinderGenerator(pdslConfiguration.resourceFinder(), pdslConfiguration.resourceRoot());
+        return new PdslProvidersDto(specificationFactory, testCaseFactory, executor, resourceFinder, pdslConfiguration);
+    }
+
+    public Provider<? extends TestCaseFactory> makeTestCaseFactoryProvider(Class<? extends Provider<? extends TestCaseFactory>> testFactoryClass) {
+        return (Provider<? extends TestCaseFactory>) createPdslProviderFromClass(
+                testFactoryClass, TEST_CASEFACTORY_PROVIDER);
+    }
+
+    public Provider<? extends TestSpecificationFactoryGenerator> makeSpecificationFactoryGenerator(
+            Class<? extends Provider<? extends TestSpecificationFactoryGenerator>> testSpecificationFactoryGeneratorClass
+    ) {
+        return (Provider<? extends TestSpecificationFactoryGenerator>) createPdslProviderFromClass(testSpecificationFactoryGeneratorClass, SPECIFICATION_FACTORY_PROVIDER);
+    }
+
+    public Provider<? extends TraceableTestRunExecutor> makeTraceableTestRunExecuter(
+            Class<? extends Provider<? extends TraceableTestRunExecutor>> traceableTestRunExecutorClass
+    ) {
+        return !traceableTestRunExecutorClass.equals(EmptyTestExecutorProvider.class)
+                ? (Provider<? extends TraceableTestRunExecutor>) createPdslProviderFromClass(traceableTestRunExecutorClass, TEST_RUN_EXECUTOR)
+                : new DefaultExecutorProvider();
+    }
+
+    public Provider<? extends TestResourceFinderGenerator> makeTestResourceFinderGenerator(
+            Class<? extends Provider<? extends TestResourceFinderGenerator>> testResourceFinderGeneratorClass,
+            String resourceRoot
+    ) {
+        return !testResourceFinderGeneratorClass.equals(EmptyTestResourceFinder.class)
+                ? (Provider<? extends TestResourceFinderGenerator>) createPdslProviderFromClass(testResourceFinderGeneratorClass, RESOURCE_FINDER)
+                : new DefaultResourceFinderGenerator(resourceRoot);
+    }
+
+    /**
+     * A mutually exclusive container for a parse tree listener or visitor.
+     */
+    public static class ParseTreeTraversal {
+        private final Optional<ParseTreeVisitor<?>> visitor;
+        private final Optional<ParseTreeListener> listener;
+
+        /**
+         * Creates a tree traversal using a visitor.
+         *
+         * @param visitor to use
+         */
+        public ParseTreeTraversal(ParseTreeVisitor<?> visitor) {
+            this.visitor = Optional.of(visitor);
+            this.listener = Optional.empty();
+        }
+
+        /**
+         * Creates a tree traversal using a listener
+         *
+         * @param listener to use
+         */
+        public ParseTreeTraversal(ParseTreeListener listener) {
+            this.visitor = Optional.empty();
+            this.listener = Optional.of(listener);
+        }
+
+        /**
+         * Retrieves the listener if one was created.
+         * <p>
+         * If there is no listener than a visitor was created instead.
+         *
+         * @return Optional ANTLR4 visitor for reading test DSLs
+         */
+        public Optional<ParseTreeListener> getListener() {
+            return listener;
+        }
+
+        /**
+         * Retrieves the visitor if one was created.
+         * <p>
+         * If there is no visitor than a listener was created instead.
+         *
+         * @return Optional ANTLR4 visitor for reading test DSLs
+         */
+        public Optional<ParseTreeVisitor<?>> getVisitor() {
+            return visitor;
+        }
+    }
+
+    record CreateSharedSuiteDto(TestCaseFactory testCaseFactory, Collection<TestSpecification> specifications,
+                                InterpreterObj interpreterObj) {
     }
 
     /**
@@ -343,13 +433,14 @@ public final class ExecutorHelper {
 
         private final Optional<Class<? extends Parser>> classWideParserRecognizerOptional;
         private final Optional<Class<? extends Lexer>> classWideLexerRecognizerOptional;
-        public PdslProvidersDto(Provider<? extends TestSpecificationFactoryGenerator> testSpecificationFactoryGenerator,
-            Provider<? extends TestCaseFactory> testCaseFactoryProvider,
-            Provider<? extends TraceableTestRunExecutor> testRunExecutor,
-            Provider<? extends TestResourceFinderGenerator> resourceFinder,
-            PdslConfiguration pdslConfiguration) {
 
-            if(pdslConfiguration.dslRecognizerParser().equals(EmptyRecognizerParser.class)
+        public PdslProvidersDto(Provider<? extends TestSpecificationFactoryGenerator> testSpecificationFactoryGenerator,
+                                Provider<? extends TestCaseFactory> testCaseFactoryProvider,
+                                Provider<? extends TraceableTestRunExecutor> testRunExecutor,
+                                Provider<? extends TestResourceFinderGenerator> resourceFinder,
+                                PdslConfiguration pdslConfiguration) {
+
+            if (pdslConfiguration.dslRecognizerParser().equals(EmptyRecognizerParser.class)
                     ^ pdslConfiguration.dslRecognizerLexer().equals(EmptyRecognizerLexer.class)) {
                 throw new IllegalArgumentException("If a dslRecognizerLexer or dslRecognizerParser is used at all in the @PdslGherkinAnnotation then BOTH of them must be present!");
             }
@@ -365,6 +456,7 @@ public final class ExecutorHelper {
 
         /**
          * Provides the created test specification factory generator.
+         *
          * @return a provider for a specification factory
          */
         public Provider<? extends TestSpecificationFactoryGenerator> getTestSpecificationFactoryGenerator() {
@@ -378,46 +470,32 @@ public final class ExecutorHelper {
             return testCaseFactoryProvider;
         }
 
-        /** Provides the created test executor provider. */
+        /**
+         * Provides the created test executor provider.
+         */
         public Provider<? extends TraceableTestRunExecutor> getTestRunExecutor() {
             return testRunExecutor;
         }
 
-        /** Provides the created test resource finder generator. */
+        /**
+         * Provides the created test resource finder generator.
+         */
         public Provider<? extends TestResourceFinderGenerator> getResourceFinder() {
             return resourceFinder;
         }
 
-        /** Provides a recognizer class intended to be used unless overridden by PdslTests. */
+        /**
+         * Provides a recognizer class intended to be used unless overridden by PdslTests.
+         */
         public Optional<Class<? extends Parser>> getClassWideParserRecognizerOptional() {
             return classWideParserRecognizerOptional;
         }
 
-        /** Provides a recognizer lexer class intended to be used unless overridden by PdslTests. */
+        /**
+         * Provides a recognizer lexer class intended to be used unless overridden by PdslTests.
+         */
         public Optional<Class<? extends Lexer>> getClassWideLexerRecognizerOptional() {
             return classWideLexerRecognizerOptional;
-        }
-    }
-
-    /**
-     * Creates a variety of factories useful for running Polymorphic DSL tests.
-     * @param provider the class containing PDSL annotations.
-     * @param configurationField name of the field associated with the class (used in friendly error message)
-     * @return an instance of the provided class.
-     */
-    public Object createPdslProviderFromClass(Class<?> provider, String configurationField) {
-        try {
-            return  provider.getConstructor().newInstance();
-        } catch (NoSuchMethodException e) {
-            throw new PolymorphicDslJUnitException(String.format("Error with parameter(s) in the @PdslConfiguration!%n"
-                            + "\tThe field %s must have a default constructor.%n"
-                            + "\tOnly the default constructor will be invoked by the JUnit runner.%n"
-                            + "\tCLASS THAT NEEDS DEFAULT CONSTRUCTOR:%n\t%s%n",
-                    configurationField, provider.getName()), e);
-        } catch (InvocationTargetException | InstantiationException e) {
-            throw new PolymorphicDslJUnitException(String.format("Error creating %s!", provider.getName()), e);
-        } catch (IllegalAccessException e) {
-            throw new PolymorphicDslJUnitException(String.format("Could not access constructor for %s. Make sure it is public!", provider.getName()), e);
         }
     }
 
@@ -426,6 +504,7 @@ public final class ExecutorHelper {
      */
     public static final class DefaultExecutorProvider implements Provider<TraceableTestRunExecutor> {
         private static final TraceableTestRunExecutor INSTANCE = new DefaultPolymorphicDslTestExecutor();
+
         @Override
         public TraceableTestRunExecutor get() {
             return INSTANCE;
@@ -436,43 +515,23 @@ public final class ExecutorHelper {
      * Provides the default resource finder used by most PDSL tests.
      */
     public static final class DefaultResourceFinderGenerator implements Provider<TestResourceFinderGenerator> {
-        private final String resourceRoot;
+        private final TestResourceFinderGenerator INSTANCE;
 
         /**
          * Creates a generator for resource finders.
+         *
          * @param resourceRoot the root directory to search in
          */
-        public DefaultResourceFinderGenerator(String resourceRoot)
-        {
+        public DefaultResourceFinderGenerator(String resourceRoot) {
             if (resourceRoot.startsWith("file:///")) {
                 resourceRoot = resourceRoot.replaceFirst("file:///", "");
             }
-            this.resourceRoot = resourceRoot;
             this.INSTANCE = new FileSystemTestResourceGenerator(resourceRoot);
         }
-        private final TestResourceFinderGenerator INSTANCE;
 
         @Override
         public TestResourceFinderGenerator get() {
             return INSTANCE;
         }
-    }
-
-    /**
-     * Create a collection of factories and other useful objects for a PDSL run.
-     * @param pdslConfiguration the configuration specifying which factories to use.
-     * @return PdslProvidersDto containing factories needed to run PDSL test cases
-     */
-    public PdslProvidersDto makePdslElements(PdslConfiguration pdslConfiguration) {
-            Provider<? extends TestCaseFactory> testCaseFactory = (Provider<? extends TestCaseFactory>) createPdslProviderFromClass(
-                    pdslConfiguration.testCaseFactoryProvider(), TEST_CASEFACTORY_PROVIDER);
-            Provider<? extends TestSpecificationFactoryGenerator> specificationFactory = (Provider<? extends TestSpecificationFactoryGenerator>) createPdslProviderFromClass(pdslConfiguration.specificationFactoryProvider(), SPECIFICATION_FACTORY_PROVIDER);
-            Provider<? extends TraceableTestRunExecutor> executor = !pdslConfiguration.testRunExecutor().equals(EmptyTestExecutorProvider.class)
-                    ? (Provider<? extends TraceableTestRunExecutor>) createPdslProviderFromClass(pdslConfiguration.testRunExecutor(), TEST_RUN_EXECUTOR)
-                    : new DefaultExecutorProvider();
-            Provider<? extends TestResourceFinderGenerator> resourceFinder = !pdslConfiguration.resourceFinder().equals(EmptyTestResourceFinder.class)
-            ? (Provider<? extends TestResourceFinderGenerator>) createPdslProviderFromClass(pdslConfiguration.resourceFinder(), RESOURCE_FINDER)
-                    : new DefaultResourceFinderGenerator(pdslConfiguration.resourceRoot());
-            return new PdslProvidersDto(specificationFactory, testCaseFactory, executor, resourceFinder, pdslConfiguration);
     }
 }

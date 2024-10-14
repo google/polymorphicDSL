@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+import java.util.function.Supplier;
 
 /**
  * A factory that processes Test Specifications doing a Preorder traversal.
@@ -17,10 +18,20 @@ import java.util.*;
  */
 public class PreorderTestCaseFactory implements TestCaseFactory {
 
+    private static final PreorderTestCaseFactory INSTANCE = new PreorderTestCaseFactory();
+
     public static final class DefaultProvider implements Provider<TestCaseFactory> {
-        private static final PreorderTestCaseFactory INSTANCE = new PreorderTestCaseFactory();
+
         @Override
         public PreorderTestCaseFactory get() {
+            return INSTANCE;
+        }
+    }
+
+    public static final class DefaultSupplier implements Supplier<TestCaseFactory> {
+
+        @Override
+        public TestCaseFactory get() {
             return INSTANCE;
         }
     }

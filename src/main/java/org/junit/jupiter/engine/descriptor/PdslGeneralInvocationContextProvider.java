@@ -6,6 +6,8 @@ import com.pdsl.runners.*;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
+import com.pdsl.testcases.SharedTestCase;
+import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
@@ -53,7 +55,7 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
 
     private static final Logger logger = LoggerFactory.getLogger(PdslGeneralInvocationContextProvider.class);
     private static final ExecutorHelper executorHelper = PdslConfigurationHelper.getExecutorHelper(new JupiterDescriptorKey());
-    private static final TraceableTestRunExecutor DEFAULT_EXECUTOR = new DefaultPolymorphicDslTestExecutor();
+    protected static final TraceableTestRunExecutor DEFAULT_EXECUTOR = new DefaultPolymorphicDslTestExecutor();
     private final Map<List<String>, TestCase> duplicateTest = new HashMap<>();
 
     @Override
@@ -152,6 +154,7 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
      * specified by the PdslConfigParameter.
      */
     protected Collection<TestCase> getTestCases(PdslConfigParameter configParameter, Collection<TestSpecification> testSpecifications) {
+        //TODO: Replace with shared test cases
         Collection<TestCase> testCases = configParameter.getTestCaseFactoryProvider().get()
                 .processTestSpecification(testSpecifications);
         List<URI> duplicateUris = new ArrayList<>();
@@ -227,8 +230,8 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
      */
     public Collection<TestTemplateInvocationContext> getInvocationContext(PdslConfigParameter parameter) {
         return createPdslExecutables(parameter).stream()
-                    .map(testCase ->  invocationContext(testCase))
-                    .collect(Collectors.toUnmodifiableList());
+                    .map(this::invocationContext)
+                    .toList();
     }
 
     /**
@@ -256,28 +259,6 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
     protected TestTemplateInvocationContext invocationContext(PdslExecutable executable) {
 
 
-        return new TestTemplateInvocationContext() {
-            @Override
-            public String getDisplayName(int invocationIndex) {
-                return executable.getTestTitle();
-            }
-
-            @Override
-            public List<Extension> getAdditionalExtensions() {
-                return Collections.singletonList(new ParameterResolver() {
-                    @Override
-                    public boolean supportsParameter(ParameterContext parameterContext,
-                                                     ExtensionContext extensionContext) {
-                        return parameterContext.getParameter().getType().equals(PdslExecutable.class);
-                    }
-
-                    @Override
-                    public Object resolveParameter(ParameterContext parameterContext,
-                                                   ExtensionContext extensionContext) {
-                        return executable;
-                    }
-                });
-            }
-        };
+        return new PdslInvocationContext(executable);
     }
 }

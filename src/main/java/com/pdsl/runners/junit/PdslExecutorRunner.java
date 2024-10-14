@@ -33,9 +33,8 @@ public class PdslExecutorRunner extends ParentRunner<SharedTestCase> {
       TraceableTestRunExecutor executor, String context) throws InitializationError {
     super(testClass);
     for (SharedTestCase currentCase : sharedTestCases) {
-      Preconditions.checkArgument(!currentCase.getSharedTestCaseWithInterpreters().isEmpty(),
-          "Somehow no test cases were produced from the features! This is likely an error with the PDSL framework");
-
+        Preconditions.checkArgument(!currentCase.getSharedTestCaseWithInterpreters().isEmpty(),
+                "Somehow no test cases were produced from the features! This is likely an error with the PDSL framework");
     }
 
     this.context = context;

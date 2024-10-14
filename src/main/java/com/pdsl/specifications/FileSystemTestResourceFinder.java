@@ -5,6 +5,7 @@ import com.pdsl.transformers.PolymorphicDslFileException;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.PathMatcher;
@@ -70,7 +71,23 @@ public class FileSystemTestResourceFinder implements TestResourceFinder {
 
     @Override
     public Optional<Collection<URI>> scanForTestResources(URI uri) {
-        Path sourceDirectory = Paths.get(uri);
+        Path sourceDirectory;
+        try {
+            sourceDirectory = Paths.get(uri);
+        } catch (IllegalArgumentException e) {
+            try {
+                // Avoid forcing the user to add "file:///"
+                // or "./" to the URI scheme.
+                // If they passed a relative path try to make it work.
+                String uriStr = uri.toString();
+                if (!uriStr.startsWith("/") && !uriStr.startsWith(".")) {
+                    uriStr = "./" + uriStr;
+                }
+                sourceDirectory = Paths.get(uriStr);
+            } catch (Exception ex) {
+                throw e;
+            }
+        }
         Preconditions.checkArgument(Files.exists(sourceDirectory), String.format("File did not exist at at this location! %s", uri));
         Preconditions.checkArgument(Files.isDirectory(sourceDirectory), String.format("URL must be a directory! %s", uri));
         try {
