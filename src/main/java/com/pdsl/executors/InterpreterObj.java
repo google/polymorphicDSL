@@ -16,33 +16,28 @@ public final class InterpreterObj {
   private final Optional<ParseTreeVisitor<?>> parseTreeVisitor;
   private final Optional<ParseTreeListener> parseTreeListener;
   private final String startRule;
-  private final String syntaxRule;
   public InterpreterObj(ParseTreeVisitor<?> parseTreeVisitor) {
     this.parseTreeVisitor = Optional.of(parseTreeVisitor);
     this.parseTreeListener = Optional.empty();
     this.startRule = PdslTestParams.DEFAULT_ALL_RULE;
-    this.syntaxRule = PdslTestParams.DEFAULT_SYNTAX_RULE;
   }
 
   public InterpreterObj(ParseTreeListener parseTreeListener) {
     this.parseTreeVisitor = Optional.empty();
     this.parseTreeListener = Optional.of(parseTreeListener);
     this.startRule = PdslTestParams.DEFAULT_ALL_RULE;
-    this.syntaxRule = PdslTestParams.DEFAULT_SYNTAX_RULE;
   }
 
-  public InterpreterObj(ParseTreeListener parseTreeListener, String startRule, String syntaxRule) {
+  public InterpreterObj(ParseTreeListener parseTreeListener, String startRule {
     this.parseTreeVisitor = Optional.empty();
     this.parseTreeListener = Optional.of(parseTreeListener);
     this.startRule = startRule;
-    this.syntaxRule = syntaxRule;
   }
 
-  public InterpreterObj(ParseTreeVisitor<?> parseTreeVisitor, String startRule, String syntaxRule) {
+  public InterpreterObj(ParseTreeVisitor<?> parseTreeVisitor, String startRule) {
     this.parseTreeVisitor = Optional.of(parseTreeVisitor);
     this.parseTreeListener = Optional.empty();
     this.startRule = startRule;
-    this.syntaxRule = syntaxRule;
   }
 
   public Optional<ParseTreeVisitor<?>> getParseTreeVisitor(){
@@ -51,5 +46,9 @@ public final class InterpreterObj {
 
   public Optional<ParseTreeListener> getParseTreeListener() {
     return parseTreeListener;
+  }
+  
+  public String getStartRule(){
+    return this.startRule;
   }
 }
