@@ -197,7 +197,7 @@ public abstract class PdslSharedInvocationContextProvider
                             new String[] {param.getTagExpression()},
                             param.getIncludesResources(),
                             param.getExcludesResources(),
-                            param.getStartRule(),
+                            i.interpreterObj().getStartRule(),
                             param.getRecognizerRule().isPresent() ? param.getRecognizerRule().get() : config.getRecognizerRule()
                             )
                     ).toList().toArray(new InterpreterParam[]{});

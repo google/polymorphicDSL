@@ -23,6 +23,8 @@ public class AnsiTerminalColorHelper {
     public static final String CYAN = ESCAPE_CHAR + "\u001B[36m";
     /** Color the terminal white. */
     public static final String WHITE = ESCAPE_CHAR + "\u001B[37m";
+	/** Color the terminal grey. */
+    public static final String GREY = ESCAPE_CHAR + "\u001B[90m";
 
     /** Color the terminal bright black. */
     public static final String BRIGHT_BLACK = ESCAPE_CHAR + "\u001B[90m";
