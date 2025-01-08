@@ -28,7 +28,7 @@ public final class InterpreterObj {
     this.startRule = PdslTestParams.DEFAULT_ALL_RULE;
   }
 
-  public InterpreterObj(ParseTreeListener parseTreeListener, String startRule {
+  public InterpreterObj(ParseTreeListener parseTreeListener, String startRule) {
     this.parseTreeVisitor = Optional.empty();
     this.parseTreeListener = Optional.of(parseTreeListener);
     this.startRule = startRule;
