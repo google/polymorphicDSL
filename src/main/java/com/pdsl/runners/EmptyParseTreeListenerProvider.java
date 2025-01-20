@@ -10,6 +10,9 @@ import javax.inject.Provider;
  * Either a listener or provider needs to be provided. In order to make the API usable this default, no-op class is
  * provided so that there will not be compilation errors when the user ignores it. This essentially allows the listener
  * field to be optional.
+ *
+ * This class is only of value for the PDSL framework itself and can be ignored by users
+ * of the framework.
  */
 class EmptyParseTreeListenerProvider implements Provider<ParseTreeListener> {
 
