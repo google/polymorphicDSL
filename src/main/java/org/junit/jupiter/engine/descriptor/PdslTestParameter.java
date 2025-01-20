@@ -205,19 +205,24 @@ public class PdslTestParameter {
             return this;
         }
 
-      public Builder withTagExpression(String str) {
-        Preconditions.checkNotNull(str, "Tag expression cannot be null!");
-        String commandLineTags = System.getProperty("tags");
-        if(commandLineTags != null && !commandLineTags.isEmpty()) {
-          this.tagExpression = commandLineTags;
-          logger.info("Overriding runner tags with tags provided in the command line {%s}".formatted(commandLineTags) );
-          logger.info("Ignoring provided tag expression {%s}".formatted(str) );
-        } else {
-          this.tagExpression =str;
-        }
+        public Builder withTagExpression(String str) {
+          Preconditions.checkNotNull(str, "Tag expression cannot be null!");
+          // Check if there are tags specified using the system property "tags".
+          String commandLineTags = System.getProperty("tags");
+          if (commandLineTags != null && !commandLineTags.isEmpty()) {
+            // If command-line tags are present, use them and log a message informing the user
+            // that the provided tag expression is being ignored.
+            this.tagExpression = commandLineTags;
+            logger.info("Overriding runner tags with tags provided in the command line {%s}".formatted(
+                commandLineTags));
+            logger.info("Ignoring provided tag expression {%s}".formatted(str));
+          } else {
+            // If no command-line tags are present, use the provided tag expression.
+            this.tagExpression = str;
+          }
 
-        return this;
-      }
+          return this;
+        }
 
         public Builder withIncludedResources(String[] resources) {
             this.includesResources = resources;
@@ -246,52 +251,5 @@ public class PdslTestParameter {
             return new PdslTestParameter(this);
         }
     }
-    public static PdslTestParameter createTestParameter(Supplier<ParseTreeListener> parseTreeListenerSupplier,
-        Class<? extends Lexer> lexerClass,
-        Class<? extends Parser> parserClass,
-        String[] includedResources) {
-        String defaultTagExpression = "@comment_tag#2";
-        String commandLineTags = System.getProperty("tags"); // Get the value
-
-        String effectiveTagExpression = (commandLineTags != null && !commandLineTags.isEmpty())
-            ? commandLineTags
-            : defaultTagExpression;
-
-        return new PdslTestParameter.Builder(parseTreeListenerSupplier, lexerClass, parserClass)
-            .withTagExpression(effectiveTagExpression)
-            .withIncludedResources(includedResources)
-            .build();
-    }
-
-    /**
-   * I've introduced a static factory method createTestParameter. This method handles the logic for
-   * overriding the tag expression. This keeps the builder focused on building objects and separates
-   * the configuration logic.
-   */
-  public static PdslTestParameter createTestParameter(
-      Supplier<ParseTreeListener> parseTreeListenerSupplier,
-      Class<? extends Lexer> lexerClass,
-      Class<? extends Parser> parserClass,
-      String[] includedResources, String defaultTagExpression) {
-    // retrieves the value passed from the command line (e.g., -Dtags="@smoke").
-    String commandLineTags = System.getProperty("tags");
-    // handles the logic for overriding the tag expression
-    String effectiveTagExpression = (commandLineTags != null && !commandLineTags.isEmpty())
-        ? commandLineTags
-        : defaultTagExpression;
-
-    // // String effectiveTagExpression = defaultTagExpression;  // Use default if invalid format
-    // if (commandLineTags != null && !commandLineTags.isEmpty()) {
-    //   String pattern = "^(?:@\\w+(?: and | or )?)*@\\w+$";
-    //   if (Pattern.matches(pattern, commandLineTags)) {
-    //     // ... logic to build effectiveTagExpression from commandLineTags (as shown above) ...
-    //   }
-    // }
-
-    return new PdslTestParameter.Builder(parseTreeListenerSupplier, lexerClass, parserClass)
-        .withTagExpression(effectiveTagExpression)
-        .withIncludedResources(includedResources)
-        .build();
-  }
 }
 

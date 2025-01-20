@@ -27,17 +27,15 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         public PreorderTestCaseFactory get() {
             return INSTANCE;
         }
-
     }
+
     public static final class DefaultSupplier implements Supplier<TestCaseFactory> {
 
         @Override
         public TestCaseFactory get() {
             return INSTANCE;
         }
-
     }
-
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
@@ -80,9 +78,6 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
           if (!tags.isEmpty()) {
             testCase = new DefaultTaggedTestCase(testCase, tags);
           }
-
-
-
           List<TestCase> singleTestCase = new ArrayList<>(1);
           singleTestCase.add(testCase);
           return singleTestCase;

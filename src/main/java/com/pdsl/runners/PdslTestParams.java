@@ -37,7 +37,13 @@ public record PdslTestParams (
         List<String> tags,
         String[] includesResources,
         String[] excludesResources){
-        return new PdslTestParams(lexerRecognizerClass,parserRecognizerClass,interpreters,tags,includesResources,excludesResources,(tags1, tagExpression) -> true,"");
+
+         /* Creates a default tag filter that always returns true, effectively disabling tag filtering.,
+         Empty tag expression as no filtering is applied */
+        return new PdslTestParams(
+            lexerRecognizerClass, parserRecognizerClass, interpreters,
+            tags, includesResources, excludesResources,
+            (tags1, tagExpression) -> true, "");
     }
     /**
      * A visitor used to extend the behavior of the PdslTestParams obje3ct without modifying

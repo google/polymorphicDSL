@@ -4,27 +4,9 @@ import com.pdsl.executors.InterpreterObj;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseVisitor;
-import com.pdsl.grammars.InterpreterAllLexer;
-import com.pdsl.grammars.InterpreterAllParser;
-import com.pdsl.grammars.MultiInterpreter2Parser;
-import com.pdsl.grammars.MultiInterpreter2Parser.ExecuteSentenceContext;
-import com.pdsl.grammars.MultiInterpreter2Parser.ParserTwoAllRulesContext;
-import com.pdsl.grammars.MultiInterpreter2ParserVisitor;
-import com.pdsl.grammars.MultiInterpreterParser.ExecutedByAllParsersContext;
-import com.pdsl.grammars.MultiInterpreterParser.FirstInterpreterContext;
-import com.pdsl.grammars.MultiInterpreterParser.IgnoreInterpreterContext;
-import com.pdsl.grammars.MultiInterpreterParser.ParseSentenceContext;
-import com.pdsl.grammars.MultiInterpreterParser.ParsedByAllInterpretersContext;
-import com.pdsl.grammars.MultiInterpreterParser.ParserOneAllRulesContext;
-import com.pdsl.grammars.MultiInterpreterParser.RecognizeInterpreterContext;
-import com.pdsl.grammars.MultiInterpreterParserVisitor;
-import com.pdsl.grammars.MultiInterpreterRecognizerLexer;
-import com.pdsl.grammars.MultiInterpreterRecognizerParser;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.logging.Logger;
 import java.util.stream.Stream;
-import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.TestTemplate;
@@ -37,16 +19,28 @@ import org.junit.jupiter.engine.descriptor.PdslExecutable;
 import org.junit.jupiter.engine.descriptor.PdslSharedInvocationContextProvider;
 import org.junit.jupiter.engine.descriptor.PdslTestParameter;
 
+/**
+ * This test class demonstrates how to override the tag expression set in the test
+ * with tags provided via the command line using the system property "tags".
+ */
 public class OverrideRunnerTagViaCLITest {
 
   private static int totalRunTests = 0;
 
+  /**
+   * This test template uses the `PdslExtension` to configure and run the test.
+   * The purpose of this test is to verify that the total number of tests run is 1.
+   */
   @TestTemplate
   @ExtendWith(PdslExtension.class)
   public void pdslGherkinTestFrameworkResources(PdslExecutable executable) {
     totalRunTests++;
   }
 
+  /**
+   * This method asserts that only one test was run. This verifies that the
+   * overridden tag expression from the command line took effect.
+   */
   @AfterAll
   public static void executeAfterAll(){
     Assertions.assertEquals(1,totalRunTests);
@@ -54,6 +48,14 @@ public class OverrideRunnerTagViaCLITest {
 
   private static class PdslExtension extends PdslSharedInvocationContextProvider {
 
+    /**
+     * This method provides the test template invocation contexts.
+     * It sets the system property "tags" to "@ex_tag1" before creating the
+     * PdslConfigParameter and then clears the property afterwards.
+     *
+     * @param context The ExtensionContext for the test.
+     * @return A stream of TestTemplateInvocationContext objects.
+     */
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
         ExtensionContext context) {
       System.setProperty("tags", "@ex_tag1");
@@ -78,6 +80,7 @@ public class OverrideRunnerTagViaCLITest {
                       .toUri())
               .build())
           .stream();
+      // Clear command-line tags
       System.clearProperty("tags");
       return contexts;
     }

@@ -63,18 +63,32 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
                 // test cases to create from each file, which parts to ignore, etc.
                 Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, params, testResources);
                 // Convert the specificaitons into test cases
+
+                /*
+                 * Filters test cases based on tags and organizes them per interpreter.
+                 *
+                 * This code iterates through a collection of test cases for a single interpreter,
+                 * filters them based on tags using a provided `TagFilterer`, and then adds the
+                 * matched test cases to a list of test cases per interpreter. It also collects
+                 * the interpreter objects.
+                 */
                 List<TestCase> testCasesForSingleInterpreter = new ArrayList<>(getTestCases(recognizerParams.providers().testCaseFactoryProvider().get(), specifications));
                 for (TestCase testcase : testCasesForSingleInterpreter) {
                     if (testcase instanceof TaggedTestCase) {
+                        // Cast the TestCase to TaggedTestCase to access tag information.
                         TaggedTestCase test = (TaggedTestCase) testcase;
                         //Filter test cases by tags using the injected TagFilterer
+                        // Check if any of the tags on the test case match the given tag expression.
                         boolean anyMatchedTag = params.tagFilterer().tagExpressionMatches(test.getTags(), params.tagExpression());
+                        // If the test case's tags match the tag expression, add it to the matched test cases.
                         if (anyMatchedTag) {
                             matchedTestCases.add(testcase);
                         }
                     }
                 }
+                // Add the list of matched test cases for the current interpreter to the overall list.
                 testCasesPerInterpreters.add(matchedTestCases);
+                // Get the interpreter object from the parser provider and add it to the list of interpreter objects.
                 interpreterObjs.add(parser.interpreterProvider().get());
 
             }
