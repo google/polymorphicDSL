@@ -32,11 +32,16 @@ public class JupiterTagFilteringTest {
 
         @Override
         public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
+            String defaultTagExpression = "@comment_tag#2";
+            String commandLineTags = System.getProperty("tags");
+            String effectiveTagExpression = (commandLineTags != null && !commandLineTags.isEmpty())
+                ? commandLineTags
+                : defaultTagExpression;
             return getInvocationContext(PdslConfigParameter.createGherkinPdslConfig(
                             List.of(
                                     new PdslTestParameter.Builder(parseTreeListenerSupplier,
                                             AllGrammarsLexer.class, AllGrammarsParser.class)
-                                            .withTagExpression("@comment_tag#2")
+                                            .withTagExpression(effectiveTagExpression)
                                             .withIncludedResources(new String[] {"tags.feature"})
                                             .build()
                             )

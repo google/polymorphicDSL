@@ -179,7 +179,7 @@ public final class JUnit4RecognizerParamsConverter {
     private static PdslTestParams getPdslTestParams(
             PdslTestDto pdslTestDto, PdslConfiguration pdslConfiguration) {
 
-       return new PdslTestParams(
+       return PdslTestParams.from(
                getRecognizerLexer(pdslTestDto, pdslConfiguration),
                getRecognizerParser(pdslTestDto, pdslConfiguration),
                getInterpreterParams(pdslTestDto, pdslConfiguration),
