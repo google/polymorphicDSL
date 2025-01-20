@@ -150,7 +150,10 @@ public abstract class PdslSharedInvocationContextProvider
                     getInterpreterParams(config, p),
                     List.of(p.getTagExpression()),
                     p.getIncludesResources(),
-                    p.getExcludesResources());
+                    p.getExcludesResources(),
+                    p.getTagFilterer(),
+                    p.getTagExpression()
+                );
             params.add(pdslTestParams);
         }
         return params;

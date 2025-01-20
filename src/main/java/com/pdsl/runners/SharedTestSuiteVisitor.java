@@ -2,15 +2,19 @@ package com.pdsl.runners;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.executors.InterpreterObj;
+import com.pdsl.gherkin.filter.TagFilterer;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
+import com.pdsl.testcases.DefaultTaggedTestCase;
 import com.pdsl.testcases.SharedTestSuite;
+import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 
@@ -27,6 +31,7 @@ import java.util.*;
  */
 public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParamsOperation<SharedTestSuite> {
 
+
     @Override
     public SharedTestSuite recognizerParamsOperation(RecognizerParams recognizerParams) {
         Preconditions.checkNotNull(recognizerParams.applicationName(), "Application name cannot be null");
@@ -39,6 +44,7 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
         recognizerParams.pdslTestParams().forEach(interpreter -> Preconditions.checkNotNull(interpreter, "No null objects can be in the interpreter array!"));
         // Create a Shared Test Suite
         List<List<TestCase>> testCasesPerInterpreters = new ArrayList<>();
+        List<TestCase> matchedTestCases = new ArrayList<>();
         List<InterpreterObj> interpreterObjs = new ArrayList<>();
         for (PdslTestParams params : recognizerParams.pdslTestParams()) {
 
@@ -58,8 +64,19 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
                 Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, params, testResources);
                 // Convert the specificaitons into test cases
                 List<TestCase> testCasesForSingleInterpreter = new ArrayList<>(getTestCases(recognizerParams.providers().testCaseFactoryProvider().get(), specifications));
-                testCasesPerInterpreters.add(testCasesForSingleInterpreter);
+                for (TestCase testcase : testCasesForSingleInterpreter) {
+                    if (testcase instanceof TaggedTestCase) {
+                        TaggedTestCase test = (TaggedTestCase) testcase;
+                        //Filter test cases by tags using the injected TagFilterer
+                        boolean anyMatchedTag = params.tagFilterer().tagExpressionMatches(test.getTags(), params.tagExpression());
+                        if (anyMatchedTag) {
+                            matchedTestCases.add(testcase);
+                        }
+                    }
+                }
+                testCasesPerInterpreters.add(matchedTestCases);
                 interpreterObjs.add(parser.interpreterProvider().get());
+
             }
         }
         return SharedTestSuite.of(testCasesPerInterpreters, interpreterObjs);

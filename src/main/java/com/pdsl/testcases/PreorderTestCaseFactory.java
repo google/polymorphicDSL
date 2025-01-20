@@ -1,5 +1,6 @@
 package com.pdsl.testcases;
 
+import com.pdsl.gherkin.filter.TagFilterer;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.specifications.TaggedTestSpecification;
 import com.pdsl.specifications.TestSpecification;
@@ -26,15 +27,17 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         public PreorderTestCaseFactory get() {
             return INSTANCE;
         }
-    }
 
+    }
     public static final class DefaultSupplier implements Supplier<TestCaseFactory> {
 
         @Override
         public TestCaseFactory get() {
             return INSTANCE;
         }
+
     }
+
 
     @Override
     public Collection<TestCase> processTestSpecification(Collection<TestSpecification> testSpecifications) {
@@ -73,13 +76,16 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
             }
             return testCases;
         } else {
-            TestCase testCase = new DefaultPdslTestCase(testSpecification.getName(), childTestBodyFragments, testSpecification.getOriginalTestResource());
-            if (!tags.isEmpty()) {
-                testCase = new DefaultTaggedTestCase(testCase, tags);
-            }
-            List<TestCase> singleTestCase = new ArrayList<>(1);
-            singleTestCase.add(testCase);
-            return singleTestCase;
+          TestCase testCase = new DefaultPdslTestCase(testSpecification.getName(), childTestBodyFragments, testSpecification.getOriginalTestResource());
+          if (!tags.isEmpty()) {
+            testCase = new DefaultTaggedTestCase(testCase, tags);
+          }
+
+
+
+          List<TestCase> singleTestCase = new ArrayList<>(1);
+          singleTestCase.add(testCase);
+          return singleTestCase;
         }
     }
 

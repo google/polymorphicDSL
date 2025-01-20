@@ -1,9 +1,11 @@
 package com.pdsl.runners;
 
+import com.pdsl.gherkin.filter.TagFilterer;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 
 import java.util.List;
+import org.junit.jupiter.engine.descriptor.PdslTestParameter;
 
 /**
  * A container for parameters useful for any framework implementing PDSL.
@@ -17,15 +19,26 @@ import java.util.List;
  * @param excludesResources the tests to ignore
  */
 public record PdslTestParams (
+    Class<? extends Lexer> lexerRecognizerClass,
+    Class<? extends Parser> parserRecognizerClass,
+    InterpreterParam[] interpreters,
+    List<String> tags,
+    String[] includesResources,
+    String[] excludesResources,
+    TagFilterer tagFilterer,
+    String tagExpression) {
+    public static final String DEFAULT_ALL_RULE = "polymorphicDslAllRules";
+    public static final String DEFAULT_SYNTAX_RULE = "polymorphicDslSyntaxCheck";
+
+    public static PdslTestParams from(
         Class<? extends Lexer> lexerRecognizerClass,
         Class<? extends Parser> parserRecognizerClass,
         InterpreterParam[] interpreters,
         List<String> tags,
         String[] includesResources,
-        String[] excludesResources) {
-    public static final String DEFAULT_ALL_RULE = "polymorphicDslAllRules";
-    public static final String DEFAULT_SYNTAX_RULE = "polymorphicDslSyntaxCheck";
-
+        String[] excludesResources){
+        return new PdslTestParams(lexerRecognizerClass,parserRecognizerClass,interpreters,tags,includesResources,excludesResources,(tags1, tagExpression) -> true,"");
+    }
     /**
      * A visitor used to extend the behavior of the PdslTestParams obje3ct without modifying
      * the record itself.

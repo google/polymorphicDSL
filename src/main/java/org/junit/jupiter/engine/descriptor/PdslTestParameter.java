@@ -1,6 +1,10 @@
 package org.junit.jupiter.engine.descriptor;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.gherkin.filter.GherkinTagFiltererAdapter;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
+import com.pdsl.gherkin.filter.TagFilterer;
+import java.util.logging.Logger;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -23,6 +27,7 @@ import static com.pdsl.runners.PdslTest.DEFAULT_ALL_RULE;
  */
 public class PdslTestParameter {
 
+    private static final Logger logger = Logger.getLogger(PdslTestParameter.class.getName());
     private final Optional<Class<? extends Parser>> recognizedByParser;
     private final Optional<Class<? extends Lexer>> recognizedByLexer;
     private final Class<? extends Parser> parser;
@@ -35,9 +40,10 @@ public class PdslTestParameter {
     private final String[] excludesResources;
     private final String startRule;
     private final Optional<String> recognizerRule;
+    private final TagFilterer tagFilterer;
 
     private PdslTestParameter(Builder builder) {
-        Preconditions.checkArgument((builder.listener.isPresent()
+      Preconditions.checkArgument((builder.listener.isPresent()
                 ^ builder.visitor.isPresent() ^ builder.interpreterParams.isPresent()),
                 "You can only have one of a visitor, listener or list of interpreterDtos!");
         this.parser = builder.parser;
@@ -52,6 +58,7 @@ public class PdslTestParameter {
         this.recognizedByLexer = builder.recognizedByLexer;
         this.recognizedByParser = builder.recognizedByParser;
         this.interpreterParams = builder.interpreterParams;
+        this.tagFilterer = builder.tagFilterer;
     }
 
     public Optional<List<Interpreter>> getInterpreters() { return interpreterParams; }
@@ -100,7 +107,11 @@ public class PdslTestParameter {
         return recognizerRule;
     }
 
-    public static class Builder {
+  public TagFilterer getTagFilterer() {
+    return tagFilterer;
+  }
+
+  public static class Builder {
         private Class<? extends Parser> parser;
         private Class<? extends Lexer> lexer;
         private Optional<Class<? extends Parser>> recognizedByParser = Optional.empty();
@@ -113,6 +124,15 @@ public class PdslTestParameter {
         private String startRule = DEFAULT_ALL_RULE;
         private Optional<String> recognizerRule = Optional.empty();
         private Optional<List<Interpreter>> interpreterParams = Optional.empty();
+
+        private TagFilterer tagFilterer = new GherkinTagFiltererAdapter(new GherkinTagsVisitorImpl());
+
+        public Builder withTagFilterer(TagFilterer tagFilterer) {
+            this.tagFilterer = tagFilterer;
+            return this;
+        }
+
+
 
         public Builder(
                 Class<? extends Lexer> lexer,
@@ -185,11 +205,19 @@ public class PdslTestParameter {
             return this;
         }
 
-        public Builder withTagExpression(String str) {
-            Preconditions.checkNotNull(str, "Tag expression cannot be null!");
-            this.tagExpression = str;
-            return  this;
+      public Builder withTagExpression(String str) {
+        Preconditions.checkNotNull(str, "Tag expression cannot be null!");
+        String commandLineTags = System.getProperty("tags");
+        if(commandLineTags != null && !commandLineTags.isEmpty()) {
+          this.tagExpression = commandLineTags;
+          logger.info("Overriding runner tags with tags provided in the command line {%s}".formatted(commandLineTags) );
+          logger.info("Ignoring provided tag expression {%s}".formatted(str) );
+        } else {
+          this.tagExpression =str;
         }
+
+        return this;
+      }
 
         public Builder withIncludedResources(String[] resources) {
             this.includesResources = resources;
@@ -218,5 +246,52 @@ public class PdslTestParameter {
             return new PdslTestParameter(this);
         }
     }
+    public static PdslTestParameter createTestParameter(Supplier<ParseTreeListener> parseTreeListenerSupplier,
+        Class<? extends Lexer> lexerClass,
+        Class<? extends Parser> parserClass,
+        String[] includedResources) {
+        String defaultTagExpression = "@comment_tag#2";
+        String commandLineTags = System.getProperty("tags"); // Get the value
+
+        String effectiveTagExpression = (commandLineTags != null && !commandLineTags.isEmpty())
+            ? commandLineTags
+            : defaultTagExpression;
+
+        return new PdslTestParameter.Builder(parseTreeListenerSupplier, lexerClass, parserClass)
+            .withTagExpression(effectiveTagExpression)
+            .withIncludedResources(includedResources)
+            .build();
+    }
+
+    /**
+   * I've introduced a static factory method createTestParameter. This method handles the logic for
+   * overriding the tag expression. This keeps the builder focused on building objects and separates
+   * the configuration logic.
+   */
+  public static PdslTestParameter createTestParameter(
+      Supplier<ParseTreeListener> parseTreeListenerSupplier,
+      Class<? extends Lexer> lexerClass,
+      Class<? extends Parser> parserClass,
+      String[] includedResources, String defaultTagExpression) {
+    // retrieves the value passed from the command line (e.g., -Dtags="@smoke").
+    String commandLineTags = System.getProperty("tags");
+    // handles the logic for overriding the tag expression
+    String effectiveTagExpression = (commandLineTags != null && !commandLineTags.isEmpty())
+        ? commandLineTags
+        : defaultTagExpression;
+
+    // // String effectiveTagExpression = defaultTagExpression;  // Use default if invalid format
+    // if (commandLineTags != null && !commandLineTags.isEmpty()) {
+    //   String pattern = "^(?:@\\w+(?: and | or )?)*@\\w+$";
+    //   if (Pattern.matches(pattern, commandLineTags)) {
+    //     // ... logic to build effectiveTagExpression from commandLineTags (as shown above) ...
+    //   }
+    // }
+
+    return new PdslTestParameter.Builder(parseTreeListenerSupplier, lexerClass, parserClass)
+        .withTagExpression(effectiveTagExpression)
+        .withIncludedResources(includedResources)
+        .build();
+  }
 }
 
