@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @see com.pdsl.gherkin.PickleJar
  */
-public class PickleJarFactory {
+public class PickleJarFactory implements GherkinObservable {
 
     public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     private final Charset charset;
@@ -107,6 +107,10 @@ public class PickleJarFactory {
                             tableTags.addAll(processTags(table.getTags().get()));
                         }
                         builder.withTags(processTags(tableTags));
+                        // notifying observers
+                        notifyObservers(
+                            scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
+                            substitutedSteps, tags, substitutions);
                         pickleJarScenarios.add(builder.build());
                     }
                 }
@@ -254,5 +258,25 @@ public class PickleJarFactory {
             tagBuilder.reset();
         }
         return tags;
+    }
+
+    private List<GherkinObserver> observers = new ArrayList<>();
+
+    @Override
+    public void registerObserver(GherkinObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(GherkinObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers(String title, List<String> steps, Set<String> tags,
+        Map<String, String> substitutions) {
+        for (GherkinObserver observer : observers) {
+            observer.onScenarioConverted(title, steps, tags, substitutions);
+        }
     }
 }

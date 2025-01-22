@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 /**
  * A factory that can product test specifications from gherkin input.
  */
-public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory {
+public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory,TestSpecificationFactoryObservable {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
     private final int DESCRIPTION_MAX_LENGTH;
@@ -55,6 +55,25 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         this.recognizerLexer = builder.recognizerLexer;
         this.recognizerRule = builder.recognizerRule;
     }
+    private List<TestSpecificationFactoryObserver> observers = new ArrayList<>();
+
+    @Override
+    public void registerObserver(TestSpecificationFactoryObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(TestSpecificationFactoryObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers(Collection<TestSpecification> testSpecifications) {
+        for (TestSpecificationFactoryObserver observer : observers) {
+            observer.onTestSpecificationsGenerated(testSpecifications);
+        }
+    }
+
 
     /**
      * Creates a builder for a gherkin test specification factory.
@@ -216,6 +235,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             featureBuilder.withChildTestSpecifications(pickles);
             featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
         }
+        notifyObservers(featureTestSpecifications);
         return Optional.of(featureTestSpecifications);
     }
 
