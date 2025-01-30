@@ -12,7 +12,8 @@ public class XrayTestSpecificationFactory extends DefaultGherkinTestSpecificatio
   private GherkinObserver observer;
   private GherkinObservable observable;
 
-  public XrayTestSpecificationFactory(Builder builder, GherkinObservable subject, GherkinObserver observer) {
+  public XrayTestSpecificationFactory(Builder builder, GherkinObservable subject,
+      GherkinObserver observer) {
     super(builder);
     this.observer = observer;
     this.observable = subject;
