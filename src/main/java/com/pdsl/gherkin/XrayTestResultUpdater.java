@@ -1,9 +1,11 @@
 package com.pdsl.gherkin;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdsl.executors.ExecutorObserver;
 import com.pdsl.gherkin.xray.models.Info;
-import com.pdsl.gherkin.xray.models.Test;
+import com.pdsl.gherkin.xray.models.XrayTestResult;
 import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
+import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
@@ -52,24 +54,24 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
 
   @Override
   public void onAfterTestSuite(Collection<TestCase> testCases,
-      org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, String context) {
-    List<Test> tests = new ArrayList<>();
+      org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, MetadataTestRunResults results, String context) {
+    List<XrayTestResult> tests = new ArrayList<>();
     for (TestCase testCase : testCases) {
       String xrayTestKey = extractXrayTestKey(testCase);
       String testStatus = extractTestStatus(testCase);
 
       if (xrayTestKey != null) {
-        tests.add(new Test(xrayTestKey, testStatus));
+        tests.add(new XrayTestResult(xrayTestKey, testStatus));
       }
     }
 
     XrayTestExecutionResult xrayResult = new XrayTestExecutionResult(
         new Info(
-            "Automated Test Execution", // Summary (from config)
-            "Results from automated tests", // Description (from config)
-            "YOUR_TEST_PLAN_KEY", // Test Plan Key (from config)
-            Arrays.asList("YOUR_TEST_ENVIRONMENT"), // Test Environments (from config)
-            "YOUR_USERNAME" // Username (from config)
+            "PDSL Automated Test Execution",
+            "Results from automated tests PDSL",
+            "GFENG-43264",
+            Arrays.asList("PRD"),
+            "janaarthanan"
         ),
         tests
     );
@@ -107,6 +109,7 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
 
   @Override
   public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+      MetadataTestRunResults results,
       String context) {
 
   }
@@ -185,13 +188,13 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
   }
 
   @Override
-  public void onPhraseFailure(ParseTreeListener listener, Phrase activePhrase,
+  public void onPhraseFailure(ParseTreeListener listener, Phrase activePhrase,TestCase testCase,
       Throwable exception) {
 
   }
 
   @Override
-  public void onPhraseFailure(ParseTreeVisitor<?> visitor, Phrase activePhrase,
+  public void onPhraseFailure(ParseTreeVisitor<?> visitor, Phrase activePhrase,TestCase testCase,
       Throwable exception) {
 
   }

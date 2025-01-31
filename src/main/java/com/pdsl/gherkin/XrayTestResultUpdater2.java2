@@ -1,0 +1,111 @@
+package com.pdsl.gherkin;
+
+import com.pdsl.executors.ActivePhraseObservable;
+import com.pdsl.executors.ExecutorObserver;
+import com.pdsl.testcases.TestCase;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.util.Collection;
+
+@FeignClient(name = "xray-client", url = "${xray.api.url}") // Configure URL in properties
+interface XrayClient {
+  @PostMapping(value = "/rest/raven/1.0/import/execution", consumes = MediaType.APPLICATION_JSON_VALUE)
+  ResponseEntity<String> updateTestResult(@RequestHeader("Authorization") String authorization, @RequestBody XrayTestResultRequest request);
+}
+
+record XrayTestResultRequest(String testKey, String status, String comment) {}
+
+public class XrayTestResultUpdater2 implements GherkinObserver, ExecutorObserver {
+
+  private final XrayClient xrayClient;
+  private final String xrayAuthToken;
+  private final GherkinObservable gherkinObservable;
+  private final ActivePhraseObservable activePhraseObservable;
+
+  public XrayTestResultUpdater2(XrayClient xrayClient, String xrayAuthToken, GherkinObservable gherkinObservable, ActivePhraseObservable activePhraseObservable) {
+    this.xrayClient = xrayClient;
+    this.xrayAuthToken = xrayAuthToken;
+    this.gherkinObservable = gherkinObservable;
+    this.activePhraseObservable = activePhraseObservable;
+    this.gherkinObservable.registerObserver(this);
+    this.activePhraseObservable.registerObserver(this);
+  }
+
+  @Override
+  public void onScenarioConverted(String title, List<String> steps, Set<String> tags, Map<String, String> substitutions) {
+    // You can use this to map scenario titles/tags to Xray test keys if needed.
+    // Example: Extract Xray key from tag: @XRAY-TEST-KEY-ABC-123
+    String xrayTestKey = tags.stream()
+        .filter(tag -> tag.startsWith("@XRAY-TEST-KEY-"))
+        .map(tag -> tag.substring("@XRAY-TEST-KEY-".length()))
+        .findFirst()
+        .orElse(null);
+
+    if (xrayTestKey != null) {
+      System.out.println("Found Xray Test Key: " + xrayTestKey + " for scenario: " + title);
+    } else {
+      System.out.println("No Xray Test Key found for scenario: " + title);
+    }
+  }
+
+  @Override
+  public void onAfterTestSuite(Collection<TestCase> testCases, org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, String context) {
+    for (TestCase testCase : testCases) {
+      String testCaseName = testCase.getMetaData().getTestName();
+      String xrayTestKey = testCaseName; // Replace with actual logic
+      String testStatus = "PASS";
+      Throwable failureReason = testCase.getMetaData().getFailureReason().orElse(null);
+      if (failureReason != null) {
+        testStatus = "FAIL";
+      }
+      if(xrayTestKey != null){
+        updateXrayTestResult(xrayTestKey, testStatus, failureReason);
+      }
+    }
+  }
+
+  private void updateXrayTestResult(String testKey, String status, Throwable failureReason) {
+    try {
+      String bearerToken = "Bearer " + xrayAuthToken;
+      XrayTestResultRequest request = new XrayTestResultRequest(testKey, status, failureReason != null ? failureReason.getMessage() : null);
+
+      ResponseEntity<String> response = xrayClient.updateTestResult(bearerToken, request);
+
+      if (response.getStatusCode() == HttpStatus.OK) {
+        System.out.println("Xray test result updated successfully for " + testKey);
+      } else {
+        System.err.println("Failed to update Xray test result for " + testKey + ": " + response.getBody());
+      }
+    } catch (Exception e) {
+      System.err.println("Error updating Xray test result: " + e.getMessage());
+    }
+  }
+
+
+  //Implement other methods from ExecutorObserver interface with empty bodies or logging if needed.
+  @Override
+  public void onBeforePhrase(org.antlr.v4.runtime.tree.ParseTreeListener listener, org.antlr.v4.runtime.tree.ParseTreeWalker walker, com.pdsl.specifications.Phrase activePhrase) {}
+  @Override
+  public void onBeforePhrase(org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, com.pdsl.specifications.Phrase activePhrase) {}
+  @Override
+  public void onAfterPhrase(org.antlr.v4.runtime.tree.ParseTreeListener listener, org.antlr.v4.runtime.tree.ParseTreeWalker walker, com.pdsl.specifications.Phrase activePhrase) {}
+  @Override
+  public void onAfterPhrase(org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, com.pdsl.specifications.Phrase activePhrase) {}
+  @Override
+  public void onPhraseFailure(org.antlr.v4.runtime.tree.ParseTreeListener listener, com.pdsl.specifications.Phrase activePhrase, Throwable exception) {}
+  @Override
+  public void onPhraseFailure(org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, com.pdsl.specifications.Phrase activePhrase, Throwable exception) {}
+  @Override
+  public void onBeforeTestSuite(Collection<TestCase> testCases, org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, String context) {}
+  @Override
+  public void onBeforeTestSuite(Collection<TestCase> testCases, org.antlr.v4.runtime.tree.ParseTreeListener listener, String context) {}
+  @Override
+  public void onAfterTestSuite(Collection<TestCase> testCases, org.antlr.v4.runtime.tree.ParseTreeListener listener, String context) {}
+}

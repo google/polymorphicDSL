@@ -1,11 +1,11 @@
 package com.pdsl.gherkin.xray.models;
 
-public class Test {
+public class XrayTestResult {
 
   private final String testKey;
   private final String status;
 
-  public Test(String testKey, String status) {
+  public XrayTestResult(String testKey, String status) {
     this.testKey = testKey;
     this.status = status;
   }

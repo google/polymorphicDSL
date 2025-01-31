@@ -1,5 +1,6 @@
 package com.pdsl.gherkin;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -16,7 +17,7 @@ import java.util.regex.Pattern;
 public class XrayAuth {
 
   Logger logger = Logger.getLogger(this.getClass().getName());
-
+  private static final Properties properties = new Properties();
   private final String xrayUrl;
   private String authToken;
   private long tokenExpirationTime;
@@ -95,15 +96,16 @@ public class XrayAuth {
     return null;
   }
 
-
+  private static void loadXrayProperties() {
+    try {
+      properties.load(new FileInputStream("src/main/resources/xray.properties"));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
   public static XrayAuth fromPropertiesFile(String propertiesFilePath) {
-    Properties properties = new Properties();
-    try (InputStream input = XrayAuth.class.getClassLoader()
-        .getResourceAsStream(propertiesFilePath)) {
-      if (input == null) {
-        throw new RuntimeException("Unable to find properties file: " + propertiesFilePath);
-      }
-      properties.load(input);
+
+    loadXrayProperties();
       String xrayUrl = properties.getProperty("xray.api.url");
       String clientId = properties.getProperty("xray.client.id");
       String clientSecret = properties.getProperty("xray.client.secret");
@@ -112,8 +114,6 @@ public class XrayAuth {
             "xray.client.id, xray.client.secret and xray.api.url must be defined in the properties file.");
       }
       return new XrayAuth(xrayUrl, clientId, clientSecret);
-    } catch (IOException ex) {
-      throw new RuntimeException("Error loading properties file: " + ex.getMessage(), ex);
-    }
+
   }
 }

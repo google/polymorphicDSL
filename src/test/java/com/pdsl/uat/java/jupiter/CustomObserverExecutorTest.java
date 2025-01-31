@@ -8,6 +8,7 @@ import com.pdsl.grammars.MultiInterpreterParser;
 import com.pdsl.grammars.MultiInterpreterParserBaseListener;
 import com.pdsl.grammars.MultiInterpreterRecognizerLexer;
 import com.pdsl.grammars.MultiInterpreterRecognizerParser;
+import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
 import com.pdsl.testcases.TestCase;
 import java.nio.file.Paths;
@@ -114,13 +115,13 @@ public class CustomObserverExecutorTest {
     }
 
     @Override
-    public void onPhraseFailure(ParseTreeListener listener, Phrase activePhrase,
+    public void onPhraseFailure(ParseTreeListener listener, Phrase activePhrase, TestCase testCase,
         Throwable exception) {
       failureCount++;
     }
 
     @Override
-    public void onPhraseFailure(ParseTreeVisitor<?> visitor, Phrase activePhrase,
+    public void onPhraseFailure(ParseTreeVisitor<?> visitor, Phrase activePhrase, TestCase testCase,
         Throwable exception) {
       failureCount++;
     }
@@ -133,6 +134,7 @@ public class CustomObserverExecutorTest {
 
     @Override
     public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+        MetadataTestRunResults results,
         String context) {
       afterTestSuite++;
     }
@@ -145,6 +147,7 @@ public class CustomObserverExecutorTest {
 
     @Override
     public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+        MetadataTestRunResults results,
         String context) {
       afterTestSuite++;
     }

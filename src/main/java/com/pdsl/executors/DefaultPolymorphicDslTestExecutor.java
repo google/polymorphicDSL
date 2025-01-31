@@ -53,7 +53,8 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
     notifyBeforeTestSuite(testCases, listener, "");
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(listener), "NONE");
-    notifyAfterTestSuite(testCases, listener, "");
+    //send results to notifyAfterTestSuite
+    notifyAfterTestSuite(testCases, listener,results, "");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -71,7 +72,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
     notifyBeforeTestSuite(testCases, subgrammarVisitor, "");
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarVisitor), "NONE");
-    notifyAfterTestSuite(testCases, subgrammarVisitor, "");
+    notifyAfterTestSuite(testCases, subgrammarVisitor,results, "");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -115,13 +116,13 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   }
 
   private void notifyOnListenerException(ParseTreeListener listener,
-      Phrase activePhrase, Throwable exception) {
-    activePhraseObservers.forEach(o -> o.onPhraseFailure(listener, activePhrase, exception));
+      Phrase activePhrase, TestCase testCase, Throwable exception) {
+    activePhraseObservers.forEach(o -> o.onPhraseFailure(listener, activePhrase,testCase, exception));
   }
 
   private void notifyOnVisitorException(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase, Throwable exception) {
-    activePhraseObservers.forEach(a -> a.onPhraseFailure(visitor, activePhrase, exception));
+      Phrase activePhrase, TestCase testCase, Throwable exception) {
+    activePhraseObservers.forEach(a -> a.onPhraseFailure(visitor, activePhrase,testCase, exception));
   }
 
   private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
@@ -129,9 +130,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, visitor, context));
   }
 
-  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
       String context) {
-    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, visitor, context));
+    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, visitor, results, context));
   }
 
   private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
@@ -139,9 +140,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, listener, context));
   }
 
-  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
       String context) {
-    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, listener, context));
+    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, listener, results, context));
   }
   /**
    * A container for a listener XOR a visitor.
@@ -214,9 +215,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         }
       } catch (Throwable e) {
         if (phraseRegistry.listener.isPresent()) {
-          notifyOnListenerException(phraseRegistry.listener.get(), activePhrase, e);
+          notifyOnListenerException(phraseRegistry.listener.get(), activePhrase, testCase, e);
         } else {
-          notifyOnVisitorException(phraseRegistry.visitor.get(), activePhrase, e);
+          notifyOnVisitorException(phraseRegistry.visitor.get(), activePhrase,testCase, e);
         }
         notifyStreams(
             (AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n"
@@ -262,7 +263,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     notifyBeforeTestSuite(testCases, subgrammarListener, "");
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarListener),
         context);
-    notifyAfterTestSuite(testCases, subgrammarListener, "");
+    notifyAfterTestSuite(testCases, subgrammarListener,results, "");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -279,7 +280,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     logger.info("Running tests...");
     notifyBeforeTestSuite(testCases, visitor, "");
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
-    notifyAfterTestSuite(testCases, visitor, "");
+    notifyAfterTestSuite(testCases, visitor, results,"");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -362,11 +363,11 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         if (interpreterObj.isPresent() && phrase.isPresent()) {
           if (interpreterObj.get().getParseTreeListener().isPresent()) {
             notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
-                phrase.get(),
+                phrase.get(),testCase,
                 e);
           } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
             notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
-                phrase.get(),
+                phrase.get(),testCase,
                 e);
           }
         }

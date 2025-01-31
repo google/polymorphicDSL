@@ -1,0 +1,40 @@
+package com.pdsl.uat.java.jupiter;
+import com.pdsl.gherkin.XrayAuth;
+import com.pdsl.gherkin.XrayReportReader;
+import com.pdsl.gherkin.XrayResultSender;
+import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
+import org.junit.jupiter.api.Test;
+import java.io.IOException;
+
+public class XrayIntegrationTest {
+
+  @Test
+  public void testXrayIntegration() throws IOException, InterruptedException {
+    List<Pickle> pickles = FeatureFileReader.readFeatures("path/to/your/xray_integration.feature");
+
+    for (Pickle pickle : pickles) {
+      String scenarioName = pickle.getName();
+      List<String> tags = pickle.getTags().stream().map(t -> t.getName()).collect(Collectors.toList());
+      String xrayKey = FeatureFileReader.extractXrayKey(tags);
+
+      // ... (Your PDSL test execution logic)
+      // Use the scenarioName and xrayKey in your PDSL test execution
+      // ...
+
+      String status =  // Get the test execution status from your PDSL execution
+
+          xrayReporter.addResult(xrayKey, status); // Notify the reporter
+    }
+
+    xrayReporter.generateReport("target/xray-report.json");
+    // ... (Your code to run the tests and generate the report)
+
+    // 2. Read the JSON report
+    XrayTestExecutionResult xrayResult = XrayReportReader.readXrayReport("xray-report.json"); // Replace with the actual path
+
+    // 3. Send to Xray API
+    XrayAuth xrayAuth = XrayAuth.fromPropertiesFile("xray.properties"); // Initialize XrayAuth
+    XrayResultSender xrayResultSender = new XrayResultSender(xrayAuth); // Use the dedicated sender class
+    xrayResultSender.sendResultsToXray(xrayResult);
+  }
+}

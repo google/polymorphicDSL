@@ -1,0 +1,87 @@
+package com.pdsl.gherkin;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pdsl.gherkin.xray.models.Info;
+import com.pdsl.gherkin.xray.models.XrayTestResult;
+import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
+import java.util.Arrays;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.TestExecutionListener;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class XrayReporter implements TestExecutionListener {
+
+  private final ObjectMapper objectMapper = new ObjectMapper();
+  private final List<Test> tests = new ArrayList<>();
+
+  @Override
+  public void testSuccessful(ExtensionContext context) {
+    String testName = context.getDisplayName();
+    String testKey = extractXrayKey(testName);
+    if (testKey != null) {
+      tests.add(new Test(testKey, "PASSED"));
+    }
+  }
+
+  @Override
+  public void testFailed(ExtensionContext context, Throwable cause) {
+    String testName = context.getDisplayName();
+    String testKey = extractXrayKey(testName);
+    if (testKey != null) {
+      tests.add(new Test(testKey, "FAILED"));
+    }
+
+  }
+
+  @Override
+  public void testAborted(ExtensionContext context, Throwable cause) {
+    String testName = context.getDisplayName();
+    String testKey = extractXrayKey(testName);
+    if (testKey != null) {
+      tests.add(new Test(testKey, "ABORTED"));
+    }
+  }
+
+
+
+  @Override
+  public void executionFinished(ExtensionContext context) {
+    XrayTestExecutionResult xrayResult = new XrayTestExecutionResult(
+        /*
+        TODO :  change to read from properties or config
+         */
+        new Info(
+            "PDSL Automated Test Execution",
+            "Results from automated tests PDSL",
+            "GFENG-43264",
+            Arrays.asList("PRD"),
+            "janaarthanan"
+        ),
+        tests
+    );
+
+    try {
+      objectMapper.writeValue(new File("target/xray-report.json"), xrayResult);
+      // System.out.println("Xray report generated successfully at target/xray-report.json");
+    } catch (IOException e) {
+      // System.err.println("Error generating Xray report: " + e.getMessage());
+    }
+  }
+
+  private String extractXrayKey(String testName) {
+    // Regular expression to extract Xray key (e.g., GFENG-900) from test name.
+    // Adapt this regex to match your test naming convention.
+    Pattern pattern = Pattern.compile("GFENG-\\d+"); // Example: Matches "GFENG-900"
+    Matcher matcher = pattern.matcher(testName);
+    if (matcher.find()) {
+      return matcher.group();
+    }
+    return null;
+  }
+}

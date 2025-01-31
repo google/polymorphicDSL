@@ -5,9 +5,9 @@ import java.util.List;
 public class XrayTestExecutionResult {
 
   private final Info info;
-  private final List<Test> tests;
+  private final List<XrayTestResult> tests;
 
-  public XrayTestExecutionResult(Info info, List<Test> tests) {
+  public XrayTestExecutionResult(Info info, List<XrayTestResult> tests) {
     this.info = info;
     this.tests = tests;
   }
@@ -16,7 +16,7 @@ public class XrayTestExecutionResult {
     return info;
   }
 
-  public List<Test> getTests() {
+  public List<XrayTestResult> getTests() {
     return tests;
   }
 
