@@ -1,5 +1,7 @@
 package com.pdsl.gherkin;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,26 +41,27 @@ public class XrayAuth {
 
   private void fetchAuthToken() {
     try {
-      String authString = clientId + ":" + clientSecret;
-      String encodedAuth = Base64.getEncoder()
-          .encodeToString(authString.getBytes(StandardCharsets.UTF_8));
+      // Create a JSON object for the request body
+      ObjectMapper objectMapper = new ObjectMapper();
+      JsonNode requestBody = objectMapper.createObjectNode()
+          .put("clientID", this.clientId)
+          .put("clientSecret", this.clientSecret);
 
       HttpClient client = HttpClient.newHttpClient();
       HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create(xrayUrl))
-          .header("Authorization", "Basic " + encodedAuth)
+          .uri(URI.create(this.xrayUrl))
           .header("Content-Type", "application/json")
-          .POST(HttpRequest.BodyPublishers.noBody())
+          .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(requestBody)))
           .build();
 
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
       if (response.statusCode() >= 200 && response.statusCode() < 300) {
         String responseBody = response.body();
-        authToken = extractValueFromJson(responseBody, "token");
+        this.authToken = extractValueFromJson(responseBody, "token");
         String expiresInStr = extractValueFromJson(responseBody, "expiresIn");
 
-        if (authToken == null) {
+        if (this.authToken == null) {
           throw new RuntimeException(
               "Could not extract access token from response: " + responseBody);
         }
@@ -66,11 +69,11 @@ public class XrayAuth {
         if (expiresInStr != null) {
           try {
             long expiresIn = Long.parseLong(expiresInStr);
-            tokenExpirationTime =
+            this.tokenExpirationTime =
                 System.currentTimeMillis() + (expiresIn * 1000) - 60000; // 1 minute buffer
           } catch (NumberFormatException e) {
             logger.info("Could not parse expiresIn: " + expiresInStr);
-            //TODO: Handle the error appropriately,set a default expiration or throw an exception
+            // TODO: Handle the error appropriately,set a default expiration or throw an exception
           }
         } else {
           logger.info("expiresIn not found in response.");
