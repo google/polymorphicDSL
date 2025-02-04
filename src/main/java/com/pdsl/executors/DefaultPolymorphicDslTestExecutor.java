@@ -127,7 +127,11 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
 
   private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
       String context) {
-    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, visitor, context));
+    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases,visitor, context));
+  }
+  private void notifyBeforeTestSuite(Collection<SharedTestCase> testCases,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, context));
   }
 
   private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
@@ -143,6 +147,10 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
       String context) {
     activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, listener, results, context));
+  }
+  private void notifyAfterTestSuite(Collection<SharedTestCase> testCases,  MetadataTestRunResults results,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, results, context));
   }
   /**
    * A container for a listener XOR a visitor.
@@ -278,9 +286,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
       ParseTreeVisitor<?> visitor, String context) {
     logger.info("Running tests...");
-    notifyBeforeTestSuite(testCases, visitor, "");
+    notifyBeforeTestSuite(testCases, visitor, context);
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
-    notifyAfterTestSuite(testCases, visitor, results,"");
+    notifyAfterTestSuite(testCases, visitor, results,context);
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -294,6 +302,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   @Override
   public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases,
       String context) {
+    notifyBeforeTestSuite(sharedTestCases, context);
     PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
         new PdslThreadSafeOutputStream(), context);
     //Set<List<String>> previouslyExecutedTests = new HashSet<>();
@@ -383,6 +392,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       results.addTestResult(DefaultTestResult.passingTest(testCase));
     }
 
+    notifyAfterTestSuite(sharedTestCases,results,context);
     return results;
   }
 

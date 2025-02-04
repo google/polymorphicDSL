@@ -7,6 +7,7 @@ import com.pdsl.gherkin.xray.models.XrayTestResult;
 import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
+import com.pdsl.testcases.DefaultTaggedTestCase;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 
@@ -32,7 +33,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
  * TODO: add code to support multiple plans, environments and platforms
  */
 public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver {
-
+  private final List<TestCase> testCases = new ArrayList<>();
   private final XrayAuth xrayAuth;
   private final ObjectMapper objectMapper; // Jackson ObjectMapper for JSON serialization
 
@@ -44,7 +45,7 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
   @Override
   public void onScenarioConverted(String title, List<String> steps, Set<String> tags,
       Map<String, String> substitutions) {
-    String xrayTestKey = extractXrayTestKey(tags);
+    String xrayTestKey = extractXrayTestKey(tags, "@xray-test-case");
     if (xrayTestKey != null) {
       System.out.println("Found Xray Test Key: " + xrayTestKey + " for scenario: " + title);
     } else {
@@ -53,11 +54,16 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
   }
 
   @Override
-  public void onAfterTestSuite(Collection<TestCase> testCases,
+  public void onAfterTestSuite(Collection<? extends TestCase> testCases,
       org.antlr.v4.runtime.tree.ParseTreeVisitor<?> visitor, MetadataTestRunResults results, String context) {
+    this.testCases.addAll(testCases);
+  }
+
+  public void publishReportsToXray() {
+
     List<XrayTestResult> tests = new ArrayList<>();
     for (TestCase testCase : testCases) {
-      String xrayTestKey = extractXrayTestKey(testCase);
+      String xrayTestKey = extractXrayTestKey(testCase,"@xray-test-case=");
       String testStatus = extractTestStatus(testCase);
 
       if (xrayTestKey != null) {
@@ -69,7 +75,7 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
         new Info(
             "PDSL Automated Test Execution",
             "Results from automated tests PDSL",
-            "GFENG-43264",
+            "GFENG-44108",
             Arrays.asList("PRD"),
             "janaarthanan"
         ),
@@ -81,16 +87,17 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
 
       HttpClient client = HttpClient.newHttpClient();
       HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create(getXrayApiUrl() + "/rest/raven/1.0/import/execution"))
+          .uri(URI.create(getXrayReportUrl()))
           .header("Authorization", "Bearer " + xrayAuth.getAuthToken())
           .header("Content-Type", "application/json")
+          .header("Accept", "*/*")
           .POST(HttpRequest.BodyPublishers.ofString(requestBody))
           .build();
 
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
       if (response.statusCode() >= 200 && response.statusCode() < 300) {
-        System.out.println("Xray test execution results imported successfully.");
+        System.out.println("Xray test execution results imported successfully\n"+ response.body());
       } else {
         System.err.println(
             "Failed to import Xray test execution results: " + response.statusCode() + " - "
@@ -98,23 +105,13 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
       }
     } catch (IOException | InterruptedException e) {
       System.err.println("Error importing Xray test execution results: " + e.getMessage());
+    }finally{
+      testCases.clear();
     }
   }
 
-  @Override
-  public void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
-      String context) {
 
-  }
-
-  @Override
-  public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
-      MetadataTestRunResults results,
-      String context) {
-
-  }
-
-  private String getXrayApiUrl() {
+  private String getXrayReportUrl() {
     Properties properties = new Properties();
     try (InputStream input = XrayAuth.class.getClassLoader()
         .getResourceAsStream("xray.properties")) {
@@ -122,7 +119,7 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
         throw new RuntimeException("Unable to find properties file: xray.properties");
       }
       properties.load(input);
-      String apiUrl = properties.getProperty("xray.api.url");
+      String apiUrl = properties.getProperty("xray.api.report.url");
       if (apiUrl == null) {
         throw new RuntimeException("xray.api.url must be defined in the properties file.");
       }
@@ -132,27 +129,28 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
     }
   }
 
-  private String extractXrayTestKey(TestCase testCase) {
+  private String extractXrayTestKey(TestCase testCase, String tagName) {
     if (testCase instanceof TaggedTestCase taggedTestCase) {
-      return extractXrayTestKey(taggedTestCase.getTags());
+      return extractXrayTestKey(taggedTestCase.getTags(),tagName);
     }
     return null;
   }
 
-  private String extractXrayTestKey(Collection<String> tags) {
+  private String extractXrayTestKey(Collection<String> tags, String tagName) {
     Optional<String> xrayKey = tags.stream()
-        .filter(tag -> tag.startsWith("@xray-key="))
-        .map(tag -> tag.substring("@xray-key=".length()))
+        .filter(tag -> tag.startsWith(tagName))
+        .map(tag -> tag.substring(tagName.length()))
         .findFirst();
     return xrayKey.orElse(null);
   }
 
   private String extractTestStatus(TestCase testCase) {
+
     if (testCase instanceof XrayTestCase) {
       return ((XrayTestCase) testCase).getTestResult();
     } else {
       //TODO: decide default
-      return "UNKNOWN";
+      return "PASSED";
     }
   }
 
@@ -199,8 +197,35 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
 
   }
 
+
+
+
   @Override
-  public void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+  public void onBeforeTestSuite(Collection<? extends TestCase> testCases,
+      ParseTreeListener listener, String context) {
+
+  }
+
+  @Override
+  public void onBeforeTestSuite(Collection<? extends TestCase> testCases, String context) {
+
+  }
+
+
+  @Override
+  public void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
+      MetadataTestRunResults results, String context) {
+    this.testCases.addAll(testCases);
+  }
+
+  @Override
+  public void onAfterTestSuite(Collection<? extends TestCase> testCases,
+      MetadataTestRunResults results, String context) {
+    this.testCases.addAll(testCases);
+  }
+
+  @Override
+  public void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor,
       String context) {
 
   }

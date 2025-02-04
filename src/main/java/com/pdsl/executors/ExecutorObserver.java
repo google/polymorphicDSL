@@ -3,6 +3,7 @@ package com.pdsl.executors;
 import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.util.Collection;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -29,18 +30,22 @@ public interface ExecutorObserver {
   void onPhraseFailure(ParseTreeVisitor<?> visitor,
       Phrase activePhrase, TestCase testCase, Throwable exception);
 
-  void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+  void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor,
+      String context);
+  void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
       String context);
 
-  void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
-      MetadataTestRunResults results,
+  void onBeforeTestSuite(Collection<? extends TestCase> testCases,
       String context);
 
-  void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+
+  void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
       String context);
 
-  void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
-      MetadataTestRunResults results,
+
+  void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
       String context);
 
+  void onAfterTestSuite(Collection<? extends TestCase> testCases, MetadataTestRunResults results,
+      String context);
 }

@@ -7,7 +7,9 @@ import com.pdsl.gherkin.xray.models.Info;
 import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
 import com.pdsl.gherkin.xray.models.XrayTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
+import com.pdsl.reports.TestResult;
 import com.pdsl.specifications.Phrase;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.io.FileInputStream;
@@ -66,42 +68,36 @@ public class XrayExecutorObserver implements ExecutorObserver {
   @Override
   public void onPhraseFailure(ParseTreeVisitor<?> visitor,
       Phrase activePhrase, TestCase testCase, Throwable exception) {
+  }
 
-    loadXrayProperties();
-    String environmentsStr = prop.getProperty("environments");
-    List<String> environments = Arrays.asList(environmentsStr.split(","));
-    String user = prop.getProperty("user");
+  @Override
+  public void onBeforeTestSuite(Collection<? extends TestCase> testCases,
+      ParseTreeVisitor<?> visitor, String context) {
 
-    if (testCase instanceof TaggedTestCase taggedTestCase) {
-      Collection<String> tags = extractTags(taggedTestCase.getTags(),"@xray-test-plan=");
-      Collection<String> caseTags = extractTags(taggedTestCase.getTags(),"@xray-test-case=");
+  }
 
-      List<Info> listOfInfo = tags.stream().map(tag -> new Info(
-          testCase.getTestTitle(),
-          String.join("", taggedTestCase.getUnfilteredPhraseBody()),
-          tag,
-          environments,
-          user
-      )).collect(Collectors.toList());
+  @Override
+  public void onBeforeTestSuite(Collection<? extends TestCase> testCases,
+      ParseTreeListener listener, String context) {
 
-      List<XrayTestResult> xrayTestResults = caseTags.stream().map(t -> new XrayTestResult(
-          t, "FAILED"
-      )).collect(Collectors.toList());
+  }
 
-      for (Info info : listOfInfo) {
-        List<XrayTestExecutionResult> results = testCaseXrayTestExecutionResultMap.computeIfAbsent(
-            testCase, k -> new ArrayList<>());
-        results.add(new XrayTestExecutionResult(info, xrayTestResults));
-      }
+  @Override
+  public void onBeforeTestSuite(Collection<? extends TestCase> testCases, String context) {
 
-    }
+  }
+
+  @Override
+  public void onAfterTestSuite(Collection<? extends TestCase> testCases,
+      ParseTreeVisitor<?> visitor, MetadataTestRunResults results, String context) {
+
   }
 
   private static List<String> extractTags(Collection<String> tags, String prefix) {
     return tags.stream()
         .filter(tag -> tag.toLowerCase().startsWith(prefix.toLowerCase()))
         .map(tag -> {
-          String[] split = tag.split("=");
+          String[] split = tag.split("=",2);
           if (split.length == 2) {
             return Optional.of(split[1]);
           } else {
@@ -114,33 +110,65 @@ public class XrayExecutorObserver implements ExecutorObserver {
         .collect(Collectors.toList());
   }
 
-  @Override
-  public void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
-      String context) {
-  }
+
+
+
 
   @Override
-  public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+  public void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
       MetadataTestRunResults results,
       String context) {
-    xrayUpdater.onAfterTestSuite(testCases, visitor,results, context);
-    //
+    System.out.println("");
+    publishReportToXray(testCases,results,context);
   }
 
-  @Override
-  public void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
-      String context) {
-  }
+
 
   @Override
-  public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
-      MetadataTestRunResults results,
+  public void onAfterTestSuite(Collection<? extends TestCase> testCases, MetadataTestRunResults results,
       String context) {
+
+  }
+
+  private void publishReportToXray(Collection<? extends TestCase> testCases, MetadataTestRunResults results,
+      String context) {
+    loadXrayProperties();
+    String environmentsStr = prop.getProperty("xray.environments");
+    List<String> environments = Arrays.asList(environmentsStr.split(","));
+    String user = prop.getProperty("xray.user");
+
+    for(TestResult result : results.getTestResults()){
+      TestCase testCase = result.getTestCase();
+      if (testCase instanceof TaggedTestCase taggedTestCase) {
+        Collection<String> tags = extractTags(taggedTestCase.getTags(),"@xray-test-plan=");
+        Collection<String> caseTags = extractTags(taggedTestCase.getTags(),"@xray-test-case=");
+
+        List<Info> listOfInfo = tags.stream().map(tag -> new Info(
+            testCase.getTestTitle(),
+            String.join("", taggedTestCase.getUnfilteredPhraseBody()),
+            tag,
+            environments,
+            user
+        )).collect(Collectors.toList());
+
+        List<XrayTestResult> xrayTestResults = caseTags.stream().map(t -> new XrayTestResult(
+            t, result.getStatus().toString()
+        )).collect(Collectors.toList());
+
+        for (Info info : listOfInfo) {
+          List<XrayTestExecutionResult> resultsList = testCaseXrayTestExecutionResultMap.computeIfAbsent(
+              testCase, k -> new ArrayList<>());
+          resultsList.add(new XrayTestExecutionResult(info, xrayTestResults));
+        }
+
+      }
+    }
+    xrayUpdater.onAfterTestSuite(testCases, results, context);
   }
 
   private void loadXrayProperties() {
     try {
-      prop.load(new FileInputStream("xray.properties"));
+      prop.load(new FileInputStream("src/main/resources/xray.properties"));
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

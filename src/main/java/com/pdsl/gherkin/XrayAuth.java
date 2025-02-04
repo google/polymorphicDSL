@@ -33,7 +33,7 @@ public class XrayAuth {
   }
 
   public String getAuthToken() {
-    if (authToken == null || System.currentTimeMillis() >= tokenExpirationTime) {
+    if (authToken == null  || (System.currentTimeMillis() >= tokenExpirationTime && tokenExpirationTime!=0) ) {
       fetchAuthToken();
     }
     return authToken;
@@ -44,48 +44,33 @@ public class XrayAuth {
       // Create a JSON object for the request body
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode requestBody = objectMapper.createObjectNode()
-          .put("clientID", this.clientId)
-          .put("clientSecret", this.clientSecret);
+          .put("client_id", this.clientId)
+          .put("client_secret", this.clientSecret);
 
       HttpClient client = HttpClient.newHttpClient();
       HttpRequest request = HttpRequest.newBuilder()
           .uri(URI.create(this.xrayUrl))
           .header("Content-Type", "application/json")
+          .header("Accept", "*/*")
           .POST(HttpRequest.BodyPublishers.ofString(objectMapper.writeValueAsString(requestBody)))
           .build();
 
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
       if (response.statusCode() >= 200 && response.statusCode() < 300) {
-        String responseBody = response.body();
-        this.authToken = extractValueFromJson(responseBody, "token");
-        String expiresInStr = extractValueFromJson(responseBody, "expiresIn");
+        String responseBody = response.body().replaceAll("\"","");
+        this.authToken = responseBody;
 
         if (this.authToken == null) {
-          throw new RuntimeException(
+          throw new IllegalStateException(
               "Could not extract access token from response: " + responseBody);
         }
-
-        if (expiresInStr != null) {
-          try {
-            long expiresIn = Long.parseLong(expiresInStr);
-            this.tokenExpirationTime =
-                System.currentTimeMillis() + (expiresIn * 1000) - 60000; // 1 minute buffer
-          } catch (NumberFormatException e) {
-            logger.info("Could not parse expiresIn: " + expiresInStr);
-            // TODO: Handle the error appropriately,set a default expiration or throw an exception
-          }
-        } else {
-          logger.info("expiresIn not found in response.");
-          // TODO: Handle the missing expiresIn, set a default expiration
-        }
-
       } else {
-        throw new RuntimeException(
+        throw new IllegalStateException(
             "Failed to fetch Xray auth token: " + response.statusCode() + " - " + response.body());
       }
     } catch (IOException | InterruptedException e) {
-      throw new RuntimeException("Error fetching Xray auth token: " + e.getMessage(), e);
+      throw new IllegalStateException("Error fetching Xray auth token: " + e.getMessage(), e);
     }
   }
 

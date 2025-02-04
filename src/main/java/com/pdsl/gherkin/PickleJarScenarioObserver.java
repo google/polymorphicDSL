@@ -12,11 +12,9 @@ public class PickleJarScenarioObserver implements GherkinObserver {
   @Override
   public void onScenarioConverted(String title, List<String> steps, Set<String> tags,
       Map<String, String> substitutions) {
-    System.out.println("Scenario Converted:");
-    System.out.println("  Title: " + title);
-    System.out.println("  Steps: " + steps);
-    System.out.println("  Tags: " + tags);
-    System.out.println("  Substitutions: " + substitutions);
+   if( substitutions.get("xray-test-case")!=null){
+     tags.add("@xray-test-case="+substitutions.get("xray-test-case"));
+    }
   }
 
 

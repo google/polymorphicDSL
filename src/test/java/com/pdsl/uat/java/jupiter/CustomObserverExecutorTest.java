@@ -10,6 +10,7 @@ import com.pdsl.grammars.MultiInterpreterRecognizerLexer;
 import com.pdsl.grammars.MultiInterpreterRecognizerParser;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -127,29 +128,40 @@ public class CustomObserverExecutorTest {
     }
 
     @Override
-    public void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+    public void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor,
         String context) {
       beforeTestSuite++;
     }
 
     @Override
-    public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+    public void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor,
         MetadataTestRunResults results,
         String context) {
       afterTestSuite++;
     }
 
     @Override
-    public void onBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+    public void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
         String context) {
       beforeTestSuite++;
     }
 
     @Override
-    public void onAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+    public void onBeforeTestSuite(Collection<? extends TestCase> testCases, String context) {
+
+    }
+
+    @Override
+    public void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
         MetadataTestRunResults results,
         String context) {
       afterTestSuite++;
+    }
+
+    @Override
+    public void onAfterTestSuite(Collection<? extends TestCase> testCases,
+        MetadataTestRunResults results, String context) {
+
     }
 
     @Override
