@@ -3,14 +3,10 @@ package com.pdsl.runners.junit;
 import com.google.common.base.Preconditions;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
-import com.pdsl.reports.TestResult;
-import com.pdsl.reports.TestRunResults;
 import com.pdsl.testcases.SharedTestCase;
-import java.util.stream.Collectors;
 import org.junit.internal.AssumptionViolatedException;
 import org.junit.internal.runners.model.EachTestNotifier;
 import org.junit.runner.Description;
-import org.junit.runner.notification.Failure;
 import org.junit.runner.notification.RunNotifier;
 import org.junit.runners.ParentRunner;
 import org.junit.runners.model.InitializationError;
@@ -58,7 +54,7 @@ public class PdslExecutorRunner extends ParentRunner<SharedTestCase> {
     return Description.createTestDescription(getTestClass().getName(),
         String.format("%d - %s", accumulator++,
             sharedTestCase.getSharedTestCaseWithInterpreters().stream().findFirst().orElseThrow()
-                .getTestCase().getTestTitle()));
+                .getTestCase().testTitle()));
   }
 
   @Override

@@ -3,7 +3,6 @@ package org.junit.jupiter.engine.descriptor;
 import com.pdsl.executors.TraceableTestRunExecutor;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.testcases.SharedTestCase;
-import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TestCase;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -91,10 +90,10 @@ public class PdslExecutable {
 
         /** Returns the text representation of the test case. */
         public String getTestTitle() {
-            return pdslTest.isPresent() ? pdslTest.get().getTestTitle()
+            return pdslTest.isPresent() ? pdslTest.get().testTitle()
                     : sharedTestCase.orElseThrow().getSharedTestCaseWithInterpreters().stream()
                     .findFirst().orElseThrow()
-                    .getTestCase().getTestTitle();
+                    .getTestCase().testTitle();
         }
 
         /**

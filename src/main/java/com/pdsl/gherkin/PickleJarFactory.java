@@ -3,6 +3,8 @@ package com.pdsl.gherkin;
 import com.pdsl.gherkin.models.*;
 import com.pdsl.transformers.PolymorphicDslFileException;
 
+import com.pdsl.xray.observers.GherkinObservable;
+import com.pdsl.xray.observers.GherkinObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;

@@ -18,7 +18,7 @@ public interface TestCase {
      *
      * @return the URI the test case was produced from
      */
-    URI getOriginalSource();
+    URI originalSource();
 
     /**
      * Provides the original phrases that this test case was created from.
@@ -26,13 +26,13 @@ public interface TestCase {
      * No metadata or any other residual data from the original test resource this test case was created from is included.
      * @return all the phrases that the recognizer encountered when making the test
      */
-    List<String> getUnfilteredPhraseBody();
+    List<String> unfilteredPhraseBody();
 
     /**
      * Provides the relevant phrases for this test case which exclude all phrases that are missing from the DSL context
      * that this test was created from.
      *
-     * This may effectively serve as an identifier for the test and should be used instead of {@link #getTestTitle()}
+     * This may effectively serve as an identifier for the test and should be used instead of {@link #testTitle()}
      * for doing comparisons between test cases to see if they are duplicates in practice. These are essentially
      * the textual representations of the phrases in this test case that a
      * {@link com.pdsl.executors.PolymorphicDslTestExecutor} can execute with the iterator returned from
@@ -40,7 +40,7 @@ public interface TestCase {
      *
      * @return the phrases that PDSL views as executable for this test case
      */
-    List<String> getContextFilteredPhraseBody();
+    List<String> contextFilteredPhraseBody();
 
     /**
      * Provides a name for this test case.
@@ -48,12 +48,12 @@ public interface TestCase {
      * <p>The Test Title is <b>not</b> guaranteed to be unique.
      * @return the name of this test case
      */
-    String getTestTitle();
+    String testTitle();
 
     /**
      * Provides an iterator that will only iterate over Test Sections that are expected to be in the test case.
      *
-     * <p>The phrases returned correspond to those returned by {@link #getContextFilteredPhraseBody()} (i.e, any phrases
+     * <p>The phrases returned correspond to those returned by {@link #contextFilteredPhraseBody()} (i.e, any phrases
      * filtered out because they are not relevant to this test cases context will not be present).
      *
      * This iterator is intended mechanism by which a {@link com.pdsl.executors.PolymorphicDslTestExecutor} grabs the
@@ -78,5 +78,5 @@ public interface TestCase {
      *
      * @return List<FilteredPhrase>  the filtered phrases from all phrases that are associated with the test case
      */
-    List<FilteredPhrase> getFilteredPhrases();
+    List<FilteredPhrase> filteredPhrases();
 }

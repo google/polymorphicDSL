@@ -1,10 +1,7 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
 import com.pdsl.specifications.TestSpecification;
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 
 public interface TestSpecificationFactoryObservable {

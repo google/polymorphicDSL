@@ -1,4 +1,4 @@
-package com.pdsl.gherkin.xray.models;
+package com.pdsl.xray.models;
 
 import java.util.List;
 

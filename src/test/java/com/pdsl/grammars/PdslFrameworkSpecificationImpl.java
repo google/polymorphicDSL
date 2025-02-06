@@ -127,7 +127,7 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     @Override
     public void enterTestCaseHasUniqueId(PdslFrameworkSpecificationParser.TestCaseHasUniqueIdContext ctx) {
         for(TestCase testCase : testCases) {
-            assertThat(testCase.getUnfilteredPhraseBody()).isNotNull();
+            assertThat(testCase.unfilteredPhraseBody()).isNotNull();
         }
 
     }
@@ -138,8 +138,8 @@ public class PdslFrameworkSpecificationImpl implements PdslFrameworkSpecificatio
     @Override
     public void enterTestCaseHasTitle(PdslFrameworkSpecificationParser.TestCaseHasTitleContext ctx) {
         for (TestCase testCase : testCases) {
-            assertThat(testCase.getTestTitle()).isNotNull();
-            assertThat(testCase.getTestTitle()).isNotEmpty();
+            assertThat(testCase.testTitle()).isNotNull();
+            assertThat(testCase.testTitle()).isNotEmpty();
         }
     }
 

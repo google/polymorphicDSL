@@ -1,9 +1,7 @@
 package com.pdsl.executors;
 
-import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
-import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.util.Collection;
 import org.antlr.v4.runtime.tree.ParseTreeListener;

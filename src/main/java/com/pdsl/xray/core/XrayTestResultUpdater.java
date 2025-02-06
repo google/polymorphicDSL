@@ -1,16 +1,15 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.core;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pdsl.executors.ExecutorObserver;
-import com.pdsl.gherkin.xray.models.Info;
-import com.pdsl.gherkin.xray.models.XrayTestResult;
-import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
+import com.pdsl.xray.models.Info;
+import com.pdsl.xray.models.XrayTestExecutionResult;
+import com.pdsl.xray.models.XrayTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
-import com.pdsl.testcases.DefaultTaggedTestCase;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
-
+import com.pdsl.xray.observers.GherkinObserver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -62,6 +61,7 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
   public void publishReportsToXray() {
 
     List<XrayTestResult> tests = new ArrayList<>();
+
     for (TestCase testCase : testCases) {
       String xrayTestKey = extractXrayTestKey(testCase,"@xray-test-case=");
       String testStatus = extractTestStatus(testCase);
@@ -90,21 +90,20 @@ public class XrayTestResultUpdater implements GherkinObserver, ExecutorObserver 
           .uri(URI.create(getXrayReportUrl()))
           .header("Authorization", "Bearer " + xrayAuth.getAuthToken())
           .header("Content-Type", "application/json")
-          .header("Accept", "*/*")
           .POST(HttpRequest.BodyPublishers.ofString(requestBody))
           .build();
 
       HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
       if (response.statusCode() >= 200 && response.statusCode() < 300) {
-        System.out.println("Xray test execution results imported successfully\n"+ response.body());
+        System.out.printf("Xray test execution results imported successfully\n%s%n",
+            response.body());
       } else {
-        System.err.println(
-            "Failed to import Xray test execution results: " + response.statusCode() + " - "
-                + response.body());
+        System.err.printf("Failed to import Xray test execution results: %d - %s%n",
+            response.statusCode(), response.body());
       }
     } catch (IOException | InterruptedException e) {
-      System.err.println("Error importing Xray test execution results: " + e.getMessage());
+      System.err.printf("Error importing Xray test execution results: %s%n", e.getMessage());
     }finally{
       testCases.clear();
     }

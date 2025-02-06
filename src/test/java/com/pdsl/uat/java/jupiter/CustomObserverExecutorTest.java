@@ -2,7 +2,7 @@ package com.pdsl.uat.java.jupiter;
 
 import com.pdsl.executors.ExecutorObserver;
 import com.pdsl.executors.InterpreterObj;
-import com.pdsl.gherkin.GherkinObserver;
+import com.pdsl.xray.observers.GherkinObserver;
 import com.pdsl.grammars.MultiInterpreterLexer;
 import com.pdsl.grammars.MultiInterpreterParser;
 import com.pdsl.grammars.MultiInterpreterParserBaseListener;
@@ -10,7 +10,6 @@ import com.pdsl.grammars.MultiInterpreterRecognizerLexer;
 import com.pdsl.grammars.MultiInterpreterRecognizerParser;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
-import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.nio.file.Paths;
 import java.util.Collection;

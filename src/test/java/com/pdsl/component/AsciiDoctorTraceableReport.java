@@ -268,9 +268,9 @@ public class AsciiDoctorTraceableReport {
     private Collection<MetadataTestRunResults> createPassingMetadata(int amount, String testSuiteId, String context, PhraseBodyType phraseBody) {
         List<MetadataTestRunResults> pdslResults = new ArrayList<>(amount);
         final TestCase testCase = Mockito.mock(TestCase.class);
-        when(testCase.getTestTitle()).thenReturn(testSuiteId);
-        when(testCase.getUnfilteredPhraseBody()).thenReturn(phraseBody.unfiltered);
-        when(testCase.getContextFilteredPhraseBody()).thenReturn(phraseBody.filtered);
+        when(testCase.testTitle()).thenReturn(testSuiteId);
+        when(testCase.unfilteredPhraseBody()).thenReturn(phraseBody.unfiltered);
+        when(testCase.contextFilteredPhraseBody()).thenReturn(phraseBody.filtered);
 
         for (int i = 0; i < amount; i++) {
             PolymorphicDslTestRunResults pdslresult = new PolymorphicDslTestRunResults(List.of(System.out), context);
@@ -291,11 +291,11 @@ public class AsciiDoctorTraceableReport {
         when(phrase.getParseTree()).thenReturn(parseTree);
 
         final TestCase testCase = Mockito.mock(TestCase.class);
-        when(testCase.getTestTitle()).thenReturn(testSuiteId);
+        when(testCase.testTitle()).thenReturn(testSuiteId);
         String filteredStep = String.format("Step%d\n", Accumulator.next());
-        when(testCase.getUnfilteredPhraseBody()).thenReturn(phraseBody.unfiltered);
-        when(testCase.getContextFilteredPhraseBody()).thenReturn(phraseBody.filtered);
-        when(testCase.getTestTitle()).thenReturn(testSuiteId);
+        when(testCase.unfilteredPhraseBody()).thenReturn(phraseBody.unfiltered);
+        when(testCase.contextFilteredPhraseBody()).thenReturn(phraseBody.filtered);
+        when(testCase.testTitle()).thenReturn(testSuiteId);
 
         for (int i = 0; i < amount; i++) {
             PolymorphicDslTestRunResults pdslresult = new PolymorphicDslTestRunResults(List.of(System.out), context);

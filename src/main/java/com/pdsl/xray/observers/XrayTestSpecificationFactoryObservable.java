@@ -1,4 +1,4 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
 import com.pdsl.specifications.TestSpecification;
 import java.util.Collection;

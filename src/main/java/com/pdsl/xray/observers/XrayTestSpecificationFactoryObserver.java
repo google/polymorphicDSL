@@ -1,9 +1,10 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
 import com.pdsl.specifications.TestSpecification;
 import java.util.Collection;
 
-public interface TestSpecificationFactoryObserver {
+// Observer interface for TestSpecificationFactory
+public interface XrayTestSpecificationFactoryObserver {
 
   void onTestSpecificationsGenerated(Collection<TestSpecification> testSpecifications);
 }

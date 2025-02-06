@@ -18,6 +18,8 @@ import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import com.pdsl.transformers.TestSpecificationHelper;
+import com.pdsl.xray.observers.TestSpecificationFactoryObservable;
+import com.pdsl.xray.observers.TestSpecificationFactoryObserver;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.slf4j.Logger;
@@ -32,7 +34,8 @@ import java.util.stream.Collectors;
 /**
  * A factory that can product test specifications from gherkin input.
  */
-public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory,TestSpecificationFactoryObservable {
+public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory,
+    TestSpecificationFactoryObservable {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
     private final int DESCRIPTION_MAX_LENGTH;

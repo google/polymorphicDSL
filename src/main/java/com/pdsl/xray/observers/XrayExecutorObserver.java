@@ -1,19 +1,16 @@
-package com.pdsl.gherkin;
-
-import static java.awt.SystemColor.info;
+package com.pdsl.xray.observers;
 
 import com.pdsl.executors.ExecutorObserver;
-import com.pdsl.gherkin.xray.models.Info;
-import com.pdsl.gherkin.xray.models.XrayTestExecutionResult;
-import com.pdsl.gherkin.xray.models.XrayTestResult;
+import com.pdsl.xray.core.XrayTestResultUpdater;
+import com.pdsl.xray.models.Info;
+import com.pdsl.xray.models.XrayTestExecutionResult;
+import com.pdsl.xray.models.XrayTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.TestResult;
 import com.pdsl.specifications.Phrase;
-import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -33,7 +29,7 @@ public class XrayExecutorObserver implements ExecutorObserver {
 
   Properties prop = new Properties();
   private final XrayTestResultUpdater xrayUpdater;
-  private Map<TestCase, List<XrayTestExecutionResult>> testCaseXrayTestExecutionResultMap = new HashMap<>();
+  private final Map<TestCase, List<XrayTestExecutionResult>> testCaseXrayTestExecutionResultMap = new HashMap<>();
 
   public XrayExecutorObserver(XrayTestResultUpdater xrayUpdater) {
     this.xrayUpdater = xrayUpdater;
@@ -118,7 +114,6 @@ public class XrayExecutorObserver implements ExecutorObserver {
   public void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
       MetadataTestRunResults results,
       String context) {
-    System.out.println("");
     publishReportToXray(testCases,results,context);
   }
 
@@ -144,8 +139,8 @@ public class XrayExecutorObserver implements ExecutorObserver {
         Collection<String> caseTags = extractTags(taggedTestCase.getTags(),"@xray-test-case=");
 
         List<Info> listOfInfo = tags.stream().map(tag -> new Info(
-            testCase.getTestTitle(),
-            String.join("", taggedTestCase.getUnfilteredPhraseBody()),
+            testCase.testTitle(),
+            String.join("", taggedTestCase.unfilteredPhraseBody()),
             tag,
             environments,
             user
@@ -160,7 +155,6 @@ public class XrayExecutorObserver implements ExecutorObserver {
               testCase, k -> new ArrayList<>());
           resultsList.add(new XrayTestExecutionResult(info, xrayTestResults));
         }
-
       }
     }
     xrayUpdater.onAfterTestSuite(testCases, results, context);

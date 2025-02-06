@@ -1,7 +1,5 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
-import com.pdsl.specifications.TestSpecification;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +10,17 @@ public class PickleJarScenarioObserver implements GherkinObserver {
   @Override
   public void onScenarioConverted(String title, List<String> steps, Set<String> tags,
       Map<String, String> substitutions) {
-   if( substitutions.get("xray-test-case")!=null){
-     tags.add("@xray-test-case="+substitutions.get("xray-test-case"));
+
+    addTag(tags, substitutions, "xray-test-plan");
+    addTag(tags, substitutions, "xray-test-case");
+    addTag(tags, substitutions, "xray-test-platform");
+    addTag(tags, substitutions, "xray-test-env");
+  }
+
+  private void addTag(Set<String> tags, Map<String, String> substitutions, String key) {
+    String value = substitutions.get(key);
+    if (value != null) {
+      tags.add("@%s=%s".formatted(key, value));
     }
   }
 

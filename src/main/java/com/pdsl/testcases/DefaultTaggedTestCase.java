@@ -24,23 +24,23 @@ public class DefaultTaggedTestCase implements TaggedTestCase {
     }
 
     @Override
-    public URI getOriginalSource() {
-        return testCase.getOriginalSource();
+    public URI originalSource() {
+        return testCase.originalSource();
     }
 
     @Override
-    public List<String> getUnfilteredPhraseBody() {
-        return testCase.getUnfilteredPhraseBody();
+    public List<String> unfilteredPhraseBody() {
+        return testCase.unfilteredPhraseBody();
     }
 
     @Override
-    public List<String> getContextFilteredPhraseBody() {
-        return testCase.getContextFilteredPhraseBody();
+    public List<String> contextFilteredPhraseBody() {
+        return testCase.contextFilteredPhraseBody();
     }
 
     @Override
-    public String getTestTitle() {
-        return testCase.getTestTitle();
+    public String testTitle() {
+        return testCase.testTitle();
     }
 
     @Override
@@ -49,7 +49,7 @@ public class DefaultTaggedTestCase implements TaggedTestCase {
     }
 
     @Override
-    public List<FilteredPhrase> getFilteredPhrases() {
-        return testCase.getFilteredPhrases();
+    public List<FilteredPhrase> filteredPhrases() {
+        return testCase.filteredPhrases();
     }
 }

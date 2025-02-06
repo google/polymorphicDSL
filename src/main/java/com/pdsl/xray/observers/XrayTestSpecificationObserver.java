@@ -1,7 +1,8 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
 // Observer that updates Xray after TestSpecifications are generated
 
+import com.pdsl.xray.core.XrayTestResultUpdater;
 import com.pdsl.specifications.TestSpecification;
 import java.util.Collection;
 import java.util.List;

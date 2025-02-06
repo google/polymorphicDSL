@@ -6,8 +6,6 @@ import com.pdsl.runners.*;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
-import com.pdsl.testcases.SharedTestCase;
-import com.pdsl.testcases.SharedTestSuite;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
@@ -160,10 +158,10 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
         List<URI> duplicateUris = new ArrayList<>();
         // Remove any duplicates with the same filtered test body
         testCases.forEach(tc -> {
-                if (duplicateTest.containsKey(tc.getContextFilteredPhraseBody())) {
-                    duplicateUris.add(tc.getOriginalSource());
+                if (duplicateTest.containsKey(tc.contextFilteredPhraseBody())) {
+                    duplicateUris.add(tc.originalSource());
                 } else {
-                    duplicateTest.put(tc.getContextFilteredPhraseBody(), tc);
+                    duplicateTest.put(tc.contextFilteredPhraseBody(), tc);
                 }
             }
         );

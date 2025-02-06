@@ -76,7 +76,7 @@ public class AsciidoctorReportGenerator implements TraceableReportGenerator {
                 for (MetadataTestRunResults metadata : context.getValue()) {
                     for (TestResult testResult : metadata.getTestResults()) {
                         pdslReportData.addData(applicationToContext.getKey(),
-                                testResult.getTestCase().getUnfilteredPhraseBody(), context.getKey(), testResult);
+                                testResult.getTestCase().unfilteredPhraseBody(), context.getKey(), testResult);
                     }
                 }
             }

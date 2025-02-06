@@ -1,10 +1,9 @@
 package com.pdsl.uat.java.jupiter;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
-import com.pdsl.executors.TraceableTestRunExecutor;
-import com.pdsl.gherkin.XrayAuth;
-import com.pdsl.gherkin.XrayExecutorObserver;
-import com.pdsl.gherkin.XrayTestResultUpdater;
+import com.pdsl.xray.core.XrayAuth;
+import com.pdsl.xray.observers.XrayExecutorObserver;
+import com.pdsl.xray.core.XrayTestResultUpdater;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseListener;
@@ -81,7 +80,6 @@ public class XrayIntegrationTest {
           .withTestRunExecutor(() -> traceableTestRunExecutor)
           .build())
           .stream();
-      //publishReportsToXray
     }
   }
 
@@ -112,7 +110,6 @@ public class XrayIntegrationTest {
           .withTestRunExecutor(() -> traceableTestRunExecutor)
           .build())
           .stream();
-      //publishReportsToXray
     }
   }
 

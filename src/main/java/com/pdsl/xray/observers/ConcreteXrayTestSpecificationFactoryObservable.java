@@ -1,4 +1,4 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
 // Concrete Observable implementation for TestSpecificationFactory
 import com.pdsl.specifications.TestSpecification;

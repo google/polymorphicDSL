@@ -35,7 +35,7 @@ public class PolymorphicDslTestRunResults implements TestRunResults, MetadataTes
     @Override
     public void addTestResult(DefaultTestResult defaultTestResult) {
         Preconditions.checkNotNull(defaultTestResult, "Test metadata cannot be null!");
-        List<String> id = defaultTestResult.getTestCase().getUnfilteredPhraseBody();
+        List<String> id = defaultTestResult.getTestCase().unfilteredPhraseBody();
         if (resultIds.contains(id)) {
             if (duplicateIdToTestResult.containsKey(id)) {
                 duplicateIdToTestResult.get(id).add(defaultTestResult);

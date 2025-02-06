@@ -1,4 +1,4 @@
-package com.pdsl.gherkin;
+package com.pdsl.xray.observers;
 
 import java.util.List;
 import java.util.Map;
