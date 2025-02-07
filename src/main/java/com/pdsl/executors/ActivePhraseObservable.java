@@ -1,6 +1,7 @@
 package com.pdsl.executors;
 
-public interface ActivePhraseObservable {
+/** An implementer of the Observer Pattern for test executions. */
+public interface ExecutorObservable {
 
   void registerObserver(ExecutorObserver observer);
 
