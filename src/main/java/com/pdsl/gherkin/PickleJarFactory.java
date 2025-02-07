@@ -24,12 +24,26 @@ public class PickleJarFactory implements GherkinObservable {
     private final Charset charset;
     private final PdslGherkinRecognizer pdslGherkinRecognizer;
     private final PdslGherkinListener listener;
+    private List<GherkinObserver> observers = new ArrayList<>();
+
+    public static PickleJarFactory getDefaultPickleJarFactory(){
+        return new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
+    }
 
     public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset) {
         this.pdslGherkinRecognizer = pdslGherkinRecognizer;
         this.listener = gherkinListener;
         this.charset = charset;
     }
+    public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset, List<GherkinObserver> observers) {
+        this.pdslGherkinRecognizer = pdslGherkinRecognizer;
+        this.listener = gherkinListener;
+        this.charset = charset;
+        this.observers = observers;
+
+
+    }
+
 
     /**
      * Converts a list of feature files into a list of {@code PickleJar}.
@@ -262,7 +276,7 @@ public class PickleJarFactory implements GherkinObservable {
         return tags;
     }
 
-    private List<GherkinObserver> observers = new ArrayList<>();
+
 
     @Override
     public void registerObserver(GherkinObserver observer) {

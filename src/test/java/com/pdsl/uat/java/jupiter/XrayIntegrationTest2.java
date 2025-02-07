@@ -46,7 +46,7 @@ public class XrayIntegrationTest2 {
   /**
    * Common Extension for any Platform
    */
-  private static class PlatformExtension extends
+  private static abstract class PlatformExtension extends
       PdslGherkinInvocationContextProvider {
 
     protected final DefaultPolymorphicDslTestExecutor traceableTestRunExecutor =
@@ -55,6 +55,10 @@ public class XrayIntegrationTest2 {
 
     public PlatformExtension(XrayTestResultUpdater updater) {
       this.xrayExecutorObserver = new XrayExecutorObserver(updater);
+    }
+
+    private static PdslConfigParameter getPDSLConfig(){
+return null;
     }
 
     @Override

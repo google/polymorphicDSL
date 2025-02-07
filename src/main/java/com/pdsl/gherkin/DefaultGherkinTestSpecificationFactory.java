@@ -18,8 +18,10 @@ import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import com.pdsl.transformers.TestSpecificationHelper;
+import com.pdsl.xray.observers.GherkinObserver;
 import com.pdsl.xray.observers.TestSpecificationFactoryObservable;
 import com.pdsl.xray.observers.TestSpecificationFactoryObserver;
+import java.util.function.Supplier;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.slf4j.Logger;
@@ -83,7 +85,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
      */
     public static class Builder {
         private int maxDescriptionLength = 1024;
-        private final PolymorphicDslPhraseFilter phraseFilter;
+        private PolymorphicDslPhraseFilter phraseFilter;
         private PickleJarFactory pickleJarFactory = PickleJarFactory.DEFAULT;
         private Charset charset = Charset.defaultCharset();
         private Optional<? extends Class<? extends Parser>> recognizerParser = Optional.empty();
@@ -124,6 +126,13 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             this.pickleJarFactory = pickleJarFactory;
             return this;
         }
+
+        public Builder withPhraseFilter(PolymorphicDslPhraseFilter polymorphicDslPhraseFilter){
+            Preconditions.checkNotNull(polymorphicDslPhraseFilter);
+            this.phraseFilter = polymorphicDslPhraseFilter;
+            return this;
+        }
+
 
         /**
          * Determines the charset to use when processesing the gherkin input.
@@ -452,4 +461,26 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                     + "%nSee the below error message for more details", originalSource, title), e);
         }
     }
+
+    public interface PickleJarFactoryGenerator extends QuadFunction<PdslGherkinRecognizer,
+        PdslGherkinListener, Charset, List<GherkinObserver>, PickleJarFactory> {
+
+        default PickleJarFactory apply(PdslGherkinRecognizer pdslGherkinRecognizer,
+            PdslGherkinListener gherkinListener, Charset charset, List<GherkinObserver> observers) {
+            return new PickleJarFactory(pdslGherkinRecognizer, gherkinListener, charset);
+        }
+    }
+
+    @FunctionalInterface
+    public interface QuadFunction<W,X,Y,Z,R>{
+        R apply(W w,X x,Y y ,Z z);
+    }
 }
+
+
+
+
+
+
+
+

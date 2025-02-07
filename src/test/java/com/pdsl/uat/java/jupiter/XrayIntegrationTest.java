@@ -1,12 +1,24 @@
 package com.pdsl.uat.java.jupiter;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
-import com.pdsl.xray.core.XrayAuth;
-import com.pdsl.xray.observers.XrayExecutorObserver;
-import com.pdsl.xray.core.XrayTestResultUpdater;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory.PickleJarFactoryGenerator;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory.QuadFunction;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory.TriFunction;
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactoryGenerator;
+import com.pdsl.gherkin.PdslGherkinListener;
+import com.pdsl.gherkin.PdslGherkinRecognizer;
+import com.pdsl.gherkin.PickleJarFactory;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseListener;
+import com.pdsl.runners.TestSpecificationFactoryGenerator;
+import com.pdsl.xray.core.XrayAuth;
+import com.pdsl.xray.core.XrayTestResultUpdater;
+import com.pdsl.xray.observers.GherkinObserver;
+import com.pdsl.xray.observers.PickleJarScenarioObserver;
+import com.pdsl.xray.observers.XrayExecutorObserver;
+import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.function.Supplier;
@@ -25,9 +37,6 @@ import org.junit.jupiter.engine.descriptor.PdslTestParameter;
 public class XrayIntegrationTest {
 
   private int totalRunTests = 0;
-  private static final String clientId = "D7A465CF00444AE9BCC4560B00E7189A";
-  private static final String clientSecret = "22f9ed3044f0e92439acdb07f9a8a4f7af3ea38717a8026d24dc7141939efc47";
-  private static final String apiUrl = "https://xray.cloud.getxray.app/api/v2/authenticate";
   private static final XrayAuth xrayAuth = XrayAuth.fromPropertiesFile(
       "src/main/resources/xray.properties");
 
@@ -57,13 +66,16 @@ public class XrayIntegrationTest {
   private static class IosExtension extends PdslGherkinInvocationContextProvider {
 
     private static final DefaultPolymorphicDslTestExecutor traceableTestRunExecutor = new DefaultPolymorphicDslTestExecutor();
+    private static final QuadFunction<PdslGherkinRecognizer, PdslGherkinListener, Charset,List<GherkinObserver>,PickleJarFactory> TRI_FUNCTION = PickleJarFactory::new;
+    private static final PickleJarScenarioObserver PICKLE_JAR_SCENARIO_OBSERVER = new PickleJarScenarioObserver();
     private static final XrayExecutorObserver xrayExecutorObserver = new XrayExecutorObserver(iosUpdater);
-
+    private static final PickleJarFactory PICKLE_JAR_FACTORY = PickleJarFactory.getDefaultPickleJarFactory();
     @Override
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(
         ExtensionContext context) {
       traceableTestRunExecutor.registerObserver(xrayExecutorObserver);
       System.out.println(xrayAuth.getAuthToken());
+      PICKLE_JAR_FACTORY.registerObserver(PICKLE_JAR_SCENARIO_OBSERVER);
       return getInvocationContext(PdslConfigParameter.createGherkinPdslConfig(
               List.of(
                   new PdslTestParameter.Builder(parseTreeListenerSupplier,
@@ -78,6 +90,10 @@ public class XrayIntegrationTest {
           .withResourceRoot(Paths.get("src/test/resources/").toUri())
           .withRecognizerRule("polymorphicDslAllRules")
           .withTestRunExecutor(() -> traceableTestRunExecutor)
+          .withTestSpecificationFactoryGenerator(() ->
+              new DefaultGherkinTestSpecificationFactoryGenerator(
+                  new DefaultGherkinTestSpecificationFactory.Builder(filter))
+                  .Builder(filter).withPickleJarFactory(PICKLE_JAR_FACTORY).build())
           .build())
           .stream();
     }
