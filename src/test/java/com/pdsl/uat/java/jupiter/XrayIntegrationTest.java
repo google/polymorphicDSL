@@ -2,9 +2,7 @@ package com.pdsl.uat.java.jupiter;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
-import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory.PickleJarFactoryGenerator;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory.QuadFunction;
-import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory.TriFunction;
 import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactoryGenerator;
 import com.pdsl.gherkin.PdslGherkinListener;
 import com.pdsl.gherkin.PdslGherkinRecognizer;
@@ -12,15 +10,18 @@ import com.pdsl.gherkin.PickleJarFactory;
 import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.grammars.AllGrammarsParserBaseListener;
-import com.pdsl.runners.TestSpecificationFactoryGenerator;
+import com.pdsl.specifications.FilteredPhrase;
+import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import com.pdsl.xray.core.XrayAuth;
 import com.pdsl.xray.core.XrayTestResultUpdater;
 import com.pdsl.xray.observers.GherkinObserver;
 import com.pdsl.xray.observers.PickleJarScenarioObserver;
 import com.pdsl.xray.observers.XrayExecutorObserver;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -90,10 +91,13 @@ public class XrayIntegrationTest {
           .withResourceRoot(Paths.get("src/test/resources/").toUri())
           .withRecognizerRule("polymorphicDslAllRules")
           .withTestRunExecutor(() -> traceableTestRunExecutor)
-          .withTestSpecificationFactoryGenerator(() ->
-              new DefaultGherkinTestSpecificationFactoryGenerator(
-                  new DefaultGherkinTestSpecificationFactory.Builder(filter))
-                  .Builder(filter).withPickleJarFactory(PICKLE_JAR_FACTORY).build())
+          .withTestSpecificationFactoryGenerator(()->{
+            PolymorphicDslPhraseFilter filter = new MyCustomFilter();
+
+            return new DefaultGherkinTestSpecificationFactoryGenerator(
+                new DefaultGherkinTestSpecificationFactory.Builder((filter))
+                .withPickleJarFactory(PICKLE_JAR_FACTORY));
+          })
           .build())
           .stream();
     }
@@ -131,7 +135,18 @@ public class XrayIntegrationTest {
 
   @AfterAll
   public static void publishReportsToXray() {
+
     iosUpdater.publishReportsToXray();
     androidUpdater.publishReportsToXray();
   }
+
+  public static class MyCustomFilter implements PolymorphicDslPhraseFilter {
+    @Override
+    public Optional<List<FilteredPhrase>> filterPhrases(List<InputStream> testInput) {
+      return Optional.empty();
+    }
+  }
 }
+
+
+
