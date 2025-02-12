@@ -2,15 +2,15 @@ package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.SentenceNotFoundException;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.models.GherkinBackground;
 import com.pdsl.gherkin.models.GherkinStep;
-import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
+import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.RecognizedBy;
-import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
@@ -18,26 +18,29 @@ import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import com.pdsl.transformers.TestSpecificationHelper;
-import com.pdsl.xray.observers.GherkinObserver;
-import com.pdsl.xray.observers.TestSpecificationFactoryObservable;
-import com.pdsl.xray.observers.TestSpecificationFactoryObserver;
-import java.util.function.Supplier;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.stream.Collectors;
-
 /**
  * A factory that can product test specifications from gherkin input.
  */
-public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory,
-    TestSpecificationFactoryObservable {
+public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecificationFactory {
 
     private static final Logger logger = LoggerFactory.getLogger(DefaultGherkinTestSpecificationFactory.class);
     private final int DESCRIPTION_MAX_LENGTH;
@@ -59,24 +62,6 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         this.recognizerParser = builder.recognizerParser;
         this.recognizerLexer = builder.recognizerLexer;
         this.recognizerRule = builder.recognizerRule;
-    }
-    private List<TestSpecificationFactoryObserver> observers = new ArrayList<>();
-
-    @Override
-    public void registerObserver(TestSpecificationFactoryObserver observer) {
-        observers.add(observer);
-    }
-
-    @Override
-    public void removeObserver(TestSpecificationFactoryObserver observer) {
-        observers.remove(observer);
-    }
-
-    @Override
-    public void notifyObservers(Collection<TestSpecification> testSpecifications) {
-        for (TestSpecificationFactoryObserver observer : observers) {
-            observer.onTestSpecificationsGenerated(testSpecifications);
-        }
     }
 
 
@@ -247,7 +232,6 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             featureBuilder.withChildTestSpecifications(pickles);
             featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
         }
-        notifyObservers(featureTestSpecifications);
         return Optional.of(featureTestSpecifications);
     }
 
@@ -462,19 +446,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         }
     }
 
-    public interface PickleJarFactoryGenerator extends QuadFunction<PdslGherkinRecognizer,
-        PdslGherkinListener, Charset, List<GherkinObserver>, PickleJarFactory> {
 
-        default PickleJarFactory apply(PdslGherkinRecognizer pdslGherkinRecognizer,
-            PdslGherkinListener gherkinListener, Charset charset, List<GherkinObserver> observers) {
-            return new PickleJarFactory(pdslGherkinRecognizer, gherkinListener, charset);
-        }
-    }
-
-    @FunctionalInterface
-    public interface QuadFunction<W,X,Y,Z,R>{
-        R apply(W w,X x,Y y ,Z z);
-    }
 }
 
 

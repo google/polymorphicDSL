@@ -1,16 +1,23 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.gherkin.models.*;
+import com.pdsl.gherkin.models.GherkinExamplesTable;
+import com.pdsl.gherkin.models.GherkinFeature;
+import com.pdsl.gherkin.models.GherkinRule;
+import com.pdsl.gherkin.models.GherkinScenario;
+import com.pdsl.gherkin.models.GherkinStep;
+import com.pdsl.gherkin.models.GherkinString;
 import com.pdsl.transformers.PolymorphicDslFileException;
-
-import com.pdsl.xray.observers.GherkinObservable;
-import com.pdsl.xray.observers.GherkinObserver;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
