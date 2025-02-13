@@ -194,16 +194,16 @@ public class PreorderTestCaseFactoryTest {
                 for (String testCaseName : testCaseNames) {  // Get every test case produced by that factory
                     List<String> expectedPhrases = testCaseNameToExpectedPhrases.get(testCaseName);
                     for (TestCase actualTestCase : actualResults.get(factoryName)) {
-                        List<String> actualResultsForTestCase =  actualTestCase.unfilteredPhraseBody();
+                        List<String> actualResultsForTestCase =  actualTestCase.getUnfilteredPhraseBody();
                         // And make sure all of them match one of the expected results
 
                         try {
                             boolean containsTestCase = actualResults.get(factoryName).stream()
-                                    .anyMatch(testSpecification -> testSpecification.unfilteredPhraseBody().equals(expectedPhrases));
+                                    .anyMatch(testSpecification -> testSpecification.getUnfilteredPhraseBody().equals(expectedPhrases));
                             assertThat(containsTestCase).isTrue();
                         } catch (AssertionError e) {
                             String prettyPrintArray = actualResults.get(factoryName).stream()
-                                    .map(testCase -> "\n\t\t" + Arrays.toString(testCase.unfilteredPhraseBody().toArray()))
+                                    .map(testCase -> "\n\t\t" + Arrays.toString(testCase.getUnfilteredPhraseBody().toArray()))
                                     .collect(Collectors.joining());
                             throw new AssertionError(String.format("The test cases produced by the factory '%s' had a problem!%n\tExpected To Create Test Case:%s%n\tActual Test Cases:%s", factoryName, expectedPhrases, prettyPrintArray), e);
                         }
@@ -305,7 +305,7 @@ public class PreorderTestCaseFactoryTest {
         // ASSERT
         assertThat(testCases.size()).isEqualTo(1);
         List<TestCase> cases = List.copyOf(testCases);
-        assertThat(cases.get(0).unfilteredPhraseBody().size()).isEqualTo(9);
-        assertThat(cases.get(0).unfilteredPhraseBody().toString()).isEqualTo("[1, 2, 3, 4, 5, 6, 7, 8, 9]");
+        assertThat(cases.get(0).getUnfilteredPhraseBody().size()).isEqualTo(9);
+        assertThat(cases.get(0).getUnfilteredPhraseBody().toString()).isEqualTo("[1, 2, 3, 4, 5, 6, 7, 8, 9]");
     }
 }

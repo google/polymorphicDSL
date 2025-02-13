@@ -30,7 +30,7 @@ public class PdslReportData {
                     TestCaseGroup.Builder testCaseGroup = TestCaseGroup.newBuilder();
                     for (TestResult testResult : contextToTestResults.getValue()) {
                         TechnicalReportData.Builder technical = TechnicalReportData.newBuilder();
-                        technical.addAllFilteredPhraseBody(testResult.getTestCase().contextFilteredPhraseBody());
+                        technical.addAllFilteredPhraseBody(testResult.getTestCase().getContextFilteredPhraseBody());
                         technical.setTestCaseTitle(testResult.getTestCaseTitle());
                         if (testResult.getStatus().equals(TechnicalReportData.Status.FAILED)) {
                             Preconditions.checkArgument(testResult.getFailingPhrase().isPresent(),

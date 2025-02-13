@@ -47,8 +47,6 @@ public class PickleJarFactory implements GherkinObservable {
         this.listener = gherkinListener;
         this.charset = charset;
         this.observers = observers;
-
-
     }
 
 

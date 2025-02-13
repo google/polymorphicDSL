@@ -90,10 +90,10 @@ public class PdslExecutable {
 
         /** Returns the text representation of the test case. */
         public String getTestTitle() {
-            return pdslTest.isPresent() ? pdslTest.get().testTitle()
+            return pdslTest.isPresent() ? pdslTest.get().getTestTitle()
                     : sharedTestCase.orElseThrow().getSharedTestCaseWithInterpreters().stream()
                     .findFirst().orElseThrow()
-                    .getTestCase().testTitle();
+                    .getTestCase().getTestTitle();
         }
 
         /**

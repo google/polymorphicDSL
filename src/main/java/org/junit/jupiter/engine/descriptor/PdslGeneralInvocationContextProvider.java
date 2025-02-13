@@ -9,14 +9,16 @@ import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
-import org.antlr.v4.runtime.tree.ParseTreeListener;
-import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.junit.jupiter.api.extension.*;
-
 import java.net.URI;
 import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.antlr.v4.runtime.tree.ParseTreeListener;
+import org.antlr.v4.runtime.tree.ParseTreeVisitor;
+import org.junit.jupiter.api.extension.ExtensionContext;
+import org.junit.jupiter.api.extension.InvocationInterceptor;
+import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
+import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,10 +160,10 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
         List<URI> duplicateUris = new ArrayList<>();
         // Remove any duplicates with the same filtered test body
         testCases.forEach(tc -> {
-                if (duplicateTest.containsKey(tc.contextFilteredPhraseBody())) {
-                    duplicateUris.add(tc.originalSource());
+                if (duplicateTest.containsKey(tc.getContextFilteredPhraseBody())) {
+                    duplicateUris.add(tc.getOriginalSource());
                 } else {
-                    duplicateTest.put(tc.contextFilteredPhraseBody(), tc);
+                    duplicateTest.put(tc.getContextFilteredPhraseBody(), tc);
                 }
             }
         );

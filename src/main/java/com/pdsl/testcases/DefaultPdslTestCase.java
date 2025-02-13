@@ -57,19 +57,19 @@ public class DefaultPdslTestCase implements TestCase {
     }
 
     @Override
-    public URI originalSource() { return source; }
+    public URI getOriginalSource() { return source; }
     @Override
-    public List<String> unfilteredPhraseBody() {
+    public List<String> getUnfilteredPhraseBody() {
         return unfilteredPhraseBody;
     }
 
     @Override
-    public List<String> contextFilteredPhraseBody() {
+    public List<String> getContextFilteredPhraseBody() {
         return contextFilteredPhraseBody;
     }
 
     @Override
-    public String testTitle() {
+    public String getTestTitle() {
         return testCaseTitle;
     }
 
@@ -87,7 +87,7 @@ public class DefaultPdslTestCase implements TestCase {
     }
 
     @Override
-    public List<FilteredPhrase> filteredPhrases() {
+    public List<FilteredPhrase> getFilteredPhrases() {
        return phrasesToTestSections;
     }
 }

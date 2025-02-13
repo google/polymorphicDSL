@@ -180,7 +180,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     for (TestCase testCase : testCases) {
 
       notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
-      notifyStreams(String.format("%s%n%s", testCase.originalSource(), testCase.testTitle())
+      notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
           .getBytes(DEFAULT_CHARSET));
       notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
       notifyStreams(RESET);
@@ -188,15 +188,15 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
       int phraseIndex = 0;
       try {
-        if (previouslyExecutedTests.contains(testCase.contextFilteredPhraseBody())) {
+        if (previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
           logger.warn(String.format(
               "A test was skipped because after filtering it duplicated an earlier run test!%n\t%s",
-              testCase.testTitle()));
+              testCase.getTestTitle()));
           StringBuilder duplicateBody = new StringBuilder();
           testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
           results.addTestResult(DefaultTestResult.duplicateTest(testCase));
         } else {
-          previouslyExecutedTests.add(testCase.contextFilteredPhraseBody());
+          previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
           while (testBody.hasNext()) {
             TestSection section = testBody.next();
             if (section.getMetaData().isPresent()) {
@@ -311,11 +311,11 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       List<TestCase> listOfTestCases = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
           .map(tc -> tc.getTestCase()).collect(
               Collectors.toUnmodifiableList());
-      int size = listOfTestCases.get(0).unfilteredPhraseBody().size();
+      int size = listOfTestCases.get(0).getUnfilteredPhraseBody().size();
       TestCase testCase = listOfTestCases.stream().findFirst().orElseThrow();
 
       notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
-      notifyStreams(String.format("%s%n%s", testCase.originalSource(), testCase.testTitle())
+      notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
           .getBytes(DEFAULT_CHARSET));
       notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
       notifyStreams(RESET);
@@ -328,10 +328,10 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         //for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
         for (int j = 0;
             j < sharedTestCase.getSharedTestCaseWithInterpreters().get(0).getTestCase()
-                .unfilteredPhraseBody().size(); j++) {
+                .getUnfilteredPhraseBody().size(); j++) {
           for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
 
-            FilteredPhrase filteredPhrase = interpreter.getTestCase().filteredPhrases()
+            FilteredPhrase filteredPhrase = interpreter.getTestCase().getFilteredPhrases()
                 .get(phraseIndex);
             filteredPhraseText = filteredPhrase.getPhrase();
 

@@ -85,7 +85,7 @@ public class DefaultTestResult implements TestResult {
      * @return a passing test result
      */
     public static DefaultTestResult passingTest(TestCase testCase) {
-        return new DefaultTestResult(testCase.contextFilteredPhraseBody().size(), testCase, TechnicalReportData.Status.PASSED);
+        return new DefaultTestResult(testCase.getContextFilteredPhraseBody().size(), testCase, TechnicalReportData.Status.PASSED);
     }
 
     /**
@@ -103,7 +103,7 @@ public class DefaultTestResult implements TestResult {
      * @return the test case title
      */
     public String getTestCaseTitle() {
-        return testCase.testTitle();
+        return testCase.getTestTitle();
     }
 
     /**
@@ -139,7 +139,7 @@ public class DefaultTestResult implements TestResult {
      * @return the total number of phrases
      */
     public int getTotalPhrases() {
-        return testCase.contextFilteredPhraseBody().size();
+        return testCase.getContextFilteredPhraseBody().size();
     }
 
     /**

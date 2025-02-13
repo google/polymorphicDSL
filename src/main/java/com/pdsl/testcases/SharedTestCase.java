@@ -27,11 +27,11 @@ public final class SharedTestCase implements TestCase{
     /**
      *  Take the first one (same) phrase in different Listener/Visitor (InterpreterObj).
      */
-    int countFirst = testCases.get(0).unfilteredPhraseBody().size();
-    Preconditions.checkArgument(testCases.stream().allMatch(tc -> tc.unfilteredPhraseBody().size() == countFirst), "The size should be the same for all " + countFirst);
+    int countFirst = testCases.get(0).getUnfilteredPhraseBody().size();
+    Preconditions.checkArgument(testCases.stream().allMatch(tc -> tc.getUnfilteredPhraseBody().size() == countFirst), "The size should be the same for all " + countFirst);
     this.testCases = testCases;
     this.interpreterObjs = interpreterObjs;
-    this.iterators = this.testCases.stream().map(TestCase::filteredPhrases).map(v-> v.iterator()).collect(Collectors.toUnmodifiableList());
+    this.iterators = this.testCases.stream().map(TestCase::getFilteredPhrases).map(v-> v.iterator()).collect(Collectors.toUnmodifiableList());
   }
 
   public SharedTestCase(List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters) {
@@ -45,23 +45,23 @@ public final class SharedTestCase implements TestCase{
 
 
     @Override
-    public URI originalSource() {
-        return sharedTestCaseWithInterpreters.getFirst().getTestCase().originalSource();
+    public URI getOriginalSource() {
+        return sharedTestCaseWithInterpreters.getFirst().getTestCase().getOriginalSource();
     }
 
     @Override
-    public List<String> unfilteredPhraseBody() {
-        return sharedTestCaseWithInterpreters.getFirst().getTestCase().unfilteredPhraseBody();
+    public List<String> getUnfilteredPhraseBody() {
+        return sharedTestCaseWithInterpreters.getFirst().getTestCase().getUnfilteredPhraseBody();
     }
 
     @Override
-    public List<String> contextFilteredPhraseBody() {
-        return sharedTestCaseWithInterpreters.getFirst().getTestCase().contextFilteredPhraseBody();
+    public List<String> getContextFilteredPhraseBody() {
+        return sharedTestCaseWithInterpreters.getFirst().getTestCase().getContextFilteredPhraseBody();
     }
 
     @Override
-    public String testTitle() {
-        return sharedTestCaseWithInterpreters.getFirst().getTestCase().testTitle();
+    public String getTestTitle() {
+        return sharedTestCaseWithInterpreters.getFirst().getTestCase().getTestTitle();
     }
 
     @Override
@@ -70,7 +70,7 @@ public final class SharedTestCase implements TestCase{
     }
 
     @Override
-    public List<FilteredPhrase> filteredPhrases() {
-        return sharedTestCaseWithInterpreters.getFirst().getTestCase().filteredPhrases();
+    public List<FilteredPhrase> getFilteredPhrases() {
+        return sharedTestCaseWithInterpreters.getFirst().getTestCase().getFilteredPhrases();
     }
 }

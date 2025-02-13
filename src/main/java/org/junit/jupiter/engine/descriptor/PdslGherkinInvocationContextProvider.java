@@ -79,11 +79,11 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
         // Remove any duplicates with the same filtered test body
         // In the case of gherkin, ignore leading and trailing whitespace on sentences
         for (TestCase testCase : testCases) {
-            List<String> whitespaceInsensitiveSteps = testCase.contextFilteredPhraseBody().stream()
+            List<String> whitespaceInsensitiveSteps = testCase.getContextFilteredPhraseBody().stream()
                 .map(String::strip)
                 .collect(Collectors.toUnmodifiableList());
             if (duplicateTest.containsKey(whitespaceInsensitiveSteps)) {
-                duplicateUris.add(testCase.originalSource());
+                duplicateUris.add(testCase.getOriginalSource());
             } else {
                 duplicateTest.put(whitespaceInsensitiveSteps, testCase);
             }
