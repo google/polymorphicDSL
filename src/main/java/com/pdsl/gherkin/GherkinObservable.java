@@ -9,8 +9,6 @@ public interface GherkinObservable {
 
   void registerObserver(GherkinObserver observer);
 
-  // void registerObserver(Observable observable, Observer observer);
-
   void removeObserver(GherkinObserver observer);
 
   void notifyObservers(String title, List<String> steps, Set<String> tags,
