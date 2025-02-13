@@ -112,6 +112,17 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             return this;
         }
 
+        /**
+         * Sets the phrase filter for the test specification factory.
+         *
+         * <p>The phrase filter is used to selectively include or exclude Gherkin phrases
+         * (such as steps or scenarios) based on specific criteria. This allows for
+         * more fine-grained control over which tests are executed.</p>
+         *
+         * @param polymorphicDslPhraseFilter The filter to be applied to the phrases.
+         * @return This builder instance for chaining method calls.
+         * @throws NullPointerException if the provided phrase filter is null.
+         */
         public Builder withPhraseFilter(PolymorphicDslPhraseFilter polymorphicDslPhraseFilter){
             Preconditions.checkNotNull(polymorphicDslPhraseFilter);
             this.phraseFilter = polymorphicDslPhraseFilter;
