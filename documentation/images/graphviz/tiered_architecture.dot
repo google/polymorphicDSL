@@ -1,0 +1,11 @@
+digraph tiered {
+    node[shape=box]
+    label="PDSL Tiered Architecture\nShare everything you can!\nIdeally you can use the same Listener/Visitor for all platforms as well!"
+  "Lexers/Parsers" -> DSL
+  DSL -> Tests [label="Feature Files, etc"]
+  Tests -> "Listener/Visitor"
+  "Listener/Visitor" -> Interfaces
+  Interfaces -> {"Web Implementation" "Mobile Implementation" "API Implentation"}
+
+}
+
