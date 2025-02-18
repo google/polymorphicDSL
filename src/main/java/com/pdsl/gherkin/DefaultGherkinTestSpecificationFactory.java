@@ -2,15 +2,15 @@ package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.SentenceNotFoundException;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.models.GherkinBackground;
 import com.pdsl.gherkin.models.GherkinStep;
-import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
+import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.RecognizedBy;
-import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.specifications.DefaultTestSpecification;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
@@ -18,16 +18,24 @@ import com.pdsl.specifications.TestSpecification;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
 import com.pdsl.transformers.TestSpecificationHelper;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.*;
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A factory that can product test specifications from gherkin input.
@@ -56,12 +64,13 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
         this.recognizerRule = builder.recognizerRule;
     }
 
+
     /**
      * Creates a builder for a gherkin test specification factory.
      */
     public static class Builder {
         private int maxDescriptionLength = 1024;
-        private final PolymorphicDslPhraseFilter phraseFilter;
+        private PolymorphicDslPhraseFilter phraseFilter;
         private PickleJarFactory pickleJarFactory = PickleJarFactory.DEFAULT;
         private Charset charset = Charset.defaultCharset();
         private Optional<? extends Class<? extends Parser>> recognizerParser = Optional.empty();
@@ -102,6 +111,24 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
             this.pickleJarFactory = pickleJarFactory;
             return this;
         }
+
+        /**
+         * Sets the phrase filter for the test specification factory.
+         *
+         * <p>The phrase filter is used to selectively include or exclude Gherkin phrases
+         * (such as steps or scenarios) based on specific criteria. This allows for
+         * more fine-grained control over which tests are executed.</p>
+         *
+         * @param polymorphicDslPhraseFilter The filter to be applied to the phrases.
+         * @return This builder instance for chaining method calls.
+         * @throws NullPointerException if the provided phrase filter is null.
+         */
+        public Builder withPhraseFilter(PolymorphicDslPhraseFilter polymorphicDslPhraseFilter){
+            Preconditions.checkNotNull(polymorphicDslPhraseFilter);
+            this.phraseFilter = polymorphicDslPhraseFilter;
+            return this;
+        }
+
 
         /**
          * Determines the charset to use when processesing the gherkin input.

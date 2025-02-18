@@ -1,14 +1,23 @@
 package com.pdsl.gherkin;
 
-import com.pdsl.gherkin.models.*;
+import com.pdsl.gherkin.models.GherkinExamplesTable;
+import com.pdsl.gherkin.models.GherkinFeature;
+import com.pdsl.gherkin.models.GherkinRule;
+import com.pdsl.gherkin.models.GherkinScenario;
+import com.pdsl.gherkin.models.GherkinStep;
+import com.pdsl.gherkin.models.GherkinString;
 import com.pdsl.transformers.PolymorphicDslFileException;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -16,18 +25,30 @@ import java.util.stream.Collectors;
  *
  * @see com.pdsl.gherkin.PickleJar
  */
-public class PickleJarFactory {
+public class PickleJarFactory implements GherkinObservable {
 
     public static final PickleJarFactory DEFAULT = new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
     private final Charset charset;
     private final PdslGherkinRecognizer pdslGherkinRecognizer;
     private final PdslGherkinListener listener;
+    private List<GherkinObserver> observers = new ArrayList<>();
+
+    public static PickleJarFactory getDefaultPickleJarFactory(){
+        return new PickleJarFactory(new PdslGherkinInterpreterImpl(), new PdslGherkinListenerImpl(), StandardCharsets.UTF_8);
+    }
 
     public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset) {
         this.pdslGherkinRecognizer = pdslGherkinRecognizer;
         this.listener = gherkinListener;
         this.charset = charset;
     }
+    public PickleJarFactory(PdslGherkinRecognizer pdslGherkinRecognizer, PdslGherkinListener gherkinListener, Charset charset, List<GherkinObserver> observers) {
+        this.pdslGherkinRecognizer = pdslGherkinRecognizer;
+        this.listener = gherkinListener;
+        this.charset = charset;
+        this.observers = observers;
+    }
+
 
     /**
      * Converts a list of feature files into a list of {@code PickleJar}.
@@ -107,6 +128,10 @@ public class PickleJarFactory {
                             tableTags.addAll(processTags(table.getTags().get()));
                         }
                         builder.withTags(processTags(tableTags));
+                        // notifying observers
+                        notifyObservers(
+                            scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
+                            substitutedSteps, tags, substitutions);
                         pickleJarScenarios.add(builder.build());
                     }
                 }
@@ -254,5 +279,25 @@ public class PickleJarFactory {
             tagBuilder.reset();
         }
         return tags;
+    }
+
+
+
+    @Override
+    public void registerObserver(GherkinObserver observer) {
+        observers.add(observer);
+    }
+
+    @Override
+    public void removeObserver(GherkinObserver observer) {
+        observers.remove(observer);
+    }
+
+    @Override
+    public void notifyObservers(String title, List<String> steps, Set<String> tags,
+        Map<String, String> substitutions) {
+        for (GherkinObserver observer : observers) {
+            observer.onScenarioConverted(title, steps, tags, substitutions);
+        }
     }
 }

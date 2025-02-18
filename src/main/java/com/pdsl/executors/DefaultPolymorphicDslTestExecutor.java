@@ -6,6 +6,7 @@ import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
 import com.pdsl.reports.TestRunResults;
+import com.pdsl.specifications.DefaultPhrase;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.Phrase;
 import com.pdsl.specifications.PolymorphicDslTransformationException;
@@ -34,7 +35,7 @@ import java.util.*;
  *
  * All metadata associated with the tests will also be printed.
  */
-public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor {
+public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor,ActivePhraseObservable {
 
   private static final Logger logger = LoggerFactory.getLogger(
       DefaultPolymorphicDslTestExecutor.class);
@@ -46,11 +47,14 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
 
   @Override
   public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases,
-      ParseTreeListener phraseRegistry) {
+      ParseTreeListener listener) {
     // Walk the phrase registry to make sure all phrases are defined
     logger.info(
         AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
-    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(phraseRegistry), "NONE");
+    notifyBeforeTestSuite(testCases, listener, "");
+    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(listener), "NONE");
+    //send results to notifyAfterTestSuite
+    notifyAfterTestSuite(testCases, listener,results, "");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -66,7 +70,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       ParseTreeVisitor subgrammarVisitor) {
     logger.info(
         AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
+    notifyBeforeTestSuite(testCases, subgrammarVisitor, "");
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarVisitor), "NONE");
+    notifyAfterTestSuite(testCases, subgrammarVisitor,results, "");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -77,6 +83,75 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     return (PolymorphicDslTestRunResults) results;
   }
 
+  List<ExecutorObserver> activePhraseObservers = new ArrayList<>();
+
+  @Override
+  public void registerObserver(ExecutorObserver observer) {
+    activePhraseObservers.add(observer);
+  }
+
+  @Override
+  public void removeObserver(ExecutorObserver observer) {
+    activePhraseObservers.remove(observer);
+  }
+
+  private void notifyBeforeListener(ParseTreeListener listener, ParseTreeWalker walker,
+      Phrase activePhrase) {
+    activePhraseObservers.forEach(o -> o.onBeforePhrase(listener, walker, activePhrase));
+  }
+
+  private void notifyBeforeVisitor(ParseTreeVisitor<?> visitor,
+      Phrase activePhrase) {
+    activePhraseObservers.forEach(o -> o.onBeforePhrase(visitor, activePhrase));
+  }
+
+  private void notifyAfterListener(ParseTreeListener listener, ParseTreeWalker walker,
+      Phrase activePhrase) {
+    activePhraseObservers.forEach(o -> o.onAfterPhrase(listener, walker, activePhrase));
+  }
+
+  private void notifyAfterVisitor(ParseTreeVisitor<?> visitor,
+      Phrase activePhrase) {
+    activePhraseObservers.forEach(o -> o.onAfterPhrase(visitor, activePhrase));
+  }
+
+  private void notifyOnListenerException(ParseTreeListener listener,
+      Phrase activePhrase, TestCase testCase, Throwable exception) {
+    activePhraseObservers.forEach(o -> o.onPhraseFailure(listener, activePhrase,testCase, exception));
+  }
+
+  private void notifyOnVisitorException(ParseTreeVisitor<?> visitor,
+      Phrase activePhrase, TestCase testCase, Throwable exception) {
+    activePhraseObservers.forEach(a -> a.onPhraseFailure(visitor, activePhrase,testCase, exception));
+  }
+
+  private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases,visitor, context));
+  }
+  private void notifyBeforeTestSuite(Collection<SharedTestCase> testCases,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, context));
+  }
+
+  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, visitor, results, context));
+  }
+
+  private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, listener, context));
+  }
+
+  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, listener, results, context));
+  }
+  private void notifyAfterTestSuite(Collection<SharedTestCase> testCases,  MetadataTestRunResults results,
+      String context) {
+    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, results, context));
+  }
   /**
    * A container for a listener XOR a visitor.
    */
@@ -131,9 +206,13 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
             }
             activePhrase = section.getPhrase();
             if (phraseRegistry.listener.isPresent()) {
+              notifyBeforeListener(phraseRegistry.listener.get(), walker, activePhrase);
               walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
+              notifyAfterListener(phraseRegistry.listener.get(), walker, activePhrase);
             } else {
+              notifyBeforeVisitor(phraseRegistry.visitor.get(), activePhrase);
               phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
+              notifyAfterVisitor(phraseRegistry.visitor.get(), activePhrase);
             }
             phraseIndex++;
             notifyStreams(
@@ -143,6 +222,11 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
           results.addTestResult(DefaultTestResult.passingTest(testCase));
         }
       } catch (Throwable e) {
+        if (phraseRegistry.listener.isPresent()) {
+          notifyOnListenerException(phraseRegistry.listener.get(), activePhrase, testCase, e);
+        } else {
+          notifyOnVisitorException(phraseRegistry.visitor.get(), activePhrase,testCase, e);
+        }
         notifyStreams(
             (AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n"
                 + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
@@ -184,8 +268,10 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
       ParseTreeListener subgrammarListener, String context) {
     logger.info("Running tests...");
+    notifyBeforeTestSuite(testCases, subgrammarListener, "");
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarListener),
         context);
+    notifyAfterTestSuite(testCases, subgrammarListener,results, "");
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -200,7 +286,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
       ParseTreeVisitor<?> visitor, String context) {
     logger.info("Running tests...");
+    notifyBeforeTestSuite(testCases, visitor, context);
     MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
+    notifyAfterTestSuite(testCases, visitor, results,context);
     if (results.failingTestTotal() == 0) {
       logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
           + AnsiTerminalColorHelper.RESET);
@@ -214,6 +302,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
   @Override
   public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases,
       String context) {
+    notifyBeforeTestSuite(sharedTestCases, context);
     PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
         new PdslThreadSafeOutputStream(), context);
     //Set<List<String>> previouslyExecutedTests = new HashSet<>();
@@ -232,9 +321,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       notifyStreams(RESET);
 
       String filteredPhraseText = null;
-
+      Optional<Phrase> phrase = Optional.empty();
       int phraseIndex = 0;
-
+      Optional<InterpreterObj> interpreterObj = Optional.empty();
       try {
         //for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
         for (int j = 0;
@@ -246,17 +335,26 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                 .get(phraseIndex);
             filteredPhraseText = filteredPhrase.getPhrase();
 
-            Optional<ParseTree> parseTree = filteredPhrase.getParseTree();
 
             //TODO - Add implementation for the duplication checking
+            Optional<ParseTree> parseTree = filteredPhrase.getParseTree();
             if (parseTree.isPresent()) {
+              phrase = Optional.of(new DefaultPhrase(parseTree.get(), phraseIndex));
 
-              InterpreterObj interpreterObj = interpreter.getInterpreterObj();
+              interpreterObj = Optional.of(interpreter.getInterpreterObj());
 
-              if (interpreterObj.getParseTreeListener().isPresent()) {
-                walker.walk(interpreterObj.getParseTreeListener().get(), parseTree.get());
+              if (interpreterObj.get().getParseTreeListener().isPresent()) {
+                notifyBeforeListener(interpreterObj.get().getParseTreeListener().get(), walker,
+                    phrase.get());
+                walker.walk(interpreterObj.get().getParseTreeListener().get(), parseTree.get());
+                notifyAfterListener(interpreterObj.get().getParseTreeListener().get(), walker,
+                    phrase.get());
               } else {
-                interpreterObj.getParseTreeVisitor().get().visit(parseTree.get());
+                notifyBeforeVisitor(interpreterObj.get().getParseTreeVisitor().get(),
+                    phrase.get());
+                interpreterObj.get().getParseTreeVisitor().get().visit(parseTree.get());
+                notifyAfterVisitor(interpreterObj.get().getParseTreeVisitor().get(),
+                    phrase.get());
               }
 
               notifyStreams(
@@ -271,6 +369,17 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                 + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
       
       } catch (Throwable e) {
+        if (interpreterObj.isPresent() && phrase.isPresent()) {
+          if (interpreterObj.get().getParseTreeListener().isPresent()) {
+            notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
+                phrase.get(),testCase,
+                e);
+          } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
+            notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
+                phrase.get(),testCase,
+                e);
+          }
+        }
         notifyStreams(
             (AnsiTerminalColorHelper.BRIGHT_RED + filteredPhraseText + "\n"
                 + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
@@ -283,6 +392,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       results.addTestResult(DefaultTestResult.passingTest(testCase));
     }
 
+    notifyAfterTestSuite(sharedTestCases,results,context);
     return results;
   }
 
