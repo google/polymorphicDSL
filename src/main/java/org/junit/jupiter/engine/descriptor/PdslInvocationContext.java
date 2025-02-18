@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.*;
 
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.extension.ExtensionContext.Namespace;
 
 /**
  * An invocation context used by JUnit5 that has an embedded PDSL test.
@@ -34,6 +35,10 @@ final class PdslInvocationContext implements TestTemplateInvocationContext {
             @Override
             public Object resolveParameter(ParameterContext parameterContext,
                                            ExtensionContext extensionContext) {
+                String uniqueId = extensionContext.getUniqueId();
+                Namespace namespace = Namespace.create(uniqueId);
+                extensionContext.getStore(namespace).put(namespace, executable);
+
                 return executable;
             }
         });
