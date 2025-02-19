@@ -23,7 +23,6 @@ public class PdslGherkinJUnit4Runner extends BlockJUnit4ClassRunner {
 
     public PdslGherkinJUnit4Runner(Class<?> testClass) throws InitializationError {
         super(testClass);
-        System.out.print("JS23001 : 50");
         pdslGherkinApplication = testClass.getAnnotation(PdslGherkinApplication.class);
         Preconditions.checkNotNull(pdslGherkinApplication, String.format("Class run with %s must be annotated with %s!",
                 getClass().getSimpleName(), PdslConfiguration.class.getSimpleName()));
