@@ -3,6 +3,8 @@
 An incredibly powerful framework for scaling testing across multiple
 applications and platforms.
 
+Accomplish months of work in a single day!
+
 ## Getting Started
 
 Start with [`the manual`](documentation/polymorphic_dsl_manual.adoc).
