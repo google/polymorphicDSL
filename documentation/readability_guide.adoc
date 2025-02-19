@@ -28,7 +28,7 @@ The above scenario can be decoupled by using words that are not tightly bound to
 
 [source,gherkin]
 ----
-Scenario: A bad scenario
+Scenario: A good scenario
 
 Given the user access My Appplication
 And the user views account details # Note navigation can be combined into this step along with the click
