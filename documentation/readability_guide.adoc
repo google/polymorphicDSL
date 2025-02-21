@@ -32,13 +32,10 @@ Scenario: A good scenario
 
 Given the user access My Appplication
 And the user views account details # Note navigation can be combined into this step along with the click
-
-When the user selects the project type dropdown
-And the user types "My Project" into the field
 When the user creates a project with the following details:
 """
 Name: My Project
-Meme: Some Memo
+Memo: Some Memo
 """
 Then the project is created
 And the user can find the project and view the details
