@@ -1,6 +1,10 @@
 package org.junit.jupiter.engine.descriptor;
 
 import com.google.common.base.Preconditions;
+import com.pdsl.gherkin.filter.GherkinTagFiltererAdapter;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
+import com.pdsl.gherkin.filter.TagFilterer;
+import java.util.logging.Logger;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
@@ -23,6 +27,7 @@ import static com.pdsl.runners.PdslTest.DEFAULT_ALL_RULE;
  */
 public class PdslTestParameter {
 
+    private static final Logger logger = Logger.getLogger(PdslTestParameter.class.getName());
     private final Optional<Class<? extends Parser>> recognizedByParser;
     private final Optional<Class<? extends Lexer>> recognizedByLexer;
     private final Class<? extends Parser> parser;
@@ -35,9 +40,10 @@ public class PdslTestParameter {
     private final String[] excludesResources;
     private final String startRule;
     private final Optional<String> recognizerRule;
+    private final TagFilterer tagFilterer;
 
     private PdslTestParameter(Builder builder) {
-        Preconditions.checkArgument((builder.listener.isPresent()
+      Preconditions.checkArgument((builder.listener.isPresent()
                 ^ builder.visitor.isPresent() ^ builder.interpreterParams.isPresent()),
                 "You can only have one of a visitor, listener or list of interpreterDtos!");
         this.parser = builder.parser;
@@ -52,6 +58,7 @@ public class PdslTestParameter {
         this.recognizedByLexer = builder.recognizedByLexer;
         this.recognizedByParser = builder.recognizedByParser;
         this.interpreterParams = builder.interpreterParams;
+        this.tagFilterer = builder.tagFilterer;
     }
 
     public Optional<List<Interpreter>> getInterpreters() { return interpreterParams; }
@@ -100,7 +107,11 @@ public class PdslTestParameter {
         return recognizerRule;
     }
 
-    public static class Builder {
+  public TagFilterer getTagFilterer() {
+    return tagFilterer;
+  }
+
+  public static class Builder {
         private Class<? extends Parser> parser;
         private Class<? extends Lexer> lexer;
         private Optional<Class<? extends Parser>> recognizedByParser = Optional.empty();
@@ -113,6 +124,15 @@ public class PdslTestParameter {
         private String startRule = DEFAULT_ALL_RULE;
         private Optional<String> recognizerRule = Optional.empty();
         private Optional<List<Interpreter>> interpreterParams = Optional.empty();
+
+        private TagFilterer tagFilterer = new GherkinTagFiltererAdapter(new GherkinTagsVisitorImpl());
+
+        public Builder withTagFilterer(TagFilterer tagFilterer) {
+            this.tagFilterer = tagFilterer;
+            return this;
+        }
+
+
 
         public Builder(
                 Class<? extends Lexer> lexer,
@@ -186,9 +206,22 @@ public class PdslTestParameter {
         }
 
         public Builder withTagExpression(String str) {
-            Preconditions.checkNotNull(str, "Tag expression cannot be null!");
+          Preconditions.checkNotNull(str, "Tag expression cannot be null!");
+          // Check if there are tags specified using the system property "tags".
+          String commandLineTags = System.getProperty("tags");
+          if (commandLineTags != null && !commandLineTags.isEmpty()) {
+            // If command-line tags are present, use them and log a message informing the user
+            // that the provided tag expression is being ignored.
+            this.tagExpression = commandLineTags;
+            logger.info("Overriding runner tags with tags provided in the command line {%s}".formatted(
+                commandLineTags));
+            logger.info("Ignoring provided tag expression {%s}".formatted(str));
+          } else {
+            // If no command-line tags are present, use the provided tag expression.
             this.tagExpression = str;
-            return  this;
+          }
+
+          return this;
         }
 
         public Builder withIncludedResources(String[] resources) {
