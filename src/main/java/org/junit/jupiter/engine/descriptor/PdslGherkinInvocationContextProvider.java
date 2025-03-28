@@ -74,24 +74,36 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
     @Override
     protected Collection<TestCase> getTestCases(PdslConfigParameter configParameter, Collection<TestSpecification> testSpecifications) {
         Collection<TestCase> testCases = TEST_CASE_FACTORY
-            .processTestSpecification(testSpecifications);
+                .processTestSpecification(testSpecifications);
+        String filterProperty = System.getProperty("pdsl.filterDuplicates");
+        boolean filter = filterProperty != null && filterProperty.equalsIgnoreCase("true");
+        if (!filter) {
+            logger.info("""
+            Allowing tests with duplicate step bodies to run.
+            To prevent duplicate test runs, please use the system property
+            `pdsl.filterDuplicates=true`
+            """);
+            return testCases;
+        }
         List<URI> duplicateUris = new ArrayList<>();
         // Remove any duplicates with the same filtered test body
         // In the case of gherkin, ignore leading and trailing whitespace on sentences
+
         for (TestCase testCase : testCases) {
             List<String> whitespaceInsensitiveSteps = testCase.getContextFilteredPhraseBody().stream()
-                .map(String::strip)
-                .collect(Collectors.toUnmodifiableList());
-            if (duplicateTest.containsKey(whitespaceInsensitiveSteps)) {
+                    .map(String::strip)
+                    .collect(Collectors.toUnmodifiableList());
+            if (filter && duplicateTest.containsKey(whitespaceInsensitiveSteps)) {
                 duplicateUris.add(testCase.getOriginalSource());
             } else {
-                duplicateTest.put(whitespaceInsensitiveSteps, testCase);
+                    duplicateTest.put(whitespaceInsensitiveSteps, testCase);
             }
-        }
-        logger.info("[{}] duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
+    }
+        logger.info("[{}] duplicate tests detected", testCases.size() - duplicateTest.entrySet().size());
         duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
         return duplicateTest.entrySet().stream().map(Entry::getValue).collect(Collectors.toUnmodifiableSet());
     }
+
 
     protected PdslExecutable getPdslExecutable(TestCase testCase, PdslConfigParameter parameter, PdslTestParameter pdslTestParameter) {
         TraceableTestRunExecutor executor = parameter.getTestRunExecutor().isPresent() ? parameter.getTestRunExecutor().get().get()

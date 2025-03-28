@@ -19,7 +19,7 @@ public class JupiterTagFilteringTest {
     private int totalRunTests = 0;
     @TestTemplate
     @ExtendWith(PdslExtension.class)
-    public void pdslGherkinTestFrameworkResources(PdslExecutable executable) {
+    public void jupiterTags(PdslExecutable executable) {
 
         executable.execute();
         totalRunTests++;
@@ -36,7 +36,7 @@ public class JupiterTagFilteringTest {
                             List.of(
                                     new PdslTestParameter.Builder(parseTreeListenerSupplier,
                                             AllGrammarsLexer.class, AllGrammarsParser.class)
-                                            .withTagExpression("@comment_tag#2")
+                                            .withTagExpression("@ex_tag1 or @scenario_tag1")
                                             .withIncludedResources(new String[] {"tags.feature"})
                                             .build()
                             )

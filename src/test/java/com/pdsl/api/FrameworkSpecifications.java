@@ -33,10 +33,16 @@ public class FrameworkSpecifications {
                 PdslFrameworkSpecificationParser.class,
                 PdslFrameworkSpecificationLexer.class
         );
-        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
-        // Act
-        TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
-        assertThat(results.failingTestTotal()).isEqualTo(0);
-        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(0);
+        try {
+            // Enable filtering
+            System.setProperty("pdsl.filterDuplicates", "true");
+            GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
+            // Act
+            TestRunResults results = gherkinTestExecutor.processFilesAndRunTests(dslFiles, new PdslFrameworkSpecificationImpl());
+            assertThat(results.failingTestTotal()).isEqualTo(0);
+            assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
+        } finally {
+            System.setProperty("pdsl.filterDuplicates", "false");
+        }
     }
 }

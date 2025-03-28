@@ -72,3 +72,4 @@ Examples:
 | tagged_feature_with_scenario_outline.feature         | 2                    | 2              | 0          |
 | tags.feature                                         | 5                    | 5              | 1          |
 | very_long.feature                                    | 1                    | 5              | 99         |
+| very_long.feature                                    | 1                    | 5              | 99         |

@@ -58,6 +58,12 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
     protected static final TraceableTestRunExecutor DEFAULT_EXECUTOR = new DefaultPolymorphicDslTestExecutor();
     private final Map<List<String>, TestCase> duplicateTest = new HashMap<>();
 
+    protected boolean filterDuplicates = false;
+
+    protected void filterDuplicates(boolean filterDuplicates) {
+	this.filterDuplicates = filterDuplicates;
+    }
+
     @Override
     public boolean supportsTestTemplate(ExtensionContext context) {
         return true;
@@ -159,14 +165,16 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
                 .processTestSpecification(testSpecifications);
         List<URI> duplicateUris = new ArrayList<>();
         // Remove any duplicates with the same filtered test body
-        testCases.forEach(tc -> {
-                if (duplicateTest.containsKey(tc.getContextFilteredPhraseBody())) {
-                    duplicateUris.add(tc.getOriginalSource());
-                } else {
-                    duplicateTest.put(tc.getContextFilteredPhraseBody(), tc);
-                }
-            }
-        );
+	if (System.getProperty("pdsl.filterDuplicates").equalsIgnoreCase( "true")) {
+		testCases.forEach(tc -> {
+			if (duplicateTest.containsKey(tc.getContextFilteredPhraseBody())) {
+			    duplicateUris.add(tc.getOriginalSource());
+			} else {
+			    duplicateTest.put(tc.getContextFilteredPhraseBody(), tc);
+			}
+		    }
+		);
+	}
         logger.info("{} duplicate tests filtered out", testCases.size() - duplicateTest.entrySet().size());
         duplicateUris.stream().forEach(uri -> logger.info(uri.toString()));
         return duplicateTest.entrySet().stream().map(Map.Entry::getValue).collect(Collectors.toUnmodifiableSet());

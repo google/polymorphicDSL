@@ -477,3 +477,62 @@ Feature:
 If you are not using Gherkin, the behavior of the tag parameter will be
 whatever the implementor of your factories decided they should do (which may very well be nothing).
 
+=== Filtering out Duplicate Tests
+
+Part of the interpreter pattern is sharing the same test with other teams, platforms,
+clients, etc.
+
+This is powerful! This allows one team to do a single unit of work and create
+many tests for many teams!
+
+But for this to be done _efficiently_ the Interface Segregation Principle needs
+to be followed. In short, your coworkers should not create work for you unless
+it is important for you to do that work.
+
+One of the central parts of PDSL is its ability to figure out how to ignore
+work that isn't relevant to you. For example, consider the below gherkin
+file which might be shared by two teams.
+
+[source,gherkin]
+----
+
+Feature:
+
+  Scenario:
+   Given a thing everybody cares about
+
+  Scenario:
+    Given a thing everybody cares about
+    But there's an additional thing some other team cares about
+
+----
+
+Here there are two distinct test test cases. But suppose the 2nd has a step
+that only matters to one team. What does PDSL do? It filters out the step you
+don't care about and transforms it into this:
+
+[source,gherkin]
+----
+
+Feature:
+
+  Scenario:
+   Given a thing everybody cares about
+
+  Scenario:
+    Given a thing everybody cares about
+    # Get rid of the step that doesn't apply to your parser
+----
+
+The result is that _after filtering_ that you get two duplicate tests. 
+(PDSL will not keep sentences that it can't find in your parser). 
+It is likely that you'll just run the same test twice with no meaningful
+difference between the two.
+
+By default, PDSL will run these duplicates, but it is possible to trigger
+a feature that will make it ignore duplicates. If you pass the system property
+_pdsl.filterDuplicates=true_ then it will not run tests that have an identical
+step body.
+
+E.g. `mvn test -Dpdsl.filterDuplicates=true`
+

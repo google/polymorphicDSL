@@ -177,6 +177,8 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         new PdslThreadSafeOutputStream(), context);
     Set<List<String>> previouslyExecutedTests = new HashSet<>();
 
+    String filterDuplicatesProperty = System.getProperty("pdsl.filterDuplicates");
+    boolean filter = filterDuplicatesProperty != null && filterDuplicatesProperty.equalsIgnoreCase("true");
     for (TestCase testCase : testCases) {
 
       notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
@@ -188,7 +190,8 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
       Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
       int phraseIndex = 0;
       try {
-        if (previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
+
+        if (filter && previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
           logger.warn(String.format(
               "A test was skipped because after filtering it duplicated an earlier run test!%n\t%s",
               testCase.getTestTitle()));
@@ -196,7 +199,9 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
           testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
           results.addTestResult(DefaultTestResult.duplicateTest(testCase));
         } else {
-          previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
+          if (filter) {
+            previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
+          }
           while (testBody.hasNext()) {
             TestSection section = testBody.next();
             if (section.getMetaData().isPresent()) {
