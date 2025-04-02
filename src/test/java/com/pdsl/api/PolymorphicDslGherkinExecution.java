@@ -12,6 +12,8 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
@@ -45,6 +47,16 @@ public class PolymorphicDslGherkinExecution {
             new GherkinTestExecutor(AllGrammarsParser.class,
                     AllGrammarsLexer.class);
     private static final AllGrammarsParserBaseListener listener = new AllGrammarsParserBaseListener();
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("pdsl.filterDuplicates", "true");
+    }
+
+    @AfterClass
+    public static void afterAll() {
+        System.setProperty("pdsl.filterDuplicates", "false");
+    }
 
     @Test
     public void minimalFeature_executesProperly() throws MalformedURLException {

@@ -5,7 +5,9 @@ import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.gherkin.filter.GherkinTagFilterer;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
+import com.pdsl.runners.TestSpecificationFactoryGenerator;
 import com.pdsl.specifications.TestSpecification;
+import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.PreorderTestCaseFactory;
 import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
@@ -44,7 +46,10 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
      */
     @Override
     protected Collection<TestSpecification> getTestSpecifications(PdslConfigParameter configParameter, PolymorphicDslPhraseFilter phraseFilter, Collection<URI> testResources) {
-        GherkinTestSpecificationFactory gherkinTestSpecificationFactory = new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();
+        TestSpecificationFactoryGenerator factory = configParameter.getSpecificationFactoryProvider().get();
+        DefaultGherkinTestSpecificationFactory gherkinTestSpecificationFactory = factory instanceof DefaultGherkinTestSpecificationFactory
+                ? (DefaultGherkinTestSpecificationFactory) factory
+            : new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();
         Optional<Collection<TestSpecification>> testSpecifications = gherkinTestSpecificationFactory
                 .getTestSpecifications(testResources.stream().collect(Collectors.toUnmodifiableSet()));
         if (testSpecifications.isEmpty()) {
