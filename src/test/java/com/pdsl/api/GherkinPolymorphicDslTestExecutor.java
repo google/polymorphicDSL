@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
 import org.antlr.v4.runtime.tree.TerminalNode;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -36,6 +38,16 @@ public final class GherkinPolymorphicDslTestExecutor {
     private static final TestSpecificationFactory provider =
             new DefaultGherkinTestSpecificationFactory.Builder(new DefaultPolymorphicDslPhraseFilter(AllGrammarsParser.class, AllGrammarsLexer.class)).build();
     private static final GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(AllGrammarsParser.class, AllGrammarsLexer.class);
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("pdsl.filterDuplicates", "true");
+    }
+
+    @AfterClass
+    public static void afterAll() {
+        System.setProperty("pdsl.filterDuplicates", "false");
+    }
 
     @Test
     public void minimalFeature_runsAllTests()  {
