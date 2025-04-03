@@ -47,8 +47,8 @@ public abstract class PdslGherkinInvocationContextProvider extends PdslGeneralIn
     @Override
     protected Collection<TestSpecification> getTestSpecifications(PdslConfigParameter configParameter, PolymorphicDslPhraseFilter phraseFilter, Collection<URI> testResources) {
         TestSpecificationFactoryGenerator factory = configParameter.getSpecificationFactoryProvider().get();
-        DefaultGherkinTestSpecificationFactory gherkinTestSpecificationFactory = factory != null
-                ? (DefaultGherkinTestSpecificationFactory) factory
+        TestSpecificationFactory gherkinTestSpecificationFactory = factory != null
+                ? factory.get(phraseFilter)
                 : new DefaultGherkinTestSpecificationFactory.Builder(phraseFilter).build();
         Optional<Collection<TestSpecification>> testSpecifications = gherkinTestSpecificationFactory
                 .getTestSpecifications(testResources.stream().collect(Collectors.toUnmodifiableSet()));
