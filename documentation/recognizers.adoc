@@ -1,0 +1,241 @@
+= Recognizers
+
+A recognizer is a parser that sees whether or not some text is part of a language. While all parsers are technically recognizers, in PDSL it refers to something more specific.
+
+== Background
+
+Suppose you have a simple gherkin DSL and the test below for some e-commerce website:
+
+[source,gherkin]
+----
+Scenario: Buying a product
+
+  Given a customer searches for a "frobinator"
+  And the customer adds the product to their cart
+  When the customer completes their purchase
+  Then the customer gets a purchase order confirmation
+----
+
+Nothing unusual here. Suppose you automate the customer website. At the same time, a separate team is automating the warehouse and inventory application:
+
+[source,gherkin]
+----
+  Given the warehouse receives a purchase order
+  And the purchase order is for the following:
+  """
+  1x Frobinator
+  """
+  When the order is shipped
+  And the order is delivered
+  Then the order status is marked complete
+  And the customer is notified of the delivery
+----
+
+Suppose each teams automation is constrained to their own application and they are mocking or stubbing data from other systems. This solves the need for one part of the test pyramid.
+
+But later it is learned that the integration between the customer website and the inventory system was broken and leadership is upset that this integration isn't tested.
+
+This is a perfect use case for a DSL. We can actually _combine_ the steps from both team into a single test:
+
+[source,gherkin]
+----
+Scenario: Buying a product
+
+  Given a customer searches for a "frobinator"
+  And the customer adds the product to their cart
+  When the customer completes their purchase
+  Then the customer gets a purchase order confirmation
+
+  Given the warehouse receives a purchase order
+  And the purchase order is for the following:
+  """
+  1x Frobinator
+  """
+  When the order is shipped
+  And the order is delivered
+  Then the order status is marked complete
+  And the customer is notified of the delivery
+----
+
+However, this now creates a problem! The test pyramid tells us we _want_ to test the applications in isolation as well as together. However, now we have two separate feature files to maintain. As time goes on this mirroring can create unmaintainable code bases and many headaches.
+
+PDSL provides a solution for this: we'll use the same test file for:
+
+- Verifying that the customer website works on its own
+- Verifying that the inventory system works on its own
+- Verifying that they work all together
+
+NOTE:: It takes little imagination to see that many different applications might need to interact together the way the two above examples do. You can use a single file to handle many, many permutations.
+
+But how can we do this maintainably? Each team might have their own parser. Making one super parser is an option, but that is problematic because *each team only cares about their own sentences much of the time*. When the same feature file is used to only test the inventory system they shouldn't be forced to implement empty methods for the customer application.
+
+There is a chain of painful things that can happen if we don't implement the _interface segregation principle_ here. Many teams might eventually work on this file adding many methods. There can be constant version control issues as things are added and removed asyncronously.
+
+The solution here is to create a *recognizer* and have each team only implement the parsers they care about.
+
+== Making a recognizer
+
+Suppose you have these two ANTLR4 files:
+
+[source,antlr]
+----
+parser grammar CustomerParser;
+
+options {tokenVocab=CustomerLexer;}
+
+givenCustomerSearchesForProduct: CUSTOMER_SEARCHES TEXT END_TEXT;
+
+ addToCart: CUSTOMER_ADDS_TO_CART;
+
+// More customer rules
+
+customerAllRules: (
+  givenCustomerSearchesForProduct
+  | addToCart
+  // All the other customer rules
+);
+----
+
+[source,antlr]
+----
+parser grammar InventoryParser;
+
+options{tokenVocab=InventoryLexer;}
+
+warehouseReceivesPurchaseOrder: WAREHOUSE_RECEIVES_ORDER;
+
+purchaseOrderContent: PURCHASE_ORDER_IS_FOR DOCSTRING TEXT END_DOCSTRING;
+// Other warehouse rules
+
+inventoryAllRules: (
+  warehouseReceivesPurchaseOrder
+ | purchaseOrderContent
+  // All other rules
+);
+----
+
+We've cleanly divided the parser rules between the customer app and inventory app. Note we created the _customerAllRules_ and _inventoryAllRules_ rules. This makes it easy to create a 3rd, separate parser from them to be a recognizer:
+
+[source,antlr]
+----
+parser grammar RecognizerParser;
+
+imports CustomerParser, InventoryParser;
+
+options {tokenVocab=RecognizerLexer;}
+
+polymorphicDslAllRules: (
+  customerAllRules
+  | inventoryAllRules
+)+;
+----
+
+The lexer for the recognizer is completely made up of imports:
+
+[source,antlr]
+----
+lexer grammar RecognizerLexer;
+
+import CustomerLexer, InventoryLexer;
+----
+
+*The job of the recognizer is to identify every sentence* in the test. It doesn't do anything else.
+
+This allows us to use a test that has sentences we might not care about while only focusing on the ones that we do.
+
+See the following JUnit5 example:
+
+[source,java]
+----
+
+public class ExampleRecognizerTest {
+
+    @TestTemplate
+    @ExtendWith(MyExtension.class)
+    public void gherkinExample(PdslExecutable pdslExecutable) {
+        pdslExecutable.execute();
+    }
+
+    private static class MyExtension extends PdslGherkinInvocationContextProvider {
+
+        private static final ParseTreeListener SINGLETON = new MyCustomerParserImpl();
+        @Override
+        public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
+            return getInvocationContext(PdslConfigParameter.createGherkinPdslConfig(
+                    List.of(
+                        new PdslTestParameter.Builder(
+                                () -> SINGLETON,
+                            CustomerLexer.class, CustomerParser.class
+                        )
+                                .withIncludedResources(new String[] {"Shopping.feature"})
+                                .build())
+                    )
+                    .withResourceRoot(Paths.get("src/test/resources/features").toUri())
+.withRecognizer(RecognizerLexer.class, RecognizerParser.class)
+.withStartRule("customerAllRules")
+.withRecognizerRule("polymorphicDslAllRules")
+                    .build()
+            ).stream();
+        }
+    }
+
+}
+----
+
+Note the line `
+
+`.withRecognizer(RecognizerLexer.class, RecognizerParser.class)`
+
+This is telling PDSL that when it reads the feature file to use our recognizer to, well, recognize all the sentences. If there is a typo we made or if we forgot to implement a sentence we'll get a compilation error telling us to fix it.
+
+However, with these lines we'll only need to provide method implementations for the Customer sentences:
+
+`PdslTestParameter.Builder(
+() -> SINGLETON,
+CustomerLexer.class, CustomerParser.class
+)`
+
+`.withStartRule("customerAllRules")`
+
+When _these_ sentencese are seen it will use the ParseTreeListener (or Visitor) that you've provided which only has the customer sentences.
+
+In this manner we can use the same feature file, but still test the Customer application by itself with mocks or stubs.
+
+At the same time, we can make a *copy of this test* and change the line to be this:
+
+`PdslTestParameter.Builder( () → SINGLETON, InventoryLexer.class, InventoryParser.class )`
+
+`.withStartRule("inventoryAllRules")`
+
+
+Now that test can use the same feature file, but test _only_ the inventory app while the other test runner handles the customer app.
+
+Finally, for our end to end integration test we can make this parser:
+
+
+[source,antlr]
+----
+parser grammar PdslShoppingParser;
+
+imports CustomerParser, InventoryParser;
+
+options {tokenVocab=RecognizerLexer;}
+
+shoppingAllRules: (
+  customerAllRules
+  | inventoryAllRules
+)+;
+----
+
+WARNING: In this case the PdslShoppingParser is more or less identical to the recognizer. It is a bad practice to provide implementations for your recognizer because it will eventually have _all_ applications in your system under test. As time goes on this will likely be too difficult to maintain, so give yourself a way out early on to ignore other application rules as they get added in.
+
+Now we can create the end to end test with this line:
+
+`PdslTestParameter.Builder( () → SINGLETON, PdslShoppingLexer.class, PdslShoppingParser.class )`
+
+`.withStartRule("shoppingAllRules")`
+
+
+Now we have a single feature file with three test runners pointed at it. Each provides different types of test coverage. If the feature file gets modified later it's no big deal. Only the parsers that _need_ to be maintained will require maintenance.
+
+NOTE: You can often use the RecognizerLexer instead of creating brand new one (like we did with PdslShoppingLexer) as long as it isn't going to be struggling with ambiguity with all the application sentences it manages. Only parsers definitely need to be cleanly divided; having a common lexer for everybody at times is advantageous.

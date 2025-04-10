@@ -95,6 +95,14 @@ public abstract class PdslSharedInvocationContextProvider
      * @return a collection of TestTempalteInvocationContext objects to be used by a JUnit5 TestTemplate
      */
     public Collection<TestTemplateInvocationContext> getInvocationContext(PdslConfigParameter parameter) {
+        // Validations
+        if (parameter.getDslRecognizerLexer().isEmpty() || parameter.getDslRecognizerParser().isEmpty()) {
+            throw new IllegalArgumentException("""
+        When making a multi-interpreter test you MUST specify a recognizer!
+        For documentation on why and how to make recognizers, please visit:
+        https://github.com/google/polymorphicDSL/blob/main/documentation/recognizers.adoc
+        """);
+        }
         SharedTestSuite suite = SHARED_TEST_SUITE_VISITOR.recognizerParamsOperation(convert(parameter));
 
         return suite.getSharedTestCaseList().stream()
