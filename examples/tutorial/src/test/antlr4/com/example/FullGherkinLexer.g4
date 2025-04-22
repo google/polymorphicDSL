@@ -14,17 +14,17 @@ fragment END: WS_NL* EOF?;
 
 GIVEN_A_TABLE: GHERKIN_STEP_KEYWORD 'a table' WS* NL WS_NL* '|' WS* -> mode(DATA_TABLE_TEXT_MODE);
 GIVEN_A_DOCSTRING: GHERKIN_STEP_KEYWORD 'a doc string' WS* NL WS* -> mode(DOC_STRING_MODE);
-GIVEN_A_SOMETHING: GHERKIN_STEP_KEYWORD 'a ' .* END;
-THEN_IT_IS: GHERKIN_STEP_KEYWORD 'it is ' .* END;
+GIVEN_A_SOMETHING: GHERKIN_STEP_KEYWORD 'a ' .+? WS_NL+;
+THEN_IT_IS: GHERKIN_STEP_KEYWORD 'it is ' .+? END;
 GIVEN_A_BACKGROUND: GHERKIN_STEP_KEYWORD ('a' | 'another') ' background step' END;
 
 mode DATA_TABLE_MODE;
-  END_ROW: WS* '|' NL WS* '|' -> mode(DATA_TABLE_TEXT_MODE);
-  END_TABLE: WS* '|' END -> mode(DEFAULT_MODE);
+  END_ROW: WS* '|' NL WS* '|' WS* -> mode(DATA_TABLE_TEXT_MODE);
   END_CELL: WS* '|' WS* -> mode(DATA_TABLE_TEXT_MODE);
+  END_TABLE: WS* '|' END -> mode(DEFAULT_MODE); // NOTE: It is important that the end rule is last in the mode!
 
 mode DATA_TABLE_TEXT_MODE;
-      fragment SPECIAL_ALPHA_NUMERIC: [a-zA-Z0-9.:;~!@#$%^&*()+\-\\] | '\n';
+      fragment SPECIAL_ALPHA_NUMERIC: [a-zA-Z0-9.:;~!@#$%^&*()+\-\\_] | '\n';
       CELL_TEXT: (SPECIAL_ALPHA_NUMERIC | WS)+ SPECIAL_ALPHA_NUMERIC -> mode(DATA_TABLE_MODE); // Match up until whitespace at the end of the cell
 
 mode DOC_STRING_MODE;

@@ -8,8 +8,8 @@ givenSomething: GIVEN_A_SOMETHING;
 thenItIs: THEN_IT_IS;
 givenBackground: GIVEN_A_BACKGROUND;
 dataTable: row+;
-row: cell+;
-cell: CELL_TEXT (END_CELL | END_ROW | END_TABLE);
+row: cell+ (END_ROW | END_TABLE);
+cell: CELL_TEXT (END_CELL?);
 
 polymorphicDslSyntaxCheck: polymorphicDslAllRules+;
-polymorphicDslAllRules: givenTable | givenDocstring | givenSomething | thenItIs | givenBackground;
+polymorphicDslAllRules: (givenTable | givenDocstring | givenSomething | thenItIs | givenBackground)+;
