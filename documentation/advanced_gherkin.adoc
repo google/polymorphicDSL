@@ -31,7 +31,7 @@ The below lexer and parser shows you how to work with these features:
 === Lexer
 
 ifndef::env-github[]
-[source,antlr4]
+[source,antlrv4]
 ----
 include::../examples/tutorial/src/test/antlr4/com/example/FullGherkinLexer.g4[FullGherkinLexer.g4]
 ----
@@ -44,11 +44,85 @@ endif::[]
 === Parser
 
 ifndef::env-github[]
-[source,antlr4]
+[source,antlrv4]
 ----
 include::../examples/tutorial/src/test/antlr4/com/example/FullGherkinParser.g4[FullGherkinParser.g4]
 ----
 endif::[]
+
+Note these rules in the parser in particular:
+
+[source,antlrv4]
+----
+dataTable: row+;
+row: cell+ (END_ROW | END_TABLE);
+cell: CELL_TEXT (END_CELL?);
+----
+
+The goal here is to sanely group the data so that you can grab it. If organized like this you
+can find data by a specific row and cell. Using the above parser, you would get a `DataTableContext`
+object you can transform into a list of lists, where the outer list represents a specific row and the inner list represents a cell in the row:
+
+[source,java]
+----
+private List<List<String>> tableAsListOfLists( PdslAdvancedGherkinParser.DataTableContext tableCtx) {
+    return tableCtx.row().stream() // Get each row in the tableData
+            .map(row -> row.cell().stream()
+                    .map(PdslAdvancedGherkinParser.CellContext::getText) // Get the text from each cell
+                    .collect(Collectors.toUnmodifiableList())) // Put it in a list
+            .collect(Collectors.toUnmodifiableList()); // Put each row in a list
+}
+
+List<List<String>> tableData = tableAsListOfLists(ctx.dataTable());
+// Get the first cell in the first row
+tableData.get(0).get(0);
+// Get the second cell in the first row
+tableData.get(0).get(1);
+// Get the first cell in the second row
+tableData.get(1).get(0);
+// Get the second cell in the second row
+tableData.get(1).get(1);
+
+
+----
+
+If the first row of your table represents a header, you might prefer to instead use a map to group the data by key:
+
+[source,java]
+----
+
+
+
+  private Map<String, List<String>> tableAsHeaderWithColumnData(PdslAdvancedGherkinParser.DataTableContext tableContext) {
+      // Organize the data by rows
+      List<List<String>> tableAsListOfLists = tableAsListOfLists(tableContext); // Use the tableAsListOfLists example from above
+      // The first row contains the headers.
+      List<String> headers = tableAsListOfLists.get(0);
+      Map<String, List<String>> map2Columns = new HashMap<>();
+      for (int i=1; i < tableAsListOfLists.size(); i++) {
+          List<String> row = tableAsListOfLists.get(i);
+          for (int j=0; j < row.size(); j++) {
+              List<String> column = map2Columns.computeIfAbsent(headers.get(j), (k) -> new ArrayList<String>(tableAsListOfLists.size()));
+              column.add(row.get(j));
+          }
+      }
+      return map2Columns;
+  }
+
+  /*
+  e.g.
+  Given a table
+  | Header 1 | Header 2 | Header 3 |
+  | Foo      | Bar      | Bizz     |
+  | Bazz     | Gralt    | Widget   |
+ */
+  Map<String, List<String>> tableAsMap = tableAsHeaderWithColumnData(tableContext);
+  table.get("Header 1"); // { "Foo", "Bazz"}
+  table.get("Header 2"); // { "Bar", "Gralt"}
+  table.get("Header 3"); // { "Bizz," "Widget"}
+
+----
+
 
 ifdef::env-github[]
 https://github.com/google/polymorphicDSL/blob/main/examples/tutorial/src/test/antlr4/com/example/FullGherkinParser.g4[FullGherkinParser.g4]

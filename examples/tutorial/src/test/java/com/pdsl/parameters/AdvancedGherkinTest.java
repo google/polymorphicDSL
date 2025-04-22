@@ -17,9 +17,7 @@ import org.junit.jupiter.engine.descriptor.PdslGherkinInvocationContextProvider;
 import org.junit.jupiter.engine.descriptor.PdslTestParameter;
 
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -84,6 +82,22 @@ public class AdvancedGherkinTest {
                             .map(PdslAdvancedGherkinParser.CellContext::getText)
                             .collect(Collectors.toUnmodifiableList()))
                     .collect(Collectors.toUnmodifiableList());
+        }
+
+        private Map<String, List<String>> tableAsHeaderWithColumnData(PdslAdvancedGherkinParser.DataTableContext tableContext) {
+            // Organize the data by rows
+            List<List<String>> tableAsListOfLists = tableAsListOfLists(tableContext);
+            // The first row contains the headers.
+            List<String> headers = tableAsListOfLists.get(0);
+            Map<String, List<String>> map2Columns = new HashMap<>();
+            for (int i=1; i < tableAsListOfLists.size(); i++) {
+                List<String> row = tableAsListOfLists.get(i);
+                for (int j=0; j < row.size(); j++) {
+                    List<String> column = map2Columns.computeIfAbsent(headers.get(j), (k) -> new ArrayList<String>(tableAsListOfLists.size()));
+                    column.add(row.get(j));
+                }
+            }
+            return map2Columns;
         }
 
         @Override
