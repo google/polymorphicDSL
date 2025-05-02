@@ -131,7 +131,7 @@ public class PickleJarFactory implements GherkinObservable {
                         // notifying observers
                         notifyObservers(
                             scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
-                            substitutedSteps, tags, substitutions);
+                            substitutedSteps, tableTags, substitutions);
                         pickleJarScenarios.add(builder.build());
                     }
                 }
