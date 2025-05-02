@@ -127,11 +127,15 @@ public class PickleJarFactory implements GherkinObservable {
                         if (table.getTags().isPresent()) {
                             tableTags.addAll(processTags(table.getTags().get()));
                         }
-                        builder.withTags(processTags(tableTags));
+                        // Use a deep copy.
+                        // Otherwise if the observer adds additional tags to the set they
+                        // will be added for ALL of the tabular scenarios
+                        Set<String> potentiallyMutatedTags = new HashSet<>(tableTags);
                         // notifying observers
                         notifyObservers(
                             scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
-                            substitutedSteps, tableTags, substitutions);
+                            substitutedSteps, potentiallyMutatedTags, substitutions);
+                        builder.withTags(processTags(potentiallyMutatedTags));
                         pickleJarScenarios.add(builder.build());
                     }
                 }
