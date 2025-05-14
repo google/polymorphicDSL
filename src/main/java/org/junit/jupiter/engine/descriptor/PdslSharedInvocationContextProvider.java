@@ -65,24 +65,6 @@ public abstract class PdslSharedInvocationContextProvider
     private static final TraceableTestRunExecutor DEFAULT_EXECUTOR = new DefaultPolymorphicDslTestExecutor();
     private static final SharedTestSuiteVisitor SHARED_TEST_SUITE_VISITOR = new SharedTestSuiteVisitor();
     private static final JUnit5DefaultPackageAccessor ACCESSOR = new JUnit5DefaultPackageAccessor(new JupiterDescriptorKey());
-    private static final class DefaultResourceFinderGenerator implements Supplier<TestResourceFinderGenerator> {
-        /**
-         * Creates a generator for resource finders.
-         * @param resourceRoot the root directory to search in
-         */
-        public DefaultResourceFinderGenerator(String resourceRoot) {
-            if (resourceRoot.startsWith("file:///")) {
-                resourceRoot = resourceRoot.replaceFirst("file:///", "");
-            }
-            this.INSTANCE = new FileSystemTestResourceGenerator(resourceRoot);
-        }
-        private final TestResourceFinderGenerator INSTANCE;
-
-        @Override
-        public TestResourceFinderGenerator get() {
-            return INSTANCE;
-        }
-    }
 
     @Override
     public boolean supportsTestTemplate(ExtensionContext context) {
@@ -103,7 +85,7 @@ public abstract class PdslSharedInvocationContextProvider
         https://github.com/google/polymorphicDSL/blob/main/documentation/recognizers.adoc
         """);
         }
-        SharedTestSuite suite = SHARED_TEST_SUITE_VISITOR.recognizerParamsOperation(convert(parameter));
+        SharedTestSuite suite = SHARED_TEST_SUITE_VISITOR.recognizerParamsOperation(PdslConfigParameter.adapt(parameter));
 
         return suite.getSharedTestCaseList().stream()
                 .map(testCase ->  new PdslExecutable(testCase,
@@ -113,24 +95,6 @@ public abstract class PdslSharedInvocationContextProvider
                         parameter.getContext()))
                 .map(PdslInvocationContext::new)
                 .collect(Collectors.toUnmodifiableList());
-    }
-
-    private static RecognizerParams convert(PdslConfigParameter parameter) {
-        return new RecognizerParams(
-                parameter.getContext(),
-                parameter.getApplicationName(),
-                parameter.getResourceRoot().toString(),
-                convert(parameter.getPdslTestParameters(), parameter),
-                parameter.getDslRecognizerLexer().orElse(ACCESSOR.getEmptyRecognizerLexerClass()),
-                parameter.getDslRecognizerParser().orElse(ACCESSOR.getEmptyRecognizerParserClass()),
-                new RecognizerParams.PdslSuppliers(
-                        parameter.getResourceFinder().isPresent() ? parameter.getResourceFinder().get()
-                                : new DefaultResourceFinderGenerator(parameter.getResourceRoot().toString()),
-                        parameter.getSpecificationFactoryProvider(),
-                        parameter.getTestCaseFactoryProvider()
-
-                )
-        );
     }
 
     private static PdslTestParameter.Builder getBuilder(PdslTestParameter p) {
@@ -148,79 +112,4 @@ public abstract class PdslSharedInvocationContextProvider
 
     }
 
-    private static List<PdslTestParams> convert(Collection<PdslTestParameter> parameters,
-                                                                 PdslConfigParameter config) {
-        List<PdslTestParams> params = new ArrayList<>(parameters.size());
-        for (PdslTestParameter p : parameters) {
-            PdslTestParams pdslTestParams = new PdslTestParams(
-                    getRecognizerLexer(config, p),
-                    getRecognizerParser(config, p),
-                    getInterpreterParams(config, p),
-                    List.of(p.getTagExpression()),
-                    p.getIncludesResources(),
-                    p.getExcludesResources());
-            params.add(pdslTestParams);
-        }
-        return params;
-    }
-
-    private static Class<? extends Lexer> getRecognizerLexer(PdslConfigParameter config, PdslTestParameter param) {
-        if (param.getRecognizedByLexer().isPresent()) {
-            return param.getRecognizedByLexer().get();
-        }
-        if (config.getDslRecognizerLexer().isPresent()) {
-            return config.getDslRecognizerLexer().get();
-        }
-        return param.getLexer();
-    }
-
-    private static Class<? extends Parser> getRecognizerParser(PdslConfigParameter config, PdslTestParameter param) {
-        if (param.getRecognizedByParser().isPresent()) {
-            return param.getRecognizedByParser().get();
-        }
-        if (config.getDslRecognizerParser().isPresent()) {
-            return config.getDslRecognizerParser().get();
-        }
-        return param.getParser();
-    }
-
-    private static Supplier<InterpreterObj> getInterpreterObj(PdslTestParameter param) {
-        if (param.getVisitor().isPresent()) {
-            return () -> new InterpreterObj(param.getVisitor().get().get());
-        }
-        if (param.getListener().isPresent()) {
-            return () -> new InterpreterObj(param.getListener().get().get());
-        }
-        throw new IllegalArgumentException("No parser/visitor was attached to PdslTestParameter!");
-    }
-
-    private static InterpreterParam[] getInterpreterParams(PdslConfigParameter config, PdslTestParameter param) {
-
-        if (param.getInterpreters().isPresent()) {
-            return param.getInterpreters().get().stream()
-                    .map(i -> new InterpreterParam(
-                            i.parser(),
-                            i.lexer(),
-                            i::interpreterObj,
-                            new String[] {param.getTagExpression()},
-                            param.getIncludesResources(),
-                            param.getExcludesResources(),
-                            i.interpreterObj().getStartRule(),
-                            param.getRecognizerRule().isPresent() ? param.getRecognizerRule().get() : config.getRecognizerRule()
-                            )
-                    ).toList().toArray(new InterpreterParam[]{});
-        }
-        return new InterpreterParam[] {
-                new InterpreterParam(
-                        param.getParser(),
-                        param.getLexer(),
-                        getInterpreterObj(param),
-                        new String[] {param.getTagExpression()},
-                        param.getIncludesResources(),
-                        param.getExcludesResources(),
-                        param.getStartRule(),
-                        param.getRecognizerRule().isPresent() ? param.getRecognizerRule().get() : config.getRecognizerRule()
-                )
-        };
-    }
 }
