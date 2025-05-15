@@ -7,7 +7,6 @@ import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.PdslTestParams;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.jruby.ir.Interp;
 
 /**
  * A container of Visitor/Listener for the Test Case, created for supporting multiple Interpreters (Lexer/Parser; Listener/Visitor)
@@ -30,7 +29,7 @@ public final class InterpreterObj {
    * Creates a InterpreterObj from the supplied parameters.
    *
    * This will use the default start rule. If a specific start rule is needed use the related
-   * method ofVisitor(supplier, String)}
+   * method ofVisitor(supplier, String)
    *
    * @return InterpreterObj
    */
