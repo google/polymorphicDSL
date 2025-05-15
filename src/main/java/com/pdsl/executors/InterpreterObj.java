@@ -2,8 +2,6 @@ package com.pdsl.executors;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.PdslTestParams;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
