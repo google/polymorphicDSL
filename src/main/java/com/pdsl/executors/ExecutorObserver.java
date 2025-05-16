@@ -2,64 +2,83 @@ package com.pdsl.executors;
 
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.Phrase;
+import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
-import java.util.Collection;
+import com.pdsl.testcases.TestSection;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
+import java.util.Collection;
+
 /** An observer that is notified when specific events occur while a Test Executor executes tests. */
 public interface ExecutorObserver {
 
+  default void onBeforeTestCase(TestCase testCase) {}
+  default void onAfterTestCase(TestCase testCase) {}
+
+  /**
+   * Notifies when a test case has completed execution with no phrase failures.
+   * @param testCase
+   */
+  default void onTestCaseSuccess(TestCase testCase) {}
+
+  /**
+   * Notifies the implementer that a test case isn't being run because a separate test case
+   * already ran that did the same thing.
+   * @param testCase that was skipped
+   */
+  default void onDuplicateSkipped(TestCase testCase) {}
+
   /** Notifies the implementer of a phrase that is about to be executed with a listener. */
-  void onBeforePhrase(ParseTreeListener listener,
-      ParseTreeWalker walker, Phrase activePhrase);
+  default void onBeforePhrase(ParseTreeListener listener,
+      ParseTreeWalker walker, TestSection phrase) {}
 
   /** Notifies the implementer of a phrase that is about to be executed with a visitor. */
-  void onBeforePhrase(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase);
+  default void onBeforePhrase(ParseTreeVisitor<?> visitor,
+      TestSection testSection) {}
 
   /** Notifies the implementer of a phrase that has completed execution with a listener WITHOUT an exception. */
-  void onAfterPhrase(ParseTreeListener listener,
-      ParseTreeWalker walker, Phrase activePhrase);
+  default void onAfterPhrase(ParseTreeListener listener,
+      ParseTreeWalker walker, TestSection testSection) {}
   
   /** Notifies the implementer of a phrase that has completed execution with a visitor WITHOUT an exception. */
   void onAfterPhrase(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase);
+                     TestSection testSection);
 
    /** Notifies the implementer of a phrase that has failed during excecution with a listener. */
-  void onPhraseFailure(ParseTreeListener listener,
-      Phrase activePhrase, TestCase testCase, Throwable exception);
+  default void onPhraseFailure(ParseTreeListener listener,
+                               TestSection testSection, TestCase testCase, Throwable exception) {}
 
   /** Notifies the implementer of a phrase that has failed during excecution with a visitor. */
-  void onPhraseFailure(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase, TestCase testCase, Throwable exception);
+  default void onPhraseFailure(ParseTreeVisitor<?> visitor,
+                               TestSection testSection, TestCase testCase, Throwable exception) {}
 
-  /** Notifies the implementer of a of a test suite that is about to execute with a visitor. */
-  void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor,
-      String context);
+  /** Notifies the implementer of a test suite that is about to execute with a visitor. */
+  default void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor,
+      String context) {}
 
-  /** Notifies the implementer of a of a test suite that is about to execute with a listener. */
-  void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
-      String context);
+  /** Notifies the implementer of a test suite that is about to execute with a listener. */
+  default void onBeforeTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener,
+      String context) {}
 
-  /** Notifies the implementer of a of a test suite that is about to execute. 
-   *  The implementation of the TestCase collection will likely be SharedTestCases in the event this method is triggered.
+  /** Notifies the implementer of a test suite that is about to execute.
+   *
    */
-  void onBeforeTestSuite(Collection<? extends TestCase> testCases,
-      String context);
+  default void onBeforeTestSuite(Collection<? extends SharedTestCase> testCases,
+      String context) {}
 
-  /** Notifies the implementer of a of a test suite that has completed execution with a visitor. */
-  void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
-      String context);
+  /** Notifies the implementer of a test suite that has completed execution with a visitor. */
+  default void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
+      String context) {}
 
-  /** Notifies the implementer of a of a test suite that has completed execution with a listener. */
-  void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
-      String context);
+  /** Notifies the implementer  a test suite that has completed execution with a listener. */
+  default void onAfterTestSuite(Collection<? extends TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
+      String context) {}
 
-  /** Notifies the implementer of a of a test suite that is has completed execution. 
-   *  The implementation of the TestCase collection will likely be SharedTestCases in the event this method is triggered.
+  /**
+   * Notifies the implementer of a test suite that is has completed execution.
    */
-  void onAfterTestSuite(Collection<? extends TestCase> testCases, MetadataTestRunResults results,
-      String context);
+  default void onAfterTestSuite(Collection<? extends SharedTestCase> testCases, MetadataTestRunResults results,
+      String context) {}
 }

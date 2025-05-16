@@ -93,7 +93,7 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
     }
 
     @Override
-    public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor) {
+    public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor<?> subgrammarVisitor) {
         return executor.runTests(testCases, subgrammarVisitor);
     }
 

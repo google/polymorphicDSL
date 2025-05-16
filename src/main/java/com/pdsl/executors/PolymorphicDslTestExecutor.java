@@ -32,7 +32,7 @@ public interface PolymorphicDslTestExecutor {
      * @param subgrammarVisitor the visitor to trigger work on appropriate phrases
      * @return the results of the test run
      */
-    TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor);
+    TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor<?> subgrammarVisitor);
 
 
 

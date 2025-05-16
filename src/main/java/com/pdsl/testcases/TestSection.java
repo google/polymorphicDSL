@@ -37,7 +37,7 @@ public interface TestSection {
         List<TestSection> testSections = new ArrayList<>(testBodyFragment.getTestPhrases().size());
         List<FilteredPhrase> filteredPhrases = testBodyFragment.getTestPhrases().stream()
                 .filter(filteredPhrase -> filteredPhrase.getParseTree().isPresent())
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         Preconditions.checkArgument(!filteredPhrases.isEmpty(),
                 "Test Body Fragment must have at least one filtered phrase with a parse tree present");
         for (int i = 0; i < testBodyFragment.getTestPhrases().size(); i++) {
@@ -46,11 +46,12 @@ public interface TestSection {
                 Phrase phrase = new DefaultPhrase(filteredPhrase.getParseTree().get(), i);
                 testSections.add(
                         // If its the first phrase with a parse tree add metadata, else just the phrase
-                        filteredPhrase == filteredPhrases.get(0) && testBodyFragment.getMetaData().isPresent()
+                        filteredPhrase == filteredPhrases.getFirst() && testBodyFragment.getMetaData().isPresent()
                                 ? new DefaultTestSection(testBodyFragment.getMetaData().get(), phrase)
                                 : new DefaultTestSection(phrase));
             }
         }
         return testSections;
     }
+
 }

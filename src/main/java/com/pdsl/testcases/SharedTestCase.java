@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * and associated (Lexer/Parser; Listener/Visitor) with them.
  * {@link com.pdsl.executors.InterpreterObj}
  */
-public final class SharedTestCase implements TestCase{
+public final class SharedTestCase implements TestCase {
 
   List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters;
 

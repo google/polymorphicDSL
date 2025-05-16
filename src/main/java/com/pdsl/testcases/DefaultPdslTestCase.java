@@ -2,6 +2,8 @@ package com.pdsl.testcases;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.specifications.FilteredPhrase;
+
+import java.io.InputStream;
 import java.net.URI;
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -44,16 +46,16 @@ public class DefaultPdslTestCase implements TestCase {
         this.phrasesToTestSections = testBodyFragments.stream()
                 .map(TestBodyFragment::getTestPhrases)
                 .flatMap(Collection::stream)
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         this.unfilteredPhraseBody = phrasesToTestSections.stream()
                 .map(FilteredPhrase::getPhrase)
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
         this.contextFilteredPhraseBody = phrasesToTestSections.stream()
                 .map(FilteredPhrase::getParseTree)
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(ParseTree::getText)
-                .collect(Collectors.toUnmodifiableList());
+                .toList();
     }
 
     @Override
@@ -76,7 +78,7 @@ public class DefaultPdslTestCase implements TestCase {
     @Override
     public Iterator<TestSection> getContextFilteredTestSectionIterator() {
         return getTestSectionStream()
-                .collect(Collectors.toUnmodifiableList())
+                .toList()
                 .iterator();
     }
 
@@ -84,6 +86,12 @@ public class DefaultPdslTestCase implements TestCase {
         return testBodyFragments.stream()
                 .map(TestSection::convertBodyFragment)
                 .flatMap(Collection::stream);
+    }
+
+    public List<Optional<InputStream>> getUnfilteredTestSectionsMetaData() {
+        return testBodyFragments.stream()
+                .map(TestBodyFragment::getMetaData)
+                .toList();
     }
 
     @Override

@@ -56,7 +56,7 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
                 // Read the files and structure them as specifications which will allow us to figure out how many
                 // test cases to create from each file, which parts to ignore, etc.
                 Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, params, testResources);
-                // Convert the specificaitons into test cases
+                // Convert the specifications into test cases
                 List<TestCase> testCasesForSingleInterpreter = new ArrayList<>(getTestCases(recognizerParams.providers().testCaseFactoryProvider().get(), specifications));
                 testCasesPerInterpreters.add(testCasesForSingleInterpreter);
                 interpreterObjs.add(parser.interpreterProvider().get());
