@@ -18,27 +18,8 @@ public final class SharedTestCase implements TestCase {
 
   List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters;
 
- private final List<TestCase> testCases;
- private final List<InterpreterObj> interpreterObjs;
-
-  private final List<Iterator<FilteredPhrase>> iterators;
-
-  public SharedTestCase(List<TestCase> testCases, List<InterpreterObj> interpreterObjs) {
-    /**
-     *  Take the first one (same) phrase in different Listener/Visitor (InterpreterObj).
-     */
-    int countFirst = testCases.get(0).getUnfilteredPhraseBody().size();
-    Preconditions.checkArgument(testCases.stream().allMatch(tc -> tc.getUnfilteredPhraseBody().size() == countFirst), "The size should be the same for all " + countFirst);
-    this.testCases = testCases;
-    this.interpreterObjs = interpreterObjs;
-    this.iterators = this.testCases.stream().map(TestCase::getFilteredPhrases).map(v-> v.iterator()).collect(Collectors.toUnmodifiableList());
-  }
-
   public SharedTestCase(List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters) {
     this.sharedTestCaseWithInterpreters = sharedTestCaseWithInterpreters;
-    this.testCases=null;
-    this.interpreterObjs=null;
-    this.iterators = null;
   }
 
   public List<SharedTestCaseWithInterpreter> getSharedTestCaseWithInterpreters() {return sharedTestCaseWithInterpreters;}

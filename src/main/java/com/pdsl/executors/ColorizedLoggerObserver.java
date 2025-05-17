@@ -64,11 +64,6 @@ public class ColorizedLoggerObserver implements ExecutorObserver {
     }
 
     @Override
-    public void onAfterTestCase(TestCase testCase) {
-
-    }
-
-    @Override
     public void onTestCaseSuccess(TestCase testCase) {
         notifyStreams(
                 (AnsiTerminalColorHelper.GREEN + "All Sentences are parsed." + "\n"
@@ -82,9 +77,7 @@ public class ColorizedLoggerObserver implements ExecutorObserver {
             notifyStreams(RESET);
         }
     }
-
-
-
+    
     @Override
     public void onBeforePhrase(ParseTreeVisitor<?> visitor, TestSection testSection) {
         beforePhrase(testSection);
@@ -102,7 +95,7 @@ public class ColorizedLoggerObserver implements ExecutorObserver {
 
     private void afterPhrase(TestSection testSection) {
         notifyStreams(
-                (AnsiTerminalColorHelper.GREY + testSection.getPhrase().getParseTree().getText() + "\n"
+                (AnsiTerminalColorHelper.GREEN + testSection.getPhrase().getParseTree().getText() + "\n"
                         + AnsiTerminalColorHelper.RESET).getBytes(charset));
     }
 
