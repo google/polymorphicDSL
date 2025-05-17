@@ -15,6 +15,11 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
+/**
+ * A logger for the progress of test execution where the output has color.
+ *
+ * The underlying implementation uses ANSII escape characters which may not be supported by all terminals.
+ */
 public class ColorizedLoggerObserver implements ExecutorObserver {
 
     private static final PdslThreadSafeOutputStream stream = new PdslThreadSafeOutputStream();
@@ -77,7 +82,7 @@ public class ColorizedLoggerObserver implements ExecutorObserver {
             notifyStreams(RESET);
         }
     }
-    
+
     @Override
     public void onBeforePhrase(ParseTreeVisitor<?> visitor, TestSection testSection) {
         beforePhrase(testSection);

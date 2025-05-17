@@ -14,7 +14,16 @@ import java.util.Collection;
 /** An observer that is notified when specific events occur while a Test Executor executes tests. */
 public interface ExecutorObserver {
 
+  /**
+   * Notifies just before a test case is going to execute.
+   * @param testCase
+   */
   default void onBeforeTestCase(TestCase testCase) {}
+
+  /**
+   * Notifies after a test case has executed regardless of whether it has passed or failed.
+   * @param testCase
+   */
   default void onAfterTestCase(TestCase testCase) {}
 
   /**

@@ -43,10 +43,20 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
     private final List<ExecutorObserver> activePhraseObservers = new ArrayList<>();
 
+    /**
+     * Constructs a DefaultPolymorphicDslTestExecutor with a default ColorizedObserver.
+     */
     public DefaultPolymorphicDslTestExecutor() {
         this.registerObserver(new ColorizedLoggerObserver());
     }
 
+    /**
+     * Creates a test executor that has all provided observers registered to it.
+     *
+     * The observers will be visited in the order they are provided in the list
+     * @param observers
+     * @return DefaultPolymorphicDslTestExecutor
+     */
     public static DefaultPolymorphicDslTestExecutor of(List<ExecutorObserver> observers) {
         DefaultPolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
         executor.activePhraseObservers.clear(); // Remove default logger observer
@@ -59,7 +69,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                                                  ParseTreeListener listener) {
         notifyBeforeTestSuite(testCases, listener, "NONE");
         MetadataTestRunResults results = walk(testCases, new InterpreterObj(listener), "NONE");
-        notifyAfterTestSuite(testCases, listener, results, "");
+        notifyAfterTestSuite(testCases, listener, results, "NONE");
         return (PolymorphicDslTestRunResults) results;
     }
 
@@ -68,19 +78,15 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                                    ParseTreeVisitor<?> subgrammarVisitor) {
         notifyBeforeTestSuite(testCases, subgrammarVisitor,"NONE");
         MetadataTestRunResults results = walk(testCases, new InterpreterObj(subgrammarVisitor), "NONE");
-        notifyAfterTestSuite(testCases, subgrammarVisitor, results, "");
+        notifyAfterTestSuite(testCases, subgrammarVisitor, results, "NONE");
         return results;
     }
-
-
-
 
     private MetadataTestRunResults walk(Collection<TestCase> testCases, InterpreterObj interpreterObj,
                                         String context) {
         PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
                 new PdslThreadSafeOutputStream(), context);
         Set<List<String>> previouslyExecutedTests = new HashSet<>();
-
         String filterDuplicatesProperty = System.getProperty("pdsl.filterDuplicates");
         boolean filter = filterDuplicatesProperty != null && filterDuplicatesProperty.equalsIgnoreCase("true");
         for (TestCase testCase : testCases) {
