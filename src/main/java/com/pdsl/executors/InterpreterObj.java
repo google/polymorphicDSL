@@ -27,7 +27,7 @@ public final class InterpreterObj {
    * Creates a InterpreterObj from the supplied parameters.
    *
    * This will use the default start rule. If a specific start rule is needed use the related
-   * method ofVisitor(supplier, String)
+   * method ofVisitor(supplier, String)}
    *
    * @return InterpreterObj
    */
@@ -132,5 +132,12 @@ public final class InterpreterObj {
   public String getStartRule(){
     return this.startRule;
   }
-}
 
+  public Optional<Supplier<ParseTreeListener>> getListenerSupplier() {
+    return parseTreeListener;
+  }
+
+  public Optional<Supplier<ParseTreeVisitor<?>>> getVisitorSupplier() {
+    return parseTreeVisitor;
+  }
+}

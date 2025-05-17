@@ -64,7 +64,6 @@ public abstract class PdslSharedInvocationContextProvider
 
     private static final TraceableTestRunExecutor DEFAULT_EXECUTOR = new DefaultPolymorphicDslTestExecutor();
     private static final SharedTestSuiteVisitor SHARED_TEST_SUITE_VISITOR = new SharedTestSuiteVisitor();
-    private static final JUnit5DefaultPackageAccessor ACCESSOR = new JUnit5DefaultPackageAccessor(new JupiterDescriptorKey());
 
     @Override
     public boolean supportsTestTemplate(ExtensionContext context) {

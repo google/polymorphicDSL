@@ -86,7 +86,7 @@ public class ConfigurableExecutorRunner {
         }
 
         @Override
-        public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor subgrammarVisitor) {
+        public TestRunResults runTests(Collection<TestCase> testCases, ParseTreeVisitor<?> subgrammarVisitor) {
             throw new UnsupportedOperationException("Not implemented for this test case!");
         }
 

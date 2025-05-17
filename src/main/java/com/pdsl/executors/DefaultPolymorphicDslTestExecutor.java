@@ -14,7 +14,9 @@ import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.SharedTestSuite.SharedTestCaseWithInterpreter;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestSection;
+
 import java.util.stream.Collectors;
+
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
@@ -29,379 +31,340 @@ import java.util.*;
 
 /**
  * An executor that runs PDSL tests create from a TestCaseFactory.
- *
+ * <p>
  * The default executor has colorized terminal output and prints the phrases as they execute and the
  * stack trace on failure.
- *
+ * <p>
  * All metadata associated with the tests will also be printed.
  */
-public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor,ActivePhraseObservable {
+public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor, ActivePhraseObservable {
 
-  private static final Logger logger = LoggerFactory.getLogger(
-      DefaultPolymorphicDslTestExecutor.class);
-  private final ParseTreeWalker walker = new ParseTreeWalker();
-  private final Optional<MultiOutputStream> outputStreams = Optional.of(
-      new MultiOutputStream(new PdslThreadSafeOutputStream()));
-  private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
-  private static final byte[] RESET = AnsiTerminalColorHelper.RESET.getBytes(DEFAULT_CHARSET);
+    private final ParseTreeWalker walker = new ParseTreeWalker();
+    private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+    private final List<ExecutorObserver> activePhraseObservers = new ArrayList<>();
 
-  @Override
-  public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases,
-      ParseTreeListener listener) {
-    // Walk the phrase registry to make sure all phrases are defined
-    logger.info(
-        AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
-    notifyBeforeTestSuite(testCases, listener, "");
-    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(listener), "NONE");
-    //send results to notifyAfterTestSuite
-    notifyAfterTestSuite(testCases, listener,results, "");
-    if (results.failingTestTotal() == 0) {
-      logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
-          + AnsiTerminalColorHelper.RESET);
-    } else {
-      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
-          + AnsiTerminalColorHelper.RESET);
-    }
-    return (PolymorphicDslTestRunResults) results;
-  }
-
-  @Override
-  public TestRunResults runTests(Collection<TestCase> testCases,
-      ParseTreeVisitor subgrammarVisitor) {
-    logger.info(
-        AnsiTerminalColorHelper.BRIGHT_YELLOW + "Running tests..." + AnsiTerminalColorHelper.RESET);
-    notifyBeforeTestSuite(testCases, subgrammarVisitor, "");
-    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarVisitor), "NONE");
-    notifyAfterTestSuite(testCases, subgrammarVisitor,results, "");
-    if (results.failingTestTotal() == 0) {
-      logger.info(AnsiTerminalColorHelper.BRIGHT_YELLOW + "All phrases successfully executed!"
-          + AnsiTerminalColorHelper.RESET);
-    } else {
-      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
-          + AnsiTerminalColorHelper.RESET);
-    }
-    return (PolymorphicDslTestRunResults) results;
-  }
-
-  List<ExecutorObserver> activePhraseObservers = new ArrayList<>();
-
-  @Override
-  public void registerObserver(ExecutorObserver observer) {
-    activePhraseObservers.add(observer);
-  }
-
-  @Override
-  public void removeObserver(ExecutorObserver observer) {
-    activePhraseObservers.remove(observer);
-  }
-
-  private void notifyBeforeListener(ParseTreeListener listener, ParseTreeWalker walker,
-      Phrase activePhrase) {
-    activePhraseObservers.forEach(o -> o.onBeforePhrase(listener, walker, activePhrase));
-  }
-
-  private void notifyBeforeVisitor(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase) {
-    activePhraseObservers.forEach(o -> o.onBeforePhrase(visitor, activePhrase));
-  }
-
-  private void notifyAfterListener(ParseTreeListener listener, ParseTreeWalker walker,
-      Phrase activePhrase) {
-    activePhraseObservers.forEach(o -> o.onAfterPhrase(listener, walker, activePhrase));
-  }
-
-  private void notifyAfterVisitor(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase) {
-    activePhraseObservers.forEach(o -> o.onAfterPhrase(visitor, activePhrase));
-  }
-
-  private void notifyOnListenerException(ParseTreeListener listener,
-      Phrase activePhrase, TestCase testCase, Throwable exception) {
-    activePhraseObservers.forEach(o -> o.onPhraseFailure(listener, activePhrase,testCase, exception));
-  }
-
-  private void notifyOnVisitorException(ParseTreeVisitor<?> visitor,
-      Phrase activePhrase, TestCase testCase, Throwable exception) {
-    activePhraseObservers.forEach(a -> a.onPhraseFailure(visitor, activePhrase,testCase, exception));
-  }
-
-  private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
-      String context) {
-    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases,visitor, context));
-  }
-  private void notifyBeforeTestSuite(Collection<SharedTestCase> testCases,
-      String context) {
-    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, context));
-  }
-
-  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
-      String context) {
-    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, visitor, results, context));
-  }
-
-  private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
-      String context) {
-    activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, listener, context));
-  }
-
-  private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
-      String context) {
-    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, listener, results, context));
-  }
-  private void notifyAfterTestSuite(Collection<SharedTestCase> testCases,  MetadataTestRunResults results,
-      String context) {
-    activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, results, context));
-  }
-  /**
-   * A container for a listener XOR a visitor.
-   */
-  private static final class PhraseRegistry {
-
-    private final Optional<ParseTreeListener> listener;
-    private final Optional<ParseTreeVisitor<?>> visitor;
-
-    PhraseRegistry(ParseTreeListener listener) {
-      this.listener = Optional.of(listener);
-      this.visitor = Optional.empty();
+    /**
+     * Constructs a DefaultPolymorphicDslTestExecutor with a default ColorizedObserver.
+     */
+    public DefaultPolymorphicDslTestExecutor() {
+        this.registerObserver(new ColorizedLoggerObserver());
     }
 
-    PhraseRegistry(ParseTreeVisitor visitor) {
-      this.listener = Optional.empty();
-      this.visitor = Optional.of(visitor);
+    /**
+     * Creates a test executor that has all provided observers registered to it.
+     *
+     * The observers will be visited in the order they are provided in the list
+     * @param observers
+     * @return DefaultPolymorphicDslTestExecutor
+     */
+    public static DefaultPolymorphicDslTestExecutor of(List<ExecutorObserver> observers) {
+        DefaultPolymorphicDslTestExecutor executor = new DefaultPolymorphicDslTestExecutor();
+        executor.activePhraseObservers.clear(); // Remove default logger observer
+        observers.forEach(executor::registerObserver);
+        return executor;
     }
-  }
 
-  private MetadataTestRunResults walk(Collection<TestCase> testCases, PhraseRegistry phraseRegistry,
-      String context) {
-    PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
-        new PdslThreadSafeOutputStream(), context);
-    Set<List<String>> previouslyExecutedTests = new HashSet<>();
+    @Override
+    public PolymorphicDslTestRunResults runTests(Collection<TestCase> testCases,
+                                                 ParseTreeListener listener) {
+        notifyBeforeTestSuite(testCases, listener, "NONE");
+        MetadataTestRunResults results = walk(testCases, new InterpreterObj(listener), "NONE");
+        notifyAfterTestSuite(testCases, listener, results, "NONE");
+        return (PolymorphicDslTestRunResults) results;
+    }
 
-    String filterDuplicatesProperty = System.getProperty("pdsl.filterDuplicates");
-    boolean filter = filterDuplicatesProperty != null && filterDuplicatesProperty.equalsIgnoreCase("true");
-    for (TestCase testCase : testCases) {
+    @Override
+    public TestRunResults runTests(Collection<TestCase> testCases,
+                                   ParseTreeVisitor<?> subgrammarVisitor) {
+        notifyBeforeTestSuite(testCases, subgrammarVisitor,"NONE");
+        MetadataTestRunResults results = walk(testCases, new InterpreterObj(subgrammarVisitor), "NONE");
+        notifyAfterTestSuite(testCases, subgrammarVisitor, results, "NONE");
+        return results;
+    }
 
-      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
-      notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
-          .getBytes(DEFAULT_CHARSET));
-      notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
-      notifyStreams(RESET);
-      Phrase activePhrase = null;
-      Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
-      int phraseIndex = 0;
-      try {
+    private MetadataTestRunResults walk(Collection<TestCase> testCases, InterpreterObj interpreterObj,
+                                        String context) {
+        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
+                new PdslThreadSafeOutputStream(), context);
+        Set<List<String>> previouslyExecutedTests = new HashSet<>();
+        String filterDuplicatesProperty = System.getProperty("pdsl.filterDuplicates");
+        boolean filter = filterDuplicatesProperty != null && filterDuplicatesProperty.equalsIgnoreCase("true");
+        for (TestCase testCase : testCases) {
+            Optional<ParseTreeListener> listener = interpreterObj.getListenerSupplier().isPresent()
+                    ? Optional.of(interpreterObj.getListenerSupplier().get().get())
+                    : Optional.empty();
+            Optional<ParseTreeVisitor<?>> visitor = interpreterObj.getVisitorSupplier().isPresent()
+                    ? Optional.of(interpreterObj.getVisitorSupplier().get().get())
+                    : Optional.empty();
+            notifyBeforeTestCase(testCase);
+            TestSection testSection = testCase.getContextFilteredTestSectionIterator().next();
+            Iterator<TestSection> testBody = testCase.getContextFilteredTestSectionIterator();
+            int phraseIndex = 0;
+            try {
 
-        if (filter && previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
-          logger.warn(String.format(
-              "A test was skipped because after filtering it duplicated an earlier run test!%n\t%s",
-              testCase.getTestTitle()));
-          StringBuilder duplicateBody = new StringBuilder();
-          testCase.getContextFilteredTestSectionIterator().forEachRemaining(duplicateBody::append);
-          results.addTestResult(DefaultTestResult.duplicateTest(testCase));
-        } else {
-          if (filter) {
-            previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
-          }
-          while (testBody.hasNext()) {
-            TestSection section = testBody.next();
-            if (section.getMetaData().isPresent()) {
-              notifyStreams(AnsiTerminalColorHelper.CYAN.getBytes(DEFAULT_CHARSET));
-              notifyStreams(section.getMetaData().get());
-              notifyStreams(RESET);
+                if (filter && previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
+                    notifyDuplicateSkipped(testCase);
+                    results.addTestResult(DefaultTestResult.duplicateTest(testCase));
+                    continue;
+                }
+                if (filter) {
+                    previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
+                }
+                while (testBody.hasNext()) {
+                    testSection = testBody.next();
+                    Phrase activePhrase = testSection.getPhrase();
+                    if (listener.isPresent()) {
+                        notifyBeforeListener(listener.get(), walker, testSection);
+                        walker.walk(listener.get(), activePhrase.getParseTree());
+                        notifyAfterListener(listener.get(), walker, testSection);
+                    } else {
+                        notifyBeforeVisitor(visitor.orElseThrow(), testSection);
+                        visitor.get().visit(activePhrase.getParseTree());
+                        notifyAfterVisitor(visitor.get(), testSection);
+                    }
+                    phraseIndex++;
+                }
+                results.addTestResult(DefaultTestResult.passingTest(testCase));
+                notifyTestCaseSuccess(testCase);
+            } catch (Throwable e) {
+                if (listener.isPresent()) {
+                    notifyAfterListener(listener.get(), walker, testSection);
+                    notifyOnListenerException(listener.get(), testSection, testCase, e);
+                } else {
+                    notifyAfterVisitor(visitor.get(), testSection);
+                    notifyOnVisitorException(visitor.orElseThrow(), testSection, testCase, e);
+                }
+
+                int phrasesSkippedDueToFailure = 0;
+                while (testBody.hasNext()) {
+                    testBody.next();
+                    phrasesSkippedDueToFailure++;
+                }
+                results.addTestResult(DefaultTestResult.failedTest(testCase, testSection.getPhrase(), e, phraseIndex,
+                        phrasesSkippedDueToFailure));
             }
-            activePhrase = section.getPhrase();
-            if (phraseRegistry.listener.isPresent()) {
-              notifyBeforeListener(phraseRegistry.listener.get(), walker, activePhrase);
-              walker.walk(phraseRegistry.listener.get(), activePhrase.getParseTree());
-              notifyAfterListener(phraseRegistry.listener.get(), walker, activePhrase);
-            } else {
-              notifyBeforeVisitor(phraseRegistry.visitor.get(), activePhrase);
-              phraseRegistry.visitor.get().visit(activePhrase.getParseTree());
-              notifyAfterVisitor(phraseRegistry.visitor.get(), activePhrase);
+            notifyAfterTestCase(testCase);
+        }
+        return results;
+    }
+
+    @Override
+    public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
+                                                       ParseTreeListener subgrammarListener, String context) {
+        notifyBeforeTestSuite(testCases, subgrammarListener, context);
+        MetadataTestRunResults results = walk(testCases, new InterpreterObj(subgrammarListener),
+                context);
+        notifyAfterTestSuite(testCases, subgrammarListener, results, context);
+        return results;
+    }
+
+    @Override
+    public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
+                                                       ParseTreeVisitor<?> visitor, String context) {
+        notifyBeforeTestSuite(testCases, visitor, context);
+        MetadataTestRunResults results = walk(testCases, new InterpreterObj(visitor), context);
+        notifyAfterTestSuite(testCases, visitor, results, context);
+        return results;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * If a supplier is used with any elements in the shared test cases, that supplier will be called to produce
+     * a visitor/listener once before each test case.
+     */
+    @Override
+    public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases,
+                                                       String context) {
+        notifyBeforeTestSuite(sharedTestCases, context);
+        PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
+                new PdslThreadSafeOutputStream(), context);
+
+
+        for (SharedTestCase sharedTestCase : sharedTestCases) {
+            List<TestCase> listOfTestCases = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
+                    .map(SharedTestCaseWithInterpreter::getTestCase).toList();
+            int size = listOfTestCases.getFirst().getUnfilteredPhraseBody().size();
+            TestCase testCase = listOfTestCases.stream().findFirst().orElseThrow();
+            notifyBeforeTestCase(sharedTestCase);
+            // Create each visitor/listener one time per test case
+            Map<InterpreterObj, ParseTreeListener> suppliedListeneres = new HashMap<>();
+            Map<InterpreterObj, ParseTreeVisitor<?>> suppliedVisitors = new HashMap<>();
+            Optional<Phrase> phrase = Optional.empty();
+            int phraseIndex = 0;
+            Optional<InterpreterObj> interpreterObj = Optional.empty();
+            // TODO: The default implementation associates metadata with the first phrase.
+            // We should design for more general use cases, but we can't do this without
+            // severely refactoring the API. Save this for v2
+            TestSection testSection = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
+                    .map(SharedTestCaseWithInterpreter::getTestCase)
+                    .map(TestCase::getContextFilteredTestSectionIterator)
+                    .filter(Iterator::hasNext)
+                    .map(Iterator::next)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("No executable phrases were found!"));
+
+            try {
+                for (int j = 0;
+                     j < sharedTestCase.getSharedTestCaseWithInterpreters().getFirst().getTestCase()
+                             .getUnfilteredPhraseBody().size(); j++) {
+                    for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
+                        FilteredPhrase filteredPhrase = interpreter.getTestCase().getFilteredPhrases()
+                                .get(phraseIndex);
+
+                        //TODO - Add implementation for the duplication checking
+                        Optional<ParseTree> parseTree = filteredPhrase.getParseTree();
+                        if (parseTree.isPresent()) {
+                            phrase = Optional.of(new DefaultPhrase(parseTree.get(), phraseIndex));
+
+                            interpreterObj = Optional.of(interpreter.getInterpreterObj());
+
+                            if (interpreterObj.get().getListenerSupplier().isPresent()) {
+                                ParseTreeListener listener = suppliedListeneres.computeIfAbsent(interpreterObj.get(),
+                                        (i) -> i.getListenerSupplier().orElseThrow().get());
+                                notifyBeforeListener(listener, walker,
+                                        testSection);
+                                walker.walk(listener, parseTree.get());
+                                notifyAfterListener(listener, walker,
+                                        testSection);
+                            } else {
+                                ParseTreeVisitor<?> visitor = suppliedVisitors.computeIfAbsent(interpreterObj.get(),
+                                        (i) -> i.getVisitorSupplier().orElseThrow().get());
+                                notifyBeforeVisitor(visitor,
+                                        testSection);
+                                visitor.visit(parseTree.get());
+                                notifyAfterVisitor(visitor, testSection);
+                            }
+
+                        }
+                    }
+                    phraseIndex++;
+                }
+                notifyTestCaseSuccess(testCase);
+            } catch (Throwable e) {
+                if (interpreterObj.isPresent() && phrase.isPresent()) {
+                    if (interpreterObj.get().getParseTreeListener().isPresent()) {
+                        notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
+                                testSection, testCase, e);
+                    } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
+                        notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
+                                testSection, testCase, e);
+                    }
+                }
+                results.addTestResult(DefaultTestResult.failedTest(testCase, null, e, phraseIndex,
+                        size - phraseIndex));
             }
-            phraseIndex++;
-            notifyStreams(
-                (AnsiTerminalColorHelper.GREEN + activePhrase.getParseTree().getText() + "\n"
-                    + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
-          }
-          results.addTestResult(DefaultTestResult.passingTest(testCase));
+            results.addTestResult(DefaultTestResult.passingTest(testCase));
+            notifyAfterTestCase(testCase);
         }
-      } catch (Throwable e) {
-        if (phraseRegistry.listener.isPresent()) {
-          notifyOnListenerException(phraseRegistry.listener.get(), activePhrase, testCase, e);
-        } else {
-          notifyOnVisitorException(phraseRegistry.visitor.get(), activePhrase,testCase, e);
-        }
-        notifyStreams(
-            (AnsiTerminalColorHelper.BRIGHT_RED + activePhrase.getParseTree().getText() + "\n"
-                + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
-
-        int phrasesSkippedDueToFailure = 0;
-        while (testBody.hasNext()) {
-          testBody.next();
-          phrasesSkippedDueToFailure++;
-        }
-        results.addTestResult(DefaultTestResult.failedTest(testCase, activePhrase, e, phraseIndex,
-            phrasesSkippedDueToFailure));
-        logger.error("Phrase failure", e);
-      }
-    }
-    return results;
-  }
-
-  private void notifyStreams(InputStream inputStream) {
-    if (outputStreams.isPresent()) {
-      try {
-        outputStreams.get().write(inputStream.readAllBytes());
-      } catch (IOException e) {
-        throw new PolymorphicDslTransformationException("Could not notify streams!", e);
-      }
-    }
-  }
-
-  private void notifyStreams(byte[] bytes) {
-    if (outputStreams.isPresent()) {
-      try {
-        outputStreams.get().write(bytes);
-      } catch (IOException e) {
-        throw new PolymorphicDslTransformationException("Could not notify streams!", e);
-      }
-    }
-  }
-
-  @Override
-  public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
-      ParseTreeListener subgrammarListener, String context) {
-    logger.info("Running tests...");
-    notifyBeforeTestSuite(testCases, subgrammarListener, "");
-    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(subgrammarListener),
-        context);
-    notifyAfterTestSuite(testCases, subgrammarListener,results, "");
-    if (results.failingTestTotal() == 0) {
-      logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
-          + AnsiTerminalColorHelper.RESET);
-    } else {
-      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
-          + AnsiTerminalColorHelper.RESET);
-    }
-    return (PolymorphicDslTestRunResults) results;
-  }
-
-  @Override
-  public MetadataTestRunResults runTestsWithMetadata(Collection<TestCase> testCases,
-      ParseTreeVisitor<?> visitor, String context) {
-    logger.info("Running tests...");
-    notifyBeforeTestSuite(testCases, visitor, context);
-    MetadataTestRunResults results = walk(testCases, new PhraseRegistry(visitor), context);
-    notifyAfterTestSuite(testCases, visitor, results,context);
-    if (results.failingTestTotal() == 0) {
-      logger.info(AnsiTerminalColorHelper.BRIGHT_GREEN + "All phrases successfully executed!"
-          + AnsiTerminalColorHelper.RESET);
-    } else {
-      logger.error(AnsiTerminalColorHelper.BRIGHT_RED + "There were test failures!"
-          + AnsiTerminalColorHelper.RESET);
-    }
-    return (PolymorphicDslTestRunResults) results;
-  }
-
-  @Override
-  public MetadataTestRunResults runTestsWithMetadata(Collection<SharedTestCase> sharedTestCases,
-      String context) {
-    notifyBeforeTestSuite(sharedTestCases, context);
-    PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
-        new PdslThreadSafeOutputStream(), context);
-    //Set<List<String>> previouslyExecutedTests = new HashSet<>();
-
-    for (SharedTestCase sharedTestCase : sharedTestCases) {
-      List<TestCase> listOfTestCases = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
-          .map(tc -> tc.getTestCase()).collect(
-              Collectors.toUnmodifiableList());
-      int size = listOfTestCases.get(0).getUnfilteredPhraseBody().size();
-      TestCase testCase = listOfTestCases.stream().findFirst().orElseThrow();
-
-      notifyStreams(AnsiTerminalColorHelper.YELLOW.getBytes(DEFAULT_CHARSET));
-      notifyStreams(String.format("%s%n%s", testCase.getOriginalSource(), testCase.getTestTitle())
-          .getBytes(DEFAULT_CHARSET));
-      notifyStreams(String.format("%n").getBytes(DEFAULT_CHARSET));
-      notifyStreams(RESET);
-
-      String filteredPhraseText = null;
-      Optional<Phrase> phrase = Optional.empty();
-      int phraseIndex = 0;
-      Optional<InterpreterObj> interpreterObj = Optional.empty();
-      try {
-        //for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
-        for (int j = 0;
-            j < sharedTestCase.getSharedTestCaseWithInterpreters().get(0).getTestCase()
-                .getUnfilteredPhraseBody().size(); j++) {
-          for (SharedTestCaseWithInterpreter interpreter : sharedTestCase.getSharedTestCaseWithInterpreters()) {
-
-            FilteredPhrase filteredPhrase = interpreter.getTestCase().getFilteredPhrases()
-                .get(phraseIndex);
-            filteredPhraseText = filteredPhrase.getPhrase();
-
-
-            //TODO - Add implementation for the duplication checking
-            Optional<ParseTree> parseTree = filteredPhrase.getParseTree();
-            if (parseTree.isPresent()) {
-              phrase = Optional.of(new DefaultPhrase(parseTree.get(), phraseIndex));
-
-              interpreterObj = Optional.of(interpreter.getInterpreterObj());
-
-              if (interpreterObj.get().getParseTreeListener().isPresent()) {
-                notifyBeforeListener(interpreterObj.get().getParseTreeListener().get(), walker,
-                    phrase.get());
-                walker.walk(interpreterObj.get().getParseTreeListener().get(), parseTree.get());
-                notifyAfterListener(interpreterObj.get().getParseTreeListener().get(), walker,
-                    phrase.get());
-              } else {
-                notifyBeforeVisitor(interpreterObj.get().getParseTreeVisitor().get(),
-                    phrase.get());
-                interpreterObj.get().getParseTreeVisitor().get().visit(parseTree.get());
-                notifyAfterVisitor(interpreterObj.get().getParseTreeVisitor().get(),
-                    phrase.get());
-              }
-
-              notifyStreams(
-                  (AnsiTerminalColorHelper.GREY + parseTree.get().getText() + "\n"
-                      + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
-            }
-          }
-          phraseIndex++;
-        }
-        notifyStreams(
-            (AnsiTerminalColorHelper.GREEN + "All Sentences are parsed." + "\n"
-                + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
-      
-      } catch (Throwable e) {
-        if (interpreterObj.isPresent() && phrase.isPresent()) {
-          if (interpreterObj.get().getParseTreeListener().isPresent()) {
-            notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
-                phrase.get(),testCase,
-                e);
-          } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
-            notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
-                phrase.get(),testCase,
-                e);
-          }
-        }
-        notifyStreams(
-            (AnsiTerminalColorHelper.BRIGHT_RED + filteredPhraseText + "\n"
-                + AnsiTerminalColorHelper.RESET).getBytes(DEFAULT_CHARSET));
-
-        results.addTestResult(DefaultTestResult.failedTest(testCase, null, e, phraseIndex,
-            size - phraseIndex));
-        logger.error("Phrase failure", e);
-      }
-
-      results.addTestResult(DefaultTestResult.passingTest(testCase));
+        notifyAfterTestSuite(sharedTestCases, results, context);
+        return results;
     }
 
-    notifyAfterTestSuite(sharedTestCases,results,context);
-    return results;
-  }
 
+    /**
+     * Adds an observer that will be notified of events as test cases are executed.
+     *
+     * beforeTestSuite         - Called once before the execution of test cases
+     * afterTestSuite          - Called once after the execution of all test cases
+     * beforeTestCaseTriggered - Called once before each test case
+     * afterTestCaseTriggered  - Called once after each test case
+     * phraseFailure           - Called once for any test that failed
+     * duplicateSkipped        - Called once only if filtering is enabled
+     *                           fore each identical test was run earlier
+     * beforePhrase            - Called before each phrase in each test case.
+     * 	                         In the event of a phrase failure, no subsequent
+     *                           phrases for that specific test case will be called
+     * afterPhrase             - Called after each successful phrase in each test case
+     * 	                         In the event of a phrase failure this method will not
+     *                           be called
+     * testCaseSuccess         - Called once after each test case only if it had no
+     *                           phrase failures
+     * @param observer
+     */
+    @Override
+    public void registerObserver(ExecutorObserver observer) {
+        activePhraseObservers.add(observer);
+    }
 
+    @Override
+    public void removeObserver(ExecutorObserver observer) {
+        activePhraseObservers.remove(observer);
+    }
+
+    private void notifyDuplicateSkipped(TestCase testCase) {
+        activePhraseObservers.forEach(o -> o.onDuplicateSkipped(testCase));
+    }
+
+    private void notifyTestCaseSuccess(TestCase testCase) {
+        activePhraseObservers.forEach(o -> o.onTestCaseSuccess(testCase));
+    }
+
+    private void notifyBeforeListener(ParseTreeListener listener, ParseTreeWalker walker,
+                                      TestSection testSection) {
+        activePhraseObservers.forEach(o -> o.onBeforePhrase(listener, walker, testSection));
+    }
+
+    private void notifyBeforeVisitor(ParseTreeVisitor<?> visitor,
+                                     TestSection testSection) {
+        activePhraseObservers.forEach(o -> o.onBeforePhrase(visitor, testSection));
+    }
+
+    private void notifyAfterListener(ParseTreeListener listener, ParseTreeWalker walker,
+                                     TestSection testSection) {
+        activePhraseObservers.forEach(o -> o.onAfterPhrase(listener, walker, testSection));
+    }
+
+    private void notifyBeforeTestCase(TestCase testCase) {
+        activePhraseObservers.forEach(o -> o.onBeforeTestCase(testCase));
+    }
+
+    private void notifyAfterTestCase(TestCase testCase) {
+        activePhraseObservers.forEach(o -> o.onAfterTestCase(testCase));
+    }
+
+    private void notifyAfterVisitor(ParseTreeVisitor<?> visitor,
+                                    TestSection testSection) {
+        activePhraseObservers.forEach(o -> o.onAfterPhrase(visitor, testSection));
+    }
+
+    private void notifyOnListenerException(ParseTreeListener listener,
+                                           TestSection testSection, TestCase testCase, Throwable exception) {
+        activePhraseObservers.forEach(o -> o.onPhraseFailure(listener, testSection, testCase, exception));
+    }
+
+    private void notifyOnVisitorException(ParseTreeVisitor<?> visitor,
+                                          TestSection testSection, TestCase testCase, Throwable exception) {
+        activePhraseObservers.forEach(a -> a.onPhraseFailure(visitor, testSection, testCase, exception));
+    }
+
+    private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor,
+                                       String context) {
+        activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, visitor, context));
+    }
+
+    private void notifyBeforeTestSuite(Collection<SharedTestCase> testCases,
+                                       String context) {
+        activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, context));
+    }
+
+    private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeVisitor<?> visitor, MetadataTestRunResults results,
+                                      String context) {
+        activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, visitor, results, context));
+    }
+
+    private void notifyBeforeTestSuite(Collection<TestCase> testCases, ParseTreeListener listener,
+                                       String context) {
+        activePhraseObservers.forEach(a -> a.onBeforeTestSuite(testCases, listener, context));
+    }
+
+    private void notifyAfterTestSuite(Collection<TestCase> testCases, ParseTreeListener listener, MetadataTestRunResults results,
+                                      String context) {
+        activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, listener, results, context));
+    }
+
+    private void notifyAfterTestSuite(Collection<SharedTestCase> testCases, MetadataTestRunResults results,
+                                      String context) {
+        activePhraseObservers.forEach(a -> a.onAfterTestSuite(testCases, results, context));
+    }
 }
-
-
