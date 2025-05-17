@@ -128,8 +128,10 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                 notifyTestCaseSuccess(testCase);
             } catch (Throwable e) {
                 if (listener.isPresent()) {
+                    notifyAfterListener(listener.get(), walker, testSection);
                     notifyOnListenerException(listener.get(), testSection, testCase, e);
                 } else {
+                    notifyAfterVisitor(visitor.get(), testSection);
                     notifyOnVisitorException(visitor.orElseThrow(), testSection, testCase, e);
                 }
 
@@ -238,20 +240,15 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                     }
                     phraseIndex++;
                 }
-
                 notifyTestCaseSuccess(testCase);
-
-
             } catch (Throwable e) {
                 if (interpreterObj.isPresent() && phrase.isPresent()) {
                     if (interpreterObj.get().getParseTreeListener().isPresent()) {
                         notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
-                                testSection, testCase,
-                                e);
+                                testSection, testCase, e);
                     } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
                         notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
-                                testSection, testCase,
-                                e);
+                                testSection, testCase, e);
                     }
                 }
                 results.addTestResult(DefaultTestResult.failedTest(testCase, null, e, phraseIndex,

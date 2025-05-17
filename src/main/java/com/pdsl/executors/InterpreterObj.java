@@ -2,12 +2,9 @@ package com.pdsl.executors;
 
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.PdslTestParams;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
-import org.jruby.ir.Interp;
 
 /**
  * A container of Visitor/Listener for the Test Case, created for supporting multiple Interpreters (Lexer/Parser; Listener/Visitor)
@@ -19,6 +16,7 @@ public final class InterpreterObj {
   private final Optional<Supplier<ParseTreeVisitor<?>>> parseTreeVisitor;
   private final Optional<Supplier<ParseTreeListener>> parseTreeListener;
   private final String startRule;
+
   public InterpreterObj(ParseTreeVisitor<?> parseTreeVisitor) {
     this.parseTreeVisitor = Optional.of(() -> parseTreeVisitor);
     this.parseTreeListener = Optional.empty();

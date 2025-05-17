@@ -86,8 +86,8 @@ public class FrameworkTestExecutor {
         assertThat(observer.afterTestCaseTriggered).isEqualTo(3);
         assertThat(observer.phraseFailure).isEqualTo(1);
         assertThat(observer.duplicateSkipped).isEqualTo(0);
-        assertThat(observer.afterPhrase).isEqualTo(8);
-        assertThat(observer.beforePhrase).isEqualTo(9);
+        assertThat(observer.beforePhrase).isEqualTo(10);
+        assertThat(observer.afterPhrase).isEqualTo(10);
         assertThat(observer.testCaseSuccess).isEqualTo(2);
     }
 
@@ -110,8 +110,8 @@ public class FrameworkTestExecutor {
         assertThat(observer.afterTestCaseTriggered).isEqualTo(3);
         assertThat(observer.phraseFailure).isEqualTo(1);
         assertThat(observer.duplicateSkipped).isEqualTo(0);
-        assertThat(observer.afterPhrase).isEqualTo(8);
-        assertThat(observer.beforePhrase).isEqualTo(9);
+        assertThat(observer.beforePhrase).isEqualTo(10);
+        assertThat(observer.afterPhrase).isEqualTo(10);
         assertThat(observer.testCaseSuccess).isEqualTo(2);
     }
 
@@ -134,8 +134,8 @@ public class FrameworkTestExecutor {
         assertThat(observer.afterTestCaseTriggered).isEqualTo(3);
         assertThat(observer.phraseFailure).isEqualTo(1);
         assertThat(observer.duplicateSkipped).isEqualTo(0);
-        assertThat(observer.afterPhrase).isEqualTo(8);
-        assertThat(observer.beforePhrase).isEqualTo(9);
+        assertThat(observer.beforePhrase).isEqualTo(10);
+        assertThat(observer.afterPhrase).isEqualTo(10);
         assertThat(observer.testCaseSuccess).isEqualTo(2);
     }
 
@@ -158,8 +158,8 @@ public class FrameworkTestExecutor {
         assertThat(observer.afterTestCaseTriggered).isEqualTo(3);
         assertThat(observer.phraseFailure).isEqualTo(1);
         assertThat(observer.duplicateSkipped).isEqualTo(0);
-        assertThat(observer.afterPhrase).isEqualTo(8);
-        assertThat(observer.beforePhrase).isEqualTo(9);
+        assertThat(observer.beforePhrase).isEqualTo(10);
+        assertThat(observer.afterPhrase).isEqualTo(10);
         assertThat(observer.testCaseSuccess).isEqualTo(2);
     }
 
@@ -320,7 +320,7 @@ public class FrameworkTestExecutor {
                     phrases.add(passingPhrase);
                 }
                 case FIRST_PHRASE_FAILS -> {
-                    if (i == 0) {
+                    if (i == 1) {
                         phrases.add(failingPhrase);
                     } else {
                         phrases.add(passingPhrase);
