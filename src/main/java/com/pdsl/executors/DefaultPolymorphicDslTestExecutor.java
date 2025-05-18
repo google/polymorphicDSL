@@ -1,6 +1,5 @@
 package com.pdsl.executors;
 
-import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
@@ -9,25 +8,17 @@ import com.pdsl.reports.TestRunResults;
 import com.pdsl.specifications.DefaultPhrase;
 import com.pdsl.specifications.FilteredPhrase;
 import com.pdsl.specifications.Phrase;
-import com.pdsl.specifications.PolymorphicDslTransformationException;
 import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.SharedTestSuite.SharedTestCaseWithInterpreter;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestSection;
-
-import java.util.stream.Collectors;
-
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * An executor that runs PDSL tests create from a TestCaseFactory.
@@ -40,8 +31,9 @@ import java.util.*;
 public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecutor, ActivePhraseObservable {
 
     private final ParseTreeWalker walker = new ParseTreeWalker();
-    private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
-    private final List<ExecutorObserver> activePhraseObservers = new ArrayList<>();
+    // In concurrent test cases an observer might be added to the collection while it's being read from
+    // Use a type that is safe for concurrency.
+    private final List<ExecutorObserver> activePhraseObservers = new CopyOnWriteArrayList<>();
 
     /**
      * Constructs a DefaultPolymorphicDslTestExecutor with a default ColorizedObserver.
