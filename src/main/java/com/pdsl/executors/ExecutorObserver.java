@@ -1,7 +1,6 @@
 package com.pdsl.executors;
 
 import com.pdsl.reports.MetadataTestRunResults;
-import com.pdsl.specifications.Phrase;
 import com.pdsl.testcases.SharedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestSection;
@@ -52,8 +51,8 @@ public interface ExecutorObserver {
       ParseTreeWalker walker, TestSection testSection) {}
   
   /** Notifies the implementer of a phrase that has completed execution with a visitor WITHOUT an exception. */
-  void onAfterPhrase(ParseTreeVisitor<?> visitor,
-                     TestSection testSection);
+  default void onAfterPhrase(ParseTreeVisitor<?> visitor,
+                     TestSection testSection) {}
 
    /** Notifies the implementer of a phrase that has failed during excecution with a listener. */
   default void onPhraseFailure(ParseTreeListener listener,
