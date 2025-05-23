@@ -25,10 +25,10 @@ public class ExampleTokens {
         Optional<GherkinFeature> featureOptional = transformer.interpretGherkinFile(Path.of(resourcePath + "example_token_multiple.feature").toUri(), listener);
         assertThat(featureOptional.isPresent()).isTrue();
         // Assert
-        GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getStepsList().get().get(0);
-        GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().get(0).getExamples().get().get(0);
+        GherkinStep step = featureOptional.get().getOptionalGherkinScenarios().orElseThrow().getFirst().getStepsList().orElseThrow().getFirst();
+        GherkinExamplesTable examplesTable = featureOptional.get().getOptionalGherkinScenarios().get().getFirst().getExamples().orElseThrow().getFirst();
         List<Map<String, String>> rows = examplesTable.getRows();
-        assertThat(step.getStepContent().getStringWithSubstitutions(rows.get(0))).contains("Given usage usage");
+        assertThat(step.getStepContent().getStringWithSubstitutions(rows.getFirst())).contains("Given usage usage");
     }
 
     @Test

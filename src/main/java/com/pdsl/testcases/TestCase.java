@@ -16,6 +16,10 @@ public interface TestCase {
     /**
      * Returns the original source file this test was created from.
      *
+     * Note that the URI return might differ from the original source file because fragments might be added
+     * to convey additional information about a specific.
+     * (e.g. ./Some.feature could become ./Some.feature#line=3 to refer to the specific scenario in the file)
+     *
      * @return the URI the test case was produced from
      */
     URI getOriginalSource();

@@ -28,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -41,7 +42,7 @@ public class GherkinTestExecutor implements TraceableTestRunExecutor {
     private final GherkinTestSpecificationFactory testSpecificationFactory;
     private final TestCaseFactory testCaseFactory = new PreorderTestCaseFactory();
     private final Logger logger = LoggerFactory.getLogger(GherkinTestExecutor.class);
-    private final TraceableTestRunExecutor executor = new DefaultPolymorphicDslTestExecutor();
+    private final TraceableTestRunExecutor executor = DefaultPolymorphicDslTestExecutor.of(List.of());
 
     public <SG extends Parser, SL extends Lexer> GherkinTestExecutor(Class<SG> subgrammarParser, Class<SL> subgrammarLexer) {
         phraseFilter = new DefaultPolymorphicDslPhraseFilter(subgrammarParser, subgrammarLexer);

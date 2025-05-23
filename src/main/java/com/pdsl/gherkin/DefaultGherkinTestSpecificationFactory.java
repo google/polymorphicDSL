@@ -249,7 +249,10 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private List<GherkinTestSpecification> transformScenariosToTestSpecifications(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags, URI originalSourceLocation) {
         List<GherkinTestSpecification> gherkinTestSpecifications = new ArrayList<>();
         for (PickleJar.PickleJarScenario pickleJarScenario : scenarios) {
-            DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(pickleJarScenario.getTitleWithSubstitutions(), originalSourceLocation);
+            DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(
+                    pickleJarScenario.getTitleWithSubstitutions(),
+                    // Provide the line number using the rfc 5147 standard for 'text/plain'
+                    originalSourceLocation.resolve("#line=" + pickleJarScenario.getLineNumber()));
             // Provide metadata
             topLevelScenario.withMetaData(new ByteArrayInputStream(extractMetaData(pickleJarScenario).toByteArray()));
             // Process step body

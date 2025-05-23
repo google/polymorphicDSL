@@ -1,5 +1,6 @@
 package com.pdsl.executors;
 
+import com.pdsl.gherkin.DefaultGherkinTestSpecificationFactory;
 import com.pdsl.logging.PdslThreadSafeOutputStream;
 import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.MetadataTestRunResults;
@@ -34,12 +35,19 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
     // In concurrent test cases an observer might be added to the collection while it's being read from
     // Use a type that is safe for concurrency.
     private final List<ExecutorObserver> activePhraseObservers = new CopyOnWriteArrayList<>();
-
+    private final boolean filterDuplicates;
     /**
      * Constructs a DefaultPolymorphicDslTestExecutor with a default ColorizedObserver.
      */
     public DefaultPolymorphicDslTestExecutor() {
         this.registerObserver(new ColorizedLoggerObserver());
+        String filterDuplicatesProperty = System.getProperty("pdsl.filterDuplicates");
+        filterDuplicates = filterDuplicatesProperty != null && filterDuplicatesProperty.equalsIgnoreCase("true");
+    }
+
+    private DefaultPolymorphicDslTestExecutor(List<ExecutorObserver> observers, boolean filterDuplicates) {
+        activePhraseObservers.addAll(observers);
+        this.filterDuplicates = filterDuplicates;
     }
 
     /**
@@ -54,6 +62,14 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         executor.activePhraseObservers.clear(); // Remove default logger observer
         observers.forEach(executor::registerObserver);
         return executor;
+    }
+
+    public static DefaultPolymorphicDslTestExecutor ofFilterDuplicates(List<ExecutorObserver> observers) {
+        return new DefaultPolymorphicDslTestExecutor(observers, true);
+    }
+
+    public static DefaultPolymorphicDslTestExecutor ofWithoutDuplicateFiltering(List<ExecutorObserver> observers) {
+        return new DefaultPolymorphicDslTestExecutor(observers, false);
     }
 
     @Override
@@ -79,8 +95,6 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
         PolymorphicDslTestRunResults results = new PolymorphicDslTestRunResults(
                 new PdslThreadSafeOutputStream(), context);
         Set<List<String>> previouslyExecutedTests = new HashSet<>();
-        String filterDuplicatesProperty = System.getProperty("pdsl.filterDuplicates");
-        boolean filter = filterDuplicatesProperty != null && filterDuplicatesProperty.equalsIgnoreCase("true");
         for (TestCase testCase : testCases) {
             Optional<ParseTreeListener> listener = interpreterObj.getListenerSupplier().isPresent()
                     ? Optional.of(interpreterObj.getListenerSupplier().get().get())
@@ -94,12 +108,12 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
             int phraseIndex = 0;
             try {
 
-                if (filter && previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
+                if (filterDuplicates && previouslyExecutedTests.contains(testCase.getContextFilteredPhraseBody())) {
                     notifyDuplicateSkipped(testCase);
                     results.addTestResult(DefaultTestResult.duplicateTest(testCase));
                     continue;
                 }
-                if (filter) {
+                if (filterDuplicates) {
                     previouslyExecutedTests.add(testCase.getContextFilteredPhraseBody());
                 }
                 while (testBody.hasNext()) {
