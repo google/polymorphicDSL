@@ -310,26 +310,4 @@ public class PickleJarFactory implements GherkinObservable {
             observer.onScenarioConverted(title, steps, tags, substitutions);
         }
     }
-
-    public static class PdslGherkinSourceComparator implements Comparator<URI> {
-
-        private static final int NUMBER_INDEX = "line=".length();
-            @Override
-            public int compare(URI source1, URI source2) {
-                String fragment1 = source1.getFragment();
-                String fragment2 = source2.getFragment();
-                int compareUris = source1.getRawSchemeSpecificPart().compareTo(source2.getRawSchemeSpecificPart());
-                // If the scenarios came from the same file have the most recent scenario first
-                if (compareUris == 0) {
-                    try {
-                        return Integer.compare(Integer.parseInt(fragment1.substring(NUMBER_INDEX)),
-                                Integer.parseInt(fragment2.substring(NUMBER_INDEX)));
-                    } catch (NumberFormatException e) {
-                        return 0;
-                    }
-                }
-                return compareUris;
-            }
-    }
-
 }

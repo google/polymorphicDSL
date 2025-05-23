@@ -1,4 +1,4 @@
-package com.pdsl.unit;
+package com.pdsl.api;
 
 import com.pdsl.executors.DefaultPolymorphicDslTestExecutor;
 import com.pdsl.executors.PolymorphicDslTestExecutor;
@@ -8,7 +8,6 @@ import com.pdsl.grammars.AllGrammarsLexer;
 import com.pdsl.grammars.AllGrammarsParser;
 import com.pdsl.reports.DefaultTestResult;
 import com.pdsl.reports.PolymorphicDslTestRunResults;
-import com.pdsl.reports.TestResult;
 import com.pdsl.reports.proto.TechnicalReportData;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.testcases.PreorderTestCaseFactory;
@@ -25,7 +24,7 @@ import java.util.*;
 
 import static com.google.common.truth.Truth.assertThat;
 
-public class PolymorphicDslTestRunResultsTest {
+public class ScenarioPositionTest {
 
 
 
