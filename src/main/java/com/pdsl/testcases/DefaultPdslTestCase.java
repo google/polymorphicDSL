@@ -110,11 +110,11 @@ public class DefaultPdslTestCase implements TestCase {
     public static class PdslTestCaseComparator implements Comparator<TestCase> {
 
         private static final int NUMBER_INDEX = "line=".length();
+
         @Override
         public int compare(TestCase source1, TestCase source2) {
             int compareUris = source1.getOriginalSource().getPath().compareTo(
                     source2.getOriginalSource().getPath());
-
             // If the scenarios came from the same file have the most recent scenario first via line number
             if (compareUris == 0) {
                 String fragment1 = source1.getOriginalSource().getFragment();

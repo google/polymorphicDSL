@@ -2,6 +2,7 @@ package com.pdsl.gherkin;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.gherkin.models.GherkinBackground;
+import com.pdsl.gherkin.models.GherkinScenario;
 
 import java.net.URI;
 import java.util.*;
@@ -201,6 +202,8 @@ class PickleJar {
         private final List<String> stepsWithParameterSubstitutionsIfNeeded;
         private Optional<Set<String>> tags;
         private final int lineNumber;
+        private final GherkinScenario.ScenarioPosition scenarioPosition;
+
         private PickleJarScenario(Builder builder) {
             this.tags = builder.tags;
             this.longDescription = builder.longDescription;
@@ -208,9 +211,14 @@ class PickleJar {
             this.lineNumber = builder.lineNumber;
             this.scenarioTitleWithParameterSubstitutionsIfNeeded = builder.titleWithSubstitutions;
             this.stepsWithParameterSubstitutionsIfNeeded = builder.stepsWithSubstitutions;
+            this.scenarioPosition = builder.scenarioPosition.orElseThrow();
         }
 
         public int getLineNumber() { return lineNumber; }
+
+        public GherkinScenario.ScenarioPosition getScenarioPosition() {
+            return scenarioPosition;
+        }
         public Optional<Set<String>> getTags() {
             return tags;
         }
@@ -233,6 +241,7 @@ class PickleJar {
             private Optional<Set<String>> tags = Optional.empty();
             private Optional<String> longDescription = Optional.empty();
             private int lineNumber = -1;
+            private Optional<GherkinScenario.ScenarioPosition> scenarioPosition;
 
             public Builder(String titleWithSubstitutions, List<String> stepsWithSubstitutions) {
                 this.titleWithSubstitutions = titleWithSubstitutions;
@@ -245,6 +254,11 @@ class PickleJar {
 
             public Builder withLineNumber(int lineNumber) {
                 this.lineNumber = lineNumber;
+                return this;
+            }
+
+            public Builder withScenarioPosition(int depth, int ordinal, int tableIndex) {
+                this.scenarioPosition = Optional.of(new GherkinScenario.ScenarioPosition(depth, ordinal, tableIndex));
                 return this;
             }
 
