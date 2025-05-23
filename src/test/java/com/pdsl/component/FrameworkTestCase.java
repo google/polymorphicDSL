@@ -87,9 +87,7 @@ public class FrameworkTestCase {
                 AllGrammarsLexer.class,
                 "polymorphicDslAllRules"
         );
-        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter,
-                // Disable printing because file is too long
-                DefaultPolymorphicDslTestExecutor.ofWithoutDuplicateFiltering(List.of()));
+        GherkinTestExecutor gherkinTestExecutor = new GherkinTestExecutor(phraseFilter);
         // Act
 
         MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(dslFiles, new TestCaseFactoryParserListenerImpl(), "Component");

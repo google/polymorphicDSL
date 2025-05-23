@@ -185,6 +185,9 @@ public class PolymorphicDslGherkinExecution {
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given the minimalism");
 
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given the minimalism inside a background");
+        assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given the minimalism");
+
+        assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given the minimalism inside a background");
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given a rule background step");
         assertThat(stepCounterListener.getStepsInOrderRun().poll()).contains("Given the 1 minimalism");
 
