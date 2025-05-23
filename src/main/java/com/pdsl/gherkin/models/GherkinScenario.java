@@ -10,6 +10,7 @@ public class GherkinScenario {
     private final Optional<GherkinString> longDescription;
     private final Optional<List<GherkinStep>> stepsList;
     private final Optional<List<GherkinExamplesTable>> examples;
+    private final int lineNumber;
 
     public GherkinScenario(Builder builder) {
         this.tags = builder.tags;
@@ -20,6 +21,7 @@ public class GherkinScenario {
         this.stepsList = builder.stepsList;
         this.examples = builder.examples.isEmpty() ? Optional.empty()
                 : Optional.of(builder.examples);
+        this.lineNumber = builder.lineNumber;
     }
 
     public Optional<List<String>> getTags() {
@@ -42,12 +44,17 @@ public class GherkinScenario {
         return examples;
     }
 
+    public int getLineNumber() {
+        return lineNumber;
+    }
+
     public static class Builder {
         private final List<GherkinExamplesTable> examples = new ArrayList<>();
         private Optional<List<String>> tags = Optional.empty();
         private String title = "";
         private String longDescription = "";
         private Optional<List<GherkinStep>> stepsList = Optional.empty();
+        private int lineNumber = -1;
 
         public GherkinScenario build() {
             return new GherkinScenario(this);
@@ -55,6 +62,11 @@ public class GherkinScenario {
 
         public Builder addExamples(GherkinExamplesTable examples) {
             this.examples.add(examples);
+            return this;
+        }
+
+        public Builder withPosition(int lineNumber) {
+            this.lineNumber = lineNumber;
             return this;
         }
 

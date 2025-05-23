@@ -200,15 +200,17 @@ class PickleJar {
         private final Optional<String> longDescription;
         private final List<String> stepsWithParameterSubstitutionsIfNeeded;
         private Optional<Set<String>> tags;
-
+        private final int lineNumber;
         private PickleJarScenario(Builder builder) {
             this.tags = builder.tags;
             this.longDescription = builder.longDescription;
             this.tags = builder.tags;
+            this.lineNumber = builder.lineNumber;
             this.scenarioTitleWithParameterSubstitutionsIfNeeded = builder.titleWithSubstitutions;
             this.stepsWithParameterSubstitutionsIfNeeded = builder.stepsWithSubstitutions;
         }
 
+        public int getLineNumber() { return lineNumber; }
         public Optional<Set<String>> getTags() {
             return tags;
         }
@@ -230,6 +232,7 @@ class PickleJar {
             private final List<String> stepsWithSubstitutions;
             private Optional<Set<String>> tags = Optional.empty();
             private Optional<String> longDescription = Optional.empty();
+            private int lineNumber = -1;
 
             public Builder(String titleWithSubstitutions, List<String> stepsWithSubstitutions) {
                 this.titleWithSubstitutions = titleWithSubstitutions;
@@ -238,6 +241,11 @@ class PickleJar {
 
             public PickleJarScenario build() {
                 return new PickleJarScenario(this);
+            }
+
+            public Builder withLineNumber(int lineNumber) {
+                this.lineNumber = lineNumber;
+                return this;
             }
 
             public Builder withLongDescription(String longDescription) {

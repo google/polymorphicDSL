@@ -6,18 +6,14 @@ import com.pdsl.gherkin.models.GherkinRule;
 import com.pdsl.gherkin.models.GherkinScenario;
 import com.pdsl.gherkin.models.GherkinStep;
 import com.pdsl.gherkin.models.GherkinString;
+import com.pdsl.reports.TestResult;
 import com.pdsl.transformers.PolymorphicDslFileException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -111,18 +107,22 @@ public class PickleJarFactory implements GherkinObservable {
             }
             if (scenario.getExamples().isPresent()) {
                 for (GherkinExamplesTable table : scenario.getExamples().get()) {
-                    Set<String> tableTags = new HashSet<>();
-                    tableTags.addAll(tags);
-                    for (Map<String, String> substitutions : table.getRows()) {
+                    Set<String> tableTags = new HashSet<>(tags);
+                    for (Map<String, GherkinExamplesTable.CellOfExamplesTable> substitutions : table.getRowsWithCell()) {
                         // steps list is guaranteed to be present by the pdslGherkinInterpreter
                         // Substitutions may need to be made on each step, docstring or gherkin table
-                        List<String> substitutedSteps = getTextSubstitutionsForStepBody(scenario.getStepsList().orElseThrow(), substitutions);
+                        Map<String, String> substitutionsAsStrings = new HashMap<>(substitutions.size());
+                        substitutions.forEach((key, value) -> substitutionsAsStrings.put(key,
+                                value.substitutionValue()));
+                        List<String> substitutedSteps = getTextSubstitutionsForStepBody(scenario.getStepsList().orElseThrow(), substitutionsAsStrings);
                         // Create a pickle with the substituted steps
                         PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
-                                scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
-                                substitutedSteps);
+                                scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutionsAsStrings),
+                                substitutedSteps)
+                                // All parameters should have the same line number, so just get the number from the first one
+                                .withLineNumber(substitutions.values().stream().findFirst().orElseThrow().lineNumber());
                         if (scenario.getLongDescription().isPresent()) {
-                            builder.withLongDescription(scenario.getLongDescription().get().getStringWithSubstitutions(substitutions));
+                            builder.withLongDescription(scenario.getLongDescription().get().getStringWithSubstitutions(substitutionsAsStrings));
                         }
                         if (table.getTags().isPresent()) {
                             tableTags.addAll(processTags(table.getTags().get()));
@@ -133,8 +133,8 @@ public class PickleJarFactory implements GherkinObservable {
                         Set<String> potentiallyMutatedTags = new HashSet<>(tableTags);
                         // notifying observers
                         notifyObservers(
-                            scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutions),
-                            substitutedSteps, potentiallyMutatedTags, substitutions);
+                            scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutionsAsStrings),
+                            substitutedSteps, potentiallyMutatedTags, substitutionsAsStrings);
                         builder.withTags(processTags(potentiallyMutatedTags));
                         pickleJarScenarios.add(builder.build());
                     }
@@ -146,7 +146,8 @@ public class PickleJarFactory implements GherkinObservable {
                 // Create a pickle with the substituted steps
                 PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
                         scenario.getTitle().orElseThrow().getRawString(),
-                        stepBody);
+                        stepBody)
+                        .withLineNumber(scenario.getLineNumber());
                 if (!tags.isEmpty()) {
                     builder.withTags(processTags(tags));
                 }

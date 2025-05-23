@@ -71,6 +71,9 @@ public class GherkinFeature {
         private List<GherkinScenario> gherkinScenarios = new ArrayList<>();
         private List<GherkinRule> rules = new ArrayList<>();
         private Optional<List<String>> tags = Optional.empty();
+        private int lineNumber = -1;
+        private int linePosition = -1;
+
 				private static final String LOCATION_ERROR = "Location cannot be null!";
         public Builder(URI location) {
 					
@@ -93,6 +96,16 @@ public class GherkinFeature {
             Preconditions.checkArgument(location != null,
                     LOCATION_ERROR);
             return new GherkinFeature(this);
+        }
+
+        public Builder withLineNumber(int lineNumber) {
+            this.lineNumber = lineNumber;
+            return this;
+        }
+
+        public Builder withLinePosition(int linePosition) {
+            this.linePosition = linePosition;
+            return this;
         }
 
         public Builder addScenario(GherkinScenario scenario) {

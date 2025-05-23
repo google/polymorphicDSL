@@ -79,7 +79,8 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
             scenarioBuilder.withTags(tags);
         }
         if (ctx.SCENARIO_TITLE() != null) {
-            scenarioBuilder.withTitle(ctx.SCENARIO_TITLE().getText());
+            scenarioBuilder.withTitle(ctx.SCENARIO_TITLE().getText())
+                    .withPosition(ctx.SCENARIO_TITLE().getSymbol().getLine());
         } else if (ctx.SCENARIO_OUTLINE_TITLE() != null) {
             scenarioBuilder.withTitle(ctx.SCENARIO_OUTLINE_TITLE().getText());
         }
@@ -109,33 +110,34 @@ public class PdslGherkinListenerImpl extends PdslGherkinListener {
             builder.withLongDescription(transformLongDescription(ctx.LONG_DESCRIPTION()));
         }
         if (ctx.DATA_ROW() != null) {
-            List<List<String>> exampleData = new LinkedList<>();
-            ctx.DATA_ROW().forEach(row -> exampleData.add(transformRowData(row.getText())));
-            builder.withTable(createSubstitutionMapping(exampleData));
+            // Each element in the outer list represents a row
+            // The inner list represents the cells in that row
+            List<ExampleTableRow> cellsPerRow = new LinkedList<>();
+            ctx.DATA_ROW().forEach(row -> cellsPerRow.add(new ExampleTableRow(row, transformRowData(row.getText()))));
+
+            builder.withTable(createSubstitutionMapping(cellsPerRow));
         }
         return builder.build();
     }
 
-    private Map<String, List<String>> createSubstitutionMapping(List<List<String>> exampleContent) {
-        // See if the rows first column or row contains the keys by convention
-        boolean verticalHeaderRow = exampleContent.get(0).get(0).trim().equals("");
-        Map<String, List<String>> substitutions = new HashMap<>();
-        if (verticalHeaderRow) {
-            // First column has headers, the rest of the cell are the values
-            for (List<String> row : exampleContent) {
-                substitutions.put(row.get(0), row.subList(1, row.size()));
-            }
-        } else { // First row in the table has parameter keywords
-            List<String> header = exampleContent.get(0);
+    private record ExampleTableRow(TerminalNode originalSource, List<String> unescapedCellParameters){}
+
+    private Map<String, List<GherkinExamplesTable.CellOfExamplesTable>> createSubstitutionMapping(List<ExampleTableRow> rows) {
+        Map<String, List<GherkinExamplesTable.CellOfExamplesTable>> substitutions = new HashMap<>();
+
+            List<String> header = rows.getFirst().unescapedCellParameters;
             for (int i = 0; i < header.size(); i++) { // For each cell entry in a row
-                List<String> parameters = new LinkedList<>(); // Create a list of all substitution data
-                for (int j = 1; j < exampleContent.size(); j++) { // Add the cells from the ith column in the table
-                    parameters.add(exampleContent.get(j).get(i)
-                            .strip()); // Keep escaped newlines, but ignore whitespace
+                List<GherkinExamplesTable.CellOfExamplesTable> parameters = new LinkedList<>(); // Create a list of all substitution data
+                for (int j = 1; j < rows.size(); j++) { // Add the cells from the ith column in the table
+                    ExampleTableRow row = rows.get(j); // For each row
+                    parameters.add(new GherkinExamplesTable.CellOfExamplesTable(
+                            row.originalSource.getSymbol().getLine(),
+                            // Get the parameter from the column that matches the header we're iterating over
+                            row.unescapedCellParameters.get(i).strip() // Keep escaped newlines, but ignore whitespace
+                    ));
                 }
                 substitutions.put("<" + header.get(i) + ">", parameters);
             }
-        }
         return substitutions;
     }
 
