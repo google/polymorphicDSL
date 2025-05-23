@@ -5,7 +5,7 @@
 
     <groupId>com.google.pdsl</groupId>
     <artifactId>pdsl</artifactId>
-    <version>1.9.0</version>
+    <version>1.10.0</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>

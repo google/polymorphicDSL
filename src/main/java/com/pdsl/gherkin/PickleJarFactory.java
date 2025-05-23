@@ -84,7 +84,7 @@ public class PickleJarFactory implements GherkinObservable {
             // Top level scenarios
             if (feature.getOptionalGherkinScenarios().isPresent()) {
                 List<PickleJar.PickleJarScenario> topLevelPickles =
-                        convertScenariosToPickleJarScenarios(feature.getOptionalGherkinScenarios().get());
+                        convertScenariosToPickleJarScenarios(feature.getOptionalGherkinScenarios().get(), 0);
                 pickleJarBuilder.withFeatureLevelScenarios(topLevelPickles);
             }
             // Add all rules
@@ -97,15 +97,18 @@ public class PickleJarFactory implements GherkinObservable {
     }
 
 
-    private List<PickleJar.PickleJarScenario> convertScenariosToPickleJarScenarios(List<GherkinScenario> scenarios) {
+    private List<PickleJar.PickleJarScenario> convertScenariosToPickleJarScenarios(List<GherkinScenario> scenarios, int depth) {
+        int nextOrdinal = 0;
         List<PickleJar.PickleJarScenario> pickleJarScenarios = new ArrayList<>();
         for (GherkinScenario scenario : scenarios) {
+            nextOrdinal++;
             // If the scenario has an examples table the tags will need to be combined with the scenario level
             Set<String> tags = new HashSet<>();
             if (scenario.getTags().isPresent()) {
                 tags.addAll(processTags(scenario.getTags().get()));
             }
             if (scenario.getExamples().isPresent()) {
+                int tableIndex = 1;
                 for (GherkinExamplesTable table : scenario.getExamples().get()) {
                     Set<String> tableTags = new HashSet<>(tags);
                     for (Map<String, GherkinExamplesTable.CellOfExamplesTable> substitutions : table.getRowsWithCell()) {
@@ -120,7 +123,8 @@ public class PickleJarFactory implements GherkinObservable {
                                 scenario.getTitle().orElseThrow().getStringWithSubstitutions(substitutionsAsStrings),
                                 substitutedSteps)
                                 // All parameters should have the same line number, so just get the number from the first one
-                                .withLineNumber(substitutions.values().stream().findFirst().orElseThrow().lineNumber());
+                                .withLineNumber(substitutions.values().stream().findFirst().orElseThrow().lineNumber())
+                                .withScenarioPosition(depth, nextOrdinal, tableIndex++);
                         if (scenario.getLongDescription().isPresent()) {
                             builder.withLongDescription(scenario.getLongDescription().get().getStringWithSubstitutions(substitutionsAsStrings));
                         }
@@ -147,7 +151,8 @@ public class PickleJarFactory implements GherkinObservable {
                 PickleJar.PickleJarScenario.Builder builder = new PickleJar.PickleJarScenario.Builder(
                         scenario.getTitle().orElseThrow().getRawString(),
                         stepBody)
-                        .withLineNumber(scenario.getLineNumber());
+                        .withLineNumber(scenario.getLineNumber())
+                        .withScenarioPosition(depth,nextOrdinal, 0);
                 if (!tags.isEmpty()) {
                     builder.withTags(processTags(tags));
                 }
@@ -163,9 +168,9 @@ public class PickleJarFactory implements GherkinObservable {
 
     private List<PickleJar.PickleJarRule> convertRulesToPickles(List<GherkinRule> rules) {
         List<PickleJar.PickleJarRule> pickleJarRules = new ArrayList<>();
-        for (GherkinRule rule : rules) {
-
-            List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().orElseThrow());
+        for (int i=0; i < rules.size(); i++) {
+            GherkinRule rule = rules.get(i);
+            List<PickleJar.PickleJarScenario> scenarios = convertScenariosToPickleJarScenarios(rule.getScenarios().orElseThrow(), i+1);
             PickleJar.PickleJarRule.Builder builder = new PickleJar.PickleJarRule.Builder(rule.getTitle().orElseThrow(), scenarios);
             if (rule.getBackground().isPresent()) {
                 builder.withBackground(rule.getBackground().get());

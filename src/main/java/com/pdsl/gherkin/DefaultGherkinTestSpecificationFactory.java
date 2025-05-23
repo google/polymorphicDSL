@@ -4,10 +4,10 @@ import com.google.common.base.Preconditions;
 import com.pdsl.exceptions.SentenceNotFoundException;
 import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.gherkin.models.GherkinBackground;
+import com.pdsl.gherkin.models.GherkinScenario;
 import com.pdsl.gherkin.models.GherkinStep;
 import com.pdsl.gherkin.specifications.GherkinTestSpecification;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
-import com.pdsl.gherkin.testcases.GherkinTestCaseSpecification;
 import com.pdsl.logging.AnsiTerminalColorHelper;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.RecognizedBy;
@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -230,7 +231,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 featureBuilder.withMetaData(
                     new ByteArrayInputStream(featureMetaData.toByteArray()));
             } catch(IOException e){
-                //TODO Y
+                throw new IllegalStateException("There was an issue  processing a feature file!", e);
             }
 
             List<TestSpecification> pickles = getGherkinStepSpecificationScenarios(pickleJar.getScenarios(),
@@ -241,7 +242,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                     pickles.addAll(transformRulesToTestSpecifications(pickleJar.getRules(), pickleJar.getLocation()));
             }
             featureBuilder.withChildTestSpecifications(pickles);
-            featureTestSpecifications.add(new GherkinTestCaseSpecification(allTagsForTestCase, featureBuilder.build()));
+            featureTestSpecifications.add(new GherkinTestSpecification(featureBuilder.build(), allTagsForTestCase));
         }
         return Optional.of(featureTestSpecifications);
     }
@@ -249,10 +250,30 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
     private List<GherkinTestSpecification> transformScenariosToTestSpecifications(List<PickleJar.PickleJarScenario> scenarios, Set<String> parentTags, URI originalSourceLocation) {
         List<GherkinTestSpecification> gherkinTestSpecifications = new ArrayList<>();
         for (PickleJar.PickleJarScenario pickleJarScenario : scenarios) {
+            var position = pickleJarScenario.getScenarioPosition();
+            URI processedUri = null;
+            try {
+                processedUri =  new URI(
+                        originalSourceLocation.getScheme(),
+                        originalSourceLocation.getRawUserInfo(), // Use raw to preserve encoding
+                        originalSourceLocation.getHost(),
+                        originalSourceLocation.getPort(),
+                        originalSourceLocation.getRawPath(),     // Use raw to preserve encoding
+                        // Provide the line number using the rfc 5147 standard for 'text/plain'
+                        // Also provide positional data as params so that test frameworks can group them together
+                        // Preserve existing fragment
+                        String.format("%s=%d&%s=%d&%s=%d",
+                                GherkinScenario.ScenarioPosition.RULE_INDEX, position.ruleIndex(),
+                                GherkinScenario.ScenarioPosition.ORDINAL, position.ordinal(),
+                                GherkinScenario.ScenarioPosition.TABLE_INDEX, position.testIndex()), // Use the query string to provide position information
+                        String.format("line=%d", pickleJarScenario.getLineNumber()));
+            } catch (URISyntaxException e) {
+                processedUri = originalSourceLocation;
+            }
             DefaultTestSpecification.Builder topLevelScenario = new DefaultTestSpecification.Builder(
-                    pickleJarScenario.getTitleWithSubstitutions(),
-                    // Provide the line number using the rfc 5147 standard for 'text/plain'
-                    originalSourceLocation.resolve("#line=" + pickleJarScenario.getLineNumber()));
+                    pickleJarScenario.getTitleWithSubstitutions(), processedUri
+
+            );
             // Provide metadata
             topLevelScenario.withMetaData(new ByteArrayInputStream(extractMetaData(pickleJarScenario).toByteArray()));
             // Process step body
@@ -316,7 +337,9 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
 
     private List<TestSpecification> transformRulesToTestSpecifications(List<PickleJar.PickleJarRule> rules, URI originalSourceLocation) {
         List<TestSpecification> testSpecifications = new ArrayList<>();
+        int ruleIndex = 0;
         for (PickleJar.PickleJarRule rule : rules) {
+            ruleIndex++;
             DefaultTestSpecification.Builder ruleBuilder = new DefaultTestSpecification.Builder(rule.getTitle(),originalSourceLocation);
             ByteArrayOutputStream ruleMetaData = new ByteArrayOutputStream();
             if (rule.getLongDescription().isPresent()) {
@@ -327,7 +350,7 @@ public class DefaultGherkinTestSpecificationFactory implements GherkinTestSpecif
                 // Nest the scenarios in a background TestSpecification
                 GherkinBackground bg = rule.getBackground().get();
                 addBytesWithCorrectEncoding(ruleMetaData, getBackgroundText(bg));
-                logger.debug(String.format("%sRule Background%s in %s", AnsiTerminalColorHelper.CYAN,  AnsiTerminalColorHelper.RESET, rule.getTitle()));
+                logger.debug("{}Rule Background{} in {}", AnsiTerminalColorHelper.CYAN, AnsiTerminalColorHelper.RESET, rule.getTitle());
                 Optional<List<FilteredPhrase>> filteredBackgroundStepBody = processStepBodyContent(bg.getSteps().orElseThrow());
                 filteredBackgroundStepBody.ifPresent(ruleBuilder::withTestPhrases);
             }
