@@ -192,9 +192,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
             List<TestCase> listOfTestCases = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
                     .map(SharedTestCaseWithInterpreter::getTestCase).toList();
             int size = listOfTestCases.getFirst().getUnfilteredPhraseBody().size();
-            // The first phrase in a test case has metadata (arbitrarilly decided by standard implementation,
-            // not because it necessarily should be that way)
-            TestCase testCase = listOfTestCases.stream().findFirst().orElseThrow();
+
             notifyBeforeTestCase(sharedTestCase);
             // Create each visitor/listener one time per test case
             Map<InterpreterObj, ParseTreeListener> suppliedListeneres = new HashMap<>();
@@ -258,22 +256,22 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                     }
                     phraseIndex++;
                 }
-                notifyTestCaseSuccess(testCase);
+                notifyTestCaseSuccess(sharedTestCase);
             } catch (Throwable e) {
                 if (interpreterObj.isPresent() && phrase.isPresent()) {
                     if (interpreterObj.get().getParseTreeListener().isPresent()) {
                         notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
-                                testSection, testCase, e);
+                                testSection, sharedTestCase, e);
                     } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
                         notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
-                                testSection, testCase, e);
+                                testSection, sharedTestCase, e);
                     }
                 }
-                results.addTestResult(DefaultTestResult.failedTest(testCase, null, e, phraseIndex,
+                results.addTestResult(DefaultTestResult.failedTest(sharedTestCase, null, e, phraseIndex,
                         size - phraseIndex));
             }
-            results.addTestResult(DefaultTestResult.passingTest(testCase));
-            notifyAfterTestCase(testCase);
+            results.addTestResult(DefaultTestResult.passingTest(sharedTestCase));
+            notifyAfterTestCase(sharedTestCase);
         }
         notifyAfterTestSuite(sharedTestCases, results, context);
         return results;
@@ -298,7 +296,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
      *                           be called
      * testCaseSuccess         - Called once after each test case only if it had no
      *                           phrase failures
-     * @param observer
+     * @param observer an observer to notify during test execution events
      */
     @Override
     public void registerObserver(ExecutorObserver observer) {

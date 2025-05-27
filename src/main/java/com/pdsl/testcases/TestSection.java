@@ -23,10 +23,17 @@ public interface TestSection {
     /**
      * Provides additional information associated with this test section if found.
      * @return optional of type input stream representing the metadata
+     * @deprecated use getSectionMetadata instead
      */
     @Deprecated
     Optional<InputStream> getMetaData();
 
+    /**
+     * Provides additional information associated with this test section.
+     * <p>
+     * The use of this information, if any, is up to the underlying implementation.
+     * @return map containing arbitrary objects
+     */
     Optional<Map<String, Object>> getSectionMetadata();
 
     /**
@@ -57,5 +64,4 @@ public interface TestSection {
         }
         return testSections;
     }
-
 }
