@@ -165,7 +165,8 @@ public abstract class PdslGeneralInvocationContextProvider implements Invocation
                 .processTestSpecification(testSpecifications);
         List<URI> duplicateUris = new ArrayList<>();
         // Remove any duplicates with the same filtered test body
-	if (System.getProperty("pdsl.filterDuplicates").equalsIgnoreCase( "true")) {
+	if (System.getProperty("pdsl.filterDuplicates") != null
+            && System.getProperty("pdsl.filterDuplicates").equalsIgnoreCase( "true")) {
 		testCases.forEach(tc -> {
 			if (duplicateTest.containsKey(tc.getContextFilteredPhraseBody())) {
 			    duplicateUris.add(tc.getOriginalSource());

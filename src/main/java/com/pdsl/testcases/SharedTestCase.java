@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 public final class SharedTestCase implements TestCase {
 
-  List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters;
+  private final List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters;
 
   public SharedTestCase(List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters) {
     this.sharedTestCaseWithInterpreters = sharedTestCaseWithInterpreters;
@@ -53,5 +53,10 @@ public final class SharedTestCase implements TestCase {
     @Override
     public List<FilteredPhrase> getFilteredPhrases() {
         return sharedTestCaseWithInterpreters.getFirst().getTestCase().getFilteredPhrases();
+    }
+
+    @Override
+    public Map<String, Object> getMetadata() {
+        return sharedTestCaseWithInterpreters.getFirst().getTestCase().getMetadata();
     }
 }

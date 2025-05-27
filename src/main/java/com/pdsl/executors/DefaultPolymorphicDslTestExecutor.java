@@ -20,6 +20,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * An executor that runs PDSL tests create from a TestCaseFactory.
@@ -191,7 +192,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
             List<TestCase> listOfTestCases = sharedTestCase.getSharedTestCaseWithInterpreters().stream()
                     .map(SharedTestCaseWithInterpreter::getTestCase).toList();
             int size = listOfTestCases.getFirst().getUnfilteredPhraseBody().size();
-            TestCase testCase = listOfTestCases.stream().findFirst().orElseThrow();
+
             notifyBeforeTestCase(sharedTestCase);
             // Create each visitor/listener one time per test case
             Map<InterpreterObj, ParseTreeListener> suppliedListeneres = new HashMap<>();
@@ -209,6 +210,11 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                     .map(Iterator::next)
                     .findFirst()
                     .orElseThrow(() -> new IllegalStateException("No executable phrases were found!"));
+            Map<SharedTestCaseWithInterpreter, Iterator<TestSection>> interpreter2Iterator = sharedTestCase.getSharedTestCaseWithInterpreters()
+                    .stream()
+                    .collect(Collectors.toMap(interpreter -> interpreter,
+                            interpreter -> interpreter.getTestCase().getContextFilteredTestSectionIterator()
+                    ));
 
             try {
                 for (int j = 0;
@@ -221,8 +227,13 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                         //TODO - Add implementation for the duplication checking
                         Optional<ParseTree> parseTree = filteredPhrase.getParseTree();
                         if (parseTree.isPresent()) {
+                            if (!interpreter2Iterator.get(interpreter).hasNext()) {
+                                // If a parse tree was found there should definitely be a new test section or something
+                                // is wrong
+                                throw new IllegalStateException("PDSL Framework error: The context filtered interpreters are out of sync!");
+                            }
+                            testSection = interpreter2Iterator.get(interpreter).next();
                             phrase = Optional.of(new DefaultPhrase(parseTree.get(), phraseIndex));
-
                             interpreterObj = Optional.of(interpreter.getInterpreterObj());
 
                             if (interpreterObj.get().getListenerSupplier().isPresent()) {
@@ -241,27 +252,26 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
                                 visitor.visit(parseTree.get());
                                 notifyAfterVisitor(visitor, testSection);
                             }
-
                         }
                     }
                     phraseIndex++;
                 }
-                notifyTestCaseSuccess(testCase);
+                notifyTestCaseSuccess(sharedTestCase);
             } catch (Throwable e) {
                 if (interpreterObj.isPresent() && phrase.isPresent()) {
                     if (interpreterObj.get().getParseTreeListener().isPresent()) {
                         notifyOnListenerException(interpreterObj.get().getParseTreeListener().get(),
-                                testSection, testCase, e);
+                                testSection, sharedTestCase, e);
                     } else if (interpreterObj.get().getParseTreeVisitor().isPresent()) {
                         notifyOnVisitorException(interpreterObj.get().getParseTreeVisitor().get(),
-                                testSection, testCase, e);
+                                testSection, sharedTestCase, e);
                     }
                 }
-                results.addTestResult(DefaultTestResult.failedTest(testCase, null, e, phraseIndex,
+                results.addTestResult(DefaultTestResult.failedTest(sharedTestCase, null, e, phraseIndex,
                         size - phraseIndex));
             }
-            results.addTestResult(DefaultTestResult.passingTest(testCase));
-            notifyAfterTestCase(testCase);
+            results.addTestResult(DefaultTestResult.passingTest(sharedTestCase));
+            notifyAfterTestCase(sharedTestCase);
         }
         notifyAfterTestSuite(sharedTestCases, results, context);
         return results;
@@ -286,7 +296,7 @@ public class DefaultPolymorphicDslTestExecutor implements TraceableTestRunExecut
      *                           be called
      * testCaseSuccess         - Called once after each test case only if it had no
      *                           phrase failures
-     * @param observer
+     * @param observer an observer to notify during test execution events
      */
     @Override
     public void registerObserver(ExecutorObserver observer) {
