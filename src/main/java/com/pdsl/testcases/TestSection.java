@@ -8,6 +8,7 @@ import com.pdsl.specifications.Phrase;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -23,7 +24,10 @@ public interface TestSection {
      * Provides additional information associated with this test section if found.
      * @return optional of type input stream representing the metadata
      */
+    @Deprecated
     Optional<InputStream> getMetaData();
+
+    Optional<Map<String, Object>> getSectionMetadata();
 
     /**
      * returns the phrase that composes part of a test.

@@ -2,9 +2,11 @@ package com.pdsl.testcases;
 
 import com.pdsl.specifications.FilteredPhrase;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.net.URI;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * An executable test for PDSL to process with a test case executor of some kind.
@@ -13,6 +15,8 @@ import java.util.List;
  */
 public interface TestCase {
 
+    String STANDARD_LONG_DESCRIPTION_KEY = "polymorphic-dsl-test-case-long-description";
+    String DEFAULT_TAGS = "polymorphic-dsl-test-case-tags";
     /**
      * Returns the original source file this test was created from.
      *
@@ -83,4 +87,17 @@ public interface TestCase {
      * @return List<FilteredPhrase>  the filtered phrases from all phrases that are associated with the test case
      */
     List<FilteredPhrase> getFilteredPhrases();
+
+    /**
+     * Provides a general container for information associated with this test case.
+     * <p>
+     * This could include things like tags, streams for text that cannot be stored in a string, etc.
+     * The purpose of these objects (if any) is determined by the underlying implementation.
+     *
+     * @return a map of arbitrary objects associated with this test case
+     */
+    Map<String, Object> getMetadata();
+
+
+
 }

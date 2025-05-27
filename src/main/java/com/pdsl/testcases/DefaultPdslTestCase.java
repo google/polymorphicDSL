@@ -8,6 +8,7 @@ import java.net.URI;
 import org.antlr.v4.runtime.tree.ParseTree;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +23,8 @@ public class DefaultPdslTestCase implements TestCase {
     private final List<String> contextFilteredPhraseBody;
     private final List<FilteredPhrase> phrasesToTestSections;
     private final URI source;
+    private final Map<String, Object> metadata;
+    private static final String errMessage = "Test case title cannot be empty or null!";
 
     public static final PdslTestCaseComparator DEFAULT_TEST_CASE_COMPARATOR = new PdslTestCaseComparator();
 
@@ -33,7 +36,7 @@ public class DefaultPdslTestCase implements TestCase {
      * @param source the original source this test case was created from
      */
     public DefaultPdslTestCase(String testCaseTitle, List<TestBodyFragment> testBodyFragments, URI source) {
-        String errMessage = "Test case title cannot be empty or null!";
+
         Preconditions.checkNotNull(testCaseTitle, errMessage);
         Preconditions.checkNotNull(source);
         Preconditions.checkArgument(!testCaseTitle.isEmpty(), errMessage);
@@ -55,6 +58,39 @@ public class DefaultPdslTestCase implements TestCase {
                 .map(Optional::get)
                 .map(ParseTree::getText)
                 .toList();
+       metadata = new ConcurrentHashMap<>();
+    }
+
+    public DefaultPdslTestCase(String testCaseTitle, List<TestBodyFragment> testBodyFragments, URI source,
+                               Map<String, Object> metadata) {
+        Preconditions.checkNotNull(testCaseTitle, errMessage);
+        Preconditions.checkNotNull(source);
+        Preconditions.checkArgument(!testCaseTitle.isEmpty(), errMessage);
+        Preconditions.checkNotNull(testBodyFragments, errMessage);
+        Preconditions.checkArgument(!testBodyFragments.isEmpty(), errMessage);
+        Preconditions.checkNotNull(metadata);
+        this.source = source;
+        this.testBodyFragments = testBodyFragments;
+        this.testCaseTitle = testCaseTitle;
+        this.phrasesToTestSections = testBodyFragments.stream()
+                .map(TestBodyFragment::getTestPhrases)
+                .flatMap(Collection::stream)
+                .toList();
+        this.unfilteredPhraseBody = phrasesToTestSections.stream()
+                .map(FilteredPhrase::getPhrase)
+                .toList();
+        this.contextFilteredPhraseBody = phrasesToTestSections.stream()
+                .map(FilteredPhrase::getParseTree)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(ParseTree::getText)
+                .toList();
+        this.metadata = metadata;
+    }
+
+    @Override
+    public Map<String, Object> getMetadata() {
+        return metadata;
     }
 
     @Override

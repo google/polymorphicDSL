@@ -2,14 +2,15 @@ package com.pdsl.interpreter;
 
 import com.pdsl.grammars.InterpreterTwoLexer;
 import com.pdsl.grammars.InterpreterTwoParser;
-import com.pdsl.grammars.InterpreterTwoListenerImpl;
+import com.pdsl.grammars.InterpreterTwoParserBaseListener;
 import com.pdsl.runners.PdslGherkinApplication;
 import com.pdsl.runners.PdslTest;
+import com.pdsl.runners.RecognizedBy;
 import com.pdsl.runners.junit.PdslGherkinJUnit4Runner;
-import javax.inject.Provider;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.runner.RunWith;
-import com.pdsl.runners.RecognizedBy;
+
+import javax.inject.Provider;
 
 /**
  * This is for debugging only.
@@ -37,7 +38,7 @@ public final class InterpreterTwo {
   public static class InterpreterTwoListenerProvider implements Provider<ParseTreeListener> {
     @Override
     public ParseTreeListener get() {
-      return new InterpreterTwoListenerImpl();
+      return new InterpreterTwoParserBaseListener();
     }
   }
 }

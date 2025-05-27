@@ -327,7 +327,7 @@ public final class GherkinPolymorphicDslTestExecutor {
         /*
         * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
         * */
-        List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerImpl()));
+        List<InterpreterObj> InterpreterObjs = List.of(new InterpreterObj(new InterpreterOneParserBaseListener()), new InterpreterObj(new InterpreterTwoParserBaseListener()));
         SharedTestSuite sharedTestSuite = SharedTestSuite.of(testCasesList, InterpreterObjs);
         MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(sharedTestSuite.getSharedTestCaseList(), "API");
 
@@ -383,7 +383,7 @@ public final class GherkinPolymorphicDslTestExecutor {
         /*
          * com.pdsl.runners.junit.PdslGherkinJUnit4Runner.runChild
          * */
-        List<InterpreterObj> interpreterObjs = List.of(new InterpreterObj(new InterpreterOneListenerImpl()), new InterpreterObj(new InterpreterTwoListenerExceptionImpl()));
+        List<InterpreterObj> interpreterObjs = List.of(new InterpreterObj(new InterpreterOneParserBaseListener()), new InterpreterObj(new InterpreterTwoListenerExceptionImpl()));
         SharedTestSuite sharedTestSuite = SharedTestSuite.of(testCasesList, interpreterObjs);
         MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(sharedTestSuite.getSharedTestCaseList(), "APIs");
 

@@ -64,7 +64,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
         }
         // Add phrases in this node if present
         if (testSpecification.getFilteredPhrases().isPresent()) {
-            childTestBodyFragments.add(new TestBodyFragment(childMetaData.isPresent() ? childMetaData.get() : null, testSpecification.getFilteredPhrases().get()));
+            childTestBodyFragments.add(new TestBodyFragment(null, testSpecification.getFilteredPhrases().get()));
         }
         // Add phrases in child node if present
         if (testSpecification.nestedTestSpecifications().isPresent()) {
@@ -74,6 +74,7 @@ public class PreorderTestCaseFactory implements TestCaseFactory {
             return testCases;
         } else {
             TestCase testCase = new DefaultPdslTestCase(testSpecification.getName(), childTestBodyFragments, testSpecification.getOriginalTestResource());
+            testCase.getMetadata().put(TestCase.STANDARD_LONG_DESCRIPTION_KEY, childMetaData);
             if (!tags.isEmpty()) {
                 testCase = new DefaultTaggedTestCase(testCase, tags);
             }

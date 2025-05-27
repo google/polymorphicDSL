@@ -2,14 +2,15 @@ package com.pdsl.interpreter;
 
 import com.pdsl.grammars.InterpreterOneLexer;
 import com.pdsl.grammars.InterpreterOneParser;
-import com.pdsl.grammars.InterpreterOneListenerImpl;
+import com.pdsl.grammars.InterpreterOneParserBaseListener;
 import com.pdsl.runners.PdslGherkinApplication;
 import com.pdsl.runners.PdslTest;
 import com.pdsl.runners.RecognizedBy;
 import com.pdsl.runners.junit.PdslGherkinJUnit4Runner;
-import javax.inject.Provider;
 import org.antlr.v4.runtime.tree.ParseTreeListener;
 import org.junit.runner.RunWith;
+
+import javax.inject.Provider;
 
 /**
  * This is for debugging only.
@@ -38,7 +39,7 @@ public final class InterpreterOne {
   public static class InterpreterOneListenerProvider implements Provider<ParseTreeListener> {
     @Override
     public ParseTreeListener get() {
-      return new InterpreterOneListenerImpl();
+      return new InterpreterOneParserBaseListener();
     }
   }
 }
