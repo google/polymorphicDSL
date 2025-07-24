@@ -9,6 +9,7 @@ AN_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'an' LINE_END -> mode(AN), type(LANGUAGE_H
 AR_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'ar' LINE_END -> mode(AR), type(LANGUAGE_HEADER) ;
 AST_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'ast' LINE_END -> mode(AST), type(LANGUAGE_HEADER) ;
 AZ_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'az' LINE_END -> mode(AZ), type(LANGUAGE_HEADER) ;
+BE_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'be' LINE_END -> mode(BE), type(LANGUAGE_HEADER) ;
 BG_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'bg' LINE_END -> mode(BG), type(LANGUAGE_HEADER) ;
 BM_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'bm' LINE_END -> mode(BM), type(LANGUAGE_HEADER) ;
 BS_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'bs' LINE_END -> mode(BS), type(LANGUAGE_HEADER) ;
@@ -25,6 +26,7 @@ EN_AU_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'en-au' LINE_END -> mode(EN_AU), type(L
 EN_LOL_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'en-lol' LINE_END -> mode(EN_LOL), type(LANGUAGE_HEADER) ;
 EN_OLD_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'en-old' LINE_END -> mode(EN_OLD), type(LANGUAGE_HEADER) ;
 EN_PIRATE_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'en-pirate' LINE_END -> mode(EN_PIRATE), type(LANGUAGE_HEADER) ;
+EN_TX_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'en-tx' LINE_END -> mode(EN_TX), type(LANGUAGE_HEADER) ;
 EO_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'eo' LINE_END -> mode(EO), type(LANGUAGE_HEADER) ;
 ES_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'es' LINE_END -> mode(ES), type(LANGUAGE_HEADER) ;
 ET_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'et' LINE_END -> mode(ET), type(LANGUAGE_HEADER) ;
@@ -77,8 +79,10 @@ UR_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'ur' LINE_END -> mode(UR), type(LANGUAGE_H
 UZ_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'uz' LINE_END -> mode(UZ), type(LANGUAGE_HEADER) ;
 VI_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'vi' LINE_END -> mode(VI), type(LANGUAGE_HEADER) ;
 ZH_CN_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'zh-CN' LINE_END -> mode(ZH_CN), type(LANGUAGE_HEADER) ;
+ML_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'ml' LINE_END -> mode(ML), type(LANGUAGE_HEADER) ;
 ZH_TW_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'zh-TW' LINE_END -> mode(ZH_TW), type(LANGUAGE_HEADER) ;
 MR_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'mr' LINE_END -> mode(MR), type(LANGUAGE_HEADER) ;
+AMH_LANGUAGE_HEADER : LANGUAGE_KEYWORD 'amh' LINE_END -> mode(AMH), type(LANGUAGE_HEADER) ;
 //////////////////////////////////////////////////////////////////////////
 FEATURE_KEYWORD : ('Feature'
 	| 'Business Need'
@@ -175,7 +179,7 @@ mode AF;
 
 	AF_RULE : (
 
-	('Rule'
+	('Regel'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	AF_GIVEN : (
@@ -737,6 +741,108 @@ mode AZ;
 	AZ_BUT_STEP : WS* AZ_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
 
 
+//Belarusian
+//Беларуская
+mode BE;
+	BE_FEATURE : ( 
+	('Функцыянальнасць'
+		| 'Фіча'
+	) ':'
+		) -> type(FEATURE_KEYWORD) ;
+
+    BE_BACKGROUND : (
+    
+	('Кантэкст'
+	) ':'
+		) -> type(BACKGROUND_KEYWORD);
+	BE_SCENARIO : (
+
+	('Сцэнарый'
+		| 'Cцэнар'
+	) ':'
+	) -> type(SCENARIO_KEYWORD);
+
+	BE_SCENARIO_OUTLINE : (
+
+	('Шаблон сцэнарыя'
+		| 'Узор сцэнара'
+	) 
+	) -> type(SCENARIO_OUTLINE_KEYWORD);
+
+	BE_EXAMPLES : (
+
+	('Прыклады'
+	) ':'  ) -> type(EXAMPLES_KEYWORD) ;
+
+	BE_RULE : (
+
+	('Правілы'
+	) ':'  ) -> type(RULE_KEYWORD) ;
+
+	BE_GIVEN : (
+
+	('Няхай '
+		| 'Дадзена '
+	)   ) -> type(GIVEN_KEYWORD) ;
+
+	BE_WHEN : (
+
+	('Калі '
+	)   ) -> type(WHEN_KEYWORD) ;
+
+	BE_THEN : (
+
+	('Тады '
+	)   ) -> type(THEN_KEYWORD) ;
+
+	BE_AND : (
+
+	('I '
+		| 'Ды '
+		| 'Таксама '
+	)   ) -> type(AND_KEYWORD) ;
+
+	BE_BUT : (
+
+	('Але '
+		| 'Інакш '
+	)   ) -> type(BUT_KEYWORD) ;
+
+	BE_STARTING_STEP_KEYWORD : (
+
+                BE_GIVEN
+		| BE_WHEN
+		| BE_THEN
+		| WILD_KEYWORD
+		) -> type(STARTING_STEP_KEYWORD);
+
+    
+	BE_ALTERNATIVE_STEP_KEYWORD : (
+
+                BE_AND
+		| BE_BUT
+		) -> type(ALTERNATIVE_STEP_KEYWORD);
+
+    
+    BE_FEATURE_TITLE : WS* BE_FEATURE ~[\r\n]* WS* LINE_END -> type(FEATURE_TITLE) ;
+
+    BE_BACKGROUND_TITLE : WS* BE_BACKGROUND ~[\r\n]* COMMENT? LINE_END -> type(BACKGROUND_TITLE) ;
+
+    BE_EXAMPLES_TITLE : WS* BE_EXAMPLES ~[\r\n]* COMMENT? LINE_END -> type(EXAMPLES_TITLE);
+
+    BE_SCENARIO_TITLE : WS* BE_SCENARIO ~[\r\n]* LINE_END -> type(SCENARIO_TITLE);
+
+    BE_SCENARIO_OUTLINE_TITLE : WS* BE_SCENARIO_OUTLINE ~[\r\n]* LINE_END -> type(SCENARIO_OUTLINE_TITLE) ;
+
+    BE_RULE_TITLE : WS* BE_RULE ~[\r\n]* LINE_END -> type(RULE_TITLE);
+
+        BE_GIVEN_STEP : WS* BE_GIVEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(GIVEN_STEP);
+	BE_WHEN_STEP : WS* BE_WHEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(WHEN_STEP);
+	BE_THEN_STEP : WS* BE_THEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(THEN_STEP);
+	BE_AND_STEP : WS* BE_AND ~[ @\r\n|] ~[\r\n]* LINE_END -> type(AND_STEP);
+	BE_BUT_STEP : WS* BE_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
+
+
 //Bulgarian
 //български
 mode BG;
@@ -770,7 +876,7 @@ mode BG;
 
 	BG_RULE : (
 
-	('Rule'
+	('Правило'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	BG_GIVEN : (
@@ -1366,7 +1472,7 @@ mode DA;
 
 	DA_RULE : (
 
-	('Rule'
+	('Regel'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	DA_GIVEN : (
@@ -2165,9 +2271,12 @@ mode EN_OLD;
 
 	EN_OLD_WHEN : (
 
-	('Tha '
-		| 'Þa '
-		| 'Ða '
+	('Bæþsealf '
+		| 'Bæþsealfa '
+		| 'Bæþsealfe '
+		| 'Ciricæw '
+		| 'Ciricæwe '
+		| 'Ciricæwa '
 	)   ) -> type(WHEN_KEYWORD) ;
 
 	EN_OLD_THEN : (
@@ -2321,6 +2430,104 @@ mode EN_PIRATE;
 	EN_PIRATE_BUT_STEP : WS* EN_PIRATE_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
 
 
+//Texas
+//Texas
+mode EN_TX;
+	EN_TX_FEATURE : ( 
+	('This ain’t my first rodeo'
+		| 'All gussied up'
+	) ':'
+		) -> type(FEATURE_KEYWORD) ;
+
+    EN_TX_BACKGROUND : (
+    
+	('Lemme tell y\'all a story'
+	) ':'
+		) -> type(BACKGROUND_KEYWORD);
+	EN_TX_SCENARIO : (
+
+	('All hat and no cattle'
+	) ':'
+	) -> type(SCENARIO_KEYWORD);
+
+	EN_TX_SCENARIO_OUTLINE : (
+
+	('Serious as a snake bite'
+		| 'Busy as a hound in flea season'
+	) 
+	) -> type(SCENARIO_OUTLINE_KEYWORD);
+
+	EN_TX_EXAMPLES : (
+
+	('Now that\'s a story longer than a cattle drive in July'
+	) ':'  ) -> type(EXAMPLES_KEYWORD) ;
+
+	EN_TX_RULE : (
+
+	('Rule '
+	) ':'  ) -> type(RULE_KEYWORD) ;
+
+	EN_TX_GIVEN : (
+
+	('Fixin\' to '
+		| 'All git out '
+	)   ) -> type(GIVEN_KEYWORD) ;
+
+	EN_TX_WHEN : (
+
+	('Quick out of the chute '
+	)   ) -> type(WHEN_KEYWORD) ;
+
+	EN_TX_THEN : (
+
+	('There’s no tree but bears some fruit '
+	)   ) -> type(THEN_KEYWORD) ;
+
+	EN_TX_AND : (
+
+	('Come hell or high water '
+	)   ) -> type(AND_KEYWORD) ;
+
+	EN_TX_BUT : (
+
+	('Well now hold on, I\'ll you what '
+	)   ) -> type(BUT_KEYWORD) ;
+
+	EN_TX_STARTING_STEP_KEYWORD : (
+
+                EN_TX_GIVEN
+		| EN_TX_WHEN
+		| EN_TX_THEN
+		| WILD_KEYWORD
+		) -> type(STARTING_STEP_KEYWORD);
+
+    
+	EN_TX_ALTERNATIVE_STEP_KEYWORD : (
+
+                EN_TX_AND
+		| EN_TX_BUT
+		) -> type(ALTERNATIVE_STEP_KEYWORD);
+
+    
+    EN_TX_FEATURE_TITLE : WS* EN_TX_FEATURE ~[\r\n]* WS* LINE_END -> type(FEATURE_TITLE) ;
+
+    EN_TX_BACKGROUND_TITLE : WS* EN_TX_BACKGROUND ~[\r\n]* COMMENT? LINE_END -> type(BACKGROUND_TITLE) ;
+
+    EN_TX_EXAMPLES_TITLE : WS* EN_TX_EXAMPLES ~[\r\n]* COMMENT? LINE_END -> type(EXAMPLES_TITLE);
+
+    EN_TX_SCENARIO_TITLE : WS* EN_TX_SCENARIO ~[\r\n]* LINE_END -> type(SCENARIO_TITLE);
+
+    EN_TX_SCENARIO_OUTLINE_TITLE : WS* EN_TX_SCENARIO_OUTLINE ~[\r\n]* LINE_END -> type(SCENARIO_OUTLINE_TITLE) ;
+
+    EN_TX_RULE_TITLE : WS* EN_TX_RULE ~[\r\n]* LINE_END -> type(RULE_TITLE);
+
+        EN_TX_GIVEN_STEP : WS* EN_TX_GIVEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(GIVEN_STEP);
+	EN_TX_WHEN_STEP : WS* EN_TX_WHEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(WHEN_STEP);
+	EN_TX_THEN_STEP : WS* EN_TX_THEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(THEN_STEP);
+	EN_TX_AND_STEP : WS* EN_TX_AND ~[ @\r\n|] ~[\r\n]* LINE_END -> type(AND_STEP);
+	EN_TX_BUT_STEP : WS* EN_TX_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
+
+
 //Esperanto
 //Esperanto
 mode EO;
@@ -2357,7 +2564,7 @@ mode EO;
 
 	EO_RULE : (
 
-	('Rule'
+	('Regulo'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	EO_GIVEN : (
@@ -2964,38 +3171,38 @@ mode GA;
 
 	GA_RULE : (
 
-	('Rule'
+	('Riail'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	GA_GIVEN : (
 
-	('Cuir i gcás go'
-		| 'Cuir i gcás nach'
-		| 'Cuir i gcás gur'
-		| 'Cuir i gcás nár'
+	('Cuir i gcás go '
+		| 'Cuir i gcás nach '
+		| 'Cuir i gcás gur '
+		| 'Cuir i gcás nár '
 	)   ) -> type(GIVEN_KEYWORD) ;
 
 	GA_WHEN : (
 
-	('Nuair a'
-		| 'Nuair nach'
-		| 'Nuair ba'
-		| 'Nuair nár'
+	('Nuair a '
+		| 'Nuair nach '
+		| 'Nuair ba '
+		| 'Nuair nár '
 	)   ) -> type(WHEN_KEYWORD) ;
 
 	GA_THEN : (
 
-	('Ansin'
+	('Ansin '
 	)   ) -> type(THEN_KEYWORD) ;
 
 	GA_AND : (
 
-	('Agus'
+	('Agus '
 	)   ) -> type(AND_KEYWORD) ;
 
 	GA_BUT : (
 
-	('Ach'
+	('Ach '
 	)   ) -> type(BUT_KEYWORD) ;
 
 	GA_STARTING_STEP_KEYWORD : (
@@ -3069,7 +3276,7 @@ mode GJ;
 
 	GJ_RULE : (
 
-	('Rule'
+	('નિયમ'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	GJ_GIVEN : (
@@ -3362,7 +3569,7 @@ mode HI;
 
 	HI_RULE : (
 
-	('Rule'
+	('नियम'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	HI_GIVEN : (
@@ -4005,6 +4212,7 @@ mode IT;
 	IT_AND : (
 
 	('E '
+		| 'Ed '
 	)   ) -> type(AND_KEYWORD) ;
 
 	IT_BUT : (
@@ -4084,7 +4292,7 @@ mode JA;
 
 	JA_RULE : (
 
-	('Rule'
+	('ルール'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	JA_GIVEN : (
@@ -4104,12 +4312,14 @@ mode JA;
 
 	JA_AND : (
 
-	('かつ'
+	('且つ'
+		| 'かつ'
 	)   ) -> type(AND_KEYWORD) ;
 
 	JA_BUT : (
 
-	('しかし'
+	('然し'
+		| 'しかし'
 		| '但し'
 		| 'ただし'
 	)   ) -> type(BUT_KEYWORD) ;
@@ -4251,10 +4461,11 @@ mode JV;
 
 
 //Georgian
-//ქართველი
+//ქართული
 mode KA;
 	KA_FEATURE : ( 
 	('თვისება'
+		| 'მოთხოვნა'
 	) ':'
 		) -> type(FEATURE_KEYWORD) ;
 
@@ -4266,13 +4477,18 @@ mode KA;
 	KA_SCENARIO : (
 
 	('მაგალითად'
-		| 'სცენარის'
+		| 'მაგალითი'
+		| 'მაგ'
+		| 'სცენარი'
 	) ':'
 	) -> type(SCENARIO_KEYWORD);
 
 	KA_SCENARIO_OUTLINE : (
 
 	('სცენარის ნიმუში'
+		| 'სცენარის შაბლონი'
+		| 'ნიმუში'
+		| 'შაბლონი'
 	) 
 	) -> type(SCENARIO_OUTLINE_KEYWORD);
 
@@ -4283,32 +4499,39 @@ mode KA;
 
 	KA_RULE : (
 
-	('Rule'
+	('წესი'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	KA_GIVEN : (
 
-	('მოცემული'
+	('მოცემული '
+		| 'მოცემულია '
+		| 'ვთქვათ '
 	)   ) -> type(GIVEN_KEYWORD) ;
 
 	KA_WHEN : (
 
-	('როდესაც'
+	('როდესაც '
+		| 'როცა '
+		| 'როგორც კი '
+		| 'თუ '
 	)   ) -> type(WHEN_KEYWORD) ;
 
 	KA_THEN : (
 
-	('მაშინ'
+	('მაშინ '
 	)   ) -> type(THEN_KEYWORD) ;
 
 	KA_AND : (
 
-	('და'
+	('და '
+		| 'ასევე '
 	)   ) -> type(AND_KEYWORD) ;
 
 	KA_BUT : (
 
-	('მაგ­რამ'
+	('მაგრამ '
+		| 'თუმცა '
 	)   ) -> type(BUT_KEYWORD) ;
 
 	KA_STARTING_STEP_KEYWORD : (
@@ -4479,30 +4702,30 @@ mode KO;
 
 	KO_GIVEN : (
 
-	('조건'
-		| '먼저'
+	('조건 '
+		| '먼저 '
 	)   ) -> type(GIVEN_KEYWORD) ;
 
 	KO_WHEN : (
 
-	('만일'
-		| '만약'
+	('만일 '
+		| '만약 '
 	)   ) -> type(WHEN_KEYWORD) ;
 
 	KO_THEN : (
 
-	('그러면'
+	('그러면 '
 	)   ) -> type(THEN_KEYWORD) ;
 
 	KO_AND : (
 
-	('그리고'
+	('그리고 '
 	)   ) -> type(AND_KEYWORD) ;
 
 	KO_BUT : (
 
-	('하지만'
-		| '단'
+	('하지만 '
+		| '단 '
 	)   ) -> type(BUT_KEYWORD) ;
 
 	KO_STARTING_STEP_KEYWORD : (
@@ -5200,7 +5423,7 @@ mode NE;
 	NE_AND : (
 
 	('र '
-		| 'अनी '
+		| 'अनि '
 	)   ) -> type(AND_KEYWORD) ;
 
 	NE_BUT : (
@@ -5276,7 +5499,7 @@ mode NL;
 
 	NL_RULE : (
 
-	('Rule'
+	('Regel'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	NL_GIVEN : (
@@ -5574,7 +5797,8 @@ mode PL;
 
 	PL_RULE : (
 
-	('Rule'
+	('Zasada'
+		| 'Reguła'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	PL_GIVEN : (
@@ -5869,6 +6093,7 @@ mode RU;
 		| 'Функциональность'
 		| 'Функционал'
 		| 'Свойство'
+		| 'Фича'
 	) ':'
 		) -> type(FEATURE_KEYWORD) ;
 
@@ -6215,8 +6440,7 @@ mode SR_CYRL;
 		) -> type(BACKGROUND_KEYWORD);
 	SR_CYRL_SCENARIO : (
 
-	('Пример'
-		| 'Сценарио'
+	('Сценарио'
 		| 'Пример'
 	) ':'
 	) -> type(SCENARIO_KEYWORD);
@@ -6237,7 +6461,7 @@ mode SR_CYRL;
 
 	SR_CYRL_RULE : (
 
-	('Rule'
+	('Правило'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	SR_CYRL_GIVEN : (
@@ -6344,7 +6568,7 @@ mode SR_LATN;
 
 	SR_LATN_RULE : (
 
-	('Rule'
+	('Pravilo'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	SR_LATN_GIVEN : (
@@ -6564,13 +6788,13 @@ mode TA;
 
 	TA_AND : (
 
-	('மேலும்  '
+	('மேலும் '
 		| 'மற்றும் '
 	)   ) -> type(AND_KEYWORD) ;
 
 	TA_BUT : (
 
-	('ஆனால்  '
+	('ஆனால் '
 	)   ) -> type(BUT_KEYWORD) ;
 
 	TA_STARTING_STEP_KEYWORD : (
@@ -6939,7 +7163,7 @@ mode TR;
 
 	TR_RULE : (
 
-	('Rule'
+	('Kural'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	TR_GIVEN : (
@@ -7342,7 +7566,7 @@ mode UZ;
 
 	UZ_GIVEN : (
 
-	('Агар '
+	('Belgilangan '
 	)   ) -> type(GIVEN_KEYWORD) ;
 
 	UZ_WHEN : (
@@ -7436,7 +7660,7 @@ mode VI;
 
 	VI_RULE : (
 
-	('Rule'
+	('Quy tắc'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	VI_GIVEN : (
@@ -7535,6 +7759,7 @@ mode ZH_CN;
 	ZH_CN_RULE : (
 
 	('Rule'
+		| '规则'
 	) ':'  ) -> type(RULE_KEYWORD) ;
 
 	ZH_CN_GIVEN : (
@@ -7599,6 +7824,101 @@ mode ZH_CN;
 	ZH_CN_THEN_STEP : WS* ZH_CN_THEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(THEN_STEP);
 	ZH_CN_AND_STEP : WS* ZH_CN_AND ~[ @\r\n|] ~[\r\n]* LINE_END -> type(AND_STEP);
 	ZH_CN_BUT_STEP : WS* ZH_CN_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
+
+
+//Malayalam
+//മലയാളം
+mode ML;
+	ML_FEATURE : ( 
+	('സവിശേഷത'
+	) ':'
+		) -> type(FEATURE_KEYWORD) ;
+
+    ML_BACKGROUND : (
+    
+	('പശ്ചാത്തലം'
+	) ':'
+		) -> type(BACKGROUND_KEYWORD);
+	ML_SCENARIO : (
+
+	('രംഗം'
+	) ':'
+	) -> type(SCENARIO_KEYWORD);
+
+	ML_SCENARIO_OUTLINE : (
+
+	('സാഹചര്യത്തിന്റെ രൂപരേഖ'
+	) 
+	) -> type(SCENARIO_OUTLINE_KEYWORD);
+
+	ML_EXAMPLES : (
+
+	('ഉദാഹരണങ്ങൾ'
+	) ':'  ) -> type(EXAMPLES_KEYWORD) ;
+
+	ML_RULE : (
+
+	('നിയമം'
+	) ':'  ) -> type(RULE_KEYWORD) ;
+
+	ML_GIVEN : (
+
+	('നൽകിയത്'
+	)   ) -> type(GIVEN_KEYWORD) ;
+
+	ML_WHEN : (
+
+	('എപ്പോൾ'
+	)   ) -> type(WHEN_KEYWORD) ;
+
+	ML_THEN : (
+
+	('പിന്നെ'
+	)   ) -> type(THEN_KEYWORD) ;
+
+	ML_AND : (
+
+	('ഒപ്പം'
+	)   ) -> type(AND_KEYWORD) ;
+
+	ML_BUT : (
+
+	('പക്ഷേ'
+	)   ) -> type(BUT_KEYWORD) ;
+
+	ML_STARTING_STEP_KEYWORD : (
+
+                ML_GIVEN
+		| ML_WHEN
+		| ML_THEN
+		| WILD_KEYWORD
+		) -> type(STARTING_STEP_KEYWORD);
+
+    
+	ML_ALTERNATIVE_STEP_KEYWORD : (
+
+                ML_AND
+		| ML_BUT
+		) -> type(ALTERNATIVE_STEP_KEYWORD);
+
+    
+    ML_FEATURE_TITLE : WS* ML_FEATURE ~[\r\n]* WS* LINE_END -> type(FEATURE_TITLE) ;
+
+    ML_BACKGROUND_TITLE : WS* ML_BACKGROUND ~[\r\n]* COMMENT? LINE_END -> type(BACKGROUND_TITLE) ;
+
+    ML_EXAMPLES_TITLE : WS* ML_EXAMPLES ~[\r\n]* COMMENT? LINE_END -> type(EXAMPLES_TITLE);
+
+    ML_SCENARIO_TITLE : WS* ML_SCENARIO ~[\r\n]* LINE_END -> type(SCENARIO_TITLE);
+
+    ML_SCENARIO_OUTLINE_TITLE : WS* ML_SCENARIO_OUTLINE ~[\r\n]* LINE_END -> type(SCENARIO_OUTLINE_TITLE) ;
+
+    ML_RULE_TITLE : WS* ML_RULE ~[\r\n]* LINE_END -> type(RULE_TITLE);
+
+        ML_GIVEN_STEP : WS* ML_GIVEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(GIVEN_STEP);
+	ML_WHEN_STEP : WS* ML_WHEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(WHEN_STEP);
+	ML_THEN_STEP : WS* ML_THEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(THEN_STEP);
+	ML_AND_STEP : WS* ML_AND ~[ @\r\n|] ~[\r\n]* LINE_END -> type(AND_STEP);
+	ML_BUT_STEP : WS* ML_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
 
 
 //Chinese traditional
@@ -7800,4 +8120,106 @@ mode MR;
 	MR_THEN_STEP : WS* MR_THEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(THEN_STEP);
 	MR_AND_STEP : WS* MR_AND ~[ @\r\n|] ~[\r\n]* LINE_END -> type(AND_STEP);
 	MR_BUT_STEP : WS* MR_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
+
+
+//Amharic
+//አማርኛ
+mode AMH;
+	AMH_FEATURE : ( 
+	('ስራ'
+		| 'የተፈለገው ስራ'
+		| 'የሚፈለገው ድርጊት'
+	) ':'
+		) -> type(FEATURE_KEYWORD) ;
+
+    AMH_BACKGROUND : (
+    
+	('ቅድመ ሁኔታ'
+		| 'መነሻ'
+		| 'መነሻ ሀሳብ'
+	) ':'
+		) -> type(BACKGROUND_KEYWORD);
+	AMH_SCENARIO : (
+
+	('ምሳሌ'
+		| 'ሁናቴ'
+	) ':'
+	) -> type(SCENARIO_KEYWORD);
+
+	AMH_SCENARIO_OUTLINE : (
+
+	('ሁናቴ ዝርዝር'
+		| 'ሁናቴ አብነት'
+	) 
+	) -> type(SCENARIO_OUTLINE_KEYWORD);
+
+	AMH_EXAMPLES : (
+
+	('ምሳሌዎች'
+		| 'ሁናቴዎች'
+	) ':'  ) -> type(EXAMPLES_KEYWORD) ;
+
+	AMH_RULE : (
+
+	('ህግ'
+	) ':'  ) -> type(RULE_KEYWORD) ;
+
+	AMH_GIVEN : (
+
+	('የተሰጠ '
+	)   ) -> type(GIVEN_KEYWORD) ;
+
+	AMH_WHEN : (
+
+	('መቼ '
+	)   ) -> type(WHEN_KEYWORD) ;
+
+	AMH_THEN : (
+
+	('ከዚያ '
+	)   ) -> type(THEN_KEYWORD) ;
+
+	AMH_AND : (
+
+	('እና '
+	)   ) -> type(AND_KEYWORD) ;
+
+	AMH_BUT : (
+
+	('ግን '
+	)   ) -> type(BUT_KEYWORD) ;
+
+	AMH_STARTING_STEP_KEYWORD : (
+
+                AMH_GIVEN
+		| AMH_WHEN
+		| AMH_THEN
+		| WILD_KEYWORD
+		) -> type(STARTING_STEP_KEYWORD);
+
+    
+	AMH_ALTERNATIVE_STEP_KEYWORD : (
+
+                AMH_AND
+		| AMH_BUT
+		) -> type(ALTERNATIVE_STEP_KEYWORD);
+
+    
+    AMH_FEATURE_TITLE : WS* AMH_FEATURE ~[\r\n]* WS* LINE_END -> type(FEATURE_TITLE) ;
+
+    AMH_BACKGROUND_TITLE : WS* AMH_BACKGROUND ~[\r\n]* COMMENT? LINE_END -> type(BACKGROUND_TITLE) ;
+
+    AMH_EXAMPLES_TITLE : WS* AMH_EXAMPLES ~[\r\n]* COMMENT? LINE_END -> type(EXAMPLES_TITLE);
+
+    AMH_SCENARIO_TITLE : WS* AMH_SCENARIO ~[\r\n]* LINE_END -> type(SCENARIO_TITLE);
+
+    AMH_SCENARIO_OUTLINE_TITLE : WS* AMH_SCENARIO_OUTLINE ~[\r\n]* LINE_END -> type(SCENARIO_OUTLINE_TITLE) ;
+
+    AMH_RULE_TITLE : WS* AMH_RULE ~[\r\n]* LINE_END -> type(RULE_TITLE);
+
+        AMH_GIVEN_STEP : WS* AMH_GIVEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(GIVEN_STEP);
+	AMH_WHEN_STEP : WS* AMH_WHEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(WHEN_STEP);
+	AMH_THEN_STEP : WS* AMH_THEN ~[ @\r\n|] ~[\r\n]* LINE_END -> type(THEN_STEP);
+	AMH_AND_STEP : WS* AMH_AND ~[ @\r\n|] ~[\r\n]* LINE_END -> type(AND_STEP);
+	AMH_BUT_STEP : WS* AMH_BUT ~[ @\r\n|] ~[\r\n]* LINE_END -> type(BUT_STEP);
 

@@ -7,7 +7,7 @@ In order to allow the lexer to be maintained a python helper script was develope
 ## Updating the Gherkin Standard
 
 The source of truth comes from the cucumber framework. You can download the JSON file and then run the script
-https://github.com/cucumber/common/blob/master/gherkin/gherkin-languages.json
+https://github.com/cucumber/gherkin/blob/main/gherkin-languages.json
 
 ### Adding new languages
 
