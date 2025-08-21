@@ -106,13 +106,28 @@ public class PdslConfigParameter {
         return new Builder(testCaseFactoryProvider, specificationFactoryProvider, pdslTestParameters);
     }
 
-    private static final TestCaseFactory GHERKIN_TEST_SPECIFICATION_FACTORY_SINGLETON = new PreorderTestCaseFactory();
+    private static final TestCaseFactory GHERKIN_TEST_CASE_FACTORY_SINGLETON = new PreorderTestCaseFactory();
     public static Builder createGherkinPdslConfig(Collection<PdslTestParameter> pdslTestParameters) {
-        return new Builder(() -> GHERKIN_TEST_SPECIFICATION_FACTORY_SINGLETON,
+        return new GherkinBuilder(new Builder(() -> GHERKIN_TEST_CASE_FACTORY_SINGLETON,
                 () -> filter -> new DefaultGherkinTestSpecificationFactory.Builder(filter).build(),
-                pdslTestParameters);
+                pdslTestParameters));
     }
 
+    private static class GherkinBuilder extends Builder{
+        private GherkinBuilder(Builder builder){
+            super(builder.testCaseFactoryProvider, builder.specificationFactoryProvider, builder.pdslTestParameters);
+        }
+
+        public GherkinPdslConfigParameter build() {
+            return new GherkinPdslConfigParameter(this);
+        }
+    }
+
+    private static class GherkinPdslConfigParameter extends PdslConfigParameter {
+        private GherkinPdslConfigParameter(Builder builder) {
+            super(builder);
+        }
+    }
     /**
      * A builder for creating a PdslConfigParameter.
      */
@@ -249,7 +264,24 @@ public class PdslConfigParameter {
     }
 
     public static RecognizerParams adapt(PdslConfigParameter parameter) {
-        return new RecognizerParams(
+        if(parameter instanceof GherkinPdslConfigParameter)
+            return new GherkinRecognizerParams(
+                    parameter.getContext(),
+                    parameter.getApplicationName(),
+                    parameter.getResourceRoot().toString(),
+                    convert(parameter.getPdslTestParameters(), parameter),
+                    parameter.getDslRecognizerLexer().orElse(ACCESSOR.getEmptyRecognizerLexerClass()),
+                    parameter.getDslRecognizerParser().orElse(ACCESSOR.getEmptyRecognizerParserClass()),
+                    new RecognizerParams.PdslSuppliers(
+                            parameter.getResourceFinder().isPresent() ? parameter.getResourceFinder().get()
+                                    : new DefaultResourceFinderGenerator(parameter.getResourceRoot().toString()),
+                            parameter.getSpecificationFactoryProvider(),
+                            parameter.getTestCaseFactoryProvider()
+
+                    )
+            );
+        else
+            return new DefaultRecognizerParams(
                 parameter.getContext(),
                 parameter.getApplicationName(),
                 parameter.getResourceRoot().toString(),
@@ -265,8 +297,6 @@ public class PdslConfigParameter {
                 )
         );
     }
-
-
 
     private static List<PdslTestParams> convert(Collection<PdslTestParameter> parameters,
                                                 PdslConfigParameter config) {
@@ -344,3 +374,5 @@ public class PdslConfigParameter {
         };
     }
 }
+
+

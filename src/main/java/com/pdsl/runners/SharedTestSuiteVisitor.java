@@ -2,11 +2,14 @@ package com.pdsl.runners;
 
 import com.google.common.base.Preconditions;
 import com.pdsl.executors.InterpreterObj;
+import com.pdsl.gherkin.filter.GherkinTagFilterer;
+import com.pdsl.gherkin.filter.GherkinTagsVisitorImpl;
 import com.pdsl.specifications.TestResourceFinder;
 import com.pdsl.specifications.TestResourceFinderGenerator;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
 import com.pdsl.testcases.SharedTestSuite;
+import com.pdsl.testcases.TaggedTestCase;
 import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
@@ -17,6 +20,7 @@ import org.antlr.v4.runtime.Parser;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * A visitor for producing PDSL test cases that can have more than one parser and listener/visitor process it.
@@ -26,6 +30,8 @@ import java.util.*;
  * features and enhancements to PDSL in general to 3rd party implementers.
  */
 public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParamsOperation<SharedTestSuite> {
+
+    protected static GherkinTagFilterer filter = new GherkinTagsVisitorImpl();
 
     @Override
     public SharedTestSuite recognizerParamsOperation(RecognizerParams recognizerParams) {
@@ -40,6 +46,7 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
         // Create a Shared Test Suite
         List<List<TestCase>> testCasesPerInterpreters = new ArrayList<>();
         List<InterpreterObj> interpreterObjs = new ArrayList<>();
+
         for (PdslTestParams params : recognizerParams.pdslTestParams()) {
 
             // Get the tests written in a DSL
@@ -58,6 +65,13 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
                 Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, params, testResources);
                 // Convert the specifications into test cases
                 List<TestCase> testCasesForSingleInterpreter = new ArrayList<>(getTestCases(recognizerParams.providers().testCaseFactoryProvider().get(), specifications));
+                if(recognizerParams instanceof GherkinRecognizerParams)
+                    testCasesForSingleInterpreter = testCasesForSingleInterpreter.stream()
+                            .filter(t -> t instanceof TaggedTestCase)
+                            .map(t -> (TaggedTestCase)t)
+                            .filter(t -> params.tags().stream().allMatch(condition -> filter.tagExpressionMatchesPickle(new HashSet<>(t.getTags()), condition)))
+                            .map(t -> (TestCase)t)
+                            .toList();
                 testCasesPerInterpreters.add(testCasesForSingleInterpreter);
                 interpreterObjs.add(parser.interpreterProvider().get());
             }

@@ -6,30 +6,25 @@ import com.pdsl.gherkin.executors.GherkinTestExecutor;
 import com.pdsl.gherkin.specifications.GherkinTestSpecificationFactory;
 import com.pdsl.grammars.*;
 import com.pdsl.grammars.InterpreterTwoParser.HiFolksContext;
-import com.pdsl.grammars.InterpreterTwoParser.PolymorphicDslAllRulesContext;
 import com.pdsl.reports.MetadataTestRunResults;
 import com.pdsl.specifications.TestSpecification;
 import com.pdsl.specifications.TestSpecificationFactory;
-import com.pdsl.testcases.*;
+import com.pdsl.testcases.PreorderTestCaseFactory;
+import com.pdsl.testcases.SharedTestSuite;
+import com.pdsl.testcases.TestCase;
+import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ErrorNode;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.net.URI;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -332,11 +327,11 @@ public final class GherkinPolymorphicDslTestExecutor {
         MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(sharedTestSuite.getSharedTestCaseList(), "API");
 
         // Assert
-        assertThat(results.totalPhrases()).isEqualTo(2); // 2 Unique test suites out of 3, 1 filtered out
-        assertThat(results.getTestResults().size()).isEqualTo(2); // 2 Unique test suites out of 3, 1 filtered out
+        assertThat(results.totalPhrases()).isEqualTo(3);
+        assertThat(results.getTestResults().size()).isEqualTo(3);
         assertThat(results.failingTestTotal()).isEqualTo(0);
-        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
-        assertThat(results.passingTestTotal()).isEqualTo(2); // 2 Unique test suites out of 3, 1 filtered out
+        assertThat(results.totalFilteredDuplicateTests()).isEqualTo(4);
+        assertThat(results.passingTestTotal()).isEqualTo(3);
     }
 
     @Test
@@ -388,10 +383,9 @@ public final class GherkinPolymorphicDslTestExecutor {
         MetadataTestRunResults results = gherkinTestExecutor.runTestsWithMetadata(sharedTestSuite.getSharedTestCaseList(), "APIs");
 
         // Assert
-        assertThat(results.totalPhrases()).isEqualTo(2);
-        assertThat(results.getTestResults().size()).isEqualTo(2);
-        assertThat(results.failingTestTotal()).isEqualTo(2);
-        //assertThat(results.totalFilteredDuplicateTests()).isEqualTo(1);
+        assertThat(results.totalPhrases()).isEqualTo(3);
+        assertThat(results.getTestResults().size()).isEqualTo(3);
+        assertThat(results.failingTestTotal()).isEqualTo(3);
         assertThat(results.passingTestTotal()).isEqualTo(0);
     }
 }
