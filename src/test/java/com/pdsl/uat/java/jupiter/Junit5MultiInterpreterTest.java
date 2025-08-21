@@ -57,7 +57,6 @@ public class Junit5MultiInterpreterTest {
   @TestTemplate
   @ExtendWith(PdslExtension.class)
   public void pdslGherkinTestFrameworkResources(PdslExecutable executable) {
-
     executable.execute();
     totalRunTests++;
     Assertions.assertEquals(2, context.sharedSentenceCalls);

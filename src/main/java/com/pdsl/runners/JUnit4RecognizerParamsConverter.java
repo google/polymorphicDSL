@@ -41,7 +41,7 @@ public final class JUnit4RecognizerParamsConverter {
         Preconditions.checkNotNull(pdslTestDto.pdslTest, "PdslTest cannot be null!");
         Preconditions.checkNotNull(configuration, "PdslConfiguration cannot be null!");
         PdslTestParams pdslTestParams = getPdslTestParams(pdslTestDto, configuration);
-        return new RecognizerParams(
+        return new DefaultRecognizerParams(
                 configuration.context(),
                 configuration.applicationName(),
                 configuration.resourceRoot(),
@@ -70,7 +70,7 @@ public final class JUnit4RecognizerParamsConverter {
         PdslTestParams pdslTestParams = getPdslTestParams(pdslTestDto, convert(pdslGherkinApplication));
         ProviderInstances providers = getProviderInstances(pdslGherkinApplication);
 
-        return new RecognizerParams(
+        return new GherkinRecognizerParams(
                 pdslGherkinApplication.context(),
                 pdslGherkinApplication.applicationName(),
                 pdslGherkinApplication.resourceRoot(),
