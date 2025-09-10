@@ -65,13 +65,16 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
                 Collection<TestSpecification> specifications = getSpecifications(parser, recognizerParams, params, testResources);
                 // Convert the specifications into test cases
                 List<TestCase> testCasesForSingleInterpreter = new ArrayList<>(getTestCases(recognizerParams.providers().testCaseFactoryProvider().get(), specifications));
-                if(recognizerParams instanceof GherkinRecognizerParams)
-                    testCasesForSingleInterpreter = testCasesForSingleInterpreter.stream()
-                            .filter(t -> t instanceof TaggedTestCase)
-                            .map(t -> (TaggedTestCase)t)
-                            .filter(t -> params.tags().stream().allMatch(condition -> filter.tagExpressionMatchesPickle(new HashSet<>(t.getTags()), condition)))
-                            .map(t -> (TestCase)t)
-                            .toList();
+                if (!params.tags().isEmpty()) {
+                    if (recognizerParams instanceof GherkinRecognizerParams) {
+                        testCasesForSingleInterpreter = testCasesForSingleInterpreter.stream()
+                                .filter(t -> t instanceof TaggedTestCase)
+                                .map(t -> (TaggedTestCase) t)
+                                .filter(t -> params.tags().stream().allMatch(condition -> filter.tagExpressionMatchesPickle(new HashSet<>(t.getTags()), condition)))
+                                .map(t -> (TestCase) t)
+                                .toList();
+                    }
+                }
                 testCasesPerInterpreters.add(testCasesForSingleInterpreter);
                 interpreterObjs.add(parser.interpreterProvider().get());
             }

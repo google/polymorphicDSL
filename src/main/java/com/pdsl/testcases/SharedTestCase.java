@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  * and associated (Lexer/Parser; Listener/Visitor) with them.
  * {@link com.pdsl.executors.InterpreterObj}
  */
-public final class SharedTestCase implements TestCase {
+public final class SharedTestCase implements TestCase, TaggedTestCase {
 
   private final List<SharedTestCaseWithInterpreter> sharedTestCaseWithInterpreters;
 
@@ -58,5 +58,13 @@ public final class SharedTestCase implements TestCase {
     @Override
     public Map<String, Object> getMetadata() {
         return sharedTestCaseWithInterpreters.getFirst().getTestCase().getMetadata();
+    }
+
+    @Override
+    public Collection<String> getTags() {
+        if (sharedTestCaseWithInterpreters.getFirst().getTestCase() instanceof TaggedTestCase tagged) {
+            return tagged.getTags();
+        }
+        return Set.of();
     }
 }
