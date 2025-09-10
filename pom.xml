@@ -1,25 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.google.pdsl</groupId>
     <artifactId>pdsl</artifactId>
-    <version>1.11</version>
+    <version>1.11.1-SNAPSHOT</version>
 
     <name>pdsl</name>
     <url>http://www.github.com/google/polymorphicDSL</url>
 
+
     <description>
-	    The Polymorphic DSL test framework was designed to solve the challenges with testing large, complex systems. Modern architecture requires software to run as distrubited systems or on multiple platforms. The conventional cost of testing these systems is quite high.
-	    PDSL allows a user to describe the system under test using a DSL of some kind: a picture,
-	    sentences in natural languages, graphs, etc. Using a common DSL allows someone to make deeply scalable tests. A simple change to the DSL could generate dozens of tests providing coverage through many layers of the test pyramid or even multiple applications.
+        The Polymorphic DSL test framework was designed to solve the challenges with testing large, complex systems.
+        Modern architecture requires software to run as distrubited systems or on multiple platforms. The conventional
+        cost of testing these systems is quite high.
+        PDSL allows a user to describe the system under test using a DSL of some kind: a picture,
+        sentences in natural languages, graphs, etc. Using a common DSL allows someone to make deeply scalable tests. A
+        simple change to the DSL could generate dozens of tests providing coverage through many layers of the test
+        pyramid or even multiple applications.
     </description>
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>7</version>
-    </parent>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -27,9 +28,27 @@
         <maven.compiler.target>21</maven.compiler.target>
         <jacoco.version>0.8.9</jacoco.version>
         <shade.version>3.3.0</shade.version>
-        <antlr.version>4.9.1</antlr.version>
+        <antlr.version>4.13.2</antlr.version>
         <mvn.jar.version>3.2.2</mvn.jar.version>
     </properties>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>A business-friendly OSS license</comments>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Nelson Boyer</name>
+            <email>nboyer@google.com</email>
+            <organization>Google LLC</organization>
+            <organizationUrl>http://www.google.com</organizationUrl>
+        </developer>
+    </developers>
 
     <dependencies>
         <!-- code coverage -->
@@ -149,22 +168,6 @@
             <id>test</id> <!-- needed to allow generation of ANTLR grammars used by test code -->
             <build>
                 <plugins>
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                        <configuration>-->
-<!--                            <argLine>-->
-<!--                                &#45;&#45;add-opens nodatafound.mockito_jpms_usecase/nodatafound.mjpmsuc=ALL-UNNAMED-->
-<!--                                &#45;&#45;add-opens=java.base/java.lang=ALL-UNNAMED-->
-<!--                                &#45;&#45;add-opens=java.base/java.util=ALL-UNNAMED-->
-
-<!--                            </argLine>-->
-<!--                            <includes>-->
-<!--                                <include>**/com/pdsl/tmp/SimpleHelloTest.java</include>-->
-<!--                                &lt;!&ndash;                                <include>**/myfiber/pdsl/*Test.java</include>&ndash;&gt;-->
-<!--                            </includes>-->
-<!--                        </configuration>-->
-<!--                    </plugin>-->
                     <plugin>
                         <groupId>org.antlr</groupId>
                         <artifactId>antlr4-maven-plugin</artifactId>
@@ -189,7 +192,7 @@
             <id>release</id>
             <build>
                 <plugins>
-                  <plugin>
+                    <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>3.8.0</version>
@@ -210,27 +213,12 @@
                             </execution>
                         </executions>
                     </plugin>
-<!--                    <plugin>-->
-<!--                        <groupId>org.apache.maven.plugins</groupId>-->
-<!--                        <artifactId>maven-surefire-plugin</artifactId>-->
-<!--                        <configuration>-->
-<!--                          <argLine>    -->
-<!--                             &#45;&#45;add-opens nodatafound.mockito_jpms_usecase/nodatafound.mjpmsuc=ALL-UNNAMED-->
-<!--                              &#45;&#45;add-opens=java.base/java.lang=ALL-UNNAMED-->
-<!--                              &#45;&#45;add-opens=java.base/java.util=ALL-UNNAMED-->
 
-<!--                          </argLine>-->
-<!--                        </configuration>      -->
-<!--                    </plugin>-->
                     <plugin>
                         <groupId>org.antlr</groupId>
                         <artifactId>antlr4-maven-plugin</artifactId>
                         <version>${antlr.version}</version>
                         <configuration>
-                            <!--
-<sourceDirectory>${basedir}/src/test/antlr4</sourceDirectory>
-<libDirectory>${basedir}/src/test/antlr4/com/pdsl/grammars</libDirectory>
-                            -->
                             <sourceDirectory>${basedir}/src/main/antlr4</sourceDirectory>
                             <preparationGoals>antlr4</preparationGoals>
                         </configuration>
@@ -258,37 +246,11 @@
                         </executions>
                     </plugin>
 
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.7.0</version>
-                        <extensions>true</extensions>
-                        <executions>
-                            <execution>
-                                <id>antlr4_deploy</id>
-                                <phase>antlr4</phase>
-                                <goals>
-                                    <goal>antlr4</goal>
-                                </goals>
-                            </execution>
-                            <execution>
-                                <id>default_deploy</id>
-                                <phase>deploy</phase>
-                                <goals>
-                                    <goal>deploy</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>false</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
+
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-source-plugin</artifactId>
-                        <version>2.2.1</version>
+                        <version>3.3.1</version>
                         <executions>
                             <execution>
                                 <id>attach-sources</id>
@@ -313,21 +275,16 @@
         </profile>
     </profiles>
 
-    <distributionManagement>
-        <snapshotRepository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </snapshotRepository>
-        <repository>
-            <id>ossrh</id>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-        </repository>
-
-    </distributionManagement>
-
     <build>
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>org.sonatype.central</groupId>
+                    <artifactId>central-publishing-maven-plugin</artifactId>
+                    <version>0.8.0</version>
+                    <extensions>true</extensions>
+                </plugin>
+
                 <plugin>
                     <groupId>org.antlr</groupId>
                     <artifactId>antlr4-maven-plugin</artifactId>
@@ -395,7 +352,12 @@
                 </plugin>
             </plugins>
         </pluginManagement>
+
         <plugins>
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -410,18 +372,12 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.12.4</version>
+                <version>3.5.3</version>
                 <configuration>
                     <argLine>
-<!--                        &#45;&#45;add-opens nodatafound.mockito_jpms_usecase/nodatafound.mjpmsuc=ALL-UNNAMED-->
                         --add-opens=java.base/java.lang=ALL-UNNAMED
                         --add-opens=java.base/java.util=ALL-UNNAMED
                     </argLine>
-                    <!--    This section for debugging only    -->
-<!--                    <includes>-->
-<!--                        <include>**/com/pdsl/interpreter/InterpreterSuiteTest.java</include>-->
-<!--                        <include>**/com/pdsl/component/PreorderTestCaseFactoryTest.java</include>-->
-<!--                    </includes>-->
                 </configuration>
             </plugin>
 

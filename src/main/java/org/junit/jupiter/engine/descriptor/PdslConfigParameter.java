@@ -306,7 +306,7 @@ public class PdslConfigParameter {
                     getRecognizerLexer(config, p),
                     getRecognizerParser(config, p),
                     getInterpreterParams(config, p),
-                    List.of(p.getTagExpression()),
+                    p.getTagExpression().isBlank() ? List.of() : List.of(p.getTagExpression()),
                     p.getIncludesResources(),
                     p.getExcludesResources());
             params.add(pdslTestParams);
