@@ -1,6 +1,7 @@
 package com.pdsl.gherkin.models;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GherkinStep {
 
@@ -51,7 +52,17 @@ public class GherkinStep {
         if (docString.isPresent()) {
             str.append(docString.get().getGherkinString().getRawString());
         } else if (dataTable.isPresent()) {
-            str.append(dataTable.get().toString());
+            StringBuilder tableAsString = new StringBuilder();
+            // Reconstruct the cell data back into gherkin
+            for (List<GherkinString> row : dataTable.get()) {
+                tableAsString.append("|"); // Add leading pipe
+                String rowAsString = row.stream()
+                        .map(GherkinString::getRawString)
+                        .collect(Collectors.joining("|"));
+                tableAsString.append(rowAsString);
+                tableAsString.append(String.format("|%n")); // Add ending pipe with a newline
+            }
+            str.append(tableAsString);
         }
         return str.toString();
     }
