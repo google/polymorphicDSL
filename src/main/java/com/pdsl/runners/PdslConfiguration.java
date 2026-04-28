@@ -39,6 +39,7 @@ public @interface PdslConfiguration {
     Class<? extends Provider<? extends TraceableTestRunExecutor>> testRunExecutor() default EmptyTestExecutorProvider.class;
     Class<? extends Provider<? extends TestResourceFinderGenerator>> resourceFinder() default EmptyTestResourceFinder.class;
     String recognizerRule() default RecognizedBy.DEFAULT_RECOGNIZER_RULE_NAME;
+    VisitorRule visitorRule() default VisitorRule.DEFAULT_RULE;
     Class<? extends Provider<? extends TestSpecificationFactoryGenerator>> specificationFactoryProvider();
     Class<? extends Provider<? extends TestCaseFactory>> testCaseFactoryProvider();
 }

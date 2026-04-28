@@ -27,5 +27,6 @@ public record GherkinRecognizerParams (
         List<PdslTestParams> pdslTestParams,
         Class<? extends Lexer> defaultLexerRecognizer,
         Class<? extends Parser> defaultParserRecognizer,
-        PdslSuppliers providers
+        PdslSuppliers providers,
+        VisitorRule visitorRule
 ) implements RecognizerParams {}

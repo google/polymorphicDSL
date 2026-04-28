@@ -60,6 +60,11 @@ class PdslGherkinHelperAnnotation implements Annotation, PdslConfiguration {
     }
 
     @Override
+    public com.pdsl.runners.VisitorRule visitorRule() {
+        return annotation.visitorRule();
+    }
+
+    @Override
     public Class<? extends Provider<? extends TestSpecificationFactoryGenerator>> specificationFactoryProvider() {
         return PdslGherkinHelperAnnotation.EmptyFactoryGenerator.class;
     }

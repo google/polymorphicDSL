@@ -14,13 +14,13 @@ import com.pdsl.testcases.TestCase;
 import com.pdsl.testcases.TestCaseFactory;
 import com.pdsl.transformers.DefaultPolymorphicDslPhraseFilter;
 import com.pdsl.transformers.PolymorphicDslPhraseFilter;
+import com.pdsl.exceptions.DuplicateVisitorMethodsException;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Parser;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * A visitor for producing PDSL test cases that can have more than one parser and listener/visitor process it.
@@ -42,6 +42,7 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
         Preconditions.checkNotNull(recognizerParams.providers().resourceFinderSupplier(), "DSL resource finder cannot be null");
         Preconditions.checkNotNull(recognizerParams.providers().specificationFactoryProvider(), "Specification Factory Provider cannot be null");
         Preconditions.checkNotNull(recognizerParams.providers().testCaseFactoryProvider(), "Test Factory Provider cannot be null");
+        Preconditions.checkNotNull(recognizerParams.visitorRule(), "Visitor rule cannot be null");
         recognizerParams.pdslTestParams().forEach(interpreter -> Preconditions.checkNotNull(interpreter, "No null objects can be in the interpreter array!"));
         // Create a Shared Test Suite
         List<List<TestCase>> testCasesPerInterpreters = new ArrayList<>();
@@ -79,9 +80,29 @@ public class SharedTestSuiteVisitor implements RecognizerParams.RecognizerParams
                 interpreterObjs.add(parser.interpreterProvider().get());
             }
         }
+        if (recognizerParams.visitorRule() == VisitorRule.NO_DUPLICATES_RULE) {
+            checkForDuplicateTestCases(testCasesPerInterpreters);
+        }
         return SharedTestSuite.of(testCasesPerInterpreters, interpreterObjs);
 
     }
+
+    private void checkForDuplicateTestCases(List<List<TestCase>> testCasesPerInterpreters) {
+        Set<String> globallySeenPhrases = new HashSet<>();
+        for (List<TestCase> testCasesFromOneInterpreter : testCasesPerInterpreters) {
+            Set<String> phrasesFromCurrentInterpreter = new HashSet<>();
+            for (TestCase testCase : testCasesFromOneInterpreter) {
+                for (String phrase : testCase.getContextFilteredPhraseBody()) {
+                    if (globallySeenPhrases.contains(phrase)) {
+                        throw new DuplicateVisitorMethodsException(String.format("Duplicate phrase found between different interpreters: %s", phrase));
+                    }
+                    phrasesFromCurrentInterpreter.add(phrase);
+                }
+            }
+            globallySeenPhrases.addAll(phrasesFromCurrentInterpreter);
+        }
+    }
+
 
     private Set<URI> getTestResources(TestResourceFinderGenerator finderGenerator, String[] includes, String[] excludes, URI resourceRoot) {
         TestResourceFinder finder = finderGenerator.get(includes,excludes);

@@ -58,7 +58,8 @@ public final class JUnit4RecognizerParamsConverter {
                                 .build()
                                 : () -> HELPER.makeSpecificationFactoryGenerator(configuration.specificationFactoryProvider()).get(),
                         () -> HELPER.makeTestCaseFactoryProvider(configuration.testCaseFactoryProvider()).get()
-                )
+                ),
+                configuration.visitorRule()
         );
     }
 
@@ -81,7 +82,8 @@ public final class JUnit4RecognizerParamsConverter {
                         () -> providers.testResourceFinderGenerator().get(),
                         () -> providers.testSpecificationFactoryGenerator().get(),
                         () -> providers.testCaseFactory().get()
-                )
+                ),
+                pdslGherkinApplication.visitorRule()
         );
     }
 
@@ -288,6 +290,11 @@ public static class GherkinWrapperConfiguration implements PdslConfiguration {
     @Override
     public String recognizerRule() {
         return configuration.recognizerRule();
+    }
+
+    @Override
+    public VisitorRule visitorRule() {
+        return configuration.visitorRule();
     }
 
     @Override
