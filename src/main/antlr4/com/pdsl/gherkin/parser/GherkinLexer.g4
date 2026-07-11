@@ -111,6 +111,7 @@ fragment CAPTURE_DATA : '<' ~[>\t\r\n ]'>' ;
 fragment DOCSTRING_DOUBLE_QUOTES : WS* '"""' (CAPTURE_DATA | ~'"' | '"' ~'"')*?  '"""' LINE_END ;
 fragment DOCSTRING_BACKTICKS : WS* '```' (~'`' | CAPTURE_DATA | '`' ~'`').*? '```' LINE_END;
 fragment TAG : '@'~[ \r\n\t@]+ ;
+fragment TAG_WITH_SPACES: '@' (~[\r\n@ ]* ' ' ~[\r\n@ ]+);
 fragment ESCAPE_SEQUENCE : '\\' [\\|\n]* ;
 fragment CELL_CHARACTER
 	:	CAPTURE_DATA
@@ -120,6 +121,7 @@ fragment CELL_CHARACTER
 fragment CELL_DATA : WS* CELL_CHARACTER* '|';
 
 DOCSTRING : DOCSTRING_DOUBLE_QUOTES | DOCSTRING_BACKTICKS ;
+TAGS_WITH_SPACES : WS* TAG_WITH_SPACES (WS* TAG_WITH_SPACES)* (COMMENT? | LINE_END);
 TAGS : WS* TAG (WS* TAG)* (COMMENT? | LINE_END);
 FEATURE_TITLE : WS* FEATURE_KEYWORD ~[\r\n]* LINE_END ;
 BACKGROUND_TITLE : WS* BACKGROUND_KEYWORD ~[\r\n]* COMMENT? LINE_END ;
