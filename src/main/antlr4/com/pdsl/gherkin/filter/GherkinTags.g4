@@ -9,7 +9,7 @@ fragment T : 'T' | 't';
 
 fragment R : 'R' | 'r';
 
-TAG :'@' ~[@ )]+ ;
+TAG :'@' ~[@ ()]+ ('(' ~[)]* ')')? ;
 WS : [ \t]+ -> skip;
 AND : A N D ;
 OR : O R;
