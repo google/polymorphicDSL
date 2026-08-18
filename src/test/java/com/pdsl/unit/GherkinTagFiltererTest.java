@@ -31,6 +31,27 @@ public class GherkinTagFiltererTest {
     }
 
     @Test
+    public void filterTagWithParenthesizedUuidValue_keepPickle() {
+        Set<String> uuidTags = Set.of("@id(\"550e8400-e29b-41d4-a716-446655440000\")");
+        assertThat(filter.tagExpressionMatchesPickle(uuidTags,
+                "@id(\"550e8400-e29b-41d4-a716-446655440000\")")).isTrue();
+    }
+
+    @Test
+    public void filterTagWithParenthesizedValue_andExpression_keepPickle() {
+        Set<String> uuidTags = Set.of("@id(\"550e8400-e29b-41d4-a716-446655440000\")", "@tagB");
+        assertThat(filter.tagExpressionMatchesPickle(uuidTags,
+                "@id(\"550e8400-e29b-41d4-a716-446655440000\") and @tagB")).isTrue();
+    }
+
+    @Test
+    public void filterTagWithParenthesizedValue_mismatchedUuid_removePickle() {
+        Set<String> uuidTags = Set.of("@id(\"550e8400-e29b-41d4-a716-446655440000\")");
+        assertThat(filter.tagExpressionMatchesPickle(uuidTags,
+                "@id(\"00000000-0000-0000-0000-000000000000\")")).isFalse();
+    }
+
+    @Test
     public void filterTagNotExpression_keepPickle() {
         assertThat(filter.tagExpressionMatchesPickle(tags, "not @tagMissing")).isTrue();
     }
