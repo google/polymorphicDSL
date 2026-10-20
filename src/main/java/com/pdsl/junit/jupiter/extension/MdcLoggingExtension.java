@@ -1,4 +1,4 @@
-package com.pdsl.junit.jupiter.extension.extension;
+package com.pdsl.junit.jupiter.extension;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.extension.AfterEachCallback;
